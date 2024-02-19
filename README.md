@@ -17,4 +17,4 @@ This is the repository for the BOUN SWE Group 4.
 
 ---
 
-Check our [wiki](https://github.com/bounswe/bounswe2024group4/wiki) for further information.
+You can check our [wiki](https://github.com/bounswe/bounswe2024group4/wiki) for further information.
