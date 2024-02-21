@@ -14,6 +14,7 @@ This is the repository for the BOUN SWE Group 4.
 * [Nurullah Uçan](https://github.com/bounswe/bounswe2024group4/wiki/Nurullah-Uçan)
 * [Ceyhun Sonyürek](https://github.com/bounswe/bounswe2024group4/wiki/Ceyhun-Sonyürek)
 * [Ahmet Batuhan Canlı](https://github.com/bounswe/bounswe2024group4/wiki/Ahmet-Batuhan-Canlı)
+* [Talha Ordukaya](https://github.com/bounswe/bounswe2024group4/wiki/Talha-Ordukaya)
 
 ---
 
