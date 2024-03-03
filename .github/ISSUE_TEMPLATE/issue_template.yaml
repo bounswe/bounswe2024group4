@@ -1,7 +1,6 @@
 name: General Issue Template
 description: Create a new issue with this template to help us understand your needs and concerns better. 
-title: "[ISSUE]"
-labels: ["pending triage"]
+title: "Title of the Issue"
 body:
 
   - type: dropdown
