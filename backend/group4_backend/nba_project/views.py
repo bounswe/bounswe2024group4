@@ -7,12 +7,13 @@ from .models import Profile
 def sign_up(request):
     if request.method == "POST":
         # Access form data from POST request
+        
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        bio = request.POST.get("bio")
+        # bio = request.POST.get("bio")
         
-        print("username: ", username, "email: ", email, "password: ", password, "bio: ", bio)
+        print("username: ", username, "email: ", email, "password: ", password)
 
         if User.objects.filter(email=email).exists():
             return HttpResponse("Email already taken", status=400)
@@ -23,7 +24,7 @@ def sign_up(request):
             user = User.objects.create_user(username=username, email=email, password=password)
             print("user created: ", user)
             # Create profile
-            profile = Profile.objects.create(user=user, bio=bio)
+            profile = Profile.objects.create(user=user, bio=" ")
             print("profile created: ", profile)
 
             # Authenticate and login user
