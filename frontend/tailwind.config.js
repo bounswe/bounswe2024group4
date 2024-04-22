@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        'nba': "url('./nba_bg.svg')",
+        'nba': "url('../assets/nba_bg.svg')",
       }
     },
   },
