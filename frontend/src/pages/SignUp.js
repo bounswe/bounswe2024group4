@@ -3,7 +3,7 @@ import "../css/index.css";
 import { Navbar } from '../components/Navbar';
 
 
-function App() {
+function SignUp() {
   return (
     <div className= "bg-nba min-h-screen bg-top-left">
         <Navbar />
@@ -23,4 +23,4 @@ function App() {
   );
 }
 
-export default App;
+export default SignUp;
