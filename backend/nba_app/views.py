@@ -1,8 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from .models import Profile
+from .models import User
 
 def sign_up(request):
     if request.method == "POST":
@@ -11,7 +10,6 @@ def sign_up(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        # bio = request.POST.get("bio")
         
         print("username: ", username, "email: ", email, "password: ", password)
 
@@ -20,12 +18,10 @@ def sign_up(request):
         elif User.objects.filter(username=username).exists():
             return HttpResponse("Username already taken", status=400)
         else:
-            # Create user
+            # Create and save user
             user = User.objects.create_user(username=username, email=email, password=password)
             print("user created: ", user)
-            # Create profile
-            profile = Profile.objects.create(user=user, bio=" ")
-            print("profile created: ", profile)
+            user.save()
 
             # Authenticate and login user
             user_login = authenticate(username=username, password=password)
