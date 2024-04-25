@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from .models import User
+from .models import User, Post
 
 def sign_up(request):
     if request.method == "POST":
@@ -44,6 +44,7 @@ def sign_up(request):
     # Render the signup.html template for GET requests
     return render(request, 'signup.html')
 
+
 def log_in(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -63,8 +64,23 @@ def log_in(request):
 
     return render(request, 'login.html')
 
+
+#@login_required
 def post(request):
+    if request.method == "POST":
+        
+        user = request.user
+        content = request.POST.get("content")
+        post = Post.objects.create(user=user, content=content)
+        #if username == "":
+        #    # handle if the user is not logged in
+        #    print("not logged in")
+        #    # return redirect('signup')
+        text = request.POST.get("post")
+
+        print(text)
     return render(request, 'post.html')
+
 
 @login_required
 def feed(request):

@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Post</title>
 </head>
 <body>
     <h2>Create Post</h2>
-    <form action="#" method="post">
-        <label for="user_input">Enter text:</label><br>
-        <input type="text" id="user_input" name="user_input"><br><br>
-        <input type="submit" value="Submit">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <label for="content">Post:</label><br>
+        <input type="text" id="content" name="content"><br>
+        <button type="submit">Submit</button>
     </form>
 </body>
 </html>
