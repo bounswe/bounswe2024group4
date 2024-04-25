@@ -1,8 +1,9 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from .models import Profile
+from .models import User
 
 def sign_up(request):
     if request.method == "POST":
@@ -11,30 +12,59 @@ def sign_up(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        # bio = request.POST.get("bio")
+        confirm_password = request.POST.get("confirm_password")
+
+
         
-        print("username: ", username, "email: ", email, "password: ", password)
+        print("username: ", username, "email: ", email, "password: ", password, "confirm_password: ", confirm_password)
+
+         # Check if passwords match
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            return redirect('signup')
 
         if User.objects.filter(email=email).exists():
-            return HttpResponse("Email already taken", status=400)
-        elif User.objects.filter(username=username).exists():
-            return HttpResponse("Username already taken", status=400)
-        else:
-            # Create user
-            user = User.objects.create_user(username=username, email=email, password=password)
-            print("user created: ", user)
-            # Create profile
-            profile = Profile.objects.create(user=user, bio=" ")
-            print("profile created: ", profile)
+            messages.error(request, "Email already taken")
+            return redirect('signup')
 
-            # Authenticate and login user
-            user_login = authenticate(username=username, password=password)
-            if user_login:
-                login(request, user_login)
-                print("user_logged in: ", user_login)
-                return HttpResponse("User created successfully", status=201)
-            else:
-                return HttpResponse("Failed to authenticate user", status=500)
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken")
+            return redirect('signup')
+        
+        # Create and save user
+        user = User.objects.create_user(username=username, email=email, password=password)
+        print("user created and saved: ", user)
+        
+        login(request, user)
+        print("user_logged in: ", user)
+        return redirect('feed')
+        return HttpResponse("User created successfully", status=201)
+            
     
     # Render the signup.html template for GET requests
     return render(request, 'signup.html')
+
+def log_in(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            messages.error(request, "User does not exist.")
+            return redirect('login')
+
+        login(request, user)
+       
+        #redirect to feed
+        return redirect('feed')
+        return HttpResponse("Logged in successfully", status=200)
+
+
+    return render(request, 'login.html')
+
+
+@login_required
+def feed(request):
+    # Only authenticated users can access this view
+    return render(request, 'feed.html')
