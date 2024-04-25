@@ -63,8 +63,11 @@ def log_in(request):
 
     return render(request, 'login.html')
 
+def post(request):
+    return render(request, 'post.html')
 
 @login_required
 def feed(request):
     # Only authenticated users can access this view
     return render(request, 'feed.html')
+
