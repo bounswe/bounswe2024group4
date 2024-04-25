@@ -1,8 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from .models import Profile
+from .models import User
 
 def sign_up(request):
     if request.method == "POST":
@@ -11,30 +10,28 @@ def sign_up(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        # bio = request.POST.get("bio")
-        
-        print("username: ", username, "email: ", email, "password: ", password)
+        confirm_password = request.POST.get("confirm_password")
 
+
+        
+        print("username: ", username, "email: ", email, "password: ", password, "confirm_password: ", confirm_password)
+
+        # Check if passwords match
+        if password != confirm_password:
+            return HttpResponse("Passwords do not match", status=400)
         if User.objects.filter(email=email).exists():
             return HttpResponse("Email already taken", status=400)
         elif User.objects.filter(username=username).exists():
             return HttpResponse("Username already taken", status=400)
         else:
-            # Create user
+            # Create and save user
             user = User.objects.create_user(username=username, email=email, password=password)
-            print("user created: ", user)
-            # Create profile
-            profile = Profile.objects.create(user=user, bio=" ")
-            print("profile created: ", profile)
-
-            # Authenticate and login user
-            user_login = authenticate(username=username, password=password)
-            if user_login:
-                login(request, user_login)
-                print("user_logged in: ", user_login)
-                return HttpResponse("User created successfully", status=201)
-            else:
-                return HttpResponse("Failed to authenticate user", status=500)
+            print("user created and saved: ", user)
+            
+            login(request, user)
+            print("user_logged in: ", user)
+            return HttpResponse("User created successfully", status=201)
+            
     
     # Render the signup.html template for GET requests
     return render(request, 'signup.html')
