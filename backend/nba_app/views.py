@@ -1,5 +1,7 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from .models import User
 
@@ -16,21 +18,27 @@ def sign_up(request):
         
         print("username: ", username, "email: ", email, "password: ", password, "confirm_password: ", confirm_password)
 
-        # Check if passwords match
+         # Check if passwords match
         if password != confirm_password:
-            return HttpResponse("Passwords do not match", status=400)
+            messages.error(request, "Passwords do not match")
+            return redirect('signup')
+
         if User.objects.filter(email=email).exists():
-            return HttpResponse("Email already taken", status=400)
-        elif User.objects.filter(username=username).exists():
-            return HttpResponse("Username already taken", status=400)
-        else:
-            # Create and save user
-            user = User.objects.create_user(username=username, email=email, password=password)
-            print("user created and saved: ", user)
-            
-            login(request, user)
-            print("user_logged in: ", user)
-            return HttpResponse("User created successfully", status=201)
+            messages.error(request, "Email already taken")
+            return redirect('signup')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken")
+            return redirect('signup')
+        
+        # Create and save user
+        user = User.objects.create_user(username=username, email=email, password=password)
+        print("user created and saved: ", user)
+        
+        login(request, user)
+        print("user_logged in: ", user)
+        return redirect('feed')
+        return HttpResponse("User created successfully", status=201)
             
     
     # Render the signup.html template for GET requests
@@ -42,10 +50,21 @@ def log_in(request):
         password = request.POST.get("password")
 
         user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return HttpResponse("Logged in successfully", status=200)
-        else:
-            return HttpResponse("Login not successful", status=401)
+        if user is None:
+            messages.error(request, "User does not exist.")
+            return redirect('login')
+
+        login(request, user)
+       
+        #redirect to feed
+        return redirect('feed')
+        return HttpResponse("Logged in successfully", status=200)
+
 
     return render(request, 'login.html')
+
+
+@login_required
+def feed(request):
+    # Only authenticated users can access this view
+    return render(request, 'feed.html')
