@@ -7,7 +7,17 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSignUp = () => {
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const validateEmail = (emailAddress) => {
+    console.log(emailAddress);
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+    return reg.test(emailAddress)
+  }
+
+  const handleSignUp = async () => {
     console.log('Username:', username);
     console.log('Email:', email);
     console.log('Password:', password);
