@@ -1,17 +1,70 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
 
 const SignUp = () => {
+  const baseURL = 'http://your-ip-address-for-now:8000';
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [message, setMessage] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSignUp = () => {
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const validateEmail = (emailAddress) => {
+    console.log(emailAddress);
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+    return reg.test(emailAddress)
+  }
+
+  const handleSignUp = async () => {
     console.log('Username:', username);
     console.log('Email:', email);
     console.log('Password:', password);
     console.log('Confirm Password:', confirmPassword);
+    if(validateEmail(email) == false){
+      setMessage('Please enter a valid email address :(');
+      toggleModal();
+      return;
+    }
+    var formData = new FormData();
+    formData.append('username', username)
+    formData.append('email', email)
+    formData.append('password', password)
+    formData.append('confirm_password', confirmPassword)
+
+    try{
+      const csrfToken = await fetch(baseURL + '/csrf_token/',
+        {
+          method: 'GET'
+        }
+      ).data.csrf_token;
+
+      const response = await fetch(baseURL + '/signup/', 
+        {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+            'X-CSRFToken': csrfToken
+      },
+      body: formData,
+        }
+      );
+      console.log(response.message)
+      if(response.status == 200){
+        setMessage('Sign-up successful! Welcome to our app.');
+        toggleModal();
+      }else{
+        setMessage('Sign-up not successful, please try again.');
+        toggleModal();
+      }
+    }
+    catch (error) {
+      console.log(error.message)
+    }
   };
 
   return (
@@ -49,6 +102,19 @@ const SignUp = () => {
             <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
               <Text style={styles.signUpButtonText}>Sign Up</Text>
             </TouchableOpacity>
+            <Modal
+              visible={isModalVisible}
+              animationType="slide"
+              transparent={false}
+              onRequestClose={toggleModal}
+            >
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+                  <Text>{message}</Text>
+                  <Button title="Close" onPress={toggleModal} />
+                </View>
+              </View>
+            </Modal>
           </View>
         </View>
 
