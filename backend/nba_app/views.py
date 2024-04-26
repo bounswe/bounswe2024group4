@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 from .models import User, Post
 
 def sign_up(request):
@@ -87,3 +89,6 @@ def feed(request):
     # Only authenticated users can access this view
     return render(request, 'feed.html')
 
+def csrf_token(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrf_token': csrf_token})
