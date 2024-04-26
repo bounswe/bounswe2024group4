@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
 
 const SignUp = () => {
+  const baseURL = 'http://your-ip-address-for-now:8000';
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,6 +25,36 @@ const SignUp = () => {
     console.log('Email:', email);
     console.log('Password:', password);
     console.log('Confirm Password:', confirmPassword);
+    if(validateEmail(email) == false){
+      setSuccessMessage('Please enter a valid email address :(');
+      toggleModal();
+      return;
+    }
+    var formData = new FormData();
+    formData.append('username', username)
+    formData.append('email', email)
+    formData.append('password', password)
+    formData.append('confirm_password', confirmPassword)
+    try{
+      const response = await fetch( baseURL+'/signup/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formData,
+      });
+      console.log(response.message)
+      if(response.status == 200){
+        setSuccessMessage('Sign-up successful! Welcome to our app.');
+        toggleModal();
+      }else{
+        setSuccessMessage('Sign-up not successful, please try again.');
+        toggleModal();
+      }
+    }
+    catch (error) {
+      console.log(error.message)
+    }
   };
 
   return (
