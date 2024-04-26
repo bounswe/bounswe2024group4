@@ -59,6 +59,19 @@ const SignUp = () => {
             <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
               <Text style={styles.signUpButtonText}>Sign Up</Text>
             </TouchableOpacity>
+            <Modal
+              visible={isModalVisible}
+              animationType="slide"
+              transparent={false}
+              onRequestClose={toggleModal}
+            >
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+                  <Text>{successMessage}</Text>
+                  <Button title="Close" onPress={toggleModal} />
+                </View>
+              </View>
+            </Modal>
           </View>
         </View>
 
