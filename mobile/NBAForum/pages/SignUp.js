@@ -35,14 +35,24 @@ const SignUp = () => {
     formData.append('email', email)
     formData.append('password', password)
     formData.append('confirm_password', confirmPassword)
+
     try{
-      const response = await fetch( baseURL+'/signup/', {
+      const csrfToken = await fetch(baseURL + '/csrf_token/',
+        {
+          method: 'GET'
+        }
+      ).data.csrf_token;
+
+      const response = await fetch(baseURL + '/signup/', 
+        {
       method: 'POST',
       headers: {
         'Content-Type': 'multipart/form-data',
+            'X-CSRFToken': csrfToken
       },
       body: formData,
-      });
+        }
+      );
       console.log(response.message)
       if(response.status == 200){
         setMessage('Sign-up successful! Welcome to our app.');
