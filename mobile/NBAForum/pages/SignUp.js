@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } fr
 const SignUp = () => {
   const baseURL = 'http://your-ip-address-for-now:8000';
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [message, setMessage] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +26,7 @@ const SignUp = () => {
     console.log('Password:', password);
     console.log('Confirm Password:', confirmPassword);
     if(validateEmail(email) == false){
-      setSuccessMessage('Please enter a valid email address :(');
+      setMessage('Please enter a valid email address :(');
       toggleModal();
       return;
     }
@@ -45,10 +45,10 @@ const SignUp = () => {
       });
       console.log(response.message)
       if(response.status == 200){
-        setSuccessMessage('Sign-up successful! Welcome to our app.');
+        setMessage('Sign-up successful! Welcome to our app.');
         toggleModal();
       }else{
-        setSuccessMessage('Sign-up not successful, please try again.');
+        setMessage('Sign-up not successful, please try again.');
         toggleModal();
       }
     }
@@ -100,7 +100,7 @@ const SignUp = () => {
             >
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                 <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
-                  <Text>{successMessage}</Text>
+                  <Text>{message}</Text>
                   <Button title="Close" onPress={toggleModal} />
                 </View>
               </View>
