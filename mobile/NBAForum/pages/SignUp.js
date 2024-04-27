@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
+import axios from 'axios'
 
 const SignUp = () => {
   const baseURL = 'http://your-ip-address-for-now:8000';
@@ -37,23 +38,18 @@ const SignUp = () => {
     formData.append('confirm_password', confirmPassword)
 
     try{
-      const csrfToken = await fetch(baseURL + '/csrf_token/',
-        {
-          method: 'GET'
-        }
-      ).data.csrf_token;
+      const csrfToken = (await axios.get(baseURL + '/csrf_token/')).data.csrf_token;
 
-      const response = await fetch(baseURL + '/signup/', 
+      const response = await axios.post(
+        baseURL + '/signup/', 
+        formData, 
         {
-      method: 'POST',
       headers: {
         'Content-Type': 'multipart/form-data',
             'X-CSRFToken': csrfToken
-      },
-      body: formData,
+          }
         }
       );
-      console.log(response.message)
       if(response.status == 200){
         setMessage('Sign-up successful! Welcome to our app.');
         toggleModal();
