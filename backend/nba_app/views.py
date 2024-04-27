@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.middleware.csrf import get_token
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.urls import reverse
 from .models import User, Post
 import requests
 
@@ -23,16 +24,17 @@ def sign_up(request):
 
          # Check if passwords match
         if password != confirm_password:
-            messages.error(request, "Passwords do not match")
-            return redirect('signup')
+            # Return an error httpresponse if passwords do not match 
+            return HttpResponse("Passwords do not match.", status=400)
+             
 
         if User.objects.filter(email=email).exists():
-            messages.error(request, "Email already taken")
-            return redirect('signup')
+            # Return an error httpresponse if email is already taken
+            return HttpResponse("Email already taken.", status=400)
 
         if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already taken")
-            return redirect('signup')
+            # Return an error httpresponse if username is already taken
+            return HttpResponse("Username already taken.", status=400)
         
         # Create and save user
         user = User.objects.create_user(username=username, email=email, password=password)
@@ -40,8 +42,7 @@ def sign_up(request):
         
         login(request, user)
         print("user_logged in: ", user)
-        return redirect('feed')
-        return HttpResponse("User created successfully", status=201)
+        return HttpResponse("User created successfully", status=200)
             
     
     # Render the signup.html template for GET requests
@@ -55,13 +56,10 @@ def log_in(request):
 
         user = authenticate(request, username=username, password=password)
         if user is None:
-            messages.error(request, "User does not exist.")
-            return redirect('login')
+            return HttpResponse("Invalid credentials", status=401)
 
         login(request, user)
        
-        #redirect to feed
-        return redirect('feed')
         return HttpResponse("Logged in successfully", status=200)
 
 
