@@ -38,12 +38,14 @@ const Login = () => {
                 setMessage('Login successful!');
                 toggleModal();
             } else {
-                setMessage('Login failed, please try again.');
+                setMessage('Something went wrong, please try again.');
                 toggleModal();
             }
         }
         catch (error) {
             console.log(error.message)
+            setMessage('Something went wrong, please try again.');
+            toggleModal();
         }
     };
     return (
