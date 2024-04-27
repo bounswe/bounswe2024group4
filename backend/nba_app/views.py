@@ -16,17 +16,8 @@ def sign_up(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm_password")
-
-
         
-        print("username: ", username, "email: ", email, "password: ", password, "confirm_password: ", confirm_password)
-
-         # Check if passwords match
-        if password != confirm_password:
-            # Return an error httpresponse if passwords do not match 
-            return HttpResponse("Passwords do not match.", status=400)
-             
+        print("username: ", username, "email: ", email, "password: ", password)
 
         if User.objects.filter(email=email).exists():
             # Return an error httpresponse if email is already taken
