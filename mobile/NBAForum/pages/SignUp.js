@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
+import axios from 'axios'
 
 const SignUp = () => {
   const baseURL = 'http://your-ip-address-for-now:8000';
@@ -20,13 +21,38 @@ const SignUp = () => {
     return reg.test(emailAddress)
   }
 
+  const validateUsername = (username) => {
+    if (username == '')
+      return false;
+    let reg = /^[A-Za-z0-9_]*$/;
+    return reg.test(username)
+  }
+
+  const validatePassword = (password, confirmPassword) => {
+    if (password == '')
+      return false;
+    let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return reg.test(password)
+  }
+
   const handleSignUp = async () => {
     console.log('Username:', username);
     console.log('Email:', email);
     console.log('Password:', password);
     console.log('Confirm Password:', confirmPassword);
-    if(validateEmail(email) == false){
-      setMessage('Please enter a valid email address :(');
+
+    let errorMessage = ''
+    if (password != confirmPassword) {
+      errorMessage = 'Please make sure you enter the same password.';
+    }else if (!validatePassword(password)) {
+      errorMessage = 'Please enter a valid password that contains at least 8 characters, including at least 1 number, 1 special character, 1 uppercase and 1 lowercase letter.';
+    }else if (!validateEmail(email)) {
+      errorMessage = 'Please enter a valid email address.';
+    }else if (!validateUsername(username)) {
+      errorMessage = 'Please enter a username that only contains upper or lowercase letters, numbers and/or underscore'
+    }
+    if (errorMessage != '') {
+      setMessage(errorMessage);
       toggleModal();
       return;
     }
@@ -36,87 +62,84 @@ const SignUp = () => {
     formData.append('password', password)
     formData.append('confirm_password', confirmPassword)
 
-    try{
-      const csrfToken = await fetch(baseURL + '/csrf_token/',
-        {
-          method: 'GET'
-        }
-      ).data.csrf_token;
+    try {
+      const csrfToken = (await axios.get(baseURL + '/csrf_token/')).data.csrf_token;
 
-      const response = await fetch(baseURL + '/signup/', 
+      const response = await axios.post(
+        baseURL + '/signup/',
+        formData,
         {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'multipart/form-data',
+          headers: {
+            'Content-Type': 'multipart/form-data',
             'X-CSRFToken': csrfToken
-      },
-      body: formData,
+          }
         }
       );
-      console.log(response.message)
-      if(response.status == 200){
+      if (response.status == 200) {
         setMessage('Sign-up successful! Welcome to our app.');
         toggleModal();
-      }else{
-        setMessage('Sign-up not successful, please try again.');
+      } else {
+        setMessage('Something went wrong, please try again.');
         toggleModal();
       }
     }
     catch (error) {
       console.log(error.message)
+      setMessage('Something went wrong, please try again.');
+      toggleModal();
     }
   };
 
   return (
 
-        <View style={styles.container}>
-          <Text style={[styles.title, { color: 'blue' }]}>Welcome to NBA Forum!</Text>
-          <View style={styles.formContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              value={username}
-              onChangeText={setUsername}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm Password"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-            <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-              <Text style={styles.signUpButtonText}>Sign Up</Text>
-            </TouchableOpacity>
-            <Modal
-              visible={isModalVisible}
-              animationType="slide"
-              transparent={false}
-              onRequestClose={toggleModal}
-            >
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
-                  <Text>{message}</Text>
-                  <Button title="Close" onPress={toggleModal} />
-                </View>
-              </View>
-            </Modal>
+    <View style={styles.container}>
+      <Text style={[styles.title, { color: 'blue' }]}>Welcome to NBA Forum!</Text>
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+          <Text style={styles.signUpButtonText}>Sign Up</Text>
+        </TouchableOpacity>
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={toggleModal}
+        >
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+            <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+              <Text>{message}</Text>
+              <Button title="Close" onPress={toggleModal} />
+            </View>
           </View>
-        </View>
+        </Modal>
+      </View>
+    </View>
 
   );
 };
