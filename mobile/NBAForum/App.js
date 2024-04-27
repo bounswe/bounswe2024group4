@@ -1,7 +1,8 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { HomePage, Login, SignUp } from "./pages";
+import { HomePage, Login, SignUp, Team } from "./pages";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,14 @@ export default function App() {
                         headerShown: false
                     }}
                 />
+                <Stack.Screen
+                    name="Team"
+                    component={Team}
+                    options={{
+                        headerShown: false
+                    }}
+                />
+
             </Stack.Navigator>
         </NavigationContainer>
     );
