@@ -5,6 +5,7 @@ import SignUp from './pages/SignUp.js';
 import SignIn from './pages/SignIn.js';
 import ErrorPage from './pages/GeneralError.js';
 import SignUpPrompt from './pages/SignUpPrompt.js';
+import Feed from './pages/Feed.js';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -25,6 +26,11 @@ const router = createBrowserRouter([
   {
     path: "/sign-in",
     element: < SignIn />,
+    errorElement: < ErrorPage />,
+  },
+  {
+    path: "/feed",
+    element: < Feed />,
     errorElement: < ErrorPage />,
   },
 ]);

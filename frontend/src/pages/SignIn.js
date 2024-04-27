@@ -3,8 +3,11 @@ import "../css/index.css";
 import { Navbar } from '../components/Navbar';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 function SignIn() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -12,7 +15,10 @@ function SignIn() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormErrorMessage('');
   };
+
+  const [formErrorMessage, setFormErrorMessage] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,8 +34,12 @@ function SignIn() {
       }
 
       const response = await axios.post(baseURL + '/login/', formData, config);
-
-      console.log(response.data);
+      if (response.status === 200) {
+        navigate('/feed');
+      }
+      else {
+        setFormErrorMessage('Invalid login, check if username and password are correct.');
+      }
     } catch (error) {
       console.error('Error:', error);
     }
@@ -44,6 +54,7 @@ function SignIn() {
             <h1 className="text-3xl font-bold text-blue-500 mb-4">Welcome back to NBA Forum!</h1>
               <input type="text" name="username" placeholder="Username" required className="border p-2 rounded-md mb-4 w-full" onChange={handleChange} />
               <input type="password" name="password" placeholder="Password" required className="border p-2 rounded-md mb-4 w-full" onChange={handleChange} />
+              { formErrorMessage !== '' && <p className="text-red-500 mb-4">{formErrorMessage}</p>}
               <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-md">SIGN IN</button>
             </form>
           </div>
