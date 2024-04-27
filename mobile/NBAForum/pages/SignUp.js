@@ -3,7 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } fr
 import axios from 'axios'
 
 const SignUp = () => {
-  const baseURL = 'http://192.168.0.135:8000';
+  const baseURL = 'http://your-ip-address-for-now:8000';
+  //const baseURL = 'http://192.168.0.135:8000';
   //const baseURL = 'http://127.0.0.1:8000'
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [message, setMessage] = useState('');
