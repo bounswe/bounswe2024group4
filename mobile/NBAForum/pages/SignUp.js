@@ -26,7 +26,7 @@ const SignUp = () => {
     console.log('Email:', email);
     console.log('Password:', password);
     console.log('Confirm Password:', confirmPassword);
-    if(validateEmail(email) == false){
+    if (validateEmail(email) == false) {
       setMessage('Please enter a valid email address :(');
       toggleModal();
       return;
@@ -37,7 +37,7 @@ const SignUp = () => {
     formData.append('password', password)
     formData.append('confirm_password', confirmPassword)
 
-    try{
+    try {
       const csrfToken = (await axios.get(baseURL + '/csrf_token/')).data.csrf_token;
 
       const response = await axios.post(
@@ -50,10 +50,10 @@ const SignUp = () => {
           }
         }
       );
-      if(response.status == 200){
+      if (response.status == 200) {
         setMessage('Sign-up successful! Welcome to our app.');
         toggleModal();
-      }else{
+      } else {
         setMessage('Sign-up not successful, please try again.');
         toggleModal();
       }
