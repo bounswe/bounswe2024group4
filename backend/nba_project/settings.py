@@ -53,9 +53,9 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000']
+CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'exp://192.168.1.43:8081']
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'exp://192.168.1.43:8000']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -96,11 +96,11 @@ WSGI_APPLICATION = 'nba_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': "nba_db",
-        'HOST': '127.0.0.1',
-        'PORT': "3306",
-        'USER': "root",
-        'PASSWORD': "12345678",
+        'NAME': os.getenv('DB_NAME'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
     }
 }
 
