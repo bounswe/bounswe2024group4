@@ -13,7 +13,7 @@ const Team = () => {
 
   const handleSearch = async (query) => {
     try {
-      const baseURL = '192.168.1.5:8000';
+      const baseURL = 'your-based-url';
       const searchPath = `/search/query=${query}`;
 
       const response = await axios.get(baseURL + searchPath);
