@@ -9,7 +9,7 @@ import { Context, Provider } from '../globalContext/globalContext.js';
 
 function Router() {
   const globalContext = useContext(Context)
-  const { isLoggedIn, setIsLoggedIn, hasSession, baseURL } = globalContext;
+  const { hasSession } = globalContext;
   const PrivateRoutes = (session) => {
     console.log(session);
     return (
