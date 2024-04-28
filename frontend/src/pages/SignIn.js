@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import "../css/index.css";
 import { Navbar } from '../components/Navbar';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { Context } from "../globalContext/globalContext.js";
 
-function SignIn() {
+const SignIn = () => {
+  const globalContext = useContext(Context);
+  const { setIsLoggedIn, isLoggedIn, baseURL, hasSession, setUserObj, setHasSession } = globalContext;
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -18,24 +21,27 @@ function SignIn() {
     setFormErrorMessage('');
   };
 
-  const [formErrorMessage, setFormErrorMessage] = useState('')
+  const [formErrorMessage, setFormErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const baseURL = 'http://127.0.0.1:8000';
+      const csrf_token = await axios.get(baseURL + '/csrf_token/');
       const config = {
         withCredentials: true,
         headers: {
           'Content-Type': "multipart/form-data",
-          'X-CSRFToken': Cookies.get("csrftoken"),
+          'X-CSRFToken': Cookies.get('csrftoken'),
         }
-      }
+      };
 
       const response = await axios.post(baseURL + '/login/', formData, config);
       if (response.status === 200) {
-        navigate('/feed');
+        setHasSession(true);
+        setUserObj(response.data);
+        setIsLoggedIn(true);
+        console.log(hasSession);
       }
       else {
         setFormErrorMessage('Invalid login, check if username and password are correct.');
