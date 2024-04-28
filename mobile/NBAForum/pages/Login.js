@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
-import axios from 'axios'
+import axios, { Axios } from 'axios'
+import { Context } from "../globalContext/globalContext.js"
+
 
 const Login = () => {
-    const baseURL = 'http://your-ip-address-for-now:8000';
+    Axios.withCredentials = true;
+
+    const globalContext = useContext(Context)
+    const { setIsLoggedIn, baseURL, setUserObj, setHasSession } = globalContext;
+
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [username, setUsername] = useState('');
@@ -36,7 +42,9 @@ const Login = () => {
             );
             if (response.status == 200) {
                 setMessage('Login successful!');
-                toggleModal();
+                setHasSession(true);
+                setUserObj(response.data);
+                setIsLoggedIn(true);
             } else {
                 setMessage('Something went wrong, please try again.');
                 toggleModal();
