@@ -106,7 +106,12 @@ def search_player(query):
         return {"response:": "error, please try a different query"}
     elif data['results']['bindings'] == []:
         return None
-    return data['results']['bindings'][0]['item']['value']
+    
+    url_lst = data['results']['bindings'][0]['item']['value'].split('/')
+    for item in url_lst:
+        if 'Q' in item:
+            player_id = item
+    return {'player': data['results']['bindings'][0]['itemLabel']['value'], 'id': player_id} 
 
 def search_team(query):
     teams = [ ["atlanta", "hawks"], 
@@ -140,11 +145,15 @@ def search_team(query):
              ["utah", "jazz"],
              ["washington", "wizards"]]
     
+    query_team = ''
     for team in teams:
         for word in team:
             if query.lower() == word:
                 query_team = team
 
+    if query_team == '':
+        return None
+    
     team_name = " ".join(query_team)
     url = 'https://www.wikidata.org/w/api.php'
     try:
@@ -154,55 +163,9 @@ def search_team(query):
         id = data1['search'][0]['id']
         response2 = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
         data2 = response2.json()
-        return data2['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
+        return {'team': team_name, 'id': data2['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']}
     except:
         return {"error:": "error, please try again"}
-#    divisions = {"Atlantic":   "Q638908",
-#                  "Central":   "Q745984", 
-#                  "Southeast": "Q639928", 
-#                  "Northwest": "Q723639", 
-#                  "Pacific":   "Q206201", 
-#                  "Southwest": "Q391166"
-#                  }
-    
-#    for id in divisions.values():
- #       sparql_query = '''
-  #          SELECT ?item ?itemLabel
-   #         WHERE {
-    #            ?item wdt:P361 wd:''' + id + '''.
-     #           ?item rdfs:label ?itemLabel.
-      #          FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel),''' + '"' + query.lower() + '''")).
-       #         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-        #    }
-         #   LIMIT 1
-        #'''
-
-        #sparql_url = "https://query.wikidata.org/sparql"
-
-        #sparql_response = requests.get(sparql_url, params={'format': 'json', 'query': sparql_query})
-#        sparql_data = sparql_response.json()
- #       if sparql_response.status_code == 500:
-  #          return {"response:": "error, please try a different query"}
-   #     elif sparql_data['results']['bindings'] != []:
-    #        break
-    
-    #print('team:', sparql_data)
-    
-    #if sparql_data['results']['bindings'] == []:
-    #    return None
-    
-#    page_url = sparql_data['results']['bindings'][0]['item']['value']
-#    page_response = requests.get(page_url)
-#    page_url_lst = page_url.split('/')
-#    if page_response.status_code == 200:
-#        data = page_response.json()
-#        entity_data = data.get("entities", {}).get(page_url_lst[3], {}) # BURASI ŞÜPHELİ, ID'YE DÖNMEK GEREKEBİLİR
-#        print('data:', page_url_lst[3])
-#        coach = entity_data.get("head coach", {})
-#        venue = entity_data.get("home venue", {})
-#        return {"coach": coach, "venue": venue}
-#    else:
-#        return {"response:": "error, please try again"}
       
       
 def csrf_token(request):
