@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
 import axios from 'axios'
+import { Context } from "../globalContext/globalContext.js"
+
 
 const SignUp = () => {
-  const baseURL = 'http://your-ip-address-for-now:8000';
+  const globalContext = useContext(Context)
+  const { setIsLoggedIn, baseURL, setUserObj, setHasSession } = globalContext;
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [message, setMessage] = useState('');
   const [username, setUsername] = useState('');
@@ -28,7 +32,7 @@ const SignUp = () => {
     return reg.test(username)
   }
 
-  const validatePassword = (password, confirmPassword) => {
+  const validatePassword = (password) => {
     if (password == '')
       return false;
     let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -76,8 +80,10 @@ const SignUp = () => {
         }
       );
       if (response.status == 200) {
-        setMessage('Sign-up successful! Welcome to our app.');
-        toggleModal();
+        setMessage('Sign-up successful! Welcome to our app!');
+        setHasSession(true);
+        setUserObj(response.data);
+        setIsLoggedIn(true);
       } else {
         setMessage('Something went wrong, please try again.');
         toggleModal();
