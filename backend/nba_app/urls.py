@@ -10,6 +10,6 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('team/', views.team, name='team'),
     path('player/', views.player, name='player'),
-    path('csrf_token/', views.csrf_token, name='csrf_token'),
+    path('csrf_token/', views.csrf_token, name='csrf_token')
     path('session/', views.session, name='session') 
 ]
