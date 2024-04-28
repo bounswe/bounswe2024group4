@@ -109,6 +109,7 @@ def search_player(query):
     for item in url_lst:
         if 'Q' in item:
             player_id = item
+
     return {'player': data['results']['bindings'][0]['itemLabel']['value'], 'id': player_id} 
 
 def search_team(query):
@@ -169,19 +170,45 @@ def team(request):
             url = 'https://www.wikidata.org/w/api.php'
             response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
             data = response.json()
-            name = data['entities'][id]['labels']['en']['value']
-            venue_temp = data['entities'][id]['claims']['P115']
-            venue_id = venue_temp[len(venue_temp)-1]['mainsnak']['datavalue']['value']['id']
-            coach_id = data['entities'][id]['claims']['P286'][0]['mainsnak']['datavalue']['value']['id']
-            division_id = data['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
-            venue = get_label(venue_id)
-            coach = get_label(coach_id)
-            response_div = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': division_id, 'language': 'en'})
-            data_div = response_div.json()
-            division = data_div['entities'][division_id]['labels']['en']['value']
-            conference_id = data_div['entities'][division_id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
-            conference = get_label(conference_id)
-            return JsonResponse({'name': name, 'conference': conference, 'coach': coach, 'division': division, 'venue': venue})
+            try:
+                name = data['entities'][id]['labels']['en']['value']
+            except:
+                name = None
+            try:
+                venue_temp = data['entities'][id]['claims']['P115']
+                venue_id = venue_temp[len(venue_temp)-1]['mainsnak']['datavalue']['value']['id']
+                venue = get_label(venue_id)
+            except:
+                venue = None
+            try:
+                coach_id = data['entities'][id]['claims']['P286'][0]['mainsnak']['datavalue']['value']['id']
+                coach = get_label(coach_id)
+            except: 
+                coach = None
+            try:
+                division_id = data['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
+                response_div = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': division_id, 'language': 'en'})
+                data_div = response_div.json()
+                division = data_div['entities'][division_id]['labels']['en']['value']
+                try:
+                    conference_id = data_div['entities'][division_id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
+                    conference = get_label(conference_id)
+                except:
+                    conference = None
+            except: 
+                division = None
+                conference = None
+            try:
+                image_name = data['entities'][id]['claims']['P154'][0]['mainsnak']['datavalue']['value']
+                image_url = f'https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{image_name}&width=300'
+            except:
+                image_url = None
+            return JsonResponse({'name': name,
+                                 'conference': conference, 
+                                 'coach': coach, 
+                                 'division': division, 
+                                 'venue': venue, 
+                                 'image': image_url})
         except:
             return JsonResponse({"error:": "error, please try again"})
 
@@ -189,7 +216,94 @@ def get_label(id):
     url = 'https://www.wikidata.org/w/api.php'
     response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
     data = response.json()
-    return data['entities'][id]['labels']['en']['value'] 
+    try:
+        return data['entities'][id]['labels']['en']['value'] 
+    except:
+        return None
+    
+def player(request):
+    if request.method == "GET" and "id" in request.GET:
+        id = request.GET.get("id")
+        try:
+            url = 'https://www.wikidata.org/w/api.php'
+            response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
+            data = response.json()
+            try:
+                name = data['entities'][id]['labels']['en']['value']
+            except:
+                name = None
+            try:
+                height = data['entities'][id]['claims']['P2048'][0]['mainsnak']['datavalue']['value']['amount']
+            except:
+                height = None
+            try:
+                date_of_birth = data['entities'][id]['claims']['P569'][0]['mainsnak']['datavalue']['value']['time']
+            except:
+                date_of_birth = None
+            try:
+                insta = data['entities'][id]['claims']['P2003'][0]['mainsnak']['datavalue']['value']
+            except:
+                insta = None
+            try:
+                position_lst = data['entities'][id]['claims']['P413']
+                positions = list_wikidata_property(position_lst)
+            except:
+                positions = None
+            try:
+                team_lst = data['entities'][id]['claims']['P54']
+                teams = {}
+                for item in team_lst:
+                    team_id = item['mainsnak']['datavalue']['value']['id']
+                    team = get_label(team_id)
+                    try:
+                        start = item['qualifiers']['P580'][0]['datavalue']['value']['time']
+                    except:
+                        start = None
+                    try:
+                        end = item['qualifiers']['P582'][0]['datavalue']['value']['time']
+                    except:
+                        end = None
+                    teams[team] = {'start': start, 'end': end}
+            except:
+                teams = None
+            try:
+                award_lst = data['entities'][id]['claims']['P166']
+                awards = {}
+                for item in award_lst:
+                    award_id = item['mainsnak']['datavalue']['value']['id']
+                    award = get_label(award_id)
+                    try:
+                        year = item['qualifiers']['P585'][0]['datavalue']['value']['time']
+                    except:
+                        year = None
+                    awards[award] = year
+            except:
+                awards = None
+            try:
+                image_name = data['entities'][id]['claims']['P18'][0]['mainsnak']['datavalue']['value']
+                image_url = f'https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{image_name}&width=300'
+            except:
+                image_url = None
+            return JsonResponse({'name': name, 
+                                 'height': height, 
+                                 'date_of_birth': date_of_birth, 
+                                 'instagram': insta, 
+                                 'teams': teams, 
+                                 'positions': positions,
+                                 'awards': awards,
+                                 'image': image_url})
+                                 
+        except:
+            return JsonResponse({"error:": "error, please try again"})
+
+def list_wikidata_property(lst):
+    names = []
+    for item in lst:
+        item_id = item['mainsnak']['datavalue']['value']['id']
+        name = get_label(item_id)
+        names.append(name)
+    return names
+
 def csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrf_token': csrf_token})
