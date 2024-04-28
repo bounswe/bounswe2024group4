@@ -182,7 +182,16 @@ def team(request):
             try:
                 venue_temp = data['entities'][id]['claims']['P115']
                 venue_id = venue_temp[len(venue_temp)-1]['mainsnak']['datavalue']['value']['id']
-                venue = get_label(venue_id)
+                response_ven = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': venue_id, 'language': 'en'})
+                data_ven = response_ven.json()
+                venue = data_ven['entities'][venue_id]['labels']['en']['value']
+                try:
+                    venue_loc = data_ven['entities'][venue_id]['claims']['P625'][0]['mainsnak']['datavalue']['value']
+                    venue_latitude = venue_loc['latitude']
+                    venue_longitude = venue_loc['longitude']
+                except:
+                    venue_latitude = None
+                    venue_longitude = None
             except:
                 venue = None
             try:
@@ -212,7 +221,9 @@ def team(request):
                                  'conference': conference, 
                                  'coach': coach, 
                                  'division': division, 
-                                 'venue': venue, 
+                                 'venue': venue,
+                                 'venue_latitude': venue_latitude,
+                                 'venue_longitude': venue_longitude,
                                  'image': image_url})
         except:
             return JsonResponse({"error:": "error, please try again"})
