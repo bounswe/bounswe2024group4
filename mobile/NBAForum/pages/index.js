@@ -3,7 +3,8 @@ import SignUp from "./SignUp";
 import Team from "./Team";
 import HomePage from "./HomePage";
 import Player from "./Player";
-import Feed from "./Feed"
+import Feed from "./Feed";
+import Search from "./Search";
 
 export{
     Login,
@@ -12,4 +13,5 @@ export{
     HomePage,
     Player,
     Feed,
+    Search,
 }

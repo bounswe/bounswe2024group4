@@ -77,6 +77,13 @@ function Navigator() {
                 headerShown: false
             }}
         />
+        <Stack.Screen
+            name="Search"
+            component={Search}
+            options={{
+                headerShown: false
+            }}
+        />
         </>
     }
     </Stack.Navigator>
