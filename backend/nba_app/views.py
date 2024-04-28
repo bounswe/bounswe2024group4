@@ -171,3 +171,8 @@ def search_team(query):
 def csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrf_token': csrf_token})
+
+def session(request):
+    if request.method == "GET":
+        session = request.session
+        return JsonResponse({'session': session != None })
