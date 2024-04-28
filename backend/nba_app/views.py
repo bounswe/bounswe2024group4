@@ -82,8 +82,9 @@ def feed(request):
 def search(request):
     if request.method == "GET" and "query" in request.GET:
         query = request.GET.get("query")
-        print(search_player(query))
-        print(search_team(query))
+        team = search_team(query)
+        player = search_player(query)
+        return JsonResponse({'team': team, 'player': player})
     return render(request, 'search.html')
 
 def search_player(query):
@@ -100,28 +101,71 @@ def search_player(query):
 
     response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
     data = response.json()
-
-    return data
+    print('player:', data)
+    if response.status_code == 500:
+        return {"response:": "error, please try a different query"}
+    elif data['results']['bindings'] == []:
+        return None
+    
+    url_lst = data['results']['bindings'][0]['item']['value'].split('/')
+    for item in url_lst:
+        if 'Q' in item:
+            player_id = item
+    return {'player': data['results']['bindings'][0]['itemLabel']['value'], 'id': player_id} 
 
 def search_team(query):
-    divisions = ["Q638908", "Q745984", "Q639928", "Q723639", "Q206201", "Q391166"]
-    for id in divisions:
-        sparql_query = '''
-            SELECT ?item ?itemLabel
-            WHERE {
-                ?item wdt:P361 wd:''' + id + '''.
-                ?item rdfs:label ?itemLabel.
-                FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel),''' + '"' + query.lower() + '''")).
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-            }
-            LIMIT 1
-        '''
+    teams = [ ["atlanta", "hawks"], 
+             ["boston", "celtics"], 
+             ["brooklyn", "nets"], 
+             ["charlotte", "hornets"], 
+             ["chicago", "bulls"], 
+             ["cleveland","cavaliers"], 
+             ["dallas", "mavericks"], 
+             ["denver", "nuggets"], 
+             ["detroit", "pistons"], 
+             ["golden", "state", "warriors"], 
+             ["houston", "rockets"],
+             ["indiana", "pacers"],
+             ["los", "angeles", "clippers"],
+             ["los", "angeles", "lakers"],
+             ["memphis", "grizzlies"],
+             ["miami", "heat"],
+             ["milwaukee", "bucks"],
+             ["minnesota", "timberwolves"],
+             ["new", "orleans", "pelicans"],
+             ["new", "york",    "knicks"],
+             ["oklahoma", "city", "thunder"],
+             ["orlando", "magic"],
+             ["philadelphia", "76ers"],
+             ["phoenix", "suns"],
+             ["portland", "trail", "blazers"],
+             ["sacramento", "kings"],
+             ["san", "antonio", "spurs"],
+             ["toronto", "raptors"],
+             ["utah", "jazz"],
+             ["washington", "wizards"]]
+    
+    query_team = ''
+    for team in teams:
+        for word in team:
+            if query.lower() == word:
+                query_team = team
 
-        endpoint_url = "https://query.wikidata.org/sparql"
-
-        response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
-        data = response.json()
-        return data
+    if query_team == '':
+        return None
+    
+    team_name = " ".join(query_team)
+    url = 'https://www.wikidata.org/w/api.php'
+    try:
+        response1 = requests.get(url, params = {'action': 'wbsearchentities', 'format': 'json', 'search': team_name, 'language': 'en'})
+        data1 = response1.json()
+        #print('team:', data)
+        id = data1['search'][0]['id']
+        response2 = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
+        data2 = response2.json()
+        return {'team': team_name, 'id': data2['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']}
+    except:
+        return {"error:": "error, please try again"}
       
       
 def csrf_token(request):
