@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
@@ -33,7 +33,7 @@ def sign_up(request):
         
         login(request, user)
         print("user_logged in: ", user)
-        return HttpResponse("User created successfully", status=200)
+        return JsonResponse({'username': username}, status=200)
             
     
     # Render the signup.html template for GET requests
@@ -51,10 +51,15 @@ def log_in(request):
 
         login(request, user)
        
-        return HttpResponse("Logged in successfully", status=200)
-
+        return JsonResponse({'username': username}, status=200)
 
     return render(request, 'login.html')
+
+def log_out(request):
+    if request.method == "GET":
+        logout(request)
+        request.session.flush()
+        return HttpResponse("Logged out successfully", status=200)
 
 
 @login_required
@@ -311,4 +316,4 @@ def csrf_token(request):
 def session(request):
     if request.method == "GET":
         session = request.session
-        return JsonResponse({'session': session != None })
+        return JsonResponse({'session': session.session_key != None })
