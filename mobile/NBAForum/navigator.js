@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Context } from "./globalContext/globalContext.js"
-import { HomePage, Login, SignUp, Team, Feed } from "./pages";
+import { HomePage, Login, SignUp, Team, Feed, Player } from "./pages";
 import { Button } from 'react-native';
 import axios from 'axios';
 
@@ -66,6 +66,13 @@ function Navigator() {
         <Stack.Screen
             name="Team"
             component={Team}
+            options={{
+                headerShown: false
+            }}
+        />
+        <Stack.Screen
+            name="Player"
+            component={Player}
             options={{
                 headerShown: false
             }}
