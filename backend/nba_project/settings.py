@@ -97,10 +97,10 @@ WSGI_APPLICATION = 'nba_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'nba_db',
-        'USER': 'root',
-        'PASSWORD': 'Kaan1504+',
-        'HOST': 'localhost',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': 3306,
     }
 }

@@ -57,10 +57,9 @@ def log_in(request):
     return render(request, 'login.html')
 
 
-#@login_required
+@login_required
 def post(request):
-    if request.method == "POST":
-        
+    if request.method == "POST":        
         user = request.user
         content = request.POST.get("content")
         post = Post.objects.create(user=user, content=content)
@@ -72,7 +71,6 @@ def post(request):
 
         print(text)
     return render(request, 'post.html')
-
 
 @login_required
 def feed(request):
@@ -159,15 +157,39 @@ def search_team(query):
     try:
         response1 = requests.get(url, params = {'action': 'wbsearchentities', 'format': 'json', 'search': team_name, 'language': 'en'})
         data1 = response1.json()
-        #print('team:', data)
         id = data1['search'][0]['id']
-        response2 = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
-        data2 = response2.json()
-        return {'team': team_name, 'id': data2['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']}
+        return {'team': team_name, 'id': id}
     except:
         return {"error:": "error, please try again"}
-      
-      
+
+def team(request):
+    if request.method == "GET" and "id" in request.GET:
+        id = request.GET.get("id")
+        try:
+            url = 'https://www.wikidata.org/w/api.php'
+            response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
+            data = response.json()
+            name = data['entities'][id]['labels']['en']['value']
+            venue_temp = data['entities'][id]['claims']['P115']
+            venue_id = venue_temp[len(venue_temp)-1]['mainsnak']['datavalue']['value']['id']
+            coach_id = data['entities'][id]['claims']['P286'][0]['mainsnak']['datavalue']['value']['id']
+            division_id = data['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
+            venue = get_label(venue_id)
+            coach = get_label(coach_id)
+            response_div = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': division_id, 'language': 'en'})
+            data_div = response_div.json()
+            division = data_div['entities'][division_id]['labels']['en']['value']
+            conference_id = data_div['entities'][division_id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
+            conference = get_label(conference_id)
+            return JsonResponse({'name': name, 'conference': conference, 'coach': coach, 'division': division, 'venue': venue})
+        except:
+            return JsonResponse({"error:": "error, please try again"})
+
+def get_label(id):
+    url = 'https://www.wikidata.org/w/api.php'
+    response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
+    data = response.json()
+    return data['entities'][id]['labels']['en']['value'] 
 def csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrf_token': csrf_token})
