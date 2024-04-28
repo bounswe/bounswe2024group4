@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useContext} from "react";
+import { Context } from "../globalContext/globalContext.js";
 import logo from "../assets/logo.svg";
 import "../pages/SignUpPrompt.js";
 import { Bars3Icon } from "@heroicons/react/24/solid";
@@ -9,6 +10,8 @@ import { useEffect, useRef } from "react";
 
 // Navbar component
 export function Navbar() {
+  const globalContext = useContext(Context)
+  const { isLoggedIn, setIsLoggedIn, hasSession, baseURL } = globalContext;
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -35,8 +38,9 @@ export function Navbar() {
   }, []);
 
   const handleCreatePost = () => {
-    // Navigate to SignUpFail component
-    navigate("/sign-up-prompt");
+    if (!hasSession) {
+      navigate("/sign-up-prompt");
+    }
   };
 
   const handleLogo = () => {

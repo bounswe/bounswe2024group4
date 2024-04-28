@@ -68,6 +68,7 @@ function SignUp() {
 
     try {
       const baseURL = 'http://127.0.0.1:8000';
+      await axios.get(baseURL + '/csrf_token/');
       const config = {
         withCredentials: true,
         headers: {
@@ -75,7 +76,6 @@ function SignUp() {
           'X-CSRFToken': Cookies.get("csrftoken"),
         }
       }
-
       const { confirm_password, ...sentData } = formData;
 
       const response = await axios.post(baseURL + '/signup/', sentData, config);
