@@ -40,6 +40,7 @@ const SignUp = () => {
   }
 
   const handleSignUp = async () => {
+    axios.defaults.validateStatus = () => true;
     console.log('Username:', username);
     console.log('Email:', email);
     console.log('Password:', password);
@@ -85,12 +86,11 @@ const SignUp = () => {
         setUserObj(response.data);
         setIsLoggedIn(true);
       } else {
-        setMessage('Something went wrong, please try again.');
+        setMessage(response.data);
         toggleModal();
       }
     }
     catch (error) {
-      console.log(error.message)
       setMessage('Something went wrong, please try again.');
       toggleModal();
     }
