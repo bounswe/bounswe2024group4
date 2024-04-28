@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { HomePage, Login, SignUp, Team } from "./pages";
+import { HomePage, Login, Player, SignUp, Team } from "./pages";
 
 
 const Stack = createNativeStackNavigator();
@@ -42,6 +42,14 @@ export default function App() {
                     }}
                 />
 
+
+                <Stack.Screen
+                    name="Player"
+                    component={Player}
+                    options={{
+                        headerShown: false
+                    }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );
