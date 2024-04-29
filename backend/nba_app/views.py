@@ -270,7 +270,7 @@ def player(request):
                 position_lst = data['entities'][id]['claims']['P413']
                 positions = list_wikidata_property(position_lst)
             except:
-                positions = None
+                positions = []
             try:
                 team_lst = data['entities'][id]['claims']['P54']
                 teams = {}
@@ -287,7 +287,7 @@ def player(request):
                         end = None
                     teams[team] = {'start': start, 'end': end}
             except:
-                teams = None
+                teams = []
             try:
                 award_lst = data['entities'][id]['claims']['P166']
                 awards = {}
@@ -300,7 +300,7 @@ def player(request):
                         year = None
                     awards[award] = year
             except:
-                awards = None
+                awards = []
             try:
                 image_name = data['entities'][id]['claims']['P18'][0]['mainsnak']['datavalue']['value']
                 image_url = f'https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{image_name}&width=300'
