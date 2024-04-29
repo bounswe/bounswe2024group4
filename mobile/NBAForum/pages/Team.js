@@ -52,8 +52,8 @@ const Team = ({ route }) => {
             initialRegion={{
               latitude: teamInfo.venue_latitude,
               longitude: teamInfo.venue_longitude,
-              latitudeDelta: 0.0043,
-              longitudeDelta: 0.0034,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
             }}
           />
          
