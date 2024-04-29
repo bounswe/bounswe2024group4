@@ -27,7 +27,7 @@ const Search = ({ navigation }) => {
       setIsLoading(false);
 
       if (data.player) {
-      
+
         // If player data is not null, navigate to the PlayerDetails screen
         navigation.navigate('Player', { player: data.player });
       } else if (data.team) {
@@ -49,7 +49,6 @@ const Search = ({ navigation }) => {
     <View style={styles.container}>
       <Searchbar
         placeholder="Search for a NBA team/player!"
-        onIconPress={onChangeSearch}
         value={searchQuery}
         onChangeText={setSearchQuery}
         onSubmitEditing={() => handleSearch(searchQuery)}
