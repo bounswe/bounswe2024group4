@@ -100,7 +100,7 @@ const SignUp = () => {
         Create Your Account
       </Text>
       <Text style={[styles.subtitle, { color: "#63697D" }]}>
-        Sign up to save and edit projects
+        Sign up to dive into the world of NBA!
       </Text>
       <View style={styles.formContainer}>
         <TextInput
