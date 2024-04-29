@@ -1,16 +1,20 @@
-import React, {useContext, useState, useRef, useEffect} from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { Context } from "../globalContext/globalContext.js";
 import logo from "../assets/logo.svg";
 import "../pages/SignUpPrompt.js";
 import { Bars3Icon } from "@heroicons/react/24/solid";
-import { UserCircleIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import {
+  UserCircleIcon,
+  ArrowLeftStartOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import { isAuthorized, setLoggedIn } from "./Auth.js";
+import SearchBar from "./searchbar.js";
 
 // Navbar component
 export function Navbar() {
-  const globalContext = useContext(Context)
+  const globalContext = useContext(Context);
   const { baseURL } = globalContext;
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,10 +49,10 @@ export function Navbar() {
 
   const handleSignOut = async () => {
     try {
-      await axios.get(baseURL + '/log_out/');
+      await axios.get(baseURL + "/log_out/");
       setLoggedIn("false");
       navigate("/sign-in");
-    } catch(error){
+    } catch (error) {
       console.log(error.message);
     }
   };
@@ -92,13 +96,7 @@ export function Navbar() {
             </div>
           )}
         </div>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search"
-            className="border p-2 rounded-md"
-          />
-        </div>
+        <SearchBar />
         <div className="flex justify-between">
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-md mr-4"
@@ -114,8 +112,12 @@ export function Navbar() {
             {isProfileMenuOpen && (
               <div className="dropdown-menu absolute top-full right--5 bg-white border border-gray-200 rounded shadow-lg">
                 <ul>
-                  <li className="flex px-4 py-2 hover:bg-gray-100" onClick = {handleSignOut}>
-                    Sign Out <ArrowLeftStartOnRectangleIcon className="h-10 text-black" />
+                  <li
+                    className="flex px-4 py-2 hover:bg-gray-100"
+                    onClick={handleSignOut}
+                  >
+                    Sign Out{" "}
+                    <ArrowLeftStartOnRectangleIcon className="h-10 text-black" />
                   </li>
                 </ul>
               </div>
