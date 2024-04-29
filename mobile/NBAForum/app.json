@@ -1,4 +1,6 @@
-{
+{ 
+  "name": "NBAForum",
+  "displayName": "NBAForum",
   "expo": {
     "name": "NBAForum",
     "slug": "NBAForum",

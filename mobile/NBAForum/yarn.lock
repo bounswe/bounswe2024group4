@@ -6030,6 +6030,11 @@ react-is@^18.0.0:
   resolved "https://registry.npmjs.org/react-is/-/react-is-18.2.0.tgz"
   integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
 
+react-native-eject@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.npmjs.org/react-native-eject/-/react-native-eject-0.2.0.tgz"
+  integrity sha512-muPhImNfKWa9hsdkrYeIkXM8/6lhZj3NnFCxI7kRrD3F50l6a6lc7crRWjg0i0aBt6XdkoE4efATjxCRkmTOFA==
+
 react-native-maps@1.10.0:
   version "1.10.0"
   resolved "https://registry.npmjs.org/react-native-maps/-/react-native-maps-1.10.0.tgz"
