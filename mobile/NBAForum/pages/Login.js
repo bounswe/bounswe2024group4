@@ -65,7 +65,7 @@ const Login = () => {
         Login Your Account
       </Text>
       <Text style={[styles.subtitle, { color: "#63697D" }]}>
-        Sign in to save and edit projects
+        Login to dive into the world of NBA!
       </Text>
       <View style={styles.formContainer}>
         <TextInput
