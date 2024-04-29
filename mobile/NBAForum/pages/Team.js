@@ -37,8 +37,11 @@ const Team = ({ route }) => {
     (!isLoading)? (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
+        <View style={styles.teamImageWrapper}>
 
-        <Text style={[styles.heading, styles.team_nameHeading]}>{teamInfo.name}</Text>
+              <Image src={teamInfo.image} style={{width: "100%", height: "100%"}} resizeMode='contain' />
+         </View>
+          <Text style={[styles.heading, styles.team_nameHeading]}>{teamInfo.name}</Text>
 
         <View style={styles.teamInfoContainer}>
           <Text style={[styles.heading, styles.teamInfoHeading]}>Team Info</Text>
@@ -108,12 +111,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  playerImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 25,
-    marginRight: 10,
-  },
   playerPosition: {
     width: 60,
     height: 30,
@@ -123,11 +120,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 10,
   },
-  TeamImage: {
+  teamImage: {
     width: 150,
     height: 150,
     borderRadius: 25,
     marginRight: 10,
+  },
+  teamImageWrapper: {
+    width: '40%',
+    aspectRatio: 1, 
+    borderRadius: 5,
+    overflow: 'hidden',
+    borderRadius: 16,
   },
   playerInfo: {
     flex: 1,
