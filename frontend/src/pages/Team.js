@@ -3,11 +3,13 @@ import "../css/index.css";
 import { Navbar } from '../components/Navbar';
 import axios from 'axios';
 import { Context } from "../globalContext/globalContext.js";
+import { useParams } from 'react-router-dom';
 
 const Team = () => {
-
+  const id = useParams();
+  console.log(id);
   const globalContext = useContext(Context);
-  const { baseURL, setUserObj } = globalContext;
+  const { baseURL } = globalContext;
   const [teamname, setTeamname] = useState('');
   const [conference, setConference] = useState('');
   const [division, setDivision] = useState('');
@@ -19,7 +21,8 @@ const Team = () => {
 
   const handleData = async () => {
     try {
-      const response = await axios.get(baseURL + '/team/?id=Q121783');
+      console.log(id);
+      const response = await axios.get(baseURL + '/team/?id=' + id.id);
       console.log(response);
       setTeamname(response.data.name);
       setConference(response.data.conference);

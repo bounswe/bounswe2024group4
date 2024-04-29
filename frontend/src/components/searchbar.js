@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { Context } from "../globalContext/globalContext.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SearchBar = () => {
+  const navigate = useNavigate();
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
   const [searchTerm, setSearchTerm] = useState("");
   const search = async (searchTerm) => {
     try {
-      const baseURL = "http://127.0.0.1:8000";
-      // Creating URL
       const url = `${baseURL}/search/?query=${searchTerm}`;
 
       const response = await axios.get(url);
@@ -22,11 +25,12 @@ const SearchBar = () => {
   const handleSearch = async () => {
     try {
       const results = await search(searchTerm);
-      //working on results can be done here
-      const team_data = results.team;
-      const team_id = team_data.id;
-      console.log("Search Results:", results);
-      console.log("team id:", team_id);
+      if (results.team != null) {
+        navigate("/team/" + results.team.id);
+      }
+      if (results.player != null) {
+        navigate("/player/" + results.player.id);
+      }
     } catch (error) {
       console.error("Error searching:", error);
     }
