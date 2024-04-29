@@ -1,14 +1,17 @@
-import React from "react";
+import React, {useContext, useState, useRef, useEffect} from "react";
+import { Context } from "../globalContext/globalContext.js";
 import logo from "../assets/logo.svg";
 import "../pages/SignUpPrompt.js";
 import { Bars3Icon } from "@heroicons/react/24/solid";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useEffect, useRef } from "react";
+import axios from 'axios';
+import { isAuthorized, setLoggedIn } from "./Auth.js";
 
 // Navbar component
 export function Navbar() {
+  const globalContext = useContext(Context)
+  const { baseURL } = globalContext;
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -35,8 +38,19 @@ export function Navbar() {
   }, []);
 
   const handleCreatePost = () => {
-    // Navigate to SignUpFail component
-    navigate("/sign-up-prompt");
+    if (!isAuthorized()) {
+      navigate("/sign-up-prompt");
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await axios.get(baseURL + '/log_out/');
+      setLoggedIn("false");
+      navigate("/sign-in");
+    } catch(error){
+      console.log(error.message);
+    }
   };
 
   const handleLogo = () => {
@@ -100,14 +114,8 @@ export function Navbar() {
             {isProfileMenuOpen && (
               <div className="dropdown-menu absolute top-full right--5 bg-white border border-gray-200 rounded shadow-lg">
                 <ul>
-                  <li className="px-4 py-2 hover:bg-gray-100">
-                    Profile Option 1
-                  </li>
-                  <li className="px-4 py-2 hover:bg-gray-100">
-                    Profile Option 2
-                  </li>
-                  <li className="px-4 py-2 hover:bg-gray-100">
-                    Profile Option 3
+                  <li className="flex px-4 py-2 hover:bg-gray-100" onClick = {handleSignOut}>
+                    Sign Out <ArrowLeftStartOnRectangleIcon className="h-10 text-black" />
                   </li>
                 </ul>
               </div>

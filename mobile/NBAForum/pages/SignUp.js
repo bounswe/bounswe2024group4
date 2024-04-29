@@ -1,17 +1,13 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  Button,
-} from "react-native";
-import axios from "axios";
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
+import axios from 'axios'
+import { Context } from "../globalContext/globalContext.js"
+
 
 const SignUp = () => {
-  const baseURL = "http://your-ip-address-for-now:8000";
+  const globalContext = useContext(Context)
+  const { setIsLoggedIn, baseURL, setUserObj, setHasSession } = globalContext;
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [username, setUsername] = useState("");
@@ -35,18 +31,19 @@ const SignUp = () => {
     return reg.test(username);
   };
 
-  const validatePassword = (password, confirmPassword) => {
-    if (password == "") return false;
-    let reg =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return reg.test(password);
-  };
+  const validatePassword = (password) => {
+    if (password == '')
+      return false;
+    let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return reg.test(password)
+  }
 
   const handleSignUp = async () => {
-    console.log("Username:", username);
-    console.log("Email:", email);
-    console.log("Password:", password);
-    console.log("Confirm Password:", confirmPassword);
+    axios.defaults.validateStatus = () => true;
+    console.log('Username:', username);
+    console.log('Email:', email);
+    console.log('Password:', password);
+    console.log('Confirm Password:', confirmPassword);
 
     let errorMessage = "";
     if (password != confirmPassword) {
@@ -82,15 +79,17 @@ const SignUp = () => {
         },
       });
       if (response.status == 200) {
-        setMessage("Sign-up successful! Welcome to our app.");
-        toggleModal();
+        setMessage('Sign-up successful! Welcome to our app!');
+        setHasSession(true);
+        setUserObj(response.data);
+        setIsLoggedIn(true);
       } else {
-        setMessage("Something went wrong, please try again.");
+        setMessage(response.data);
         toggleModal();
       }
-    } catch (error) {
-      console.log(error.message);
-      setMessage("Something went wrong, please try again.");
+    }
+    catch (error) {
+      setMessage('Something went wrong, please try again.');
       toggleModal();
     }
   };
