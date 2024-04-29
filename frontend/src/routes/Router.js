@@ -1,26 +1,26 @@
-import React, {useContext} from "react";
+import React from "react";
 import SignUp from '../pages/SignUp.js';
 import SignIn from '../pages/SignIn.js';
 import ErrorPage from '../pages/GeneralError.js';
 import SignUpPrompt from '../pages/SignUpPrompt.js';
 import Feed from '../pages/Feed.js';
 import { BrowserRouter, Routes, Route, Outlet, Navigate} from 'react-router-dom';
-import { Context, Provider } from '../globalContext/globalContext.js';
+import { Provider } from '../globalContext/globalContext.js';
+import { isAuthorized } from "../components/Auth.js";
 
 function Router() {
-  const globalContext = useContext(Context)
-  const { hasSession } = globalContext;
-  const PrivateRoutes = (session) => {
-    console.log(session);
+  const PrivateRoutes = () => {
+    console.log(isAuthorized())
     return (
-      session ? <Outlet/> : <Navigate to='/sign-in'/>
-    )
-  }
+      isAuthorized() ? <Outlet /> : <Navigate to='/sign-in' />
+    );
+    };
+
     return (
         <Provider>
         <BrowserRouter>
         <Routes>
-          <Route element={<PrivateRoutes session = {hasSession}/>}>
+          <Route element={<PrivateRoutes/>}>
               <Route path='/' element={<Feed/>} />
           </Route>
           <Route path="/sign-up" element={<SignUp />} />

@@ -104,7 +104,7 @@ function SignUp() {
               <input type="password" name="password" placeholder="Password" required className="border p-2 rounded-md mb-4 w-full" onChange={handleChange}/>
               <input type="password" name="confirm_password" placeholder="Confirm Password" required className="border p-2 rounded-md mb-4 w-full" onChange={handleChange} />
               { formErrorMessage !== '' && <p className="text-red-500 mb-4">{formErrorMessage}</p>}
-              <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-md">SIGN UP</button>
+              <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold w-full px-4 py-2 rounded-md">Sign up</button>
             </form>
           </div>
         </main>
