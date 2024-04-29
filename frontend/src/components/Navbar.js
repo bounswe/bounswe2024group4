@@ -10,7 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { isAuthorized, setLoggedIn } from "./Auth.js";
-import SearchBar from "./searchbar.js";
+import SearchBar from "./SearchBar.js";
 
 // Navbar component
 export function Navbar() {

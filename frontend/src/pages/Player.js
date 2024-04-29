@@ -3,11 +3,12 @@ import "../css/index.css";
 import { Navbar } from '../components/Navbar';
 import axios from 'axios';
 import { Context } from "../globalContext/globalContext.js";
+import { useParams } from 'react-router-dom';
 
 const Player = () => {
-
+  const id = useParams();
   const globalContext = useContext(Context);
-  const { baseURL, setUserObj } = globalContext;
+  const { baseURL } = globalContext;
   const [playername, setPlayername] = useState('');
   const [height, setHeight] = useState('');
   const [birthdate, setBirthdate] = useState('');
@@ -19,7 +20,7 @@ const Player = () => {
 
   const handleData = async () => {
     try {
-      const response = await axios.get(baseURL + '/player/?id=Q348618');
+      const response = await axios.get(baseURL + '/player/?id=' + id.id);
       setPlayername(response.data.name);
       setHeight(response.data.height);
       setBirthdate(response.data.date_of_birth);
