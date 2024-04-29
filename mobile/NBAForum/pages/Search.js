@@ -11,8 +11,6 @@ const Search = ({ navigation }) => {
 
   const { baseURL } = useContext(Context);
 
-
-
   const handleSearch = async (query) => {
     if (!query.trim()) {
       setError("Please enter a valid search query.");
@@ -24,20 +22,20 @@ const Search = ({ navigation }) => {
       const encodedQuery = encodeURIComponent(query);
       const response = await axios.get(`${baseURL}/search/?query=${encodedQuery}`);
       const data = response.data;
-      setIsLoading(false);
+ //     setIsLoading(false);
 
       if (data.player) {
 
         // If player data is not null, navigate to the PlayerDetails screen
-        navigation.navigate('Player', { player: data.player });
+        navigation.navigate('Player', { id: data.player.id });
       } else if (data.team) {
         // If team data is not null, navigate to the TeamDetails screen
-        navigation.navigate('Team', { team: data.team });
+        navigation.navigate('Team', { id: data.team.id });
       } else {
         setError("No data found for the query.");
       }
       console.log("Player Data:", data.player);
-      console.log("Player Data:", data.team);
+      console.log("Team Data:", data.team.id);
     } catch (err) {
       setError("Failed to fetch data");
       setIsLoading(false);

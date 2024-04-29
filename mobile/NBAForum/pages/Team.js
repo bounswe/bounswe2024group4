@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
-import { Searchbar } from 'react-native-paper';
+import { Context } from "../globalContext/globalContext.js"
 import MapView from 'react-native-maps';
 import axios from 'axios';
 
 
-const Team = () => {
+const Team = ({ route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [teams, setTeams] = useState([]);
+  const { baseURL } = useContext(Context);
 
-  const onChangeSearch = query => setSearchQuery(query);
-
+  const  teamID  =  route.params['id'];
+  console.log(route.params['id'])
   const handleSearch = async (query) => {
     try {
-      const baseURL = 'your-based-url';
-      const searchPath = `/search/query=${query}`;
-
-      const response = await axios.get(baseURL + searchPath);
+      const response = await axios.get(`${baseURL}/team/?id=${query}`);
 
       if (response.status === 200) {
         console.log('OK:', response.data);
@@ -30,22 +28,13 @@ const Team = () => {
   };
 
   useEffect(() => {
-    handleSearch(searchQuery);
-  }, [searchQuery]); 
-
+    handleSearch(teamID);
+  }, [teamID]); 
 
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Searchbar
-          placeholder="Search"
-          onChangeText={onChangeSearch}
-          value={searchQuery}
-        />
-        <View style={styles.blankSpace}></View>
-
-        {/* Takım isimlerini burada görüntüle */}
         <View>
           {teams.map((team, index) => (
             <Text key={index}>{team.name}</Text>
@@ -78,45 +67,7 @@ const Team = () => {
           />
          
         </View>
-        <View style={styles.playersContainer}>
-          <Text style={styles.heading}>Players</Text>
-          <View style={styles.playerItem}>
-            <Image source={{ uri: 'https://example.com/player1.jpg' }} style={styles.playerImage} />
-            <View style={styles.playerInfo}>
-              <Text>Player 1 Surname 1</Text>
-              <View style={styles.playerPosition}>
-              <Text style={styles.positionText}>Forward</Text>
-            </View>
-            </View>
-          </View>
-          <View style={styles.playerItem}>
-            <Image source={{ uri: 'https://example.com/player1.jpg' }} style={styles.playerImage} />
-            <View style={styles.playerInfo}>
-              <Text>Player 1 Surname 1</Text>
-              <View style={styles.playerPosition}>
-              <Text style={styles.positionText}>Forward</Text>
-            </View>
-            </View>
-          </View>
-          <View style={styles.playerItem}>
-            <Image source={{ uri: 'https://example.com/player1.jpg' }} style={styles.playerImage} />
-            <View style={styles.playerInfo}>
-              <Text>Player 1 Surname 1</Text>
-              <View style={styles.playerPosition}>
-              <Text style={styles.positionText}>Forward</Text>
-            </View>
-            </View>
-          </View>
-          <View style={styles.playerItem}>
-            <Image source={{ uri: 'https://example.com/player1.jpg' }} style={styles.playerImage} />
-            <View style={styles.playerInfo}>
-              <Text>Player 1 Surname 1</Text>
-              <View style={styles.playerPosition}>
-              <Text style={styles.positionText}>Forward</Text>
-            </View>
-            </View>
-          </View>
-        </View>
+       
       </View>
     </ScrollView>
   );

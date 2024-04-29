@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider } from "./globalContext/globalContext.js";
 import Navigator from './navigator.js'
-import Search from './pages/Search.js';
+import CommonNavigator from './commonNavigator.js';
 
 
 export default function App() {
@@ -14,7 +14,7 @@ export default function App() {
             <NavigationContainer>
                 <Tab.Navigator>
                     <Tab.Screen name="Main" component={Navigator} options={{ headerShown: false }}/>
-                    <Tab.Screen name="Search" component={Search} />
+                    <Tab.Screen name="Search Tab" component={CommonNavigator} />
                 </Tab.Navigator>
             </NavigationContainer>
         </Provider>
