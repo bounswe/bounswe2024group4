@@ -1,19 +1,26 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
-import axios, { Axios } from 'axios'
-import { Context } from "../globalContext/globalContext.js"
-
+import React, { useContext, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Button,
+} from "react-native";
+import axios, { Axios } from "axios";
+import { Context } from "../globalContext/globalContext.js";
 
 const Login = () => {
-    Axios.withCredentials = true;
+  Axios.withCredentials = true;
 
-    const globalContext = useContext(Context)
-    const { setIsLoggedIn, baseURL, setUserObj, setHasSession } = globalContext;
+  const globalContext = useContext(Context);
+  const { setIsLoggedIn, baseURL, setUserObj, setHasSession } = globalContext;
 
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [message, setMessage] = useState('');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [message, setMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -31,68 +38,81 @@ const Login = () => {
       const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
         .csrf_token;
 
-            const response = await axios.post(
-                baseURL + '/login/',
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'X-CSRFToken': csrfToken
-                    }
-                }
-            );
-            if (response.status == 200) {
-                setMessage('Login successful!');
-                setHasSession(true);
-                setUserObj(response.data);
-                setIsLoggedIn(true);
-            } else {
-                setMessage('Something went wrong, please try again.');
-                toggleModal();
-            }
-        }
-        catch (error) {
-            console.log(error.message)
-            setMessage('Something went wrong, please try again.');
-            toggleModal();
-        }
-    };
-    return (
-        <View style={styles.container}>
-            <Text style={[styles.title, { color: 'blue' }]}>Welcome to NBA Forum!</Text>
-            <View style={styles.formContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Username"
-                    value={username}
-                    onChangeText={setUsername}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                />
-                <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                    <Text style={styles.loginButtonText}>Login</Text>
-                </TouchableOpacity>
-                <Modal
-                    visible={isModalVisible}
-                    animationType="slide"
-                    transparent={false}
-                    onRequestClose={toggleModal}
-                >
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                        <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
-                            <Text>{message}</Text>
-                            <Button title="Close" onPress={toggleModal} />
-                        </View>
-                    </View>
-                </Modal>
+      const response = await axios.post(baseURL + "/login/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-CSRFToken": csrfToken,
+        },
+      });
+      if (response.status == 200) {
+        setMessage("Login successful!");
+        setHasSession(true);
+        setUserObj(response.data);
+        setIsLoggedIn(true);
+      } else {
+        setMessage("Something went wrong, please try again.");
+        toggleModal();
+      }
+    } catch (error) {
+      console.log(error.message);
+      setMessage("Something went wrong, please try again.");
+      toggleModal();
+    }
+  };
+  return (
+    <View style={styles.container}>
+      <Text style={[styles.title, { color: "#232734" }]}>
+        Login Your Account
+      </Text>
+      <Text style={[styles.subtitle, { color: "#63697D" }]}>
+        Sign in to save and edit projects
+      </Text>
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginButtonText}>Login</Text>
+        </TouchableOpacity>
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={toggleModal}
+        >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "white",
+                padding: 20,
+                borderRadius: 10,
+              }}
+            >
+              <Text>{message}</Text>
+              <Button title="Close" onPress={toggleModal} />
             </View>
-        </View>
-    )
+          </View>
+        </Modal>
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
