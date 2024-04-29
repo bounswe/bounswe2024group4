@@ -50,7 +50,7 @@ def log_in(request):
             return HttpResponse("Invalid credentials", status=401)
 
         login(request, user)
-       
+        print("user_logged in: ", user) 
         return JsonResponse({'username': username}, status=200)
 
     return render(request, 'login.html')
@@ -85,10 +85,13 @@ def feed(request):
 def search(request):
     if request.method == "GET" and "query" in request.GET:
         query = request.GET.get("query")
-        team = search_team(query)
-        player = search_player(query)
-        return JsonResponse({'team': team, 'player': player})
-    return render(request, 'search.html')
+        try:
+            team = search_team(query)
+            player = search_player(query)
+            return JsonResponse({'team': team, 'player': player})
+        except:
+            return JsonResponse({"error:": "error, please try again"})
+    #return render(request, 'search.html')
 
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
@@ -123,34 +126,37 @@ def search_team(query):
              ["brooklyn", "nets"], 
              ["charlotte", "hornets"], 
              ["chicago", "bulls"], 
-             ["cleveland","cavaliers"], 
+             ["cleveland", "cavaliers"], 
              ["dallas", "mavericks"], 
              ["denver", "nuggets"], 
              ["detroit", "pistons"], 
-             ["golden", "state", "warriors"], 
+             ["golden state", "warriors"], 
              ["houston", "rockets"],
              ["indiana", "pacers"],
-             ["los", "angeles", "clippers"],
-             ["los", "angeles", "lakers"],
+             ["los angeles", "clippers"],
+             ["los angeles", "lakers"],
              ["memphis", "grizzlies"],
              ["miami", "heat"],
              ["milwaukee", "bucks"],
              ["minnesota", "timberwolves"],
-             ["new", "orleans", "pelicans"],
-             ["new", "york",    "knicks"],
+             ["new orleans", "pelicans"],
+             ["new york", "knicks"],
              ["oklahoma", "city", "thunder"],
              ["orlando", "magic"],
              ["philadelphia", "76ers"],
              ["phoenix", "suns"],
              ["portland", "trail", "blazers"],
              ["sacramento", "kings"],
-             ["san", "antonio", "spurs"],
+             ["san antonio", "spurs"],
              ["toronto", "raptors"],
              ["utah", "jazz"],
              ["washington", "wizards"]]
     
     query_team = ''
     for team in teams:
+        print('query_team:', query_team)
+        if query_team != '':
+            break
         for word in team:
             if query.lower() == word:
                 query_team = team
