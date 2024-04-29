@@ -6,24 +6,22 @@ import axios from 'axios';
 
 
 const Team = ({ route }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [teams, setTeams] = useState([]);
   const { baseURL } = useContext(Context);
-
+  const [teamInfo, setTeamInfo] = useState("LL");
   const  teamID  =  route.params['id'];
   console.log(route.params['id'])
   const handleSearch = async (query) => {
     try {
       const response = await axios.get(`${baseURL}/team/?id=${query}`);
+      setTeamInfo(response.data);
 
       if (response.status === 200) {
         console.log('OK:', response.data);
-        setTeams(response.data.teams);
       } else {
-        console.log('FAİL', response.status);
+        console.log('FAIL', response.status);
       }
     } catch (error) {
-      console.error('FAİL', error);
+      console.error('FAIL', error);
     }
   };
 
@@ -35,34 +33,27 @@ const Team = ({ route }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <View>
-          {teams.map((team, index) => (
-            <Text key={index}>{team.name}</Text>
-          ))}
-        </View>
 
-        <View style={styles.team_nameContainer}>
-          <Text style={[styles.heading, styles.team_nameHeading]}>Team Name</Text>
-          </View>
+          <Text style={[styles.heading, styles.team_nameHeading]}>{teamInfo.name}</Text>
 
         <View style={styles.teamInfoContainer}>
           <Text style={[styles.heading, styles.teamInfoHeading]}>Team Info</Text>
-          <Image source={{ uri: 'https://example.com/player1.jpg' }} style={styles.TeamImage} />
 
             <View style={styles.playerInfo}>
-              <Text>Conference: Eastern Conference</Text>
-              <Text>Division: Atlantic Division</Text>
-              <Text>Coach: John Doe</Text>
+              <Text>Conference: {teamInfo.conference}</Text>
+              <Text>Division: {teamInfo.division}</Text>
+              <Text>Coach: {teamInfo.coach}</Text>
               <Text>Area: United States</Text>
             </View>
 
+          <Text style={[styles.heading, styles.teamInfoHeading]}>{teamInfo.venue}</Text>
             <MapView
             style={{ flex: 1, height: 200 }}
             initialRegion={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
+              latitude: teamInfo.venue_latitude,
+              longitude: teamInfo.venue_longitude,
+              latitudeDelta: 0.0043,
+              longitudeDelta: 0.0034,
             }}
           />
          
