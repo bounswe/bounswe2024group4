@@ -22,7 +22,7 @@ const SearchBar = () => {
   const handleSearch = async () => {
     try {
       const results = await search(searchTerm);
-      // Sonuçları işleme veya gösterme işlemleri burada yapılabilir
+      //working on results can be done here
       const team_data = results.team;
       const team_id = team_data.id;
       console.log("Search Results:", results);
