@@ -22,7 +22,7 @@ const Search = ({ navigation }) => {
       const encodedQuery = encodeURIComponent(query);
       const response = await axios.get(`${baseURL}/search/?query=${encodedQuery}`);
       const data = response.data;
- //     setIsLoading(false);
+      setIsLoading(false);
 
       if (data.player) {
 
@@ -34,8 +34,6 @@ const Search = ({ navigation }) => {
       } else {
         setError("No data found for the query.");
       }
-      console.log("Player Data:", data.player);
-      console.log("Team Data:", data.team.id);
     } catch (err) {
       setError("Failed to fetch data");
       setIsLoading(false);
@@ -57,6 +55,7 @@ const Search = ({ navigation }) => {
         <Text>{error}</Text>
       ) : null}
     </View>
+    
   );
 };
 

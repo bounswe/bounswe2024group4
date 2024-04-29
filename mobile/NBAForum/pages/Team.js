@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Image } from 'react-native';
 import { Context } from "../globalContext/globalContext.js"
 import MapView from 'react-native-maps';
 import axios from 'axios';
@@ -10,10 +10,13 @@ const Team = ({ route }) => {
   const [teamInfo, setTeamInfo] = useState("LL");
   const  teamID  =  route.params['id'];
   console.log(route.params['id'])
+  const [ isLoading, setIsLoading ] = useState(true);
+  
   const handleSearch = async (query) => {
     try {
       const response = await axios.get(`${baseURL}/team/?id=${query}`);
       setTeamInfo(response.data);
+      setIsLoading(false);
 
       if (response.status === 200) {
         console.log('OK:', response.data);
@@ -27,14 +30,15 @@ const Team = ({ route }) => {
 
   useEffect(() => {
     handleSearch(teamID);
-  }, [teamID]); 
+  }, []); 
 
 
   return (
+    (!isLoading)? (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
 
-          <Text style={[styles.heading, styles.team_nameHeading]}>{teamInfo.name}</Text>
+        <Text style={[styles.heading, styles.team_nameHeading]}>{teamInfo.name}</Text>
 
         <View style={styles.teamInfoContainer}>
           <Text style={[styles.heading, styles.teamInfoHeading]}>Team Info</Text>
@@ -43,10 +47,9 @@ const Team = ({ route }) => {
               <Text>Conference: {teamInfo.conference}</Text>
               <Text>Division: {teamInfo.division}</Text>
               <Text>Coach: {teamInfo.coach}</Text>
-              <Text>Area: United States</Text>
             </View>
 
-          <Text style={[styles.heading, styles.teamInfoHeading]}>{teamInfo.venue}</Text>
+          <Text style={[styles.heading, styles.teamInfoHeading]}>Venue: {teamInfo.venue}</Text>
             <MapView
             style={{ flex: 1, height: 200 }}
             initialRegion={{
@@ -61,6 +64,11 @@ const Team = ({ route }) => {
        
       </View>
     </ScrollView>
+    )
+    :(
+      <View style={styles.container}>
+      </View>
+    )
   );
 };
 
@@ -77,6 +85,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+    marginTop: 10,
   },
   teamInfoContainer: {
     marginBottom: 30,
