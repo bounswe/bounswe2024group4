@@ -21,23 +21,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-},
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        alignItems: 'center'
-    },
-    logoutButton: {
-      backgroundColor: '#007aff',
-      padding: 10,
-      borderRadius: 5,
-      alignItems: 'center',
   },
-  logoutButtonText: {
-      color: 'white',
-      fontWeight: 'bold',
-      fontSize: 16,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    alignItems: 'center'
   },
 });
 
