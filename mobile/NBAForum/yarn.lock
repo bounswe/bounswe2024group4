@@ -5231,7 +5231,7 @@ metro-transform-worker@0.80.8:
     metro-transform-plugins "0.80.8"
     nullthrows "^1.1.1"
 
-metro@^0.80.3, metro@0.80.8:
+metro@^0.80.3, metro@^0.80.8, metro@0.80.8:
   version "0.80.8"
   resolved "https://registry.npmjs.org/metro/-/metro-0.80.8.tgz"
   integrity sha512-in7S0W11mg+RNmcXw+2d9S3zBGmCARDxIwoXJAmLUQOQoYsRP3cpGzyJtc7WOw8+FXfpgXvceD0u+PZIHXEL7g==
