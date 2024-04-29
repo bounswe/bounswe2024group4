@@ -9,7 +9,8 @@ const SearchBar = () => {
     try {
       const baseURL = "http://127.0.0.1:8000";
       // Creating URL
-      const url = `${baseURL}/search/?query=${searchTerm}`;
+      const url = `${baseURL}/search/?query=${encodeURIComponent(searchTerm)}`;
+      console.log(url);
 
       const response = await axios.get(url);
 

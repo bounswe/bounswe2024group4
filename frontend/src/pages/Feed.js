@@ -1,15 +1,21 @@
-import React from 'react';
-import { Navbar } from '../components/Navbar';
+import React from "react";
+import { Navbar } from "../components/Navbar";
 
 const Feed = () => {
+  const username = localStorage.getItem("username");
   return (
-    <div className="bg-white">
-      <Navbar />
-      <img
-        src="https://upload.wikimedia.org/wikipedia/en/c/c5/Bob_the_builder.jpg"
-        className="mb-4 mx-auto h-1/2"
-      />
-      <h1 className="text-3xl font-bold text-center">WORK IN PROGRESS</h1>
+    <div className="bg-white h-screen">
+      <div className="w-full">
+        <Navbar />
+      </div>
+      <div className="flex justify-center items-center h-full ">
+        <div className="bg-blue-500 rounded-lg p-10 max-w-md text-center">
+          <h1 className="text-4xl font-bold mb-4">Welcome, {username}!</h1>
+          <p className="text-lg mb-8">
+            This page will show your feed when the project is done.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
