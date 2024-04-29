@@ -20,7 +20,7 @@ services:
     #    context: ./backend
     #    dockerfile: Dockerfile
     image: fatihdkr/backend_image:latest
-    env_file: ./backend/.env
+    env_file: .env
     volumes:
       - ./backend:/home/app/backend
     ports:
