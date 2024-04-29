@@ -104,7 +104,7 @@ pip install Django
 pip install djangorestframework
 ```
 
-### Runnig
+### Running
 
 To check if everything is okay, try to run the project. While you are still in the `./backend` directory:
 
