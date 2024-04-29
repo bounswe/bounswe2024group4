@@ -9,11 +9,11 @@ const SignUp = () => {
   const { setIsLoggedIn, baseURL, setUserObj, setHasSession } = globalContext;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [message, setMessage] = useState('');
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [message, setMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -22,15 +22,14 @@ const SignUp = () => {
   const validateEmail = (emailAddress) => {
     console.log(emailAddress);
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
-    return reg.test(emailAddress)
-  }
+    return reg.test(emailAddress);
+  };
 
   const validateUsername = (username) => {
-    if (username == '')
-      return false;
+    if (username == "") return false;
     let reg = /^[A-Za-z0-9_]*$/;
-    return reg.test(username)
-  }
+    return reg.test(username);
+  };
 
   const validatePassword = (password) => {
     if (password == '')
@@ -46,40 +45,39 @@ const SignUp = () => {
     console.log('Password:', password);
     console.log('Confirm Password:', confirmPassword);
 
-    let errorMessage = ''
+    let errorMessage = "";
     if (password != confirmPassword) {
-      errorMessage = 'Please make sure you enter the same password.';
-    }else if (!validatePassword(password)) {
-      errorMessage = 'Please enter a valid password that contains at least 8 characters, including at least 1 number, 1 special character, 1 uppercase and 1 lowercase letter.';
-    }else if (!validateEmail(email)) {
-      errorMessage = 'Please enter a valid email address.';
-    }else if (!validateUsername(username)) {
-      errorMessage = 'Please enter a username that only contains upper or lowercase letters, numbers and/or underscore'
+      errorMessage = "Please make sure you enter the same password.";
+    } else if (!validatePassword(password)) {
+      errorMessage =
+        "Please enter a valid password that contains at least 8 characters, including at least 1 number, 1 special character, 1 uppercase and 1 lowercase letter.";
+    } else if (!validateEmail(email)) {
+      errorMessage = "Please enter a valid email address.";
+    } else if (!validateUsername(username)) {
+      errorMessage =
+        "Please enter a username that only contains upper or lowercase letters, numbers and/or underscore";
     }
-    if (errorMessage != '') {
+    if (errorMessage != "") {
       setMessage(errorMessage);
       toggleModal();
       return;
     }
     var formData = new FormData();
-    formData.append('username', username)
-    formData.append('email', email)
-    formData.append('password', password)
-    formData.append('confirm_password', confirmPassword)
+    formData.append("username", username);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("confirm_password", confirmPassword);
 
     try {
-      const csrfToken = (await axios.get(baseURL + '/csrf_token/')).data.csrf_token;
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+        .csrf_token;
 
-      const response = await axios.post(
-        baseURL + '/signup/',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'X-CSRFToken': csrfToken
-          }
-        }
-      );
+      const response = await axios.post(baseURL + "/signup/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-CSRFToken": csrfToken,
+        },
+      });
       if (response.status == 200) {
         setMessage('Sign-up successful! Welcome to our app!');
         setHasSession(true);
@@ -97,9 +95,13 @@ const SignUp = () => {
   };
 
   return (
-
     <View style={styles.container}>
-      <Text style={[styles.title, { color: 'blue' }]}>Welcome to NBA Forum!</Text>
+      <Text style={[styles.title, { color: "#232734" }]}>
+        Create Your Account
+      </Text>
+      <Text style={[styles.subtitle, { color: "#63697D" }]}>
+        Sign up to dive into the world of NBA!
+      </Text>
       <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
@@ -137,8 +139,21 @@ const SignUp = () => {
           transparent={false}
           onRequestClose={toggleModal}
         >
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-            <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "white",
+                padding: 20,
+                borderRadius: 10,
+              }}
+            >
               <Text>{message}</Text>
               <Button title="Close" onPress={toggleModal} />
             </View>
@@ -146,42 +161,49 @@ const SignUp = () => {
         </Modal>
       </View>
     </View>
-
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 30,
+    backgroundColor: "#F9F9FB",
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 32,
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
   },
   input: {
-    width: '100%',
-    height: 40,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 5,
-    marginBottom: 10,
-    paddingLeft: 10,
+    fontSize: 16,
+    width: "100%",
+    height: 54,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginBottom: 16,
+    paddingLeft: 16,
   },
   signUpButton: {
-    backgroundColor: '#007aff',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
+    backgroundColor: "#1B64EB",
+    fontSize: 18,
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 16,
+    alignItems: "center",
   },
   signUpButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
   },
 });
