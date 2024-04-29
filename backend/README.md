@@ -55,8 +55,26 @@ docker-compose up
 
 ## How to Run Manually
 
-We need to create a virtual environment and do all backend-related jobs inside that virtual environment.
-The manual running process has three steps: Creating virtual environment, installing requirements and running.
+After cloning the repo to our local, we need to create a virtual environment and do all backend-related jobs inside that virtual environment.
+The manual running process has four steps: Cloning the repository, creating virtual environment, installing requirements and running.
+
+### Cloning the repository
+
+First you can choose where you want to clone the repository to (cd desktop/../..). Afterwards, on the terminal, you can use the following commands:
+
+```bash
+# Clone with SSH
+git clone git@github.com:bounswe/bounswe2024group4.git
+
+# Clone with HTTPS
+git clone https://github.com/bounswe/bounswe2024group4.git
+
+# Clone with GitHub CLI
+gh repo clone bounswe/bounswe2024group4
+```
+
+For simplicity, you can also choose to open it with GitHub Desktop
+
 
 ### Creating virtual environment
 
