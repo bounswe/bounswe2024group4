@@ -24,9 +24,9 @@ function Router() {
         <Routes>
           <Route element={<PrivateRoutes/>}>
               <Route path='/' element={<Feed/>} />
-              <Route path="/team/:id" element={<Team />} />
-              <Route path="/player/:id" element={<Player />} />
           </Route>
+          <Route path="/team/:id" element={<Team />} />
+          <Route path="/player/:id" element={<Player />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/sign-up-prompt" element={<SignUpPrompt />} />
           <Route path="/sign-in" element={<SignIn />} />
