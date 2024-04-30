@@ -30,6 +30,15 @@ DB_USER=group4
 DB_PASSWORD=group4_dbnba
 DB_PORT=3306  
 DB_ROOT_PASSWORD = admin_group4_dbnba
+
+```
+
+Afterwards, run the following commands:
+
+```
+docker pull fatihdkr/backend_image
+
+docker pull fatihdkr/frontend_image
 ```
 
 and then `docker-compose up` or `docker compose up`.
