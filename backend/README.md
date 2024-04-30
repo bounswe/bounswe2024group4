@@ -76,6 +76,7 @@ DB_USER=myuser
 DB_PASSWORD=mypassword
 DB_HOST=localhost
 DB_PORT=3306
+DEPLOY_MACHINE_IP=127.0.0.1
 ```
 
 ### Running
