@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /backend_code
 
 # Copy the requirements file into the container at /code
-COPY backend/requirements.txt /backend_code/
+COPY requirements.txt /backend_code/
 
 # install dependencies for mysqlclient
 RUN apt-get update && apt-get install -y pkg-config python3-dev default-libmysqlclient-dev build-essential
