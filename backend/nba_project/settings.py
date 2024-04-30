@@ -53,9 +53,9 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://138.68.69.167:3306', 'http://138.68.69.167:3000']
+CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + os.getenv('DEPLOY_MACHINE') + ':3306', 'http://' + os.getenv('DEPLOY_MACHINE') + ':3000']
 ALLOWED_HOSTS = ['*', '161.35.30.222']
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://138.68.69.167:3306', 'http://138.68.69.167:3000']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + os.getenv('DEPLOY_MACHINE') + ':3306', 'http://' + os.getenv('DEPLOY_MACHINE') + ':3000']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

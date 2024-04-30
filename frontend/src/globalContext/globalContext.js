@@ -5,7 +5,7 @@ const Context = createContext()
 
 const Provider = ( { children } ) => {
 
-const [ baseURL, setBaseURL ] = useState("http://138.68.69.167:8000");
+const [ baseURL, setBaseURL ] = useState("http://" + process.env.DEPLOY_MACHINE_IP + ":8000");
 const [ userObj, setUserObj ] = useState();
 // const [ hasSession, setHasSession] = useState(false);
 axios.defaults.withCredentials = true;
