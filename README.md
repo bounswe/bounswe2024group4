@@ -35,3 +35,6 @@ REACT_APP_DEPLOY_MACHINE_IP=127.0.0.1
 ```
 
 and then `docker-compose up` or `docker compose up`.
+
+To run the project locally without containerization, consult the `README`s of `backend`, `frontend` and `mobile` directories. 
+
