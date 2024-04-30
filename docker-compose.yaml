@@ -7,11 +7,15 @@ services:
     ports:
       - "3307:3306"
     env_file: .env
+    expose: 
+      - "3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}   
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    networks:
+      - mynetwork   
     
     
   backend:
@@ -33,6 +37,8 @@ services:
     restart: "on-failure"
     depends_on:
       - db
+    networks:
+      - mynetwork
 
 
   frontend:
@@ -48,6 +54,12 @@ services:
     restart: "on-failure"
     depends_on:
       - backend
+    networks:
+      - mynetwork
 
 volumes:
   db_data:
+
+networks:
+  mynetwork:
+    driver: bridge
