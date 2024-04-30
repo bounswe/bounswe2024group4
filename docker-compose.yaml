@@ -16,8 +16,7 @@ services:
       - MYSQL_PASSWORD=${DB_PASSWORD}  
     networks:
       - mynetwork   
-    networks:
-      - mynetwork
+    
     
     
   backend:
