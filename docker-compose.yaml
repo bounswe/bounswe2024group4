@@ -24,7 +24,6 @@ services:
     build:
         context: ./backend
         dockerfile: Dockerfile
-    #image: fatihdkr/backend_image:latest
     env_file: .env
     volumes:
       - ./backend:/home/app/backend
@@ -46,7 +45,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    #image: fatihdkr/frontend_image:latest
+    env_file: ./frontend/.env
     ports:
       - "3000:3000"
     volumes:
