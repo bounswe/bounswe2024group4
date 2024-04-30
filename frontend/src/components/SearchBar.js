@@ -25,7 +25,6 @@ const SearchBar = () => {
   const handleSearch = async () => {
     try {
       const results = await search(searchTerm);
-      if (searchTerm =='')
       if (results.team != null) {
         navigate("/team/" + results.team.id);
       }
