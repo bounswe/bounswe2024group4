@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import "../css/index.css";
 import { Navbar } from '../components/Navbar';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { Context } from "../globalContext/globalContext.js";
 axios.defaults.validateStatus = () => true;
 
 function SignUp() {
