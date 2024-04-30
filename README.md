@@ -20,3 +20,16 @@ This is the repository for the BOUN SWE Group 4.
 ---
 
 You can check our [wiki](https://github.com/bounswe/bounswe2024group4/wiki) for further information.
+
+To run the project, put the following as .env in the root folder:
+
+```
+DB_HOST=db
+DB_NAME=nba_database
+DB_USER=group4
+DB_PASSWORD=group4_dbnba
+DB_PORT=3306  
+DB_ROOT_PASSWORD = admin_group4_dbnba
+```
+
+and then `docker-compose up` or `docker compose up`.
