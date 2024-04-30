@@ -11,15 +11,17 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}   
+      - MYSQL_PASSWORD=${DB_PASSWORD}     
+    networks:
+      - mynetwork
     
     
   backend:
     # build the image or use an existing one
-    #build:
-    #    context: ./backend
-    #    dockerfile: Dockerfile
-    image: fatihdkr/backend_image:latest
+    build:
+        context: ./backend
+        dockerfile: Dockerfile
+    #image: fatihdkr/backend_image:latest
     env_file: .env
     volumes:
       - ./backend:/home/app/backend
@@ -33,13 +35,15 @@ services:
     restart: "on-failure"
     depends_on:
       - db
+    networks:
+      - mynetwork
 
 
   frontend:
-    #build:
-    #  context: ./frontend
-    #  dockerfile: Dockerfile
-    image: fatihdkr/frontend_image:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    #image: fatihdkr/frontend_image:latest
     ports:
       - "3000:3000"
     volumes:
@@ -48,6 +52,12 @@ services:
     restart: "on-failure"
     depends_on:
       - backend
+    networks:
+      - mynetwork
 
 volumes:
   db_data:
+
+networks:
+  mynetwork:
+    driver: bridge
