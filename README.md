@@ -34,8 +34,4 @@ DEPLOY_MACHINE_IP=127.0.0.1
 REACT_APP_DEPLOY_MACHINE_IP=127.0.0.1
 ```
 
-and in the .env in the frontend folder:
-
-Afterwards, run the following commands:
-
 and then `docker-compose up` or `docker compose up`.
