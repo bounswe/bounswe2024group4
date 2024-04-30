@@ -31,13 +31,10 @@ DB_PASSWORD=group4_dbnba
 DB_PORT=3306  
 DB_ROOT_PASSWORD = admin_group4_dbnba
 DEPLOY_MACHINE_IP=127.0.0.1
+REACT_APP_DEPLOY_MACHINE_IP=127.0.0.1
 ```
 
 and in the .env in the frontend folder:
-
-```
-REACT_APP_DEPLOY_MACHINE_IP=127.0.0.1
-```
 
 Afterwards, run the following commands:
 
