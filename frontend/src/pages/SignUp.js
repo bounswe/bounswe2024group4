@@ -8,6 +8,8 @@ axios.defaults.validateStatus = () => true;
 
 function SignUp() {
   const navigate = useNavigate();
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
 
   const [formData, setFormData] = useState({
     username: '',
@@ -67,7 +69,6 @@ function SignUp() {
     }
 
     try {
-      const baseURL = 'http://127.0.0.1:8000';
       await axios.get(baseURL + '/csrf_token/');
       const config = {
         withCredentials: true,
