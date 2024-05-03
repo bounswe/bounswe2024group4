@@ -1,7 +1,15 @@
-{ 
+{
   "name": "NBAForum",
   "displayName": "NBAForum",
   "expo": {
+    "plugins": [[
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+    ]],
     "name": "NBAForum",
     "slug": "NBAForum",
     "version": "1.0.0",
@@ -23,10 +31,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.buse23.NBAForum"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "56d3e37e-8ee5-4074-8ef0-684556bbabeb"
+      }
     }
   }
 }
