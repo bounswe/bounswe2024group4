@@ -13,3 +13,5 @@ After running the server as mentioned in [README of backend](https://github.com/
 ```
 4. After you run the previous command, you can open the app on your phone with Expo App via scanning the QR Code, or you can press i to open the app on the IOS simulator, or press a to open Android simulator.
 5. Enjoy the application!
+
+Note: The APK can be found [here](https://github.com/bounswe/bounswe2024group4/tree/main/mobile/NBAForum/application-c0657967-bcf0-4180-82c2-707eda320299.apk)
