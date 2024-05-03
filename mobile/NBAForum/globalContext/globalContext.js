@@ -5,7 +5,7 @@ const Context = createContext()
 
 const Provider = ( { children } ) => {
 
-  const [ baseURL, setBaseURL ] = useState("http://161.35.30.222:8000")
+  const [ baseURL, setBaseURL ] = useState("http://64.226.89.39:8000")
   const [ isLoggedIn, setIsLoggedIn ] = useState()
   const [ userObj, setUserObj ] = useState()
   const [ hasSession, setHasSession] = useState()
