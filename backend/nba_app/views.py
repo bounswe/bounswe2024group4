@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
-from .models import User, Post
+from .models import User, Post, Follow
 import requests
 
 def sign_up(request):
@@ -76,6 +76,63 @@ def post(request):
 
         print(text)
     return render(request, 'post.html')
+
+
+def profile_info(request):
+    user = request.user
+    following_count = user.following.count()
+    followers_count = user.followers.count()
+    
+    data = {
+        'username': user.username,
+        'email': user.email,
+        'bio': user.bio,
+        #'profile_picture': user.profile_picture.url if user.profile_picture else None,
+        # Add any other fields you want to include in the response
+        'following_count': following_count,
+        'followers_count': followers_count
+    }
+    return JsonResponse(data)
+
+
+
+def follow_user(request, user_id):
+    # Check if the user is trying to follow themselves
+    if request.user.id == int(user_id):
+        return JsonResponse({'error': 'You cannot follow yourself.'}, status=400)
+    
+    # Retrieve the user to follow
+    try:
+        followed_user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found.'}, status=404)
+    
+    # Check if the user is already following the given user
+    already_following = Follow.objects.filter(follower=request.user, followed=followed_user).exists()
+    if already_following:
+        return JsonResponse({'message': 'You are already following this user.'})
+    
+    # Create a new follow instance
+    Follow.objects.create(follower=request.user, followed=followed_user)
+    return JsonResponse({'message': 'You have successfully followed the user.'})
+
+
+
+def unfollow_user(request, user_id):
+    # Retrieve the user to unfollow
+    try:
+        followed_user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found.'}, status=404)
+    
+    # Check if the user is already not following the given user
+    follow_instance = Follow.objects.filter(follower=request.user, followed=followed_user).first()
+    if not follow_instance:
+        return HttpResponse('You are not following this user.')
+    
+    # Delete the follow instance
+    follow_instance.delete()
+    return JsonResponse({'message': 'You have successfully unfollowed the user.'})
 
 @login_required
 def feed(request):
