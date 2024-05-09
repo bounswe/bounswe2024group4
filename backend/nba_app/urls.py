@@ -1,6 +1,9 @@
 from django.urls import path
 from . import views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('signup/', views.sign_up, name='signup'),
@@ -14,3 +17,6 @@ urlpatterns = [
     path('session/', views.session, name='session'),
     path('log_out/', views.log_out, name='log_out')
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

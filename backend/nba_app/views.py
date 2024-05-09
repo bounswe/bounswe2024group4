@@ -8,6 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from .models import User, Post
 import requests
+from django.db import models
 
 def sign_up(request):
     if request.method == "POST":
