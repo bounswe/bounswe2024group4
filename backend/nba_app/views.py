@@ -1,12 +1,12 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
-from .models import User, Post
+from .models import User, Post, Comment
 import requests
 
 def sign_up(request):
@@ -61,7 +61,7 @@ def log_out(request):
         request.session.flush()
         return HttpResponse("Logged out successfully", status=200)
 
-
+"""
 @login_required
 def post(request):
     if request.method == "POST":        
@@ -76,6 +76,40 @@ def post(request):
 
         print(text)
     return render(request, 'post.html')
+"""
+@login_required
+def post(request):
+    if request.method == "POST":
+        user = request.user
+        content = request.POST.get("content")
+        post = Post.objects.create(user=user, content=content)
+         #if username == "":
+        #    # handle if the user is not logged in
+        #    print("not logged in")
+        #    # return redirect('signup')
+        return HttpResponseRedirect(f'/post/{post.post_id}/')
+    return render(request, 'post.html')
+
+@login_required
+def create_comment(request, post_id):
+    if request.method == "POST":
+        user = request.user
+        content = request.POST.get("content")
+        post = Post.objects.get(post_id=post_id)
+
+        if post:
+            Comment.objects.create(user=user, content=content, post=post)
+            return HttpResponseRedirect(f'/post/{post_id}/')
+        else:
+            return HttpResponse("Post not found", status=404)
+
+    return render(request, 'comment.html', {'post_id': post_id})
+
+
+def post_detail(request, post_id):
+    post = Post.objects.get(post_id=post_id)
+    comments = post.comments.all()
+    return render(request, 'post_detail.html', {'post': post, 'comments': comments})    
 
 @login_required
 def feed(request):

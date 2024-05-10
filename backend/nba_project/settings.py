@@ -18,6 +18,9 @@ import os
 # Load environment variables from .env file
 load_dotenv('././.env')
 
+print('DB_HOST:', os.getenv('DB_HOST'))
+print('DB_USER:', os.getenv('DB_USER'))
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
