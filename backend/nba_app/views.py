@@ -1,10 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
-from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from .models import User, Post
 import requests
@@ -70,9 +69,10 @@ def post(request):
         content = request.POST.get("content")
         image = request.FILES.get("image")
         post = Post.objects.create(user=user, content=content, image=image)
-        text = request.POST.get("post")
-        print(text)
+        #text = request.POST.get("post")
+        return HttpResponseRedirect(f'/post/{post.post_id}/')
     return render(request, 'post.html')
+
 
 @login_required
 def feed(request):

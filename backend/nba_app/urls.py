@@ -16,7 +16,8 @@ urlpatterns = [
     path('csrf_token/', views.csrf_token, name='csrf_token'),
     path('session/', views.session, name='session'),
     path('log_out/', views.log_out, name='log_out')
+    path('post/<int:post_id>/', views.post_detail, name='post_detail'),
+    path('post/<int:post_id>/comment/', views.create_comment, name='create_comment')
 ]
-
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
