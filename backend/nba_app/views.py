@@ -16,7 +16,9 @@ def sign_up(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        
+        #
+        profile_picture = request.FILES.get("image")
+        #
         print("username: ", username, "email: ", email, "password: ", password)
 
         if User.objects.filter(email=email).exists():
@@ -27,9 +29,9 @@ def sign_up(request):
             # Return an error httpresponse if username is already taken
             return HttpResponse("Username already taken.", status=400)
         
-        # Create and save user
-        user = User.objects.create_user(username=username, email=email, password=password)
-        print("user created and saved: ", user)
+        # Create and save user                                                             #
+        user = User.objects.create_user(username=username, email=email, password=password, profile_picture=profile_picture)
+        print("user created and saved: ", user)                                            #
         
         login(request, user)
         print("user_logged in: ", user)
