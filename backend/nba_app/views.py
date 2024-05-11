@@ -138,7 +138,8 @@ def profile_view_edit(request):
         
         # Update profile picture if provided
         if new_profile_picture:
-            os.remove(user.profile_picture.path)
+            if user.profile_picture != 'default_nba_app_pp.jpg':
+                os.remove(user.profile_picture.path)
             user.profile_picture = new_profile_picture
         
         # Update bio if provided
