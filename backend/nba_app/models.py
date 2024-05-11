@@ -64,7 +64,6 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(max_length=300, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return f'{self.user.username} on {self.post.post_id}: {self.content}'
 

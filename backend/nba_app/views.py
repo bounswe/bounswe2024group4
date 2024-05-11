@@ -7,7 +7,7 @@ from django.middleware.csrf import get_token
 from django.urls import reverse
 from .models import User, Post, Comment, Follow
 import requests
-from django.db import models
+import os
 
 def sign_up(request):
     if request.method == "POST":
@@ -16,9 +16,7 @@ def sign_up(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        #
-        profile_picture = request.FILES.get("image")
-        #
+        #profile_picture = request.FILES.get("profile_picture")
         print("username: ", username, "email: ", email, "password: ", password)
 
         if User.objects.filter(email=email).exists():
@@ -29,9 +27,9 @@ def sign_up(request):
             # Return an error httpresponse if username is already taken
             return HttpResponse("Username already taken.", status=400)
         
-        # Create and save user                                                             #
-        user = User.objects.create_user(username=username, email=email, password=password, profile_picture=profile_picture)
-        print("user created and saved: ", user)                                            #
+        # Create and save user
+        user = User.objects.create_user(username=username, email=email, password=password)
+        print("user created and saved: ", user)
         
         login(request, user)
         print("user_logged in: ", user)
@@ -57,6 +55,7 @@ def log_in(request):
 
     return render(request, 'login.html')
 
+
 def log_out(request):
     if request.method == "GET":
         logout(request)
@@ -70,10 +69,12 @@ def post(request):
         user = request.user
         content = request.POST.get("content")
         image = request.FILES.get("image")
+        #image_binary = image.read()
         post = Post.objects.create(user=user, content=content, image=image)
         #text = request.POST.get("post")
         return HttpResponseRedirect(f'/post/{post.post_id}/')
     return render(request, 'post.html')
+
 
 @login_required
 def create_comment(request, post_id):
@@ -81,16 +82,12 @@ def create_comment(request, post_id):
         user = request.user
         content = request.POST.get("content")
         post = Post.objects.get(post_id=post_id)
-
         if post:
             Comment.objects.create(user=user, content=content, post=post)
             return HttpResponseRedirect(f'/post/{post_id}/')
         else:
             return HttpResponse("Post not found", status=404)
-
     return render(request, 'comment.html', {'post_id': post_id})
-
-
 
 def post_detail(request, post_id):
     post = Post.objects.get(post_id=post_id)
@@ -132,6 +129,7 @@ def profile_view_edit(request):
         
         # Update profile picture if provided
         if new_profile_picture:
+            os.remove(user.profile_picture.path)
             user.profile_picture = new_profile_picture
         
         # Update bio if provided
@@ -156,15 +154,15 @@ def profile_view_edit(request):
         'username': user.username,
         'email': user.email,
         'bio': user.bio,
-        #'profile_picture': user.profile_picture.url if user.profile_picture else None,
+        'profile_picture': user.profile_picture.url if user.profile_picture else None,
         # Add any other fields you want to include in the response
         'following_count': following_count,
         'followers_count': followers_count,
+        'profile_picture': user.profile_picture.url if user.profile_picture else None,
         'posts': [{'content': post.content, 'created_at': post.created_at} for post in posts]
     }
-    return JsonResponse(data, status=200)
-
-
+    return render(request, 'profile_view_edit.html', data)
+    #return JsonResponse(data, status=200)
 
 
 def reset_password(request):
