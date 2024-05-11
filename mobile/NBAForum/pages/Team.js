@@ -41,12 +41,12 @@ const Team = ({ route }) => {
 
               <Image src={teamInfo.image} style={{width: "100%", height: "100%"}} resizeMode='contain' />
          </View>
-          <Text style={[styles.heading, styles.team_nameHeading]}>{teamInfo.name}</Text>
+          <Text style={styles.heading}>{teamInfo.name}</Text>
 
         <View style={styles.teamInfoContainer}>
           <Text style={[styles.heading, styles.teamInfoHeading]}>Team Info</Text>
 
-            <View style={styles.playerInfo}>
+            <View style={styles.teamInfo}>
               <Text>Conference: {teamInfo.conference}</Text>
               <Text>Division: {teamInfo.division}</Text>
               <Text>Coach: {teamInfo.coach}</Text>
@@ -99,33 +99,6 @@ const styles = StyleSheet.create({
   teamInfoHeading: {
     marginBottom: 10,
   },
-  
-  playersContainer: {
-    marginBottom: 20,
-    backgroundColor: '#eaeaea', 
-    padding: 10,
-    borderRadius: 10,
-  },
-  playerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  playerPosition: {
-    width: 60,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  teamImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 25,
-    marginRight: 10,
-  },
   teamImageWrapper: {
     width: '40%',
     aspectRatio: 1, 
@@ -133,11 +106,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: 16,
   },
-  playerInfo: {
+  teamInfo: {
     flex: 1,
-  },
-  blankSpace: {
-    height: 20, 
   },
 });
 
