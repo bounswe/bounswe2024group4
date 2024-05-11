@@ -78,11 +78,46 @@ def post(request):
     return render(request, 'post.html')
 
 
-def profile_info(request):
+def profile_view_edit(request):
+    if request.method == 'POST':
+        new_username = request.POST.get('username')
+        new_email = request.POST.get('email')
+        new_profile_picture = request.FILES.get('profile_picture')
+        new_bio = request.POST.get('bio')
+        new_password = request.POST.get('password')
+        
+        user = request.user
+        
+        # Update username if provided
+        if new_username:
+            user.username = new_username
+        
+        # Update email if provided
+        if new_email:
+            user.email = new_email
+        
+        # Update profile picture if provided
+        if new_profile_picture:
+            user.profile_picture = new_profile_picture
+        
+        # Update bio if provided
+        if new_bio:
+            user.bio = new_bio
+
+        # Update password if provided
+        if new_password:
+            user.set_password(new_password)
+        
+        user.save()
+        
+        return JsonResponse({'message': 'Account information updated successfully.'}, status=200)
+
+    # if request.method == 'GET':
     user = request.user
     following_count = user.following.count()
     followers_count = user.followers.count()
-    
+    posts = Post.objects.filter(user=user)
+    #post_contents = [post.content for post in posts]
     data = {
         'username': user.username,
         'email': user.email,
@@ -90,15 +125,62 @@ def profile_info(request):
         #'profile_picture': user.profile_picture.url if user.profile_picture else None,
         # Add any other fields you want to include in the response
         'following_count': following_count,
-        'followers_count': followers_count
+        'followers_count': followers_count,
+        'posts': [{'content': post.content, 'created_at': post.created_at} for post in posts]
     }
-    return JsonResponse(data)
+    return JsonResponse(data, status=200)
 
 
 
-def follow_user(request, user_id):
-    # Check if the user is trying to follow themselves
-    if request.user.id == int(user_id):
+
+def reset_password(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+    
+    email = request.POST.get('email')
+    username = request.POST.get('username')
+    new_password = request.POST.get('new_password')
+    
+    # Check if either email or username is provided
+    if not email and not username:
+        return JsonResponse({'error': 'Email address or username is required in the request.'}, status=400)
+    
+    # Retrieve the user by email or username
+    user = None
+    if email:
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            pass
+    elif username:
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            pass
+    
+    if not user:
+        return JsonResponse({'error': 'User not found.'}, status=404)
+    
+    # Check if new password is provided
+    if not new_password:
+        return JsonResponse({'error': 'New password is required.'}, status=400)
+    
+    # Set the new password
+    user.set_password(new_password)
+    user.save()
+    
+    return JsonResponse({'message': 'Password reset successful.'}, status = 200)
+
+
+
+
+def follow_user(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+    
+    user_id = request.POST.get('user_id')
+
+    if request.user.user_id == user_id:
         return JsonResponse({'error': 'You cannot follow yourself.'}, status=400)
     
     # Retrieve the user to follow
@@ -110,15 +192,21 @@ def follow_user(request, user_id):
     # Check if the user is already following the given user
     already_following = Follow.objects.filter(follower=request.user, followed=followed_user).exists()
     if already_following:
-        return JsonResponse({'message': 'You are already following this user.'})
+        return JsonResponse({'message': 'You are already following this user.'}, status = 400)
     
     # Create a new follow instance
     Follow.objects.create(follower=request.user, followed=followed_user)
-    return JsonResponse({'message': 'You have successfully followed the user.'})
+    return JsonResponse({'message': 'You have successfully followed the user.'}, status=200)
 
 
 
-def unfollow_user(request, user_id):
+
+def unfollow_user(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+    
+    user_id = request.POST.get('user_id')
+    
     # Retrieve the user to unfollow
     try:
         followed_user = User.objects.get(pk=user_id)
@@ -128,11 +216,12 @@ def unfollow_user(request, user_id):
     # Check if the user is already not following the given user
     follow_instance = Follow.objects.filter(follower=request.user, followed=followed_user).first()
     if not follow_instance:
-        return HttpResponse('You are not following this user.')
+        return HttpResponse('You are not following this user.', status=400)
     
     # Delete the follow instance
     follow_instance.delete()
-    return JsonResponse({'message': 'You have successfully unfollowed the user.'})
+    return JsonResponse({'message': 'You have successfully unfollowed the user.'}, status=200)
+
 
 @login_required
 def feed(request):

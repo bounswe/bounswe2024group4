@@ -1,0 +1,26 @@
+<!-- post_detail.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post Detail</title>
+</head>
+<body>
+    <h1>Post Detail</h1>
+    <p>{{ post.content }}</p>
+    <h2>Comments</h2>
+    <ul>
+    {% for comment in comments %}
+        <li>{{ comment.user.username }}: {{ comment.content }}</li>
+    {% empty %}
+        <li>No comments yet.</li>
+    {% endfor %}
+    </ul>
+    <h3>Add a Comment</h3>
+    <form action="{% url 'create_comment' post.post_id %}" method="post">
+        {% csrf_token %}
+        <textarea name="content" placeholder="Write your comment..."></textarea><br>
+        <button type="submit">Comment</button>
+    </form>
+</body>
+</html>
