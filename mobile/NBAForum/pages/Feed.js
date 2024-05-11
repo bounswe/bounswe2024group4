@@ -4,7 +4,6 @@ import { Context } from "../globalContext/globalContext.js"
 import axios from 'axios';
 
 const Feed = () => {
-
   const globalContext = useContext(Context)
   const { baseURL } = useContext(Context);
   const userObj = globalContext.userObj;
@@ -28,25 +27,37 @@ const Feed = () => {
       } catch (error) {
         console.error('Error getting the following users', error);
       }
+      const fetchedPosts = [];
       
+      // Loop through the list of post_ids and fetch individual posts
+      for (const postId of postIds) {
+        try {
+          const response = await axios.get(`${baseURL}/post/${postId}`);
+          fetchedPosts.push(response.data);
+        } catch (error) {
+          console.error('Error fetching post:', error);
+        }
+      }
+      // Set the fetched posts in state
+      setPosts(fetchedPosts);
+      setIsLoading(false);
     };
     fetchFollowedProfilesPosts();
-    setIsLoading(false);
   }, []);
 
-  const renderPostItem = ({ post }) => (
+  const renderPostItem = ({ item }) => (
     <View style={styles.postContainer}>
-      <Text style={styles.postText}>{post?.content}</Text>
+      <Text style={styles.postText}>{item.content}</Text>
       <View style={styles.commentContainer}>
-        {post?.comments.map((comment) => (
+        {item.comments.map((comment) => (
           <Text style={styles.postText}>{comment.content}</Text>
         ))}
       </View>
       <View style={styles.actionsContainer}>
-        <TouchableOpacity onPress={() => handleLike(post?.id)} style={styles.actionButton}>
+        <TouchableOpacity onPress={() => handleLike(item?.id)} style={styles.actionButton}>
           <Text style={styles.actionButtonText}>Like</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleComment(post?.id)} style={styles.actionButton}>
+        <TouchableOpacity onPress={() => handleComment(item?.id)} style={styles.actionButton}>
           <Text style={styles.actionButtonText}>Comment</Text>
         </TouchableOpacity>
       </View>
