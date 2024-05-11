@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
-load_dotenv('././.env')
+load_dotenv('./.env')
 
 print('DB_HOST:', os.getenv('DB_HOST'))
 print('DB_USER:', os.getenv('DB_USER'))
@@ -94,6 +94,7 @@ WSGI_APPLICATION = 'nba_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
 
 
 DATABASES = {

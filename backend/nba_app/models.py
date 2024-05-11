@@ -35,6 +35,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
+    following = models.ManyToManyField('self', symmetrical=False, through='Follow', related_name='followers')
+
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
@@ -65,5 +68,11 @@ class Comment(models.Model):
     def __str__(self):
         return f'{self.user.username} on {self.post.post_id}: {self.content}'
 
-        
-                
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following_set')
+    followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower_set')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'followed')
