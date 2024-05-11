@@ -1,32 +1,152 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Context } from "../globalContext/globalContext.js"
+import axios from 'axios';
 
 const Feed = () => {
-
   const globalContext = useContext(Context)
-  const userObj = globalContext.userObj
-  console.log("user object:", userObj)
+  const { baseURL } = useContext(Context);
+  const userObj = globalContext.userObj;
+  const [ postIds, setPostIds ] = useState([1,2,3,4,5,6]);
+  const [ isLoading, setIsLoading ] = useState(true);
+  const [ posts, setPosts] = useState([]);
+//  console.log("user object:", userObj)
+
+  useEffect(() => {
+    const fetchFollowedProfilesPosts = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/user_followings/`);
+ //       console.log(response.data)
+        //TODO: get the post id's of all the following users
+
+        if (response.status === 200) {
+          console.log('OK:', response.data);
+        } else {
+          console.log('FAIL', response.status);
+        }
+      } catch (error) {
+        console.error('Error getting the following users', error);
+      }
+      const fetchedPosts = [];
+      
+      // Loop through the list of post_ids and fetch individual posts
+      for (const postId of postIds) {
+        try {
+          const response = await axios.get(`${baseURL}/post/${postId}`);
+          fetchedPosts.push(response.data);
+        } catch (error) {
+          console.error('Error fetching post:', error);
+        }
+      }
+      // Set the fetched posts in state
+      setPosts(fetchedPosts);
+      setIsLoading(false);
+    };
+    fetchFollowedProfilesPosts();
+  }, []);
+
+  const renderPostItem = ({ item }) => (
+    <View style={styles.postContainer}>
+      <Text style={styles.postText}>{item.content}</Text>
+      <View style={styles.commentContainer}>
+        {item.comments.map((comment) => (
+          <Text style={styles.postText}>{comment.content}</Text>
+        ))}
+      </View>
+      <View style={styles.actionsContainer}>
+        <TouchableOpacity onPress={() => handleLike(item?.id)} style={styles.actionButton}>
+          <Text style={styles.actionButtonText}>Like</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleComment(item?.id)} style={styles.actionButton}>
+          <Text style={styles.actionButtonText}>Comment</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const handleCreatePost = () => {
+    // Navigate to the screen where users can create a new post
+  };
+
+  // Handler for liking a post
+  const handleLike = (postId) => {
+
+  };
+
+  // Handler for commenting on a post
+  const handleComment = (postId) => {
+    // Implement logic to navigate to the screen where users can comment on the post
+  };
 
   return (
+    (!isLoading)? (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: 'blue' }]}>This is your feed!</Text>
-    </View>
+      <FlatList
+          data={posts}
+          renderItem={renderPostItem}
+          keyExtractor={(post) => post.id}
+        />
+      <TouchableOpacity style={styles.createPostButton} onPress={handleCreatePost}>
+        <Text><Text style={styles.createPostButtonText}>Create a Post</Text></Text> 
+      </TouchableOpacity>
+    </View>)
+    :(
+      <View style={styles.scrollContainer}>
+      </View>
+    )
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    position: 'relative',
   },
-  title: {
-    fontSize: 24,
+  createPostButton: {
+    backgroundColor: "#1B64EB",
+    fontSize: 18,
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 16,
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+  },
+  createPostButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  postContainer: {
+    backgroundColor: '#ffffff',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#dddddd',
+  },
+  postText: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  actionButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 20,
-    alignItems: 'center'
   },
 });
 
