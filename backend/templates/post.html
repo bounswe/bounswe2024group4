@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Post</title>
 </head>
 <body>
-    <h2>Create Post</h2>
-    <form method="post">
+    <h1>Create Post</h1>
+
+    <!-- Form for creating new posts -->
+    <form method="post" enctype="multipart/form-data" action="{% url 'post' %}">
         {% csrf_token %}
-        {{ form.as_p }}
-        <label for="content">Post:</label><br>
-        <input type="text" id="content" name="content"><br>
-        <button type="submit">Submit</button>
+        <textarea name="content" rows="4" cols="50" placeholder="Enter your post content"></textarea><br>
+        <input type="file" name="image"><br>
+        <button type="submit">Post</button>
     </form>
 </body>
 </html>

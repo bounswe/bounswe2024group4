@@ -1,13 +1,13 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
-from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from .models import User, Post, Comment, Follow
 import requests
+from django.db import models
 
 def sign_up(request):
     if request.method == "POST":
@@ -16,7 +16,9 @@ def sign_up(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
-        
+        #
+        profile_picture = request.FILES.get("image")
+        #
         print("username: ", username, "email: ", email, "password: ", password)
 
         if User.objects.filter(email=email).exists():
@@ -27,9 +29,9 @@ def sign_up(request):
             # Return an error httpresponse if username is already taken
             return HttpResponse("Username already taken.", status=400)
         
-        # Create and save user
-        user = User.objects.create_user(username=username, email=email, password=password)
-        print("user created and saved: ", user)
+        # Create and save user                                                             #
+        user = User.objects.create_user(username=username, email=email, password=password, profile_picture=profile_picture)
+        print("user created and saved: ", user)                                            #
         
         login(request, user)
         print("user_logged in: ", user)
@@ -61,32 +63,15 @@ def log_out(request):
         request.session.flush()
         return HttpResponse("Logged out successfully", status=200)
 
-"""
+
 @login_required
 def post(request):
     if request.method == "POST":        
         user = request.user
         content = request.POST.get("content")
-        post = Post.objects.create(user=user, content=content)
-        #if username == "":
-        #    # handle if the user is not logged in
-        #    print("not logged in")
-        #    # return redirect('signup')
-        text = request.POST.get("post")
-
-        print(text)
-    return render(request, 'post.html')
-"""
-@login_required
-def post(request):
-    if request.method == "POST":
-        user = request.user
-        content = request.POST.get("content")
-        post = Post.objects.create(user=user, content=content)
-         #if username == "":
-        #    # handle if the user is not logged in
-        #    print("not logged in")
-        #    # return redirect('signup')
+        image = request.FILES.get("image")
+        post = Post.objects.create(user=user, content=content, image=image)
+        #text = request.POST.get("post")
         return HttpResponseRedirect(f'/post/{post.post_id}/')
     return render(request, 'post.html')
 
@@ -376,12 +361,13 @@ def team(request):
             url = 'https://www.wikidata.org/w/api.php'
             response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
             data = response.json()
+            data_entitites_id = data['entities'][id]
             try:
-                name = data['entities'][id]['labels']['en']['value']
+                name = data_entitites_id['labels']['en']['value']
             except:
                 name = None
             try:
-                venue_temp = data['entities'][id]['claims']['P115']
+                venue_temp = data_entitites_id['claims']['P115']
                 venue_id = venue_temp[len(venue_temp)-1]['mainsnak']['datavalue']['value']['id']
                 response_ven = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': venue_id, 'language': 'en'})
                 data_ven = response_ven.json()
@@ -396,12 +382,12 @@ def team(request):
             except:
                 venue = None
             try:
-                coach_id = data['entities'][id]['claims']['P286'][0]['mainsnak']['datavalue']['value']['id']
+                coach_id = data_entitites_id['claims']['P286'][0]['mainsnak']['datavalue']['value']['id']
                 coach = get_label(coach_id)
             except: 
                 coach = None
             try:
-                division_id = data['entities'][id]['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
+                division_id = data_entitites_id['claims']['P361'][0]['mainsnak']['datavalue']['value']['id']
                 response_div = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': division_id, 'language': 'en'})
                 data_div = response_div.json()
                 division = data_div['entities'][division_id]['labels']['en']['value']
@@ -414,7 +400,7 @@ def team(request):
                 division = None
                 conference = None
             try:
-                image_name = data['entities'][id]['claims']['P154'][0]['mainsnak']['datavalue']['value']
+                image_name = data_entitites_id['claims']['P154'][0]['mainsnak']['datavalue']['value']
                 image_url = f'https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{image_name}&width=300'
             except:
                 image_url = None
@@ -445,29 +431,30 @@ def player(request):
             url = 'https://www.wikidata.org/w/api.php'
             response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
             data = response.json()
+            data_entitites_id = data['entities'][id]
             try:
-                name = data['entities'][id]['labels']['en']['value']
+                name = data_entitites_id['labels']['en']['value']
             except:
                 name = None
             try:
-                height = data['entities'][id]['claims']['P2048'][0]['mainsnak']['datavalue']['value']['amount']
+                height = data_entitites_id['claims']['P2048'][0]['mainsnak']['datavalue']['value']['amount']
             except:
                 height = None
             try:
-                date_of_birth = data['entities'][id]['claims']['P569'][0]['mainsnak']['datavalue']['value']['time']
+                date_of_birth = data_entitites_id['claims']['P569'][0]['mainsnak']['datavalue']['value']['time']
             except:
                 date_of_birth = None
             try:
-                insta = data['entities'][id]['claims']['P2003'][0]['mainsnak']['datavalue']['value']
+                insta = data_entitites_id['claims']['P2003'][0]['mainsnak']['datavalue']['value']
             except:
                 insta = None
             try:
-                position_lst = data['entities'][id]['claims']['P413']
+                position_lst = data_entitites_id['claims']['P413']
                 positions = list_wikidata_property(position_lst)
             except:
                 positions = []
             try:
-                team_lst = data['entities'][id]['claims']['P54']
+                team_lst = data_entitites_id['claims']['P54']
                 teams = {}
                 for item in team_lst:
                     team_id = item['mainsnak']['datavalue']['value']['id']
@@ -484,7 +471,7 @@ def player(request):
             except:
                 teams = []
             try:
-                award_lst = data['entities'][id]['claims']['P166']
+                award_lst = data_entitites_id['claims']['P166']
                 awards = {}
                 for item in award_lst:
                     award_id = item['mainsnak']['datavalue']['value']['id']
@@ -497,7 +484,7 @@ def player(request):
             except:
                 awards = []
             try:
-                image_name = data['entities'][id]['claims']['P18'][0]['mainsnak']['datavalue']['value']
+                image_name = data_entitites_id['claims']['P18'][0]['mainsnak']['datavalue']['value']
                 image_url = f'https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{image_name}&width=300'
             except:
                 image_url = None
