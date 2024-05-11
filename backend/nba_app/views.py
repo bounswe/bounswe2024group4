@@ -113,6 +113,20 @@ def post_detail(request, post_id):
     return render(request, 'post_detail.html', {'post': post, 'comments': comments})    
 
 
+def user_followings(request):
+    user = request.user
+    followings = user.following.all()
+    followings_info = [{'user_id': following.user_id, 'username':following.username} for following in followings]
+    return JsonResponse({'followings_info': followings_info}, status=200)
+
+
+def user_followers(request):
+    user = request.user
+    followers = user.followers.all()
+    followers_info = [{'user_id': follower.user_id, 'username':follower.username} for follower in followers]
+    return JsonResponse({'followers_info': followers_info}, status=200)
+
+
 def profile_view_edit(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
