@@ -209,11 +209,11 @@ def reset_password(request):
 
 
 
-def follow_user(request):
+def follow_user(request, user_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
     
-    user_id = request.POST.get('user_id')
+    # user_id = request.POST.get('user_id')
 
     if request.user.user_id == user_id:
         return JsonResponse({'error': 'You cannot follow yourself.'}, status=400)
@@ -236,11 +236,11 @@ def follow_user(request):
 
 
 
-def unfollow_user(request):
+def unfollow_user(request, user_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
     
-    user_id = request.POST.get('user_id')
+    # user_id = request.POST.get('user_id')
     
     # Retrieve the user to unfollow
     try:
