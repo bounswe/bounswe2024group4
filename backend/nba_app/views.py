@@ -118,7 +118,7 @@ def user_followers(request):
     return JsonResponse({'followers_info': followers_info}, status=200)
 
 
-def profile_view_edit(request):
+def profile_view_edit(request, user_id):
     if request.method == 'POST':
         new_username = request.POST.get('username')
         new_email = request.POST.get('email')
@@ -155,46 +155,28 @@ def profile_view_edit(request):
         return JsonResponse({'message': 'Account information updated successfully.'}, status=200)
 
     # if request.method == 'GET':
-    user = request.user
+    user = User.objects.get(user_id=user_id)
     following_count = user.following.count()
     followers_count = user.followers.count()
     posts = Post.objects.filter(user=user)
+    if request.user == user:
+        is_following = None
+    else:
+        is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
     data = {
         'username': user.username,
         'email': user.email,
         'bio': user.bio,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        # Add any other fields you want to include in the response
         'following_count': following_count,
         'followers_count': followers_count,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
+        'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
         'posts': [{'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts]
     }
     return JsonResponse(data, status=200)
     #return render(request, 'profile_view_edit.html', data)
 
-def profile_view_of_other_users(request, user_id):
-    try:
-        user = User.objects.get(pk=user_id)
-    except User.DoesNotExist:
-        return JsonResponse({'error': 'User not found.'}, status=404)
-    
-    following_count = user.following.count()
-    followers_count = user.followers.count()
-    posts = Post.objects.filter(user=user)
-
-    is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
-
-    data = {
-        'username': user.username,
-        'bio': user.bio,
-        'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'following_count': following_count,
-        'followers_count': followers_count,
-        'is_following': is_following,
-        'posts': [{'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts]
-    }
-    return JsonResponse(data, status=200)
 
 def reset_password(request):
     if request.method != 'POST':
