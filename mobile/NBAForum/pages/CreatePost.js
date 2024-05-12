@@ -45,7 +45,8 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: "white", 
     width: "100%", 
-    padding: 24
+    padding: 24,
+    borderRadius: 24,
   },
   descriptionInput: {
     borderColor: "gray",
