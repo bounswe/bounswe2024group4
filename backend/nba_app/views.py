@@ -167,7 +167,6 @@ def profile_view_edit(request, user_id):
             'username': user.username,
             'email': user.email,
             'bio': user.bio,
-            'profile_picture': user.profile_picture.url if user.profile_picture else None,
             'following_count': following_count,
             'followers_count': followers_count,
             'profile_picture': user.profile_picture.url if user.profile_picture else None,
