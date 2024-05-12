@@ -154,28 +154,27 @@ def profile_view_edit(request, user_id):
         
         return JsonResponse({'message': 'Account information updated successfully.'}, status=200)
 
-    # if request.method == 'GET':
-    user = User.objects.get(user_id=user_id)
-    following_count = user.following.count()
-    followers_count = user.followers.count()
-    posts = Post.objects.filter(user=user)
-    if request.user == user:
-        is_following = None
-    else:
-        is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
-    data = {
-        'username': user.username,
-        'email': user.email,
-        'bio': user.bio,
-        'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'following_count': following_count,
-        'followers_count': followers_count,
-        'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
-        'posts': [{'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts]
-    }
-    return JsonResponse(data, status=200)
-    #return render(request, 'profile_view_edit.html', data)
+    if request.method == 'GET':
+        user = User.objects.get(user_id=user_id)
+        following_count = user.following.count()
+        followers_count = user.followers.count()
+        posts = Post.objects.filter(user=user)
+        if request.user == user:
+            is_following = None
+        else:
+            is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
+        data = {
+            'username': user.username,
+            'email': user.email,
+            'bio': user.bio,
+            'profile_picture': user.profile_picture.url if user.profile_picture else None,
+            'following_count': following_count,
+            'followers_count': followers_count,
+            'profile_picture': user.profile_picture.url if user.profile_picture else None,
+            'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
+            'posts': [{'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts]
+        }
+        return JsonResponse(data, status=200)
 
 
 def reset_password(request):
