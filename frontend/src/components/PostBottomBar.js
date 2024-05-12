@@ -35,7 +35,7 @@ function PostBottomBar() {
                         onClick={handleLikeToggle}
                     />
                 )}
-                <span className="text-gray-600 group-hover:text-red-500">
+                <span className={`${liked ? 'text-red-500' : 'text-gray-500 group-hover:text-red-500'}`}>
                     {likeCount}
                 </span>
             </div>
