@@ -159,7 +159,6 @@ def profile_view_edit(request):
     following_count = user.following.count()
     followers_count = user.followers.count()
     posts = Post.objects.filter(user=user)
-    #post_contents = [post.content for post in posts]
     data = {
         'username': user.username,
         'email': user.email,
@@ -169,11 +168,33 @@ def profile_view_edit(request):
         'following_count': following_count,
         'followers_count': followers_count,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'posts': [{'content': post.content, 'created_at': post.created_at} for post in posts]
+        'posts': [{'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts]
     }
-    return render(request, 'profile_view_edit.html', data)
-    #return JsonResponse(data, status=200)
+    return JsonResponse(data, status=200)
+    #return render(request, 'profile_view_edit.html', data)
 
+def profile_view_of_other_users(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found.'}, status=404)
+    
+    following_count = user.following.count()
+    followers_count = user.followers.count()
+    posts = Post.objects.filter(user=user)
+
+    is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
+
+    data = {
+        'username': user.username,
+        'bio': user.bio,
+        'profile_picture': user.profile_picture.url if user.profile_picture else None,
+        'following_count': following_count,
+        'followers_count': followers_count,
+        'is_following': is_following,
+        'posts': [{'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts]
+    }
+    return JsonResponse(data, status=200)
 
 def reset_password(request):
     if request.method != 'POST':
