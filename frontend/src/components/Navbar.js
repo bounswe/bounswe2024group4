@@ -87,7 +87,7 @@ export function Navbar() {
             </span>
           </div>
           {isMenuOpen && (
-            <div className="dropdown-menu absolute top-full left-0 bg-white border border-gray-200 rounded shadow-lg">
+            <div className="dropdown-menu z-10 absolute top-full left-0 bg-white border border-gray-200 rounded shadow-lg">
               <ul>
                 <li className="px-4 py-2 hover:bg-gray-100">Option 1</li>
                 <li className="px-4 py-2 hover:bg-gray-100">Option 2</li>
@@ -110,7 +110,7 @@ export function Navbar() {
             ref={profileMenuRef}
           >
             {isProfileMenuOpen && (
-              <div className="dropdown-menu absolute top-full right--5 bg-white border border-gray-200 rounded shadow-lg">
+              <div className="dropdown-menu z-10 absolute top-full right--5 bg-white border border-gray-200 rounded shadow-lg">
                 <ul>
                   <li
                     className="flex px-4 py-2 hover:bg-gray-100"

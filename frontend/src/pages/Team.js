@@ -43,7 +43,7 @@ const Team = () => {
   });
 
   return (
-    <div className= "bg-orange-100 min-h-screen bg-top-left">
+    <div className= "bg-sky-50 min-h-screen bg-top-left">
       <Navbar />
       <main className="container mx-auto mt-20 flex justify-center">
         <div className="bg-white p-8 rounded-3xl shadow-sm w-3/4">
