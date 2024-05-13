@@ -95,10 +95,14 @@ const Player = () => {
                 <h2 className="text-2xl font-semibold mt-8 mb-4">Career Highlights and Awards</h2>
                 <ul className="list-none pl-10">
                   {Object.entries(awards).sort(([ ,a], [ ,b]) => {
-                    return a.localeCompare(b);
+                    if (a != null && b != null) {
+                      return a.localeCompare(b);
+                    } else {
+                      return 0;
+                    }
                   }).map(([award, date]) => (
                     <li className="mb-1" key={ award }>
-                      { award } ({date.slice(1, 5)})
+                      { award } ({date ? date.slice(1, 5) : "null"})
                     </li>
                   ))}
                 </ul>
