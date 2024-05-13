@@ -161,7 +161,8 @@ def profile_view_edit(request, user_id):
         return JsonResponse({'message': 'Account information updated successfully.'}, status=200)
 
     if request.method == 'GET':
-        user = User.objects.get(user_id=user_id)
+        # user = User.objects.get(user_id=user_id)
+        user = User.objects.get(username=user_id)
         following_count = user.following.count()
         followers_count = user.followers.count()
         posts = Post.objects.filter(user=user)
