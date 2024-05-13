@@ -96,12 +96,18 @@ def post_detail(request, post_id):
     print({'post': post, 'comments': comments})
     return render(request, 'post_detail.html', {'post': post, 'comments': comments})    
 """
-
+"""
 def post_detail(request, post_id):
     post = Post.objects.get(post_id=post_id)
     comments = Comment.objects.filter(post = post) #post.comments.all()
     print({'post': post, 'image': post.image, 'comments': comments})
     return render(request, 'post_detail.html', {'post': post, 'image': post.image, 'comments': comments})
+"""
+def post_detail(request, post_id):
+    post = Post.objects.get(post_id=post_id)
+    comments = post.comments.all()
+    print({'post': post, 'image': post.image.url, 'comments': comments})
+    return render(request, 'post_detail.html', {'post': post, 'image': post.image.url, 'comments': comments})
 
 
 def user_followings(request):
