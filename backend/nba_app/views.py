@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
@@ -65,16 +65,15 @@ def log_out(request):
 
 @login_required
 def post(request):
-    if request.method == "POST":        
+    if request.method == "POST":
         user = request.user
         content = request.POST.get("content")
-        image = request.FILES.get("image")
-        #image_binary = image.read()
+        image = request.FILES.get("image") if 'image' in request.FILES else None
         post = Post.objects.create(user=user, content=content, image=image)
-        #text = request.POST.get("post")
-        return HttpResponseRedirect(f'/post/{post.post_id}/')
-    return render(request, 'post.html')
 
+        # Instead of redirecting, return an HttpResponse showing the Post ID
+        return HttpResponse(f'Post created successfully with ID {post.post_id}')
+    return render(request, 'post.html')
 
 @login_required
 def create_comment(request, post_id):
@@ -104,11 +103,16 @@ def post_detail(request, post_id):
     return render(request, 'post_detail.html', {'post': post, 'image': post.image, 'comments': comments})
 """
 def post_detail(request, post_id):
-    post = Post.objects.get(post_id=post_id)
+    post = get_object_or_404(Post, post_id=post_id)
+    user_id = post.user.user_id  
     comments = post.comments.all()
-    print({'post': post, 'image': post.image.url, 'comments': comments})
-    return render(request, 'post_detail.html', {'post': post, 'image': post.image.url, 'comments': comments})
-
+    context = {
+        'post': post,
+        'image': post.image.url if hasattr(post, 'image') and post.image else None,
+        'comments': comments,
+        'user_id': user_id
+    }
+    return render(request, 'post_detail.html', context)
 
 def user_followings(request):
     user = request.user
