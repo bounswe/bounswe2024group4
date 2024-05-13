@@ -18,6 +18,14 @@ const Player = () => {
   const [positions, setPositions] = useState('');
   const [awards, setAwards] = useState('');
 
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  }  
+
   const handleData = async () => {
     try {
       const response = await axios.get(baseURL + '/player/?id=' + id.id);
@@ -47,25 +55,25 @@ const Player = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="flex flex-col items-center lg:items-start">
                 <h1 className="text-3xl font-semibold text-center mb-2">{ playername }</h1>
-                <img className="h-auto max-w-lg mb-4" src={ image } alt="Player"/>
+                <img className="h-auto max-w-lg mb-4" src={ image } alt="Player image"/>
                 <div className="grid grid-cols-2 gap-2 mb-2 text-left">
                   <div className="flex items-center">
                       <p className="text-lg mb-1 my-4">Height:</p>
                     </div>
                     <div>
-                      <p className="text-lg mb-1 my-4">{ height.replace("+", "")} cm</p>
+                      <p className="text-lg mb-1 my-4">{ height ? height.replace("+", "") : "null" } cm</p>
                     </div>
                   <div className="flex items-center">
-                    <p className="text-lg mb-1 my-4">Date of Birth (Y-M-D):</p>
+                    <p className="text-lg mb-1 my-4">Date of Birth:</p>
                   </div>
                   <div>
-                    <p className="text-lg mb-1 my-4">{ birthdate.replace("+", "").split("T")[0] }</p>
+                    <p className="text-lg mb-1 my-4">{ birthdate ? formatDate(birthdate.replace("+", "").split("T")[0]) : "" }</p>
                   </div>
                   <div className="flex items-center">
                     <p className="text-lg mb-1 my-4">Position:</p>
                   </div>
                   <div>
-                    <p className="text-lg mb-1 my-4">{ positions.length > 0 ? positions.join(", ") : positions[0] }</p>
+                    <p className="text-lg mb-1 my-4">{ positions && positions.length > 0 ? positions.join(", ") : positions }</p>
                   </div>
                   <div className="flex items-center">
                     <p className="text-lg mb-1 my-4">Instagram:</p>
@@ -88,7 +96,7 @@ const Player = () => {
                     }
                   }).map(([team, dates]) => (
                     <li className="text-lg mb-2" key={ team }>
-                      { team } ({dates.start ? dates.start.slice(1, 5) : ""} - {dates.end ? dates.end.slice(1, 5) : ""})
+                      { team } ({dates.start ? dates.start.slice(1, 5) : "null"} - {dates.end ? dates.end.slice(1, 5) : ""})
                     </li>
                   ))}
                 </ul>
