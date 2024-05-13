@@ -103,12 +103,16 @@ def post_detail(request, post_id):
     print({'post': post, 'image': post.image, 'comments': comments})
     return render(request, 'post_detail.html', {'post': post, 'image': post.image, 'comments': comments})
 """
-def post_detail(request, post_id):
-    post = Post.objects.get(post_id=post_id)
-    comments = post.comments.all()
-    print({'post': post, 'image': post.image.url, 'comments': comments})
-    return render(request, 'post_detail.html', {'post': post, 'image': post.image.url, 'comments': comments})
-
+def post_detail(request): 
+    if request.method == "GET" and "post_id" in request.GET:
+        post_id = request.GET.get("post_id")
+        print(post_id)
+        post = Post.objects.get(post_id=post_id)
+        comments = post.comments.all()
+        print({'post': post, 'image': post.image.url, 'comments': comments})
+        print(post)
+        return JsonResponse({'post': post.content, 'image': post.image.url, 'comments': comments}, status=200)
+    return JsonResponse({'error': 'Only GET requests are allowed.'}, status=405)
 
 def user_followings(request):
     user = request.user
