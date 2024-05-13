@@ -1,6 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Team, Player, Search } from "./pages";
+import { Team, Player, Search, Profile, EditProfile} from "./pages";
 
 
 const Stack = createNativeStackNavigator();
@@ -29,6 +29,20 @@ function CommonNavigator() {
             options={{
                 headerShown: false
             }}
+        />
+        <Stack.Screen 
+            name="Profile" 
+            component={Profile} 
+            options={{ 
+                title: 'Profile' 
+            }} 
+        />
+        <Stack.Screen 
+            name="EditProfile" 
+            component={EditProfile} 
+            options={{ 
+                title: 'Edit Profile'   
+            }} 
         />
     </Stack.Navigator>
   )

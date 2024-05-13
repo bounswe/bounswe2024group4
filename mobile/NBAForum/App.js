@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider } from "./globalContext/globalContext.js";
 import Navigator from './navigator.js'
 import CommonNavigator from './commonNavigator.js';
+import Profile from './pages/Profile.js';
 
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
                 <Tab.Navigator>
                     <Tab.Screen name="Main" component={Navigator} options={{ headerShown: false }}/>
                     <Tab.Screen name="Search Tab" component={CommonNavigator} />
+                    <Tab.Screen name="Profile" component={Profile} />
                 </Tab.Navigator>
             </NavigationContainer>
         </Provider>
