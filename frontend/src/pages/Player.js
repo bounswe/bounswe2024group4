@@ -40,10 +40,10 @@ const Player = () => {
   });
 
     return (
-      <div className="bg-orange-100 min-h-screen bg-top-left">
+      <div className="bg-sky-50 min-h-screen bg-top-left">
         <Navbar />
-        <main className="container mx-auto mt-20 flex justify-center">
-          <div className="bg-white p-8 rounded-3xl shadow-sm w-3/4">
+        <main className="container mx-auto mt-10 flex justify-center">
+          <div className="bg-white p-8 mb-10 rounded-3xl shadow-sm w-3/4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="flex flex-col items-center lg:items-start">
                 <h1 className="text-3xl font-semibold text-center mb-2">{ playername }</h1>
@@ -53,19 +53,19 @@ const Player = () => {
                       <p className="text-lg mb-1 my-4">Height:</p>
                     </div>
                     <div>
-                      <p className="text-lg mb-1 my-4">{ height }</p>
+                      <p className="text-lg mb-1 my-4">{ height.replace("+", "")} cm</p>
                     </div>
                   <div className="flex items-center">
-                    <p className="text-lg mb-1 my-4">Date of Birth:</p>
+                    <p className="text-lg mb-1 my-4">Date of Birth (Y-M-D):</p>
                   </div>
                   <div>
-                    <p className="text-lg mb-1 my-4">{ birthdate }</p>
+                    <p className="text-lg mb-1 my-4">{ birthdate.replace("+", "").split("T")[0] }</p>
                   </div>
                   <div className="flex items-center">
                     <p className="text-lg mb-1 my-4">Position:</p>
                   </div>
                   <div>
-                    <p className="text-lg mb-1 my-4">{ positions }</p>
+                    <p className="text-lg mb-1 my-4">{ positions.join(", ") }</p>
                   </div>
                   <div className="flex items-center">
                     <p className="text-lg mb-1 my-4">Instagram:</p>
@@ -78,17 +78,25 @@ const Player = () => {
               <div>
                 <h2 className="text-2xl font-semibold mb-4">Professional Career</h2>
                 <ul className="list-none pl-10">
-                  {Object.entries(teams).map(([team, dates]) => (
-                    <li key={ team }>
-                      { team }
+                  {Object.entries(teams).sort(([, a], [, b]) => {
+                    if (a.start.localeCompare(b.start) == 0) {
+                      return a.end.localeCompare(b.end);
+                    } else {
+                      return a.start.localeCompare(b.start);
+                    }
+                  }).map(([team, dates]) => (
+                    <li className="text-lg mb-2" key={team}>
+                      { team } ({dates.start.slice(1, 5)} - {dates.end ? dates.end.slice(1, 5) : "now"})
                     </li>
                   ))}
                 </ul>
                 <h2 className="text-2xl font-semibold mt-8 mb-4">Career Highlights and Awards</h2>
                 <ul className="list-none pl-10">
-                  {Object.entries(Object.keys(awards)).map((award) => (
-                    <li key={ award }>
-                      { award }
+                  {Object.entries(awards).sort(([ ,a], [ ,b]) => {
+                    return a.localeCompare(b);
+                  }).map(([award, date]) => (
+                    <li className="mb-1" key={ award }>
+                      { award } ({date.slice(1, 5)})
                     </li>
                   ))}
                 </ul>
