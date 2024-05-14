@@ -192,6 +192,7 @@ def post_detail(request, post_id):
     return JsonResponse(data, status=200)
 
 
+@permission_classes([IsAuthenticated])
 def user_followings(request):
     user = request.user
     followings = user.following.all()
@@ -199,13 +200,16 @@ def user_followings(request):
     return JsonResponse({'followings_info': followings_info}, status=200)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def user_followers(request):
     user = request.user
     followers = user.followers.all()
     followers_info = [{'user_id': follower.user_id, 'username':follower.username} for follower in followers]
     return JsonResponse({'followers_info': followers_info}, status=200)
 
-
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
 def profile_view_edit_auth(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
@@ -330,7 +334,8 @@ def reset_password(request):
     return JsonResponse({'message': 'Password reset successful.'}, status = 200)
 
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 
 def follow_user(request, username):
     if request.method != 'POST':
@@ -356,8 +361,8 @@ def follow_user(request, username):
     return JsonResponse({'message': 'You have successfully followed the user.'}, status=200)
 
 
-
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def unfollow_user(request, username):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
@@ -378,7 +383,8 @@ def unfollow_user(request, username):
     follow_instance.delete()
     return JsonResponse({'message': 'You have successfully unfollowed the user.'}, status=200)
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @login_required
 def feed(request):
     # Only authenticated users can access this view
@@ -397,7 +403,8 @@ def feed(request):
     #is_like = LikePost.objects.filter(user=user, post=post).exists()
     #return JsonResponse({'all_feed_posts': [{'post_id':post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in all_feed_posts]}, status=200)
 
-
+@api_view(['POST','GET'])
+@permission_classes([IsAuthenticated])
 def search(request):
     if request.method == "GET" and "query" in request.GET:
         query = request.GET.get("query")
