@@ -176,6 +176,7 @@ def post_detail(request, post_id):
         'image': image_url,
         'comments': comments_list,
         'username': post.user.username,
+        'created_at': post.created_at,
         'user_has_liked': user_has_liked,
         'likes_count': likes_count,  # Total likes for the post
         'user_has_bookmarked': user_has_bookmarked
