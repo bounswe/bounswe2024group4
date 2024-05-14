@@ -102,13 +102,16 @@ def post_detail(request, post_id):
     print({'post': post, 'image': post.image, 'comments': comments})
     return render(request, 'post_detail.html', {'post': post, 'image': post.image, 'comments': comments})
 """
+@login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, post_id=post_id)
-    username = post.user.username
     comments = post.comments.all()
 
-    # Build a list of comment contents
-    comments_list = [comment.content for comment in comments]
+    # Prepare comments list with like status
+    comments_list = [{
+        'content': comment.content,
+        'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists()
+    } for comment in comments]
 
     # Prepare the image URL if the image exists
     image_url = post.image.url if hasattr(post, 'image') and post.image else None
@@ -124,12 +127,13 @@ def post_detail(request, post_id):
         'post': post.content,
         'image': image_url,
         'comments': comments_list,
-        'username': username,
+        'username': post.user.username,
         'user_has_liked': user_has_liked,
         'user_has_bookmarked': user_has_bookmarked
     }
 
     return JsonResponse(data, status=200)
+
 
 def user_followings(request):
     user = request.user
