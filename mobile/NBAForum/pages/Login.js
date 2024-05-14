@@ -8,6 +8,7 @@ import {
   Modal,
   Button,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios, { Axios } from "axios";
 import { Context } from "../globalContext/globalContext.js";
 
@@ -15,7 +16,7 @@ const Login = () => {
   Axios.withCredentials = true;
 
   const globalContext = useContext(Context);
-  const { setIsLoggedIn, baseURL, setUserObj, setHasSession } = globalContext;
+  const { setIsLoggedIn, baseURL, setHasSession } = globalContext;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [message, setMessage] = useState("");
@@ -47,7 +48,11 @@ const Login = () => {
       if (response.status == 200) {
         setMessage("Login successful!");
         setHasSession(true);
-        setUserObj(response.data);
+        console.log(response.data.username);
+        await AsyncStorage.setItem(
+          'username',
+          response.data.username,
+        );
         setIsLoggedIn(true);
       } else {
         setMessage("Something went wrong, please try again.");

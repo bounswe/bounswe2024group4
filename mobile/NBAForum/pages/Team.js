@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, ScrollView, StyleSheet, Image } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { Context } from "../globalContext/globalContext.js"
 import MapView from 'react-native-maps';
 import axios from 'axios';
@@ -70,6 +70,7 @@ const Team = ({ route }) => {
     )
     :(
       <View style={styles.container}>
+        <ActivityIndicator size="large" color="#FFFF" />
       </View>
     )
   );
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 25,
     flex: 1,
-    backgroundColor: '#87CEEB',
+    backgroundColor: '#55A1E6',
   },
   heading: {
     fontSize: 20,
