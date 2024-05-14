@@ -399,7 +399,7 @@ def search(request):
             player = search_player(query)
             print("team:", team, "player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id, 'content': post.content, 'created_at': post.created_at} for post in posts]})
+            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id} for post in posts]})
         except:
             return JsonResponse({"error:": "error, please try again"})
         
@@ -412,7 +412,8 @@ def search_player(query):
         SELECT DISTINCT ?item ?itemLabel WHERE {
             ?item (wdt:P3647) [].
             ?item rdfs:label ?itemLabel.
-            FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel),''' + '"' + query.lower() + '''"))
+            ?item skos:altLabel ?altLabel.
+            FILTER(lang(?itemLabel) = "en" && (contains(lcase(?itemLabel),''' + '"' + query.lower() + '''") || lang(?altLabel) = "en" && contains(lcase(?altLabel),''' + '"' + query.lower() + '''"))).
         }
         LIMIT 1
     '''
