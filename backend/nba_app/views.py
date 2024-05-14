@@ -406,8 +406,7 @@ def search_player(query):
         SELECT DISTINCT ?item ?itemLabel WHERE {
             ?item (wdt:P3647) [].
             ?item rdfs:label ?itemLabel.
-            ?item skos:altLabel ?altLabel.
-            FILTER(lang(?itemLabel) = "en" && (contains(lcase(?itemLabel),''' + '"' + query.lower() + '''") || lang(?altLabel) = "en" && contains(lcase(?altLabel),''' + '"' + query.lower() + '''"))).
+            FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel),''' + '"' + query.lower() + '''")).
         }
         LIMIT 1
     '''
