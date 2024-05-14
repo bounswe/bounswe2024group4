@@ -154,6 +154,7 @@ def post_detail(request, post_id):
     comments_list = [{
         'content': comment.content,
         'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists()
+        'likes_count': LikeComment.objects.filter(comment=comment).count()  # Count of likes for each comment
     } for comment in comments]
 
     # Prepare the image URL if the image exists
@@ -161,6 +162,9 @@ def post_detail(request, post_id):
 
     # Check if the current user has liked the post
     user_has_liked = LikePost.objects.filter(user=request.user, post=post).exists()
+
+    # Count of likes on the post
+    likes_count = LikePost.objects.filter(post=post).count()
 
     # Check if the current user has bookmarked the post
     user_has_bookmarked = Bookmark.objects.filter(user=request.user, post=post).exists()
@@ -173,6 +177,7 @@ def post_detail(request, post_id):
         'comments': comments_list,
         'username': post.user.username,
         'user_has_liked': user_has_liked,
+        'likes_count': likes_count,  # Total likes for the post
         'user_has_bookmarked': user_has_bookmarked
     }
 
