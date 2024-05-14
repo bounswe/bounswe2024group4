@@ -5,9 +5,7 @@ import axios from 'axios';
 
 const Profile = ({ navigation }) => {
   const globalContext = useContext(Context)
-  const userObj = globalContext.userObj;
-  console.log("user object:", userObj)
-  const { baseURL,currentUser } = useContext(Context); 
+  const { baseURL } = useContext(Context); 
   const [userInfo, setUserInfo] = useState({
     username: "",
     profile_picture: "https://cdn.nba.com/manage/2020/10/NBA20Primary20Logo-1-259x588.jpg",
@@ -20,15 +18,17 @@ const Profile = ({ navigation }) => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get(`${baseURL}/profile_view_edit/${currentUser.user_id}`);
+        const response = await axios.get(`${baseURL}/profile_view_edit_auth`);
+        console.log(response.data);
         if (response.status === 200) {
           setUserInfo({
             username: response.data.username,
-            profile_picture: response.data.profile_picture || userInfo.profile_picture,
+            profile_picture: response.data.profile_picture,
             bio: response.data.bio,
             followers_count: response.data.followers_count,
             following_count: response.data.following_count,
             postsCount: response.data.posts.length,
+            posts: response.data.posts,
           });
           console.log("User profile data:", response.data);
         }
@@ -38,7 +38,7 @@ const Profile = ({ navigation }) => {
     };
 
     fetchUserProfile();
-  }, [baseURL]);
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
