@@ -109,9 +109,13 @@ def post_detail(request):
         print(post_id)
         post = Post.objects.get(post_id=post_id)
         comments = post.comments.all()
-        print({'post': post, 'image': post.image.url, 'comments': comments})
         print(post)
-        return JsonResponse({'post': post.content, 'image': post.image.url, 'comments': comments}, status=200)
+        return JsonResponse({
+            'id': post_id,
+            'post': post.content, 
+            'image': post.image.url if hasattr(post, 'image') and post.image else None,
+            'comments': [comment.content for comment in list(comments)]
+            }, status=200)
     return JsonResponse({'error': 'Only GET requests are allowed.'}, status=405)
 
 def user_followings(request):
