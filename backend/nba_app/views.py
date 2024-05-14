@@ -212,10 +212,6 @@ def profile_view_edit_auth(request):
         posts = Post.objects.filter(user=user)
         bookmarks = Bookmark.objects.filter(user=user)
         bookmarked_posts = [bookmark.post for bookmark in bookmarks]
-        """if request.user == user:
-            is_following = None
-        else:
-            is_following = Follow.objects.filter(follower=request.user, followed=user).exists()"""
         data = {
             'username': user.username,
             'email': user.email,
@@ -223,7 +219,6 @@ def profile_view_edit_auth(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'profile_picture': user.profile_picture.url if user.profile_picture else None,
-            #'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
             'posts': [{'post_id': post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts],
             'bookmarked_posts': [{'post_id': bookmarked_post.post_id, 'content': bookmarked_post.content, 'created_at': bookmarked_post.created_at, 'image':bookmarked_post.image} for bookmarked_post in bookmarked_posts]
         }
@@ -234,6 +229,12 @@ def profile_view_edit_others(request, username):
     user = User.objects.get(username=username)
     following_count = user.following.count()
     followers_count = user.followers.count()
+
+    if request.user == user:
+        is_following = None
+    else:
+        is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
+    
     posts = Post.objects.filter(user=user)
     bookmarks = Bookmark.objects.filter(user=user)
     bookmarked_posts = [bookmark.post for bookmark in bookmarks]
@@ -246,6 +247,7 @@ def profile_view_edit_others(request, username):
         'followers_count': followers_count,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
         'posts': [{'post_id':post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts],
+        'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
         'bookmarked_posts': [{'post_id': bookmarked_post.post_id, 'content': bookmarked_post.content, 'created_at': bookmarked_post.created_at, 'image':bookmarked_post.image} for bookmarked_post in bookmarked_posts]
     }
 
