@@ -11,7 +11,7 @@ function Post({ author, postId, createdAt, image }) {
   const { baseURL } = globalContext;
   const handleData = async () => {
     try {
-      const response = await axios.get(baseURL + '/post/' + postId + '/');
+      const response = await axios.get(baseURL + '/post_detail/?post_id=' + postId);
       setContent(response.data.post);
       setImageURL(baseURL + response.data.image);
 
@@ -22,7 +22,7 @@ function Post({ author, postId, createdAt, image }) {
 
   useEffect(() => {
     handleData();
-  });
+  }, []);
 
 	return (
 		<div className="border border-gray-300 rounded-md overflow-hidden mb-2">
