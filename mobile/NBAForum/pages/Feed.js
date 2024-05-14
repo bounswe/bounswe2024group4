@@ -1,39 +1,36 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { Context } from "../globalContext/globalContext.js"
 import axios from 'axios';
 
 const Feed = () => {
-  const globalContext = useContext(Context)
   const { baseURL } = useContext(Context);
-  const userObj = globalContext.userObj;
-  const [ postIds, setPostIds ] = useState([1,2,3,4,5,6]);
+  const [ postIds, setPostIds ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(true);
-  const [ posts, setPosts] = useState([]);
-//  console.log("user object:", userObj)
+  const [ posts, setPosts ] = useState([]);
+  const [ liked, setLiked ] = useState(false);
+  const [ bookmarked, setBookmarked ] = useState(false);
 
   useEffect(() => {
     const fetchFollowedProfilesPosts = async () => {
       try {
-        const response = await axios.get(`${baseURL}/user_followings/`);
- //       console.log(response.data)
+       
         //TODO: get the post id's of all the following users
-
-        if (response.status === 200) {
-          console.log('OK:', response.data);
-        } else {
-          console.log('FAIL', response.status);
-        }
+        const idResponse = await axios.get(`${baseURL}/feed/`);
+        setPostIds(idResponse.data.post_ids);
       } catch (error) {
         console.error('Error getting the following users', error);
       }
-      const fetchedPosts = [];
       
+      const fetchedPosts = [];
       // Loop through the list of post_ids and fetch individual posts
       for (const postId of postIds) {
+        setIsLoading(true);
         try {
-          const response = await axios.get(`${baseURL}/post/${postId}`);
+          const response = await axios.get(`${baseURL}/post_detail/?post_id=${postId}`);
           fetchedPosts.push(response.data);
+
         } catch (error) {
           console.error('Error fetching post:', error);
         }
@@ -41,36 +38,59 @@ const Feed = () => {
       // Set the fetched posts in state
       setPosts(fetchedPosts);
       setIsLoading(false);
+      console.log(posts);
     };
     fetchFollowedProfilesPosts();
+    
   }, []);
 
-  const renderPostItem = ({ item }) => (
+  const renderPostItem = ({ item }) => {
+    console.log('Post ID:', item.id);
+
+    return (
     <View style={styles.postContainer}>
-      <Text style={styles.postText}>{item.content}</Text>
-      <View style={styles.commentContainer}>
-        {item.comments.map((comment) => (
-          <Text style={styles.postText}>{comment.content}</Text>
-        ))}
+      <View style={styles.userInfoContainer}>
+        <Image
+          source={{ uri: '/Users/buseaydin/Desktop/bounswe2024group4/backend/media/profile_pictures/default_nba_app_pp.jpg' }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.username}>Zbuse</Text>
       </View>
+
+      <Text style={styles.postText}>{item.post}</Text>
+        {item.image ? (
+        <Image
+          source={{ uri: baseURL + item.image }}
+          style={styles.postImage}
+        />
+      ) : null}
       <View style={styles.actionsContainer}>
-        <TouchableOpacity onPress={() => handleLike(item?.id)} style={styles.actionButton}>
-          <Text style={styles.actionButtonText}>Like</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleComment(item?.id)} style={styles.actionButton}>
-          <Text style={styles.actionButtonText}>Comment</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={handleLike} style={[styles.actionButton]}>
+        <Icon name={liked ? 'heart' : 'heart-o'} size={20} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleComment} style={styles.actionButton}>
+        <Icon name='comments' size={20} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleBookmark} style={[styles.actionButton]}>
+        <Icon name={bookmarked ? 'bookmark' : 'bookmark-o'} size={20} color="#fff" />
+      </TouchableOpacity>
       </View>
     </View>
-  );
+  )};
 
   const handleCreatePost = () => {
     // Navigate to the screen where users can create a new post
   };
 
-  // Handler for liking a post
-  const handleLike = (postId) => {
 
+  // TODO: Handler for liking a post 
+  const handleLike = () => {
+    setLiked(!liked); 
+  };
+
+  // TODO: Handler for bookmarking a post 
+  const handleBookmark = () => {
+    setBookmarked(!bookmarked); 
   };
 
   // Handler for commenting on a post
@@ -79,21 +99,22 @@ const Feed = () => {
   };
 
   return (
-    (!isLoading)? (
     <View style={styles.container}>
-      <FlatList
+      {!isLoading ? (
+        <FlatList
           data={posts}
           renderItem={renderPostItem}
-          keyExtractor={(post) => post.id}
+          keyExtractor={(item) => item.id.toString()}
         />
+      ) : (
+        <ActivityIndicator size="large" color="#ffff" />
+      )}
       <TouchableOpacity style={styles.createPostButton} onPress={handleCreatePost}>
         <Text><Text style={styles.createPostButtonText}>Create a Post</Text></Text> 
       </TouchableOpacity>
-    </View>)
-    :(
-      <View style={styles.scrollContainer}>
-      </View>
-    )
+      
+    </View>
+
   );
 };
 
@@ -101,16 +122,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative',
+    backgroundColor: '#55A1E6',
   },
   createPostButton: {
-    backgroundColor: "#1B64EB",
+    backgroundColor: "#CE4800",
     fontSize: 18,
     padding: 16,
     borderRadius: 16,
     marginTop: 16,
     position: 'absolute',
     bottom: 20,
-    right: 20,
+    left: 20,
   },
   createPostButtonText: {
     color: "white",
@@ -120,33 +142,51 @@ const styles = StyleSheet.create({
   postContainer: {
     backgroundColor: '#ffffff',
     padding: 10,
-    marginBottom: 10,
+    margin: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#dddddd',
+    borderColor: '#BCBCBC',
   },
   postText: {
     fontSize: 16,
     marginBottom: 10,
   },
-  commentContainer: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
   actionsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
+  },
+  postImageContainer: {
+    width: '100%', // Ensure the container takes up the full width
+    backgroundColor: '#f0f0f0',
+  },
+  postImage: {
+    width: '100%', // Ensure the image takes up the full width of its container
+    height: undefined, // Allow height to adjust automatically based on width
+    aspectRatio: 16 / 16, // Set aspect ratio to 16:9 for landscape images
+    resizeMode: 'contain',
   },
   actionButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    backgroundColor: '#CE4800',
+    padding: 10,
+    borderRadius: 50, // Make it circular to create a heart shape
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  actionButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  username: {
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
   },
 });
 
