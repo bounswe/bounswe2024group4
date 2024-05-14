@@ -388,14 +388,16 @@ def feed(request):
 def search(request):
     if request.method == "GET" and "query" in request.GET:
         query = request.GET.get("query")
+        print("query:", query)
         try:
             team = search_team(query)
+            print("team:", team)
             player = search_player(query)
-            print("team:", team, "player:", player)
+            print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
             return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id} for post in posts]})
         except:
-            return JsonResponse({"error:": "error, please try again"})
+            return JsonResponse({"error:": "error in search, please try again"})
         
 
     #return render(request, 'search.html')
@@ -403,15 +405,16 @@ def search(request):
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
     sparql_query = '''
-        SELECT DISTINCT ?item ?itemLabel WHERE {
+        SELECT DISTINCT ?item ?itemLabel ?altLabel WHERE {
             ?item (wdt:P3647) [].
             ?item rdfs:label ?itemLabel.
-            FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel),''' + '"' + query.lower() + '''")).
+            ?item skos:altLabel ?altLabel.
+            FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel), "''' + query.lower() + '''")).
         }
         LIMIT 1
     '''
     endpoint_url = "https://query.wikidata.org/sparql"
-
+    #print(sparql_query)
     response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
     data = response.json()
     if response.status_code == 500:
@@ -427,36 +430,36 @@ def search_player(query):
     return {'player': data['results']['bindings'][0]['itemLabel']['value'], 'id': player_id} 
 
 def search_team(query):
-    teams = [ ["atlanta", "hawks"], 
-             ["boston", "celtics"], 
-             ["brooklyn", "nets"], 
-             ["charlotte", "hornets"], 
-             ["chicago", "bulls"], 
-             ["cleveland", "cavaliers"], 
-             ["dallas", "mavericks"], 
-             ["denver", "nuggets"], 
-             ["detroit", "pistons"], 
-             ["golden state", "warriors"], 
-             ["houston", "rockets"],
-             ["indiana", "pacers"],
-             ["los angeles", "clippers"],
-             ["los angeles", "lakers"],
-             ["memphis", "grizzlies"],
-             ["miami", "heat"],
-             ["milwaukee", "bucks"],
-             ["minnesota", "timberwolves"],
-             ["new orleans", "pelicans"],
-             ["new york", "knicks"],
-             ["oklahoma", "city", "thunder"],
-             ["orlando", "magic"],
-             ["philadelphia", "76ers"],
-             ["phoenix", "suns"],
-             ["portland", "trail", "blazers"],
-             ["sacramento", "kings"],
-             ["san antonio", "spurs"],
-             ["toronto", "raptors"],
-             ["utah", "jazz"],
-             ["washington", "wizards"]]
+    teams = [ ["atlanta", "hawks", "atlanta hawks"], 
+             ["boston", "celtics", "boston celtics"], 
+             ["brooklyn", "nets", "brooklyn nets"], 
+             ["charlotte", "hornets", "charlotte hornets"], 
+             ["chicago", "bulls", "chicago bulls"], 
+             ["cleveland", "cavaliers", "cleveland cavaliers"], 
+             ["dallas", "mavericks", "dallas mavericks"], 
+             ["denver", "nuggets", "denver nuggets"], 
+             ["detroit", "pistons", "detroit pistons"], 
+             ["golden state", "warriors", "golden state warriors"], 
+             ["houston", "rockets", "houston rockets"],
+             ["indiana", "pacers", "indiana pacers"],
+             ["los angeles", "clippers", "los angeles clippers"],
+             ["los angeles", "lakers", "los angeles lakers"],
+             ["memphis", "grizzlies", "memphis grizzlies"],
+             ["miami", "heat", "miami heat"],
+             ["milwaukee", "bucks", "milwaukee bucks"],
+             ["minnesota", "timberwolves", "minnesota timberwolves"],
+             ["new orleans", "pelicans", "new orleans pelicans"],
+             ["new york", "knicks", "new york knicks"],
+             ["oklahoma", "city", "thunder", "oklahoma city thunder"],
+             ["orlando", "magic", "orlando magic"],
+             ["philadelphia", "76ers", "philadelphia 76ers"],
+             ["phoenix", "suns", "phoenix suns"],
+             ["portland", "trail", "blazers", "portland trail blazers"],
+             ["sacramento", "kings", "sacramento kings"],
+             ["san antonio", "spurs", "san antonio spurs"],
+             ["toronto", "raptors", "toronto raptors"],
+             ["utah", "jazz", "utah jazz"],
+             ["washington", "wizards", "washington wizards"]]
     
     query_team = ''
     for team in teams:
@@ -465,11 +468,10 @@ def search_team(query):
         for word in team:
             if query.lower() == word:
                 query_team = team
-
+    print("query_team:", query_team)
     if query_team == '':
         return None
-    
-    team_name = " ".join(query_team)
+    team_name = query_team[2]
     url = 'https://www.wikidata.org/w/api.php'
     try:
         response1 = requests.get(url, params = {'action': 'wbsearchentities', 'format': 'json', 'search': team_name, 'language': 'en'})
