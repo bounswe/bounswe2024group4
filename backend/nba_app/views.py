@@ -80,6 +80,8 @@ def post(request):
     return render(request, 'post.html')
 
 @login_required
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_comment(request, post_id):
     if request.method == "POST":
         user = request.user
@@ -150,6 +152,8 @@ def bookmark_or_unbookmark_post(request, post_id):
 
 
 @login_required
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def post_detail(request, post_id):
     post = get_object_or_404(Post, post_id=post_id)
     comments = post.comments.all()
