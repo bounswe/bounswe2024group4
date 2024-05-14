@@ -4,7 +4,6 @@ import { HeartIcon as HeartIconOutline, ChatBubbleOvalLeftEllipsisIcon, Bookmark
 import {formatDistanceToNowStrict} from "date-fns";
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
-import { InView } from 'react-intersection-observer';
 import Cookies from 'js-cookie';
 
 function Post({ postId }) {
