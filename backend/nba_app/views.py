@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
@@ -65,16 +65,15 @@ def log_out(request):
 
 @login_required
 def post(request):
-    if request.method == "POST":        
+    if request.method == "POST":
         user = request.user
         content = request.POST.get("content")
-        image = request.FILES.get("image")
-        #image_binary = image.read()
+        image = request.FILES.get("image") if 'image' in request.FILES else None
         post = Post.objects.create(user=user, content=content, image=image)
-        #text = request.POST.get("post")
-        return HttpResponseRedirect(f'/post/{post.post_id}/')
-    return render(request, 'post.html')
 
+        # Instead of redirecting, return an HttpResponse showing the Post ID
+        return HttpResponse(f'Post created successfully with ID {post.post_id}')
+    return render(request, 'post.html')
 
 @login_required
 def create_comment(request, post_id):
@@ -144,28 +143,40 @@ def bookmark_or_unbookmark_post(request, post_id):
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
 
 
-# post atan user
-#TODO : if the authenticated user likes the post, is_like = True, otherwise is_like = False
-# if the authenticated user bookmarks the post, is_bookmarked = True, otherwise is_bookmarked = False
-# if the user likes the comment for each comment of the post, is_comment_like = True, otherwise is_comment_like = False 
-def post_detail(request, post_id):
-    post = Post.objects.get(post_id=post_id)
-    comments = Comment.objects.filter(post = post) #post.comments.all()
-    print({'post': post, 'image': post.image, 'comments': comments})
-    return render(request, 'post_detail.html', {'post': post, 'image': post.image, 'comments': comments})
 
-def post_detail(request): 
-    if request.method == "GET" and "post_id" in request.GET:
-        post_id = request.GET.get("post_id")
-        post = Post.objects.get(post_id=post_id)
-        comments = post.comments.all()
-        return JsonResponse({
-            'id': post_id,
-            'post': post.content, 
-            'image': post.image.url if hasattr(post, 'image') and post.image else None,
-            'comments': [comment.content for comment in list(comments)]
-            }, status=200)
-    return JsonResponse({'error': 'Only GET requests are allowed.'}, status=405)
+
+@login_required
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, post_id=post_id)
+    comments = post.comments.all()
+
+    # Prepare comments list with like status
+    comments_list = [{
+        'content': comment.content,
+        'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists()
+    } for comment in comments]
+
+    # Prepare the image URL if the image exists
+    image_url = post.image.url if hasattr(post, 'image') and post.image else None
+
+    # Check if the current user has liked the post
+    user_has_liked = LikePost.objects.filter(user=request.user, post=post).exists()
+
+    # Check if the current user has bookmarked the post
+    user_has_bookmarked = Bookmark.objects.filter(user=request.user, post=post).exists()
+
+    # Prepare the JSON data
+    data = {
+        'post': post.content,
+        'image': image_url,
+        'comments': comments_list,
+        'username': post.user.username,
+        'user_has_liked': user_has_liked,
+        'user_has_bookmarked': user_has_bookmarked
+    }
+
+    return JsonResponse(data, status=200)
+
 
 def user_followings(request):
     user = request.user
