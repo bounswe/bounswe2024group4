@@ -57,6 +57,10 @@ export function Navbar() {
     }
   };
 
+  const handleProfile = () => {
+    navigate("/user/" + localStorage.getItem("username"));
+  }
+
   const handleLogo = () => {
     // Navigate to main page
     navigate("/");
@@ -89,9 +93,7 @@ export function Navbar() {
           {isMenuOpen && (
             <div className="dropdown-menu z-10 absolute top-full left-0 bg-white border border-gray-200 rounded shadow-lg">
               <ul>
-                <li className="px-4 py-2 hover:bg-gray-100">Option 1</li>
-                <li className="px-4 py-2 hover:bg-gray-100">Option 2</li>
-                <li className="px-4 py-2 hover:bg-gray-100">Option 3</li>
+                <li className="px-4 py-2 hover:bg-gray-100" onClick={handleProfile}> Profile </li>
               </ul>
             </div>
           )}
