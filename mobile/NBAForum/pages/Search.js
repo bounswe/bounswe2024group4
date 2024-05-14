@@ -2,11 +2,13 @@ import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import axios from 'axios';
-import { Context } from "../globalContext/globalContext.js"; // Ensure the correct path
+import { Context } from "../globalContext/globalContext.js";
+import SearchResults from './SearchResults'; // Import SearchResults component
 
 const Search = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState(null); // Store search results
   const [error, setError] = useState('');
 
   const { baseURL } = useContext(Context);
@@ -21,16 +23,10 @@ const Search = ({ navigation }) => {
     try {
       const encodedQuery = encodeURIComponent(query);
       const response = await axios.get(`${baseURL}/search/?query=${encodedQuery}`);
-      const data = response.data;
       setIsLoading(false);
-
-      if (data.player) {
-
-        // If player data is not null, navigate to the PlayerDetails screen
-        navigation.navigate('Player', { id: data.player.id });
-      } else if (data.team) {
-        // If team data is not null, navigate to the TeamDetails screen
-        navigation.navigate('Team', { id: data.team.id });
+      if (response.data && (response.data.player || response.data.team)) {
+        setResults(response.data); // Store results in state
+        console.log(results)
       } else {
         setError("No data found for the query.");
       }
@@ -53,9 +49,10 @@ const Search = ({ navigation }) => {
         <ActivityIndicator size="large" color="#FFFF" />
       ) : error ? (
         <Text>{error}</Text>
+      ) : results ? (
+        <SearchResults results={results} navigation={navigation} />
       ) : null}
     </View>
-    
   );
 };
 
