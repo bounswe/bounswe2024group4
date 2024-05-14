@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const Feed = () => {
   const { baseURL } = useContext(Context);
-  const [ postIds, setPostIds ] = useState([1,2,3,4,5,6,8]);
+  const [ postIds, setPostIds ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(true);
   const [ posts, setPosts ] = useState([]);
   const [ liked, setLiked ] = useState(false);
@@ -17,10 +17,8 @@ const Feed = () => {
       try {
        
         //TODO: get the post id's of all the following users
-
-
-
-
+        const idResponse = await axios.get(`${baseURL}/feed/`);
+        setPostIds(idResponse.data.post_ids);
       } catch (error) {
         console.error('Error getting the following users', error);
       }
