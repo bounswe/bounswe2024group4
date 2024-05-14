@@ -103,12 +103,18 @@ def post_detail(request, post_id):
     print({'post': post, 'image': post.image, 'comments': comments})
     return render(request, 'post_detail.html', {'post': post, 'image': post.image, 'comments': comments})
 """
-def post_detail(request, post_id):
-    post = Post.objects.get(post_id=post_id)
-    comments = post.comments.all()
-    print({'post': post, 'image': post.image.url, 'comments': comments})
-    return render(request, 'post_detail.html', {'post': post, 'image': post.image.url, 'comments': comments})
-
+def post_detail(request): 
+    if request.method == "GET" and "post_id" in request.GET:
+        post_id = request.GET.get("post_id")
+        post = Post.objects.get(post_id=post_id)
+        comments = post.comments.all()
+        return JsonResponse({
+            'id': post_id,
+            'post': post.content, 
+            'image': post.image.url if hasattr(post, 'image') and post.image else None,
+            'comments': [comment.content for comment in list(comments)]
+            }, status=200)
+    return JsonResponse({'error': 'Only GET requests are allowed.'}, status=405)
 
 def user_followings(request):
     user = request.user
@@ -124,7 +130,7 @@ def user_followers(request):
     return JsonResponse({'followers_info': followers_info}, status=200)
 
 
-def profile_view_edit(request, user_id):
+def profile_view_edit(request, username):
     if request.method == 'POST':
         new_username = request.POST.get('username')
         new_email = request.POST.get('email')
@@ -161,7 +167,7 @@ def profile_view_edit(request, user_id):
         return JsonResponse({'message': 'Account information updated successfully.'}, status=200)
 
     if request.method == 'GET':
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(username=username)
         following_count = user.following.count()
         followers_count = user.followers.count()
         posts = Post.objects.filter(user=user)
@@ -221,8 +227,6 @@ def reset_password(request):
     return JsonResponse({'message': 'Password reset successful.'}, status = 200)
 
 
-
-
 def follow_user(request, user_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
@@ -246,8 +250,6 @@ def follow_user(request, user_id):
     # Create a new follow instance
     Follow.objects.create(follower=request.user, followed=followed_user)
     return JsonResponse({'message': 'You have successfully followed the user.'}, status=200)
-
-
 
 
 def unfollow_user(request, user_id):
@@ -274,8 +276,11 @@ def unfollow_user(request, user_id):
 
 @login_required
 def feed(request):
-    # Only authenticated users can access this view
-    return render(request, 'feed.html')
+    followed_users = request.user.following.all()
+    followed_posts = Post.objects.filter(user__in=followed_users)
+    post_ids = followed_posts.values_list('post_id', flat=True)
+    return JsonResponse({'post_ids': list(post_ids)}, status=200)
+
 
 def search(request):
     if request.method == "GET" and "query" in request.GET:
@@ -283,9 +288,13 @@ def search(request):
         try:
             team = search_team(query)
             player = search_player(query)
-            return JsonResponse({'team': team, 'player': player})
+            print("team:", team, "player:", player)
+            posts = Post.objects.filter(content__icontains=query)
+            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id, 'content': post.content, 'created_at': post.created_at} for post in posts]})
         except:
             return JsonResponse({"error:": "error, please try again"})
+        
+
     #return render(request, 'search.html')
 
 def search_player(query):
@@ -302,7 +311,6 @@ def search_player(query):
 
     response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
     data = response.json()
-    print('player:', data)
     if response.status_code == 500:
         return {"response:": "error, please try a different query"}
     elif data['results']['bindings'] == []:
@@ -349,7 +357,6 @@ def search_team(query):
     
     query_team = ''
     for team in teams:
-        print('query_team:', query_team)
         if query_team != '':
             break
         for word in team:

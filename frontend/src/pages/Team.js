@@ -40,13 +40,13 @@ const Team = () => {
 
   useEffect(() => {
     handleData();
-  });
+  }, []);
 
   return (
     <div className= "bg-sky-50 min-h-screen bg-top-left">
       <Navbar />
-      <main className="container mx-auto mt-20 flex justify-center">
-        <div className="bg-white p-8 rounded-3xl shadow-sm w-3/4">
+      <main className="container mx-auto mt-10 flex justify-center">
+        <div className="bg-white p-8 mb-10 rounded-3xl shadow-sm w-3/4">
           <div className="flex items-center justify-center mb-6">
             <img className="h-auto max-w-lg" src={image} alt="logo" />
           </div>
@@ -77,6 +77,18 @@ const Team = () => {
               <p className="text-xl my-4">{ stadium }</p>
             </div>
           </div>
+          <div className="flex mx-auto justify-center mt-10 mb-6">
+              <iframe
+                className="rounded-2xl"
+                title="Map"
+                width="700"
+                height="350"
+                loading="lazy"
+                allowFullScreen
+                frameBorder="0"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.1}%2C${latitude - 0.1}%2C${longitude + 0.1}%2C${latitude + 0.1}&amp;layer=mapnik`}
+              ></iframe>
+            </div>
         </div>
       </main>
     </div>
