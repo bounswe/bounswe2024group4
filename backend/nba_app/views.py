@@ -124,7 +124,7 @@ def user_followers(request):
     return JsonResponse({'followers_info': followers_info}, status=200)
 
 
-def profile_view_edit(request, user_id):
+def profile_view_edit(request, username):
     if request.method == 'POST':
         new_username = request.POST.get('username')
         new_email = request.POST.get('email')
@@ -161,7 +161,7 @@ def profile_view_edit(request, user_id):
         return JsonResponse({'message': 'Account information updated successfully.'}, status=200)
 
     if request.method == 'GET':
-        user = User.objects.get(username=user_id)
+        user = User.objects.get(username=username)
         following_count = user.following.count()
         followers_count = user.followers.count()
         posts = Post.objects.filter(user=user)
