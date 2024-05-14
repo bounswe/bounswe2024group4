@@ -106,10 +106,8 @@ def post_detail(request, post_id):
 def post_detail(request): 
     if request.method == "GET" and "post_id" in request.GET:
         post_id = request.GET.get("post_id")
-        print(post_id)
         post = Post.objects.get(post_id=post_id)
         comments = post.comments.all()
-        print(post)
         return JsonResponse({
             'id': post_id,
             'post': post.content, 
@@ -282,8 +280,7 @@ def feed(request):
     followed_posts = Post.objects.filter(user__in=followed_users)
     post_ids = followed_posts.values_list('post_id', flat=True)
     return JsonResponse({'post_ids': list(post_ids)}, status=200)
-    # Only authenticated users can access this view
-    return render(request, 'feed.html')
+
 
 def search(request):
     if request.method == "GET" and "query" in request.GET:
