@@ -15,38 +15,25 @@ const Feed = () => {
   useEffect(() => {
     const fetchFollowedProfilesPosts = async () => {
       try {
-       
-        //TODO: get the post id's of all the following users
-        const idResponse = await axios.get(`${baseURL}/feed/`);
-        setPostIds(idResponse.data.post_ids);
+        const response = await axios.get(`${baseURL}/feed/`);
+        const postIds = response.data.post_ids;
+        setPostIds(postIds);
+  
+        const postRequests = postIds.map(postId => axios.get(`${baseURL}/post_detail/${postId}/`));
+        const postResponses = await Promise.all(postRequests);
+        const fetchedPosts = postResponses.map(response => response.data);
+  
+        setPosts(fetchedPosts);
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error getting the following users', error);
+        console.error('Error fetching followed profiles posts:', error);
+        setIsLoading(false);
       }
-      
-      const fetchedPosts = [];
-      // Loop through the list of post_ids and fetch individual posts
-      for (const postId of postIds) {
-        setIsLoading(true);
-        try {
-          const response = await axios.get(`${baseURL}/post_detail/?post_id=${postId}`);
-          fetchedPosts.push(response.data);
-
-        } catch (error) {
-          console.error('Error fetching post:', error);
-        }
-      }
-      // Set the fetched posts in state
-      setPosts(fetchedPosts);
-      setIsLoading(false);
-      console.log(posts);
-    };
-    fetchFollowedProfilesPosts();
-    
+      };
+      fetchFollowedProfilesPosts();
   }, []);
 
   const renderPostItem = ({ item }) => {
-    console.log('Post ID:', item.id);
-
     return (
     <View style={styles.postContainer}>
       <View style={styles.userInfoContainer}>
@@ -104,7 +91,7 @@ const Feed = () => {
         <FlatList
           data={posts}
           renderItem={renderPostItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.post_id.toString()}
         />
       ) : (
         <ActivityIndicator size="large" color="#ffff" />
