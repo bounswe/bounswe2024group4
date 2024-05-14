@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Context } from "../globalContext/globalContext.js"
 import axios from 'axios';
 
-const Feed = () => {
+const Feed = ({ navigation }) => {
   const { baseURL } = useContext(Context);
   const [ postIds, setPostIds ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(true);
@@ -22,7 +22,9 @@ const Feed = () => {
         const postRequests = postIds.map(postId => axios.get(`${baseURL}/post_detail/${postId}/`));
         const postResponses = await Promise.all(postRequests);
         const fetchedPosts = postResponses.map(response => response.data);
-  
+        fetchedPosts.sort((obj1, obj2) => {
+          return obj2.post_id - obj1.post_id;
+        });
         setPosts(fetchedPosts);
         setIsLoading(false);
       } catch (error) {
@@ -35,6 +37,7 @@ const Feed = () => {
 
   const renderPostItem = ({ item }) => {
     return (
+      
     <View style={styles.postContainer}>
       <View style={styles.userInfoContainer}>
         <Image
@@ -53,13 +56,13 @@ const Feed = () => {
       ) : null}
       <View style={styles.actionsContainer}>
       <TouchableOpacity onPress={handleLike} style={[styles.actionButton]}>
-        <Icon name={liked ? 'heart' : 'heart-o'} size={20} color="#fff" />
+        <Icon name={item.user_has_liked ? 'heart' : 'heart-o'} size={20} color="#fff" />
       </TouchableOpacity>
       <TouchableOpacity onPress={handleComment} style={styles.actionButton}>
         <Icon name='comments' size={20} color="#fff" />
       </TouchableOpacity>
       <TouchableOpacity onPress={handleBookmark} style={[styles.actionButton]}>
-        <Icon name={bookmarked ? 'bookmark' : 'bookmark-o'} size={20} color="#fff" />
+        <Icon name={item.user_has_bookmarked ? 'bookmark' : 'bookmark-o'} size={20} color="#fff" />
       </TouchableOpacity>
       </View>
     </View>
@@ -83,6 +86,7 @@ const Feed = () => {
   // Handler for commenting on a post
   const handleComment = (postId) => {
     // Implement logic to navigate to the screen where users can comment on the post
+    navigation.navigate('Post')
   };
 
   return (
@@ -155,6 +159,7 @@ const styles = StyleSheet.create({
   actionButton: {
     backgroundColor: '#CE4800',
     padding: 10,
+    marginRight: 5,
     borderRadius: 50, // Make it circular to create a heart shape
     alignItems: 'center',
     justifyContent: 'center',

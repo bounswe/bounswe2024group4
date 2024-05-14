@@ -5,6 +5,7 @@ import HomePage from "./HomePage";
 import Player from "./Player";
 import Feed from "./Feed";
 import Search from "./Search";
+import Post from "./Post";
 
 export{
     Login,
@@ -14,4 +15,5 @@ export{
     Player,
     Feed,
     Search,
+    Post,
 }
