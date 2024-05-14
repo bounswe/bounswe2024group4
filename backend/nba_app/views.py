@@ -104,16 +104,32 @@ def post_detail(request, post_id):
 """
 def post_detail(request, post_id):
     post = get_object_or_404(Post, post_id=post_id)
-    username = post.user.username  
-    comments = post.comments.values('content')
-    context = {
-        'post': post,
-        'post_content': post.content,
-        'image': post.image.url if hasattr(post, 'image') and post.image else None,
-        'comments': list(comments),
-        'username': username
+    username = post.user.username
+    comments = post.comments.all()
+
+    # Build a list of comment contents
+    comments_list = [comment.content for comment in comments]
+
+    # Prepare the image URL if the image exists
+    image_url = post.image.url if hasattr(post, 'image') and post.image else None
+
+    # Check if the current user has liked the post
+    user_has_liked = LikePost.objects.filter(user=request.user, post=post).exists()
+
+    # Check if the current user has bookmarked the post
+    user_has_bookmarked = Bookmark.objects.filter(user=request.user, post=post).exists()
+
+    # Prepare the JSON data
+    data = {
+        'post': post.content,
+        'image': image_url,
+        'comments': comments_list,
+        'username': username,
+        'user_has_liked': user_has_liked,
+        'user_has_bookmarked': user_has_bookmarked
     }
-    return render(request, 'post_detail.html', context)
+
+    return JsonResponse(data, status=200)
 
 def user_followings(request):
     user = request.user
