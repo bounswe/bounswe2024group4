@@ -5,9 +5,10 @@ import Post from '../components/Post.js';
 import axios from 'axios';
 import { Context } from "../globalContext/globalContext.js";
 import { useParams } from 'react-router-dom';
-
+import Cookies from 'js-cookie';
 
 const Profile = () => {
+  const [ownProfile, setOwnProfile] = useState(false);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [followerCount, setFollowerCount] = useState(0);
@@ -19,13 +20,20 @@ const Profile = () => {
 
   const handleData = async () => {
     try {
+      let response;
       setUsername(params.username);
-      const response = await axios.get(baseURL + '/profile_view_edit_others/' + params.username);
+      if (localStorage.getItem('username') === params.username) {
+        setOwnProfile(true);
+        response = await axios.get(baseURL + '/profile_view_edit_auth');
+      }
+      else {
+        response = await axios.get(baseURL + '/profile_view_edit_others/' + params.username);
+      }
       setBio(response.data.bio);
       setProfilePictureURL(baseURL + response.data.profile_picture);
       setFollowerCount(response.data.followers_count);
       setFollowingCount(response.data.following_count);
-      setIsFollowing(response.data.isFollowing);
+      setIsFollowing(response.data.is_following);
       setPosts(response.data.posts);
 
     } catch (error) {
@@ -33,8 +41,62 @@ const Profile = () => {
     }
   };
 
-  const handleFollow = () => {
-
+  const handleFollow = async () => {
+    if (ownProfile) {
+      
+    }
+    else if (isFollowing) {
+      // Optimistically update the follow state so we don't wait for the server
+      const prevFollowerCount = followerCount;
+      setIsFollowing(false);
+      setFollowerCount((prev) => prev - 1);
+      const config = {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": Cookies.get("csrftoken"),
+        },
+      };
+    
+      try {
+        const response = await axios.post(baseURL + '/unfollow_user/' + username, '', config);
+        if (response.status !== 200) {
+          // Unfollow is not accepted by the server, revert back
+          setIsFollowing(true);
+          setFollowerCount(prevFollowerCount);
+        }
+      } catch (error) {
+        console.error('Error following the user:', error);
+        setIsFollowing(true);
+        setFollowerCount(prevFollowerCount);
+      }
+      }
+    else {
+      // Optimistically update the follow state so we don't wait for the server
+      const prevFollowerCount = followerCount;
+      setIsFollowing(true);
+      setFollowerCount((prev) => prev + 1);
+      const config = {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": Cookies.get("csrftoken"),
+        },
+      };
+    
+      try {
+        const response = await axios.post(baseURL + '/follow_user/' + username, '', config);
+        if (response.status !== 200) {
+          // Follow is not accepted by the server, revert back
+          setIsFollowing(false);
+          setFollowerCount(prevFollowerCount);
+        }
+      } catch (error) {
+        console.error('Error following the user:', error);
+        setIsFollowing(false);
+        setFollowerCount(prevFollowerCount);
+      }
+      }
   }
 
   useEffect(() => {
@@ -62,7 +124,7 @@ const Profile = () => {
                     <span className="font-light">Following</span>
                   </div>
                 </div>
-                <button className={`${isFollowing ? 'bg-white border text-blue-500' : 'bg-blue-500 text-white'} ${isFollowing ? 'hover:bg-slate-50' : 'hover:bg-blue-700'} font-bold py-2 w-full mx-auto rounded-lg`} onClick={handleFollow}>{isFollowing ? 'Following' : 'Follow'}</button>
+                <button className={`${ownProfile ? 'bg-white border text-black' : (isFollowing ? 'bg-white border text-blue-500' : 'bg-blue-500 text-white')} ${ownProfile ? 'hover:bg-slate-50' : (isFollowing ? 'hover:bg-slate-50' : 'hover:bg-blue-700')} font-bold py-2 w-full mx-auto rounded-lg`} onClick={handleFollow}>{ownProfile && !isFollowing ? 'Edit Profile' : (isFollowing ? 'Following' : 'Follow')}</button>
           </div>                 
         </div>
 

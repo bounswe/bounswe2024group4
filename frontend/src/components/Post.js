@@ -43,6 +43,8 @@ function Post({ postId }) {
       }
     } catch (error) {
       console.error('Error liking the post:', error);
+      setLikesCount(previousLikesCount);
+      setIsLiked(previousIsLiked);
     }
   };
 
@@ -66,7 +68,8 @@ function Post({ postId }) {
         setIsBookmarked(previousBookmarked);
       }
     } catch (error) {
-      console.error('Error liking the post:', error);
+      console.error('Error bookmarking the post:', error);
+      setIsBookmarked(previousBookmarked);
     }
   };
 
