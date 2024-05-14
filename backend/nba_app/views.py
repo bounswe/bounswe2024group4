@@ -104,14 +104,14 @@ def post_detail(request, post_id):
 """
 def post_detail(request, post_id):
     post = get_object_or_404(Post, post_id=post_id)
-    user_id = post.user.user_id  
+    username = post.user.username  
     comments = post.comments.values('content')
     context = {
         'post': post,
         'post_content': post.content,
         'image': post.image.url if hasattr(post, 'image') and post.image else None,
         'comments': list(comments),
-        'user_id': user_id
+        'username': username
     }
     return render(request, 'post_detail.html', context)
 
