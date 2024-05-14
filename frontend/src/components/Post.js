@@ -1,8 +1,29 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import PostBottomBar from './PostBottomBar';
 import {formatDistanceToNowStrict} from "date-fns";
+import { Context } from "../globalContext/globalContext.js";
+import axios from 'axios';
 
-function Post({ author, content, createdAt, image }) {
+function Post({ author, postId, createdAt, image }) {
+  const [content, setContent] = useState('');
+  const [imageURL, setImageURL] = useState('');
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
+  const handleData = async () => {
+    try {
+      const response = await axios.get(baseURL + '/post/' + postId + '/');
+      setContent(response.data.post);
+      setImageURL(baseURL + response.data.image);
+
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  useEffect(() => {
+    handleData();
+  });
+
 	return (
 		<div className="border border-gray-300 rounded-md overflow-hidden mb-2">
 			<div className="bg-white shadow-md p-4 hover:bg-slate-50">
@@ -17,7 +38,7 @@ function Post({ author, content, createdAt, image }) {
             </div>
             <p className="text-gray-800 mb-4">{content}</p> 
             {image && 
-                <img src={image} alt="" className="rounded-3xl mb-4 object-cover min-w-96 max-h-[55vh]" />
+                <img src={imageURL} alt="" className="rounded-3xl mb-4 object-cover min-w-96 max-h-[55vh]" />
             }
             <PostBottomBar />
           </div>
