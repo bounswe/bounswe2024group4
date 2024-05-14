@@ -168,6 +168,7 @@ def post_detail(request, post_id):
     # Prepare the JSON data
     data = {
         'post': post.content,
+        'post_id': post_id,
         'image': image_url,
         'comments': comments_list,
         'username': post.user.username,
