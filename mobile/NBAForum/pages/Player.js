@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Context } from "../globalContext/globalContext.js"
 import axios from 'axios';
 
@@ -90,16 +90,13 @@ const Player = ({ route }) => {
     )
     :(
       <View style={styles.scrollContainer}>
+        <ActivityIndicator size="large" color="#FFFF" />
       </View>
     )
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#87CEEB",
-  },
   infoContainer: {
     padding: 10,
     marginBottom: 5,
@@ -111,7 +108,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: "#87CEEB",
+    backgroundColor: "#55A1E6",
   },
   leftsideContainer: {
     flex: 1,
