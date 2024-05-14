@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Context } from "./globalContext/globalContext.js"
-import { HomePage, Login, SignUp, Feed,Profile,EditProfile } from "./pages";
+import { HomePage, Login, SignUp, Feed,Profile,EditProfile, Others_Profile } from "./pages";
 import { Button } from 'react-native';
 import axios from 'axios';
 
@@ -69,6 +69,13 @@ function Navigator() {
             component={Profile}
             options={{
                 title: 'Profile'
+            }}
+        />
+        <Stack.Screen
+            name="Others_Profile" 
+            component={Others_Profile}
+            options={{
+                title: 'Others_Profile'
             }}
         />
         <Stack.Screen 
