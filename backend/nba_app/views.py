@@ -1,11 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.urls import reverse
-from .models import User, Post, Comment, Follow
+from .models import User, Post, Comment, Follow, LikePost, LikeComment, Bookmark
 import requests
 import os
 
@@ -65,16 +65,15 @@ def log_out(request):
 
 @login_required
 def post(request):
-    if request.method == "POST":        
+    if request.method == "POST":
         user = request.user
         content = request.POST.get("content")
-        image = request.FILES.get("image")
-        #image_binary = image.read()
+        image = request.FILES.get("image") if 'image' in request.FILES else None
         post = Post.objects.create(user=user, content=content, image=image)
-        #text = request.POST.get("post")
-        return HttpResponseRedirect(f'/post/{post.post_id}/')
-    return render(request, 'post.html')
 
+        # Instead of redirecting, return an HttpResponse showing the Post ID
+        return HttpResponse(f'Post created successfully with ID {post.post_id}')
+    return render(request, 'post.html')
 
 @login_required
 def create_comment(request, post_id):
@@ -87,21 +86,97 @@ def create_comment(request, post_id):
             return HttpResponseRedirect(f'/post/{post_id}/')
         else:
             return HttpResponse("Post not found", status=404)
+
     return render(request, 'comment.html', {'post_id': post_id})
 
-"""
-def post_detail(request, post_id):
-    post = Post.objects.get(post_id=post_id)
-    comments = Comment.objects.get(post = post) #post.comments.all()
-    print({'post': post, 'comments': comments})
-    return render(request, 'post_detail.html', {'post': post, 'comments': comments})    
-"""
 
+#user like or unlike post
+def like_or_unlike_post(request, post_id):
+    if request.method == "POST":
+        user = request.user
+        post = Post.objects.get(post_id=post_id)
+
+        like = LikePost.objects.filter(user=user, post=post).first()
+        if like:
+            like.delete()
+            return JsonResponse({'message': 'Post unliked'}, status=200)
+        else:
+            LikePost.objects.create(user=user, post=post)
+            return JsonResponse({'message': 'Post liked'}, status=200)
+    
+    return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+
+
+
+#user like or unlike comment
+def like_or_unlike_comment(request, comment_id):
+    if request.method == "POST":
+        user = request.user
+        comment = Comment.objects.get(comment_id=comment_id)
+
+        like = LikeComment.objects.filter(user=user, comment=comment).first()
+        if like:
+            like.delete()
+            return JsonResponse({'message': 'Comment unliked'}, status=200)
+        else:
+            LikeComment.objects.create(user=user, comment=comment)
+            return JsonResponse({'message': 'Comment liked'}, status=200)
+    
+    return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+
+
+
+#user bookmark or unbookmark post
+def bookmark_or_unbookmark_post(request, post_id):
+    if request.method == "POST":
+        user = request.user
+        post = Post.objects.get(post_id=post_id)
+
+        bookmark = Bookmark.objects.filter(user=user, post=post).first()
+        if bookmark:
+            bookmark.delete()
+            return JsonResponse({'message': 'Post unbookmarked'}, status=200)
+        else:
+            Bookmark.objects.create(user=user, post=post)
+            return JsonResponse({'message': 'Post bookmarked'}, status=200)
+    
+    return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+
+
+
+
+@login_required
 def post_detail(request, post_id):
-    post = Post.objects.get(post_id=post_id)
-    comments = Comment.objects.filter(post = post) #post.comments.all()
-    print({'post': post, 'image': post.image, 'comments': comments})
-    return render(request, 'post_detail.html', {'post': post, 'image': post.image, 'comments': comments})
+    post = get_object_or_404(Post, post_id=post_id)
+    comments = post.comments.all()
+
+    # Prepare comments list with like status
+    comments_list = [{
+        'content': comment.content,
+        'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists()
+    } for comment in comments]
+
+    # Prepare the image URL if the image exists
+    image_url = post.image.url if hasattr(post, 'image') and post.image else None
+
+    # Check if the current user has liked the post
+    user_has_liked = LikePost.objects.filter(user=request.user, post=post).exists()
+
+    # Check if the current user has bookmarked the post
+    user_has_bookmarked = Bookmark.objects.filter(user=request.user, post=post).exists()
+
+    # Prepare the JSON data
+    data = {
+        'post': post.content,
+        'post_id': post_id,
+        'image': image_url,
+        'comments': comments_list,
+        'username': post.user.username,
+        'user_has_liked': user_has_liked,
+        'user_has_bookmarked': user_has_bookmarked
+    }
+
+    return JsonResponse(data, status=200)
 
 
 def user_followings(request):
@@ -118,7 +193,7 @@ def user_followers(request):
     return JsonResponse({'followers_info': followers_info}, status=200)
 
 
-def profile_view_edit(request, user_id):
+def profile_view_edit_auth(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
         new_email = request.POST.get('email')
@@ -155,14 +230,12 @@ def profile_view_edit(request, user_id):
         return JsonResponse({'message': 'Account information updated successfully.'}, status=200)
 
     if request.method == 'GET':
-        user = User.objects.get(user_id=user_id)
+        user = request.user
         following_count = user.following.count()
         followers_count = user.followers.count()
         posts = Post.objects.filter(user=user)
-        if request.user == user:
-            is_following = None
-        else:
-            is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
+        bookmarks = Bookmark.objects.filter(user=user)
+        bookmarked_posts = [bookmark.post for bookmark in bookmarks]
         data = {
             'username': user.username,
             'email': user.email,
@@ -170,10 +243,39 @@ def profile_view_edit(request, user_id):
             'following_count': following_count,
             'followers_count': followers_count,
             'profile_picture': user.profile_picture.url if user.profile_picture else None,
-            'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
-            'posts': [{'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts]
+            'posts': [{'post_id': post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts],
+            'bookmarked_posts': [{'post_id': bookmarked_post.post_id, 'content': bookmarked_post.content, 'created_at': bookmarked_post.created_at, 'image':bookmarked_post.image} for bookmarked_post in bookmarked_posts]
         }
         return JsonResponse(data, status=200)
+    
+
+def profile_view_edit_others(request, username):
+    user = User.objects.get(username=username)
+    following_count = user.following.count()
+    followers_count = user.followers.count()
+
+    if request.user == user:
+        is_following = None
+    else:
+        is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
+    
+    posts = Post.objects.filter(user=user)
+    bookmarks = Bookmark.objects.filter(user=user)
+    bookmarked_posts = [bookmark.post for bookmark in bookmarks]
+
+    data = {
+        'username': user.username,
+        'email': user.email,
+        'bio': user.bio,
+        'following_count': following_count,
+        'followers_count': followers_count,
+        'profile_picture': user.profile_picture.url if user.profile_picture else None,
+        'posts': [{'post_id':post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts],
+        'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
+        'bookmarked_posts': [{'post_id': bookmarked_post.post_id, 'content': bookmarked_post.content, 'created_at': bookmarked_post.created_at, 'image':bookmarked_post.image} for bookmarked_post in bookmarked_posts]
+    }
+
+    return JsonResponse(data, status=200)
 
 
 def reset_password(request):
@@ -217,18 +319,17 @@ def reset_password(request):
 
 
 
-def follow_user(request, user_id):
+def follow_user(request, username):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
     
-    # user_id = request.POST.get('user_id')
 
-    if request.user.user_id == user_id:
+    if request.user.username == username:
         return JsonResponse({'error': 'You cannot follow yourself.'}, status=400)
     
     # Retrieve the user to follow
     try:
-        followed_user = User.objects.get(pk=user_id)
+        followed_user = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found.'}, status=404)
     
@@ -244,15 +345,14 @@ def follow_user(request, user_id):
 
 
 
-def unfollow_user(request, user_id):
+def unfollow_user(request, username):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
     
-    # user_id = request.POST.get('user_id')
     
     # Retrieve the user to unfollow
     try:
-        followed_user = User.objects.get(pk=user_id)
+        followed_user = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found.'}, status=404)
     
@@ -269,7 +369,21 @@ def unfollow_user(request, user_id):
 @login_required
 def feed(request):
     # Only authenticated users can access this view
-    return render(request, 'feed.html')
+    user = request.user
+    following = user.following.all()
+    post_ids = []
+    for follow in following:
+        posts = Post.objects.filter(user=follow.user)
+        for post in posts:
+            post_ids.append(post.post_id)
+
+    return JsonResponse({'post_ids': post_ids}, status=200)
+
+    #all_feed_posts = [Post.objects.filter(user=follow.user) for follow in following]
+    #return info of the posts
+    #is_like = LikePost.objects.filter(user=user, post=post).exists()
+    #return JsonResponse({'all_feed_posts': [{'post_id':post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in all_feed_posts]}, status=200)
+
 
 def search(request):
     if request.method == "GET" and "query" in request.GET:
@@ -277,9 +391,13 @@ def search(request):
         try:
             team = search_team(query)
             player = search_player(query)
-            return JsonResponse({'team': team, 'player': player})
+            print("team:", team, "player:", player)
+            posts = Post.objects.filter(content__icontains=query)
+            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id, 'content': post.content, 'created_at': post.created_at} for post in posts]})
         except:
             return JsonResponse({"error:": "error, please try again"})
+        
+
     #return render(request, 'search.html')
 
 def search_player(query):
@@ -296,7 +414,6 @@ def search_player(query):
 
     response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
     data = response.json()
-    print('player:', data)
     if response.status_code == 500:
         return {"response:": "error, please try a different query"}
     elif data['results']['bindings'] == []:
@@ -343,7 +460,6 @@ def search_team(query):
     
     query_team = ''
     for team in teams:
-        print('query_team:', query_team)
         if query_team != '':
             break
         for word in team:
