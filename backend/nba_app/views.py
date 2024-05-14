@@ -6,6 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.urls import reverse
 from .models import User, Post, Comment, Follow, LikePost, LikeComment, Bookmark
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 import requests
 import os
 
@@ -64,15 +67,16 @@ def log_out(request):
 
 
 @login_required
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def post(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         user = request.user
-        content = request.POST.get("content")
-        image = request.FILES.get("image") if 'image' in request.FILES else None
+        content = request.data.get('content')  # DRF uses request.data instead of request.POST
+        image = request.FILES.get('image') if 'image' in request.FILES else None
         post = Post.objects.create(user=user, content=content, image=image)
+        return Response({'message': f'Post created successfully with ID {post.post_id}'}, status=201)
 
-        # Instead of redirecting, return an HttpResponse showing the Post ID
-        return HttpResponse(f'Post created successfully with ID {post.post_id}')
     return render(request, 'post.html')
 
 @login_required
