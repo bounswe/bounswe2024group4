@@ -7,9 +7,12 @@ from django.middleware.csrf import get_token
 from django.urls import reverse
 from .models import User, Post, Comment, Follow, LikePost, LikeComment, Bookmark
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 import requests
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 import os
 
 
@@ -43,19 +46,41 @@ def sign_up(request):
     # Render the signup.html template for GET requests
     return render(request, 'signup.html')
 
-
-
+@swagger_auto_schema(
+    method='post',
+    operation_description="Login a user with a username and password",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password of the user'),
+        },
+        required=['username', 'password'],
+    ),
+    responses={
+        200: openapi.Response('Login successful', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        401: 'Invalid credentials',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
+@csrf_exempt
 def log_in(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        username = request.data.get("username")
+        password = request.data.get("password")
 
         user = authenticate(request, username=username, password=password)
         if user is None:
             return HttpResponse("Invalid credentials", status=401)
 
         login(request, user)
-        print("user_logged in: ", user) 
         return JsonResponse({'username': username}, status=200)
 
     return render(request, 'login.html')
@@ -68,13 +93,34 @@ def log_out(request):
         return HttpResponse("Logged out successfully", status=200)
 
 
-@login_required
+@swagger_auto_schema(
+    method='post',
+    operation_description="Create a new post with content and an optional image",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'content': openapi.Schema(type=openapi.TYPE_STRING, description='Content of the post'),
+            'image': openapi.Schema(type=openapi.TYPE_FILE, description='Optional image for the post'),
+        },
+        required=['content'],
+    ),
+    responses={
+        201: openapi.Response('Post created successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: 'Bad Request',
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@login_required
 def post(request):
     if request.method == 'POST':
         user = request.user
-        content = request.data.get('content')  # DRF uses request.data instead of request.POST
+        content = request.data.get('content')
         image = request.FILES.get('image') if 'image' in request.FILES else None
         post = Post.objects.create(user=user, content=content, image=image)
         return Response({'message': f'Post created successfully with ID {post.post_id}'}, status=201)
@@ -159,9 +205,38 @@ def bookmark_or_unbookmark_post(request, post_id):
 
 
 
-@login_required
-@api_view(['POST'])
+@swagger_auto_schema(
+    method='get',
+    operation_description="Retrieve details of a specific post including comments, likes, and bookmarks",
+    responses={
+        200: openapi.Response('Post details retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'post': openapi.Schema(type=openapi.TYPE_STRING),
+                'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'image': openapi.Schema(type=openapi.TYPE_STRING, description='URL of the image'),
+                'comments': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'content': openapi.Schema(type=openapi.TYPE_STRING),
+                        'liked_by_user': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        'likes_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )),
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                'user_has_liked': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'likes_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'user_has_bookmarked': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, description='URL of the profile picture'),
+            }
+        )),
+        404: 'Post not found',
+    }
+)
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, post_id=post_id)
     comments = post.comments.all()

@@ -6,6 +6,7 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import log_in
+from rest_framework.permissions import AllowAny
 
 
 
@@ -20,8 +21,10 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
    public=True,
-   permission_classes=(permissions.AllowAny,),
+   permission_classes=(AllowAny,),
 )
+
+
 
 urlpatterns = [
     path('signup/', views.sign_up, name='signup'),
