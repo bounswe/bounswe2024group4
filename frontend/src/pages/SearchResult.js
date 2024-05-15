@@ -80,9 +80,8 @@ const SearchResult = () => {
   return (
     <div className="bg-sky-50 min-h-screen">
       <Navbar />
-      {/* {Filter will be added} */}
       <div className="relative bg-white p-8 mb-10 mt-10 rounded-3xl shadow-sm w-3/4 mx-auto max-h-screen">
-        <AdjustmentsHorizontalIcon className="w-8 h-8 border-2 rounded-full border-black absolute top-4 right-4" />
+        { /* <AdjustmentsHorizontalIcon className="w-8 h-8 border-2 rounded-full border-black absolute top-4 right-4" Filter />*/}
         <h2 className="text-2xl font-bold mb-10">Search Results for “{params.query}”:</h2>
         <div className="overflow-auto max-h-96 pr-2">
           {team && (
