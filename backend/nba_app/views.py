@@ -12,7 +12,7 @@ from rest_framework.response import Response
 import requests
 import os
 
-@api_view(['POST'])
+
 def sign_up(request):
     if request.method == "POST":
         # Access form data from POST request
@@ -43,7 +43,8 @@ def sign_up(request):
     # Render the signup.html template for GET requests
     return render(request, 'signup.html')
 
-@api_view(['POST'])
+
+
 def log_in(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -59,7 +60,7 @@ def log_in(request):
 
     return render(request, 'login.html')
 
-@api_view(['GET'])
+
 def log_out(request):
     if request.method == "GET":
         logout(request)
