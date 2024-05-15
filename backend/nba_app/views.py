@@ -28,7 +28,7 @@ def sign_up(request):
             return HttpResponse("Username already taken.", status=400)
         
         # Create and save user
-        user = User.objects.create_user(username=username, email=email, password=password)
+        user = User.objects.create_user(username=username, email=email, password=password, profile_picture='profile_pictures/default_nba_app_pp.jpg')
         print("user created and saved: ", user)
         
         login(request, user)
@@ -179,7 +179,8 @@ def post_detail(request, post_id):
         'created_at': post.created_at,
         'user_has_liked': user_has_liked,
         'likes_count': likes_count,  # Total likes for the post
-        'user_has_bookmarked': user_has_bookmarked
+        'user_has_bookmarked': user_has_bookmarked,
+        'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None
     }
 
     return JsonResponse(data, status=200)
