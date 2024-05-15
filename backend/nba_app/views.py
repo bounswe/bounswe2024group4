@@ -914,11 +914,41 @@ def list_wikidata_property(lst):
         names.append(name)
     return names
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get the csrf token",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'csrf_token': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ))
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrf_token': csrf_token})
 
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get the session key",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'session': openapi.Schema(type=openapi.TYPE_BOOLEAN)
+            }
+        ))
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def session(request):
     if request.method == "GET":
         session = request.session
         return JsonResponse({'session': session.session_key != None })
+
