@@ -55,13 +55,13 @@ const Feed = ({ navigation }) => {
         />
       ) : null}
       <View style={styles.actionsContainer}>
-      <TouchableOpacity onPress={handleLike} style={[styles.actionButton]}>
+      <TouchableOpacity onPress={() => handleLike} style={[styles.actionButton]}>
         <Icon name={item.user_has_liked ? 'heart' : 'heart-o'} size={20} color="#fff" />
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleComment} style={styles.actionButton}>
+      <TouchableOpacity onPress={() => handleComment(item)} style={styles.actionButton}>
         <Icon name='comments' size={20} color="#fff" />
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleBookmark} style={[styles.actionButton]}>
+      <TouchableOpacity onPress={() => handleBookmark} style={[styles.actionButton]}>
         <Icon name={item.user_has_bookmarked ? 'bookmark' : 'bookmark-o'} size={20} color="#fff" />
       </TouchableOpacity>
       </View>
@@ -75,18 +75,16 @@ const Feed = ({ navigation }) => {
 
   // TODO: Handler for liking a post 
   const handleLike = () => {
-    setLiked(!liked); 
   };
 
   // TODO: Handler for bookmarking a post 
   const handleBookmark = () => {
-    setBookmarked(!bookmarked); 
   };
 
   // Handler for commenting on a post
-  const handleComment = (postId) => {
+  const handleComment = (post) => {
     // Implement logic to navigate to the screen where users can comment on the post
-    navigation.navigate('Post')
+    navigation.navigate('Post', post)
   };
 
   return (

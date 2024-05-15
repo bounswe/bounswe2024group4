@@ -67,7 +67,6 @@ function Navigator() {
             name="Post"
             component={Post}
             options={{
-                headerShown: false
             }}
         />
         </>
