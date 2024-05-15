@@ -199,6 +199,12 @@ def user_followers(request):
     return JsonResponse({'followers_info': followers_info}, status=200)
 
 
+def get_bookmarked_post_ids(request):
+    user = request.user
+    bookmarks = Bookmark.objects.filter(user=user)
+    bookmarked_post_ids = [{'post_id' : bookmark.post.post_id} for bookmark in bookmarks]
+    return JsonResponse({'posts': bookmarked_post_ids}, status=200)     
+
 def profile_view_edit_auth(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
