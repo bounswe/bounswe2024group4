@@ -69,7 +69,7 @@ const SearchResult = () => {
                   <div className="flex items-center mb-4">
                     <div>
                       <h3 className="text-xl font-semibold">{player}</h3>
-                      <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handleTeam} >Go to Player Page</button>
+                      <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handlePlayer} >Go to Player Page</button>
                     </div>
                   </div>
                 </div>
