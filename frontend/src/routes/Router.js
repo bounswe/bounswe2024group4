@@ -7,6 +7,7 @@ import Feed from '../pages/Feed.js';
 import Team from '../pages/Team.js';
 import Player from '../pages/Player.js';
 import Profile from '../pages/Profile.js';
+import SearchResult from '../pages/SearchResult.js';
 import { BrowserRouter, Routes, Route, Outlet, Navigate} from 'react-router-dom';
 import { Provider } from '../globalContext/globalContext.js';
 import { isAuthorized } from "../components/Auth.js";
@@ -29,6 +30,7 @@ function Router() {
           <Route path="/team/:id" element={<Team />} />
           <Route path="/player/:id" element={<Player />} />
           <Route path="/user/:username" element={<Profile />} />
+          <Route path="/search/:query" element={<SearchResult />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/sign-up-prompt" element={<SignUpPrompt />} />
           <Route path="/sign-in" element={<SignIn />} />
