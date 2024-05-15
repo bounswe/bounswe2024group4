@@ -15,14 +15,33 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import os
 
-
+@swagger_auto_schema(
+    method='post',
+    operation_description="Register a new user",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user'),
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email of the user'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password of the user'),
+        },
+        required=['username', 'email', 'password']
+    ),
+    responses={
+        200: openapi.Response('User registered successfully'),
+        400: 'Email or username already taken',
+        500: 'Internal server error'
+    }
+)
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
 def sign_up(request):
     if request.method == "POST":
         # Access form data from POST request
         
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        username = request.data.get("username")
+        email = request.data.get("email")
+        password = request.data.get("password")
         #profile_picture = request.FILES.get("profile_picture")
         print("username: ", username, "email: ", email, "password: ", password)
 
@@ -86,6 +105,15 @@ def log_in(request):
     return render(request, 'login.html')
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Log out the current user",
+    responses={
+        200: openapi.Response('Logged out successfully'),
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def log_out(request):
     if request.method == "GET":
         logout(request)
@@ -114,7 +142,7 @@ def log_out(request):
         400: 'Bad Request',
     }
 )
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 @login_required
 def post(request):
@@ -155,14 +183,26 @@ def create_comment(request, post_id):
             return HttpResponse("Post not found", status=404)
         
         Comment.objects.create(user=user, content=content, post=post)
+        
         return HttpResponseRedirect(f'/post_detail/{post_id}/')
+        
 
 
     return render(request, 'comment.html', {'post_id': post_id})
 
 
 #user like or unlike post
-@api_view(['POST'])
+@swagger_auto_schema(
+    method='post',
+    operation_description="Like or unlike a specific post",
+    responses={
+        200: openapi.Response('Like/unlike status changed successfully'),
+        404: 'Post not found',
+        405: 'Only POST requests are allowed'
+    }
+)
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
 def like_or_unlike_post(request, post_id):
     if request.method == "POST":
         user = request.user
@@ -181,7 +221,18 @@ def like_or_unlike_post(request, post_id):
 
 
 #user like or unlike comment
-@api_view(['POST'])
+# User like or unlike comment
+@swagger_auto_schema(
+    method='post',
+    operation_description="Like or unlike a specific comment",
+    responses={
+        200: openapi.Response('Like/unlike status changed successfully'),
+        404: 'Comment not found',
+        405: 'Only POST requests are allowed'
+    }
+)
+@api_view(['POST','GET'])
+@permission_classes([IsAuthenticated])
 def like_or_unlike_comment(request, comment_id):
     if request.method == "POST":
         user = request.user
@@ -200,7 +251,22 @@ def like_or_unlike_comment(request, comment_id):
 
 
 #user bookmark or unbookmark post
-@api_view(['POST'])
+@swagger_auto_schema(
+    method='post',
+    operation_description="Bookmark or unbookmark a post",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        405: openapi.Response('Method Not Allowed'),
+        404: openapi.Response('Not Found'),
+    }
+)
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
 def bookmark_or_unbookmark_post(request, post_id):
     if request.method == "POST":
         user = request.user
