@@ -12,6 +12,7 @@ from rest_framework.response import Response
 import requests
 import os
 
+@api_view(['POST'])
 def sign_up(request):
     if request.method == "POST":
         # Access form data from POST request
@@ -42,7 +43,7 @@ def sign_up(request):
     # Render the signup.html template for GET requests
     return render(request, 'signup.html')
 
-
+@api_view(['POST'])
 def log_in(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -58,7 +59,7 @@ def log_in(request):
 
     return render(request, 'login.html')
 
-
+@api_view(['GET'])
 def log_out(request):
     if request.method == "GET":
         logout(request)
@@ -100,6 +101,7 @@ def create_comment(request, post_id):
 
 
 #user like or unlike post
+@api_view(['POST'])
 def like_or_unlike_post(request, post_id):
     if request.method == "POST":
         user = request.user
@@ -118,6 +120,7 @@ def like_or_unlike_post(request, post_id):
 
 
 #user like or unlike comment
+@api_view(['POST'])
 def like_or_unlike_comment(request, comment_id):
     if request.method == "POST":
         user = request.user
@@ -136,6 +139,7 @@ def like_or_unlike_comment(request, comment_id):
 
 
 #user bookmark or unbookmark post
+@api_view(['POST'])
 def bookmark_or_unbookmark_post(request, post_id):
     if request.method == "POST":
         user = request.user
@@ -222,6 +226,8 @@ def get_bookmarked_post_ids(request):
     bookmarked_post_ids = [{'post_id' : bookmark.post.post_id} for bookmark in bookmarks]
     return JsonResponse({'posts': bookmarked_post_ids}, status=200)     
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def profile_view_edit_auth(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
@@ -300,7 +306,8 @@ def profile_view_edit_others(request, username):
 
     return JsonResponse(data, status=200)
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def reset_password(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
@@ -507,6 +514,8 @@ def search_team(query):
     except:
         return {"error:": "error, please try again"}
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def team(request):
     if request.method == "GET" and "id" in request.GET:
         id = request.GET.get("id")
@@ -577,6 +586,8 @@ def get_label(id):
     except:
         return None
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def player(request):
     if request.method == "GET" and "id" in request.GET:
         id = request.GET.get("id")
