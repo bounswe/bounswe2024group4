@@ -28,7 +28,7 @@ def sign_up(request):
             return HttpResponse("Username already taken.", status=400)
         
         # Create and save user
-        user = User.objects.create_user(username=username, email=email, password=password)
+        user = User.objects.create_user(username=username, email=email, password=password, profile_picture='profile_pictures/default_nba_app_pp.jpg')
         print("user created and saved: ", user)
         
         login(request, user)
@@ -182,7 +182,8 @@ def post_detail(request, post_id):
         'created_at': post.created_at,
         'user_has_liked': user_has_liked,
         'likes_count': likes_count,  # Total likes for the post
-        'user_has_bookmarked': user_has_bookmarked
+        'user_has_bookmarked': user_has_bookmarked,
+        'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None
     }
 
     return JsonResponse(data, status=200)
@@ -256,7 +257,7 @@ def profile_view_edit_auth(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'profile_picture': user.profile_picture.url if user.profile_picture else None,
-            'posts': [{'post_id': post.post_id} for post in posts]
+            'posts': [{'post_id': post.post_id} for post in posts].reverse
         }
         return JsonResponse(data, status=200)
     
@@ -280,7 +281,7 @@ def profile_view_edit_others(request, username):
         'following_count': following_count,
         'followers_count': followers_count,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'posts': [{'post_id': post.post_id} for post in posts],
+        'posts': [{'post_id': post.post_id} for post in posts].reverse,
         'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
     }
 
@@ -385,7 +386,7 @@ def feed(request):
         posts = Post.objects.filter(user=follow)
         for post in posts:
             post_ids.append(post.post_id)
-
+    post_ids.reverse
     return JsonResponse({'post_ids': post_ids}, status=200)
 
     #all_feed_posts = [Post.objects.filter(user=follow.user) for follow in following]
@@ -404,7 +405,7 @@ def search(request):
             player = search_player(query)
             print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id} for post in posts]})
+            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id} for post in posts].reverse})
         except:
             return JsonResponse({"error:": "error in search, please try again"})
         
