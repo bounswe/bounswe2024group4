@@ -8,7 +8,7 @@ const Profile = ({ navigation }) => {
   const { baseURL } = useContext(Context); 
   const [userInfo, setUserInfo] = useState({
     username: "",
-    profile_picture: "https://cdn.nba.com/manage/2020/10/NBA20Primary20Logo-1-259x588.jpg",
+    profile_picture: "",
     bio: "",
     followers_count: 0,
     following_count: 0,
@@ -23,7 +23,7 @@ const Profile = ({ navigation }) => {
         if (response.status === 200) {
           setUserInfo({
             username: response.data.username,
-            profile_picture: response.data.profile_picture,
+            profile_picture: baseURL + response.data.profile_picture,
             bio: response.data.bio,
             followers_count: response.data.followers_count,
             following_count: response.data.following_count,
@@ -36,7 +36,7 @@ const Profile = ({ navigation }) => {
         console.error("Failed to fetch user profile:", error);
       }
     };
-
+  
     fetchUserProfile();
   }, []);
 
@@ -64,6 +64,7 @@ const Profile = ({ navigation }) => {
           <Text style={styles.statValue}>{userInfo.following_count}</Text>
         </View>
       </View>
+      
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EditProfile')}>
         <Text style={styles.buttonText}>Edit Profile</Text>
