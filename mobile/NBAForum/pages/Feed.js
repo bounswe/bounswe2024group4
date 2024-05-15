@@ -4,7 +4,7 @@ import { Context } from "../globalContext/globalContext.js"
 import axios from 'axios';
 import Post from './Post.js';
 
-const Feed = ({ navigation }) => {
+const Feed = ( ) => {
   const { baseURL } = useContext(Context);
   const [ postIds, setPostIds ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(true);
@@ -20,9 +20,6 @@ const Feed = ({ navigation }) => {
         const postRequests = postIds.map(postId => axios.get(`${baseURL}/post_detail/${postId}/`));
         const postResponses = await Promise.all(postRequests);
         const fetchedPosts = postResponses.map(response => response.data);
-        fetchedPosts.sort((obj1, obj2) => {
-          return obj2.post_id - obj1.post_id;
-        });
         setPosts(fetchedPosts);
         setIsLoading(false);
       } catch (error) {
