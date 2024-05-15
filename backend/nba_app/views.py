@@ -80,12 +80,15 @@ def create_comment(request, post_id):
     if request.method == "POST":
         user = request.user
         content = request.POST.get("content")
-        post = Post.objects.get(post_id=post_id)
-        if post:
-            Comment.objects.create(user=user, content=content, post=post)
-            return HttpResponseRedirect(f'/post/{post_id}/')
-        else:
+        
+        try:
+            post = Post.objects.get(post_id=post_id)
+        except Post.DoesNotExist:
             return HttpResponse("Post not found", status=404)
+        
+        Comment.objects.create(user=user, content=content, post=post)
+        return HttpResponseRedirect(f'/post/{post_id}/')
+
 
     return render(request, 'comment.html', {'post_id': post_id})
 
