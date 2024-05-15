@@ -1,57 +1,64 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { Context } from "../globalContext/globalContext.js"
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import moment from 'moment';
 
-const Post = ({ route }) => {
-    const post = route.params;
-    console.log(post);
+const Post = ({ post }) => {
+  const { baseURL } = useContext(Context);
 
-    // TODO: Handler for liking a post 
-    const handleLike = () => {
-    };
+  // TODO: Handler for liking a post 
+  const handleLike = () => {
+  };
 
-    // TODO: Handler for bookmarking a post 
-    const handleBookmark = () => {
-    };
+  // TODO: Handler for bookmarking a post 
+  const handleBookmark = () => {
+  };
 
-    const handleComment = () => {
-    };
+  // Handler for commenting on a post
+  const handleComment = (post) => {
+    // Implement logic to navigate to the screen where users can comment on the post
+    navigation.navigate('Post', post)
+  };
+
+  const isLiked = post.user_has_liked;
 
   return (
-    <View style={styles.container}>
     <View style={styles.postContainer}>
-      <View style={styles.header}>
-        <Text style={styles.username}>--username--</Text>
-        <Text style={styles.time}>--time--</Text>
+      <View style={styles.userInfoContainer}>
+        <View style={styles.userDetails}>
+          <Image
+            source={{ uri: baseURL + post.profile_picture }}
+            style={styles.profileImage}
+          />
+          <Text style={styles.username}>{post.username}</Text>
+        </View>
+        <Text>{moment(post.created_at).fromNow()}</Text>
       </View>
-      <Text style={styles.content}>{post.post}</Text>
-      <View style={styles.actions}>
-        <TouchableOpacity onPress={() => handleLike} style={styles.actionButton}>
-          <Icon name={post.user_has_liked ? 'heart' : 'heart-o'} size={20} color="#fff" />
+
+      <Text style={styles.postText}>{post.post}</Text>
+      {post.image && (
+        <Image
+          source={{ uri: baseURL + post.image }}
+          style={styles.postImage}
+        />
+      )}
+      <View style={styles.actionsContainer}>
+        <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
+          <Icon name={isLiked ? 'heart' : 'heart-o'} size={20} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleComment} style={styles.actionButton}>
-          <Icon name='comment' size={20} color="#fff" />
+        <TouchableOpacity onPress={handleComment} style={styles.actionButton}>
+          <Icon name='comments' size={20} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleBookmark} style={styles.actionButton}>
+        <TouchableOpacity onPress={handleBookmark} style={styles.actionButton}>
           <Icon name={post.user_has_bookmarked ? 'bookmark' : 'bookmark-o'} size={20} color="#fff" />
         </TouchableOpacity>
       </View>
-      <View style={styles.stats}>
-        <Text style={styles.likes}>{   } likes</Text>
-        <Text style={styles.comments}>{} comments</Text>
-      </View>
-      {/* Add comment input field and button here */}
-    </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: 'relative',
-    backgroundColor: '#55A1E6',
-  },
   postContainer: {
     backgroundColor: '#ffffff',
     padding: 10,
@@ -60,25 +67,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#BCBCBC',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  username: {
-    fontWeight: 'bold',
-    marginRight: 5,
-  },
-  time: {
-    color: '#777',
-  },
-  content: {
+  postText: {
+    fontSize: 16,
     marginBottom: 10,
   },
-  actions: {
+  actionsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
+    justifyContent: 'flex-end',
+  },
+  postImageContainer: {
+    width: '100%', // Ensure the container takes up the full width
+    backgroundColor: '#f0f0f0',
+  },
+  postImage: {
+    width: '100%', // Ensure the image takes up the full width of its container
+    height: undefined, // Allow height to adjust automatically based on width
+    aspectRatio: 16 / 16, // Set aspect ratio to 16:9 for landscape images
+    resizeMode: 'contain',
   },
   actionButton: {
     backgroundColor: '#CE4800',
@@ -88,15 +93,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stats: {
+  userInfoContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
     justifyContent: 'space-between',
   },
-  likes: {
-    fontWeight: 'bold',
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
   },
-  comments: {
-    color: '#777',
+  username: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
 
