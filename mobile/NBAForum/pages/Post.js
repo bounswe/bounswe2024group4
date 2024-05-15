@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { Context } from "../globalContext/globalContext.js"
 import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -9,6 +9,7 @@ const Post = ({ post }) => {
   const { baseURL } = useContext(Context);
   const [ showComments, setShowComments ] = useState(false);
   const [ commentText, setCommentText ] = useState('');
+  const [ comments, setComments ] = useState(post.comments);
   const [ isLiked, setIsLiked ] = useState(post.user_has_liked);
   const [ isBookmarked, setIsBookmarked ] = useState(post.user_has_bookmarked);
   const [ likesCount, setLikesCount ] = useState(post.likes_count);
@@ -16,7 +17,6 @@ const Post = ({ post }) => {
   const handleLike = async () => {
     const previousLikesCount = likesCount;
     const previousIsLiked = isLiked;
-    // Optimistically update the like state so we don't wait for the server
     setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
     setIsLiked((prev) => !prev);
     
@@ -45,21 +45,45 @@ const Post = ({ post }) => {
     }
   };
 
-  const handleBookmark = () => {
+  const handleBookmark = async () => {
     const prevIsBookmarked = isBookmarked;
     setIsBookmarked((prev) => !prev);
 
-    // TODO: Handler for bookmarking a post 
+    // send request, if fails revert the changes
   };
 
   const toggleComments = () => {
     setShowComments(!showComments);
   };
 
-  const handleComment = () => {
-    // send request
-    setCommentText(''); // Clear comment text after submitting
+  const handleComment = async () => {
+    if (commentText.trim()){
+      try {
+        const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+          .csrf_token;
+        console.log(commentText);
+        var formData = new FormData();
+        formData.append("content", commentText);
+        setCommentText(''); // Clear comment text after submitting
 
+        const response = await axios.post(
+          baseURL + "/post/" + post.post_id + "/comment/", formData,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "X-CSRFToken": csrfToken,
+            },
+          }
+        );
+        setComments(response.data.comments);
+        if (response.status !== 200) {
+          console.log("Couldn't comment on the post");
+        }
+      } catch (error) {
+        console.error("Error commenting on the post:", error);
+      }
+    }
   };
 
   return (
@@ -102,7 +126,7 @@ const Post = ({ post }) => {
         {showComments && (
           <View style={styles.commentsContainer}>
             {/* Display comments */}
-            {post.comments.map((comment, index) => (
+            {comments.map((comment, index) => (
               <Text key={index} style={styles.comment}>{comment.content}</Text>
             ))}
             {/* Create a comment */}
