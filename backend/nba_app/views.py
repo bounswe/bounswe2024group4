@@ -72,8 +72,9 @@ def post(request):
         post = Post.objects.create(user=user, content=content, image=image)
 
         # Instead of redirecting, return an HttpResponse showing the Post ID
-        return HttpResponse(f'Post created successfully with ID {post.post_id}')
+        return HttpResponse(f'Post created successfully with ID {post.post_id}', status=201)
     return render(request, 'post.html')
+
 
 @login_required
 def create_comment(request, post_id):
@@ -110,7 +111,6 @@ def like_or_unlike_post(request, post_id):
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
 
 
-
 #user like or unlike comment
 def like_or_unlike_comment(request, comment_id):
     if request.method == "POST":
@@ -128,7 +128,6 @@ def like_or_unlike_comment(request, comment_id):
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
 
 
-
 #user bookmark or unbookmark post
 def bookmark_or_unbookmark_post(request, post_id):
     if request.method == "POST":
@@ -144,8 +143,6 @@ def bookmark_or_unbookmark_post(request, post_id):
             return JsonResponse({'message': 'Post bookmarked'}, status=200)
     
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
-
-
 
 
 @login_required
@@ -208,6 +205,7 @@ def get_bookmarked_post_ids(request):
     bookmarks = Bookmark.objects.filter(user=user)
     bookmarked_post_ids = [{'post_id' : bookmark.post.post_id} for bookmark in bookmarks]
     return JsonResponse({'posts': bookmarked_post_ids}, status=200)     
+
 
 def profile_view_edit_auth(request):
     if request.method == 'POST':
@@ -327,8 +325,6 @@ def reset_password(request):
     return JsonResponse({'message': 'Password reset successful.'}, status = 200)
 
 
-
-
 def follow_user(request, username):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
@@ -351,8 +347,6 @@ def follow_user(request, username):
     # Create a new follow instance
     Follow.objects.create(follower=request.user, followed=followed_user)
     return JsonResponse({'message': 'You have successfully followed the user.'}, status=200)
-
-
 
 
 def unfollow_user(request, username):
@@ -405,12 +399,13 @@ def search(request):
             player = search_player(query)
             print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))})
+            return JsonResponse({'team': team, 'player': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
         except:
-            return JsonResponse({"error:": "error in search, please try again"})
+            return JsonResponse({"error:": "error in search, please try again"}, status=500)
         
 
     #return render(request, 'search.html')
+
 
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
@@ -438,6 +433,7 @@ def search_player(query):
             player_id = item
 
     return {'player': data['results']['bindings'][0]['itemLabel']['value'], 'id': player_id} 
+
 
 def search_team(query):
     teams = [ ["atlanta", "hawks", "atlanta hawks"], 
@@ -490,6 +486,7 @@ def search_team(query):
         return {'team': team_name, 'id': id}
     except:
         return {"error:": "error, please try again"}
+
 
 def team(request):
     if request.method == "GET" and "id" in request.GET:
@@ -548,9 +545,10 @@ def team(request):
                                  'venue': venue,
                                  'venue_latitude': venue_latitude,
                                  'venue_longitude': venue_longitude,
-                                 'image': image_url})
+                                 'image': image_url}, status=200)
         except:
-            return JsonResponse({"error:": "error, please try again"})
+            return JsonResponse({"error:": "error, please try again"}, status=500)
+
 
 def get_label(id):
     url = 'https://www.wikidata.org/w/api.php'
@@ -560,7 +558,8 @@ def get_label(id):
         return data['entities'][id]['labels']['en']['value'] 
     except:
         return None
-    
+
+
 def player(request):
     if request.method == "GET" and "id" in request.GET:
         id = request.GET.get("id")
@@ -632,10 +631,11 @@ def player(request):
                                  'teams': teams, 
                                  'positions': positions,
                                  'awards': awards,
-                                 'image': image_url})
+                                 'image': image_url}, status=200)
                                  
         except:
-            return JsonResponse({"error:": "error, please try again"})
+            return JsonResponse({"error:": "error, please try again"}, status=500)
+
 
 def list_wikidata_property(lst):
     names = []
@@ -645,9 +645,11 @@ def list_wikidata_property(lst):
         names.append(name)
     return names
 
+
 def csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrf_token': csrf_token})
+
 
 def session(request):
     if request.method == "GET":
