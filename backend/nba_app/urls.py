@@ -13,11 +13,13 @@ urlpatterns = [
     path('user_followings/', views.user_followings, name='user_followings'),
     path('user_followers/', views.user_followers, name='user_followers'),
     
-    path('follow_user/<str:user_id>', views.follow_user, name='follow_user'),
-    path('unfollow_user/<str:user_id>', views.unfollow_user, name='unfollow_user'),
+    path('follow_user/<str:username>', views.follow_user, name='follow_user'),
+    path('unfollow_user/<str:username>', views.unfollow_user, name='unfollow_user'),
     
     path('profile_view_edit_auth', views.profile_view_edit_auth, name='profile_view_edit_auth'),
     path('profile_view_edit_others/<str:username>', views.profile_view_edit_others, name='profile_view_edit_others'),
+
+    path('get_bookmarked_post_ids/', views.get_bookmarked_post_ids, name='get_bookmarked_post_ids'),
     
     path('reset_password/', views.reset_password, name='reset_password'),
     
