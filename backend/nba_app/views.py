@@ -28,7 +28,7 @@ def sign_up(request):
             return HttpResponse("Username already taken.", status=400)
         
         # Create and save user
-        user = User.objects.create_user(username=username, email=email, password=password)
+        user = User.objects.create_user(username=username, email=email, password=password, profile_picture='profile_pictures/default_nba_app_pp.jpg')
         print("user created and saved: ", user)
         
         login(request, user)
@@ -80,12 +80,15 @@ def create_comment(request, post_id):
     if request.method == "POST":
         user = request.user
         content = request.POST.get("content")
-        post = Post.objects.get(post_id=post_id)
-        if post:
-            Comment.objects.create(user=user, content=content, post=post)
-            return HttpResponseRedirect(f'/post/{post_id}/')
-        else:
+        
+        try:
+            post = Post.objects.get(post_id=post_id)
+        except Post.DoesNotExist:
             return HttpResponse("Post not found", status=404)
+        
+        Comment.objects.create(user=user, content=content, post=post)
+        return HttpResponseRedirect(f'/post/{post_id}/')
+
 
     return render(request, 'comment.html', {'post_id': post_id})
 
@@ -153,7 +156,8 @@ def post_detail(request, post_id):
     # Prepare comments list with like status
     comments_list = [{
         'content': comment.content,
-        'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists()
+        'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists(),
+        'likes_count': LikeComment.objects.filter(comment=comment).count()  # Count of likes for each comment
     } for comment in comments]
 
     # Prepare the image URL if the image exists
@@ -161,6 +165,9 @@ def post_detail(request, post_id):
 
     # Check if the current user has liked the post
     user_has_liked = LikePost.objects.filter(user=request.user, post=post).exists()
+
+    # Count of likes on the post
+    likes_count = LikePost.objects.filter(post=post).count()
 
     # Check if the current user has bookmarked the post
     user_has_bookmarked = Bookmark.objects.filter(user=request.user, post=post).exists()
@@ -172,8 +179,11 @@ def post_detail(request, post_id):
         'image': image_url,
         'comments': comments_list,
         'username': post.user.username,
+        'created_at': post.created_at,
         'user_has_liked': user_has_liked,
-        'user_has_bookmarked': user_has_bookmarked
+        'likes_count': likes_count,  # Total likes for the post
+        'user_has_bookmarked': user_has_bookmarked,
+        'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None
     }
 
     return JsonResponse(data, status=200)
@@ -192,6 +202,12 @@ def user_followers(request):
     followers_info = [{'user_id': follower.user_id, 'username':follower.username} for follower in followers]
     return JsonResponse({'followers_info': followers_info}, status=200)
 
+
+def get_bookmarked_post_ids(request):
+    user = request.user
+    bookmarks = Bookmark.objects.filter(user=user)
+    bookmarked_post_ids = [{'post_id' : bookmark.post.post_id} for bookmark in bookmarks]
+    return JsonResponse({'posts': bookmarked_post_ids}, status=200)     
 
 def profile_view_edit_auth(request):
     if request.method == 'POST':
@@ -234,8 +250,6 @@ def profile_view_edit_auth(request):
         following_count = user.following.count()
         followers_count = user.followers.count()
         posts = Post.objects.filter(user=user)
-        bookmarks = Bookmark.objects.filter(user=user)
-        bookmarked_posts = [bookmark.post for bookmark in bookmarks]
         data = {
             'username': user.username,
             'email': user.email,
@@ -243,8 +257,7 @@ def profile_view_edit_auth(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'profile_picture': user.profile_picture.url if user.profile_picture else None,
-            'posts': [{'post_id': post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts],
-            'bookmarked_posts': [{'post_id': bookmarked_post.post_id, 'content': bookmarked_post.content, 'created_at': bookmarked_post.created_at, 'image':bookmarked_post.image} for bookmarked_post in bookmarked_posts]
+            'posts': list(reversed([{'post_id': post.post_id} for post in posts]))
         }
         return JsonResponse(data, status=200)
     
@@ -260,8 +273,6 @@ def profile_view_edit_others(request, username):
         is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
     
     posts = Post.objects.filter(user=user)
-    bookmarks = Bookmark.objects.filter(user=user)
-    bookmarked_posts = [bookmark.post for bookmark in bookmarks]
 
     data = {
         'username': user.username,
@@ -270,9 +281,8 @@ def profile_view_edit_others(request, username):
         'following_count': following_count,
         'followers_count': followers_count,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'posts': [{'post_id':post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in posts],
+        'posts': list(reversed([{'post_id': post.post_id} for post in posts])),
         'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
-        'bookmarked_posts': [{'post_id': bookmarked_post.post_id, 'content': bookmarked_post.content, 'created_at': bookmarked_post.created_at, 'image':bookmarked_post.image} for bookmarked_post in bookmarked_posts]
     }
 
     return JsonResponse(data, status=200)
@@ -376,6 +386,7 @@ def feed(request):
         posts = Post.objects.filter(user=follow)
         for post in posts:
             post_ids.append(post.post_id)
+    post_ids = list(reversed(post_ids))
     return JsonResponse({'post_ids': post_ids}, status=200)
 
     #all_feed_posts = [Post.objects.filter(user=follow.user) for follow in following]
@@ -387,14 +398,16 @@ def feed(request):
 def search(request):
     if request.method == "GET" and "query" in request.GET:
         query = request.GET.get("query")
+        print("query:", query)
         try:
             team = search_team(query)
+            print("team:", team)
             player = search_player(query)
-            print("team:", team, "player:", player)
+            print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id, 'content': post.content, 'created_at': post.created_at} for post in posts]})
+            return JsonResponse({'team': team, 'player': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))})
         except:
-            return JsonResponse({"error:": "error, please try again"})
+            return JsonResponse({"error:": "error in search, please try again"})
         
 
     #return render(request, 'search.html')
@@ -402,15 +415,16 @@ def search(request):
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
     sparql_query = '''
-        SELECT DISTINCT ?item ?itemLabel WHERE {
+        SELECT DISTINCT ?item ?itemLabel ?altLabel WHERE {
             ?item (wdt:P3647) [].
             ?item rdfs:label ?itemLabel.
-            FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel),''' + '"' + query.lower() + '''"))
+            ?item skos:altLabel ?altLabel.
+            FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel), "''' + query.lower() + '''")).
         }
         LIMIT 1
     '''
     endpoint_url = "https://query.wikidata.org/sparql"
-
+    #print(sparql_query)
     response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
     data = response.json()
     if response.status_code == 500:
@@ -426,36 +440,36 @@ def search_player(query):
     return {'player': data['results']['bindings'][0]['itemLabel']['value'], 'id': player_id} 
 
 def search_team(query):
-    teams = [ ["atlanta", "hawks"], 
-             ["boston", "celtics"], 
-             ["brooklyn", "nets"], 
-             ["charlotte", "hornets"], 
-             ["chicago", "bulls"], 
-             ["cleveland", "cavaliers"], 
-             ["dallas", "mavericks"], 
-             ["denver", "nuggets"], 
-             ["detroit", "pistons"], 
-             ["golden state", "warriors"], 
-             ["houston", "rockets"],
-             ["indiana", "pacers"],
-             ["los angeles", "clippers"],
-             ["los angeles", "lakers"],
-             ["memphis", "grizzlies"],
-             ["miami", "heat"],
-             ["milwaukee", "bucks"],
-             ["minnesota", "timberwolves"],
-             ["new orleans", "pelicans"],
-             ["new york", "knicks"],
-             ["oklahoma", "city", "thunder"],
-             ["orlando", "magic"],
-             ["philadelphia", "76ers"],
-             ["phoenix", "suns"],
-             ["portland", "trail", "blazers"],
-             ["sacramento", "kings"],
-             ["san antonio", "spurs"],
-             ["toronto", "raptors"],
-             ["utah", "jazz"],
-             ["washington", "wizards"]]
+    teams = [ ["atlanta", "hawks", "atlanta hawks"], 
+             ["boston", "celtics", "boston celtics"], 
+             ["brooklyn", "nets", "brooklyn nets"], 
+             ["charlotte", "hornets", "charlotte hornets"], 
+             ["chicago", "bulls", "chicago bulls"], 
+             ["cleveland", "cavaliers", "cleveland cavaliers"], 
+             ["dallas", "mavericks", "dallas mavericks"], 
+             ["denver", "nuggets", "denver nuggets"], 
+             ["detroit", "pistons", "detroit pistons"], 
+             ["golden state", "warriors", "golden state warriors"], 
+             ["houston", "rockets", "houston rockets"],
+             ["indiana", "pacers", "indiana pacers"],
+             ["los angeles", "clippers", "los angeles clippers"],
+             ["los angeles", "lakers", "los angeles lakers"],
+             ["memphis", "grizzlies", "memphis grizzlies"],
+             ["miami", "heat", "miami heat"],
+             ["milwaukee", "bucks", "milwaukee bucks"],
+             ["minnesota", "timberwolves", "minnesota timberwolves"],
+             ["new orleans", "pelicans", "new orleans pelicans"],
+             ["new york", "knicks", "new york knicks"],
+             ["oklahoma", "city", "thunder", "oklahoma city thunder"],
+             ["orlando", "magic", "orlando magic"],
+             ["philadelphia", "76ers", "philadelphia 76ers"],
+             ["phoenix", "suns", "phoenix suns"],
+             ["portland", "trail", "blazers", "portland trail blazers"],
+             ["sacramento", "kings", "sacramento kings"],
+             ["san antonio", "spurs", "san antonio spurs"],
+             ["toronto", "raptors", "toronto raptors"],
+             ["utah", "jazz", "utah jazz"],
+             ["washington", "wizards", "washington wizards"]]
     
     query_team = ''
     for team in teams:
@@ -464,11 +478,10 @@ def search_team(query):
         for word in team:
             if query.lower() == word:
                 query_team = team
-
+    print("query_team:", query_team)
     if query_team == '':
         return None
-    
-    team_name = " ".join(query_team)
+    team_name = query_team[2]
     url = 'https://www.wikidata.org/w/api.php'
     try:
         response1 = requests.get(url, params = {'action': 'wbsearchentities', 'format': 'json', 'search': team_name, 'language': 'en'})
