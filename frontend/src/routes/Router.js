@@ -34,6 +34,7 @@ function Router() {
           <Route path="/team/:id" element={<Team />} />
           <Route path="/player/:id" element={<Player />} />
           <Route path="/user/:username" element={<Profile />} />
+          <Route path="/search/:query" element={<SearchResult />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/sign-up-prompt" element={<SignUpPrompt />} />
           <Route path="/sign-in" element={<SignIn />} />
