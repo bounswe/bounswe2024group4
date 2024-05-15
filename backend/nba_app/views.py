@@ -127,13 +127,27 @@ def post(request):
 
     return render(request, 'post.html')
 
-@login_required
-@api_view(['POST'])
+@swagger_auto_schema(
+    method='post',
+    operation_description="Create a comment on a specific post",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'content': openapi.Schema(type=openapi.TYPE_STRING, description='Content of the comment'),
+        },
+        required=['content'],
+    ),
+    responses={
+        201: openapi.Response('Comment created successfully'),
+        404: 'Post not found'
+    }
+)
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 def create_comment(request, post_id):
     if request.method == "POST":
         user = request.user
-        content = request.POST.get("content")
+        content = request.data.get("content")
         
         try:
             post = Post.objects.get(post_id=post_id)
@@ -141,7 +155,7 @@ def create_comment(request, post_id):
             return HttpResponse("Post not found", status=404)
         
         Comment.objects.create(user=user, content=content, post=post)
-        return HttpResponseRedirect(f'/post/{post_id}/')
+        return HttpResponseRedirect(f'/post_detail/{post_id}/')
 
 
     return render(request, 'comment.html', {'post_id': post_id})
@@ -302,8 +316,52 @@ def get_bookmarked_post_ids(request):
     bookmarked_post_ids = [{'post_id' : bookmark.post.post_id} for bookmark in bookmarks]
     return JsonResponse({'posts': bookmarked_post_ids}, status=200)     
 
-@api_view(['POST'])
+@swagger_auto_schema(
+    method='post',
+    operation_description="Update the authenticated user's profile information",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='New username'),
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description='New email'),
+            'profile_picture': openapi.Schema(type=openapi.TYPE_FILE, description='New profile picture'),
+            'bio': openapi.Schema(type=openapi.TYPE_STRING, description='New bio'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='New password')
+        },
+        required=['username', 'email', 'bio', 'password'],
+    ),
+    responses={
+        200: openapi.Response('Account information updated successfully.'),
+        400: 'Bad request'
+    }
+)
+@swagger_auto_schema(
+    method='get',
+    operation_description="Retrieve the authenticated user's profile information",
+    responses={
+        200: openapi.Response('Profile information retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'bio': openapi.Schema(type=openapi.TYPE_STRING),
+                'following_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'followers_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, description='URL of the profile picture'),
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'post_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+                    }
+                ))
+            }
+        )),
+        401: 'Unauthorized'
+    }
+)
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
+@login_required
 def profile_view_edit_auth(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
