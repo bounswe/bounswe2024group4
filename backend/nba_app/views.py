@@ -648,10 +648,10 @@ def list_wikidata_property(lst):
 
 def csrf_token(request):
     csrf_token = get_token(request)
-    return JsonResponse({'csrf_token': csrf_token})
+    return JsonResponse({'csrf_token': csrf_token}, status=200)
 
 
 def session(request):
     if request.method == "GET":
         session = request.session
-        return JsonResponse({'session': session.session_key != None })
+        return JsonResponse({'session': session.session_key != None }, status=200)
