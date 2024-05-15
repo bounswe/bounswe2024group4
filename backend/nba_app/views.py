@@ -357,6 +357,27 @@ def post_detail(request, post_id):
     return JsonResponse(data, status=200)
 
 
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get the list of users the authenticated user is following",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'followings_info': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'username': openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                ))
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+    }
+)
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_followings(request):
     user = request.user
@@ -365,7 +386,26 @@ def user_followings(request):
     return JsonResponse({'followings_info': followings_info}, status=200)
 
 
-@api_view(['POST'])
+@swagger_auto_schema(
+    method='post',
+    operation_description="Get the list of users who are following the authenticated user",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'followers_info': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'username': openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                ))
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+    }
+)
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 def user_followers(request):
     user = request.user
@@ -375,6 +415,8 @@ def user_followers(request):
 
 @api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
+
+
 
 def get_bookmarked_post_ids(request):
     user = request.user
