@@ -11,7 +11,7 @@ const SearchBar = () => {
     if (searchTerm.trim() != '') {
       navigate("/search/" + searchTerm);
     }
-  }
+  };
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {

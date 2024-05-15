@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import "../css/index.css";
 import { Navbar } from "../components/Navbar";
 import Post from "../components/Post.js";
@@ -78,38 +79,40 @@ const SearchResult = () => {
 
   return (
     <div className="bg-sky-50 min-h-screen">
-        <Navbar />
-        <div className="bg-white p-8 mb-10 mt-20 rounded-3xl shadow-sm w-3/4 mx-auto max-h-screen">
-            <h2 className="text-2xl font-bold mb-10">Search Results for “{params.query}”:</h2>
-            <div className="overflow-auto max-h-96 pr-2">
-              {team && (
-                <div className="border-b pb-4 mb-4 flex items-center">
-                  <img src={logo} alt={`${team} Logo`} className="w-20 h-20 object-contain mr-4"/>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold">{team}</h3>
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handleTeam} >Go to Team Page</button>
-                  </div>
-                </div>
-              )}
-              {player && (
-                <div className="border-b pb-4 mb-4 flex items-center">
-                  <img src={image} alt={`${player} Image`} className="w-20 h-20 object-cover object-top rounded-full mr-4"/>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold">{player}</h3>
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handlePlayer} >Go to Player Page</button>
-                  </div>
-                </div>
-              )}
-              <div className="border-b pb-4 mb-4">
-                <h1 className="text-2xl font-bold mb-4">Related Posts</h1>
-                {posts.length > 0 
-                  ? posts.map((post) => (
-                      <Post key={post.id} postId={post.id} />
-                    ))
-                  : "Not found"}
+      <Navbar />
+      <AdjustmentsHorizontalIcon className="w-10 h-10 border-2 rounded-full border-black mt-10 ml-60" />
+      {/* {Filter will be added} */}
+      <div className="bg-white p-8 mb-10 mt-10 rounded-3xl shadow-sm w-3/4 mx-auto max-h-screen">
+        <h2 className="text-2xl font-bold mb-10">Search Results for “{params.query}”:</h2>
+        <div className="overflow-auto max-h-96 pr-2">
+          {team && (
+            <div className="border-b pb-4 mb-4 flex items-center">
+              <img src={logo} alt={`${team} Logo`} className="w-20 h-20 object-contain mr-4"/>
+              <div className="ml-5">
+                <h3 className="text-xl font-semibold">{team}</h3>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handleTeam} >Go to Team Page</button>
               </div>
             </div>
+          )}
+          {player && (
+            <div className="border-b pb-4 mb-4 flex items-center">
+              <img src={image} alt={`${player} Image`} className="w-20 h-20 object-cover object-top rounded-full mr-4"/>
+              <div className="ml-5">
+                <h3 className="text-xl font-semibold">{player}</h3>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handlePlayer} >Go to Player Page</button>
+              </div>
+            </div>
+          )}
+          <div className="border-b pb-4 mb-4">
+            <h1 className="text-2xl font-bold mb-4">Related Posts</h1>
+            {posts.length > 0 
+              ? posts.map((post) => (
+                  <Post key={post.id} postId={post.id} />
+                ))
+              : "Not found"}
+          </div>
         </div>
+      </div>
     </div>
   );
 };
