@@ -103,8 +103,8 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
-        'USER': 'root', #os.getenv('DB_USER'),  # for privileged user : root
-        'PASSWORD': 'admin_group4_dbnba' #os.getenv('DB_PASSWORD'),
+        'USER': os.getenv('DB_USER'), #'root',   # for privileged user : root
+        'PASSWORD': os.getenv('DB_PASSWORD'), #'admin_group4_dbnba'
     }
 }
 
