@@ -247,7 +247,7 @@ def profile_view_edit_auth(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'profile_picture': user.profile_picture.url if user.profile_picture else None,
-            'posts': [{'post_id': post.post_id} for post in posts]
+            'posts': [{'post_id': post.post_id} for post in posts].reverse
         }
         return JsonResponse(data, status=200)
     
@@ -271,7 +271,7 @@ def profile_view_edit_others(request, username):
         'following_count': following_count,
         'followers_count': followers_count,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'posts': [{'post_id': post.post_id} for post in posts],
+        'posts': [{'post_id': post.post_id} for post in posts].reverse,
         'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
     }
 
@@ -376,7 +376,7 @@ def feed(request):
         posts = Post.objects.filter(user=follow.user)
         for post in posts:
             post_ids.append(post.post_id)
-
+    post_ids.reverse
     return JsonResponse({'post_ids': post_ids}, status=200)
 
     #all_feed_posts = [Post.objects.filter(user=follow.user) for follow in following]
@@ -395,7 +395,7 @@ def search(request):
             player = search_player(query)
             print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id} for post in posts]})
+            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id} for post in posts].reverse})
         except:
             return JsonResponse({"error:": "error in search, please try again"})
         
