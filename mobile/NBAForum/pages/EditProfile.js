@@ -1,23 +1,45 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
 import { Context } from "../globalContext/globalContext.js";
 
 const EditProfile = ({ navigation }) => {
-  const { baseURL, currentUser } = useContext(Context);  
+  const { baseURL } = useContext(Context);
   const [userInfo, setUserInfo] = useState({
-    username: currentUser?.username || "",
-    bio: currentUser?.bio || "",
-    email: currentUser?.email || "",
-    profilePicture: currentUser?.profile_picture || "https://cdn.nba.com/manage/2020/10/NBA20Primary20Logo-1-259x588.jpg"
+    username: "",
+    email: "",
+    bio: "",
+    profilePicture: ""
   });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/profile_view_edit_auth`);
+        if (response.data) {
+          setUserInfo({
+            username: response.data.username,
+            email: response.data.email,
+            bio: response.data.bio,
+            profilePicture: response.data.profile_picture ? `${baseURL}${response.data.profile_picture}` : userInfo.profilePicture
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        Alert.alert('Error', 'Could not fetch profile data');
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleChoosePhoto = () => {
     const options = {
       noData: true,
       mediaType: 'photo',
     };
+
     ImagePicker.launchImageLibrary(options, response => {
       if (response.uri) {
         setUserInfo({ ...userInfo, profilePicture: response.uri });
@@ -26,105 +48,93 @@ const EditProfile = ({ navigation }) => {
   };
 
   const handleSave = async () => {
+    const formData = new FormData();
+    formData.append('username', userInfo.username);
+    formData.append('email', userInfo.email);
+    formData.append('bio', userInfo.bio);
+
+    // Check if the profile picture is a new file and not just a URL from the server
+    if (userInfo.profilePicture && !userInfo.profilePicture.includes(baseURL)) {
+      formData.append('profile_picture', {
+        name: 'profile.jpg',
+        type: 'image/jpeg',
+        uri: userInfo.profilePicture,
+      });
+    }
+
     try {
-      const formData = new FormData();
-      formData.append('username', userInfo.username);
-      formData.append('email', userInfo.email);
-      formData.append('bio', userInfo.bio);
-      if (!userInfo.profilePicture.startsWith('http')) {
-        formData.append('profile_picture', {
-          name: 'profile.jpg',
-          type: 'image/jpeg',
-          uri: userInfo.profilePicture
-        });
-      }
-      
-      const config = {
+
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+      .csrf_token;
+
+      const response = await axios.post(`${baseURL}/profile_view_edit_auth`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
+          "X-CSRFToken": csrfToken,
         },
-      };
-      const response = await axios.post(`${baseURL}/profile_view_edit/${currentUser.user_id}`, formData, config);
-      console.log("Profile update response:", response.data);
-      Alert.alert("Profile Updated Successfully!");
-      navigation.goBack();
+      });
+
+      if (response.status === 200) {
+        Alert.alert("Profile Updated", "Your profile has been successfully updated.");
+        navigation.navigate('Profile');
+      } else {
+        throw new Error('Server responded with an error');
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile');
+      Alert.alert('Update Failed', 'Failed to update profile.');
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.profileSection}>
-        <View style={styles.imageContainer}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.imageContainer}>
+        <TouchableOpacity onPress={handleChoosePhoto}>
           <Image source={{ uri: userInfo.profilePicture }} style={styles.profileImage} />
-        </View>
-        <Text style={styles.name}>{userInfo.username}</Text>
-        <Text>{userInfo.email}</Text>
-        <Text>{userInfo.bio}</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleChoosePhoto}>
-        <Text style={styles.buttonText}>Choose New Photo</Text>
-      </TouchableOpacity>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={userInfo.username}
-          onChangeText={(text) => setUserInfo({ ...userInfo, username: text })}
-          placeholder="Username"
-        />
-        <TextInput
-          style={styles.input}
-          value={userInfo.email}
-          onChangeText={(text) => setUserInfo({ ...userInfo, email: text })}
-          placeholder="Email"
-        />
-        <TextInput
-          style={styles.input}
-          value={userInfo.bio}
-          onChangeText={(text) => setUserInfo({ ...userInfo, bio: text })}
-          placeholder="Biography"
-          multiline
-        />
-      </View>
-
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save Changes</Text>
+      <TextInput
+        style={styles.input}
+        value={userInfo.username}
+        onChangeText={username => setUserInfo({ ...userInfo, username })}
+        placeholder="Username"
+      />
+      <TextInput
+        style={styles.input}
+        value={userInfo.email}
+        onChangeText={email => setUserInfo({ ...userInfo, email })}
+        placeholder="Email"
+      />
+      <TextInput
+        style={styles.input}
+        value={userInfo.bio}
+        onChangeText={bio => setUserInfo({ ...userInfo, bio })}
+        placeholder="Bio"
+        multiline
+      />
+      <TouchableOpacity style={styles.button} onPress={handleSave}>
+        <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flexGrow: 1,
+    alignItems: 'center',
     padding: 20,
     backgroundColor: '#F0F9FF'
   },
-  profileSection: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
   imageContainer: {
-    width: 200,
-    height: 200,
-    borderRadius: 60,
-    overflow: 'hidden',
+    alignItems: 'center',
+    marginBottom: 20
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain', 
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  inputContainer: {
-    width: '100%',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 10
   },
   input: {
     height: 40,
@@ -133,28 +143,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 10,
     borderRadius: 5,
+    width: '100%'
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1B64EB',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 20
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
-  },
-  saveButton: {
-    backgroundColor: '#34C759',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
+    fontSize: 16
   },
 });
 
