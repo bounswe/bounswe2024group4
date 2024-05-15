@@ -7,7 +7,7 @@ import Feed from "./Feed";
 import Search from "./Search";
 import Profile from "./Profile";
 import EditProfile from "./EditProfile";
-import Others_Profile from "./Others_Profile";
+import OthersProfile from "./OthersProfile";
 
 export{
     Login,
@@ -19,5 +19,5 @@ export{
     Search,
     Profile,
     EditProfile,
-    Others_Profile
+    OthersProfile
 }

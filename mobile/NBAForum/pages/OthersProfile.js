@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import { Context } from "../globalContext/globalContext.js";
 
-const Others_Profile = () => {
-  
+const OthersProfile = ({ route, navigation }) => {
+  const { username } = route.params;
   const { baseURL } = useContext(Context);
   const [profileInfo, setProfileInfo] = useState({
     username: "",
@@ -12,34 +12,50 @@ const Others_Profile = () => {
     bio: "",
     followers_count: 0,
     following_count: 0,
-    postsCount: 0,
-    is_following: true
+    posts: [],
+    isFollowing: false
   });
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get(`${baseURL}/profile_view_edit_others`);
-        console.log(response.data);
+        const response = await axios.get(`${baseURL}/profile_view_edit_others/${username}`);
         if (response.status === 200) {
           setProfileInfo({
             username: response.data.username,
-            profile_picture: response.data.profile_picture,
+            profile_picture: response.data.profile_picture || profileInfo.profile_picture,
             bio: response.data.bio,
             followers_count: response.data.followers_count,
             following_count: response.data.following_count,
-            postsCount: response.data.posts.length,
             posts: response.data.posts,
+            isFollowing: response.data.is_following
           });
-          console.log("User profile data:", response.data);
         }
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
+        Alert.alert('Error', 'Failed to fetch user profile data');
       }
     };
 
     fetchUserProfile();
-  }, []);  
+  }, []);
+
+  const handleFollowToggle = async () => {
+    try {
+      const endpoint = profileInfo.isFollowing ? '/unfollow_user/' : '/follow_user/';
+      const response = await axios.post(`${baseURL}${endpoint}${username}`);
+      if (response.status === 200) {
+        setProfileInfo(prevState => ({
+          ...prevState,
+          isFollowing: !prevState.isFollowing,
+          followers_count: prevState.followers_count + (prevState.isFollowing ? -1 : 1)
+        }));
+      }
+    } catch (error) {
+      console.error("Error updating follow status:", error);
+      Alert.alert('Error', 'Failed to update follow status');
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -52,7 +68,7 @@ const Others_Profile = () => {
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <Text style={styles.statTitle}>Posts</Text>
-          <Text style={styles.statValue}>{profileInfo.postsCount}</Text>
+          <Text style={styles.statValue}>{profileInfo.posts.length}</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={styles.statTitle}>Followers</Text>
@@ -64,9 +80,16 @@ const Others_Profile = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.followButton} onPress={() => {/* Follow/Unfollow logic */}}>
+      <TouchableOpacity style={styles.followButton} onPress={handleFollowToggle}>
         <Text style={styles.buttonText}>{profileInfo.isFollowing ? 'Unfollow' : 'Follow'}</Text>
       </TouchableOpacity>
+
+    
+      {profileInfo.posts.map((post) => (
+        <View key={post.post_id} style={styles.postContainer}>
+          <Text>{post.content}</Text>
+        </View>
+      ))}
     </ScrollView>
   );
 };
@@ -79,16 +102,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F9FF'
   },
   profileImageContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    overflow: 'hidden',
+    alignItems: 'center',
     marginBottom: 20
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain'
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: 'hidden'
   },
   heading: {
     fontSize: 24,
@@ -121,7 +142,6 @@ const styles = StyleSheet.create({
   },
   followButton: {
     backgroundColor: "#1B64EB",
-    fontSize: 18,
     padding: 10,
     borderRadius: 16,
     marginTop: 10,
@@ -133,6 +153,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center'
+  },
+  postContainer: {
+    backgroundColor: '#fff',
+    padding: 10,
+    marginTop: 10,
+    width: '100%',
+    borderRadius: 5
   }
 });
-export default Others_Profile;
+
+export default OthersProfile;
