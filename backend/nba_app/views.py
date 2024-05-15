@@ -80,12 +80,15 @@ def create_comment(request, post_id):
     if request.method == "POST":
         user = request.user
         content = request.POST.get("content")
-        post = Post.objects.get(post_id=post_id)
-        if post:
-            Comment.objects.create(user=user, content=content, post=post)
-            return HttpResponseRedirect(f'/post/{post_id}/')
-        else:
+        
+        try:
+            post = Post.objects.get(post_id=post_id)
+        except Post.DoesNotExist:
             return HttpResponse("Post not found", status=404)
+        
+        Comment.objects.create(user=user, content=content, post=post)
+        return HttpResponseRedirect(f'/post/{post_id}/')
+
 
     return render(request, 'comment.html', {'post_id': post_id})
 
@@ -200,6 +203,12 @@ def user_followers(request):
     return JsonResponse({'followers_info': followers_info}, status=200)
 
 
+def get_bookmarked_post_ids(request):
+    user = request.user
+    bookmarks = Bookmark.objects.filter(user=user)
+    bookmarked_post_ids = [{'post_id' : bookmark.post.post_id} for bookmark in bookmarks]
+    return JsonResponse({'posts': bookmarked_post_ids}, status=200)     
+
 def profile_view_edit_auth(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
@@ -248,7 +257,7 @@ def profile_view_edit_auth(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'profile_picture': user.profile_picture.url if user.profile_picture else None,
-            'posts': [{'post_id': post.post_id} for post in posts].reverse
+            'posts': list(reversed([{'post_id': post.post_id} for post in posts]))
         }
         return JsonResponse(data, status=200)
     
@@ -272,7 +281,7 @@ def profile_view_edit_others(request, username):
         'following_count': following_count,
         'followers_count': followers_count,
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
-        'posts': [{'post_id': post.post_id} for post in posts].reverse,
+        'posts': list(reversed([{'post_id': post.post_id} for post in posts])),
         'is_following': is_following, # True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user
     }
 
@@ -377,7 +386,7 @@ def feed(request):
         posts = Post.objects.filter(user=follow)
         for post in posts:
             post_ids.append(post.post_id)
-    post_ids.reverse
+    post_ids = list(reversed(post_ids))
     return JsonResponse({'post_ids': post_ids}, status=200)
 
     #all_feed_posts = [Post.objects.filter(user=follow.user) for follow in following]
@@ -396,7 +405,7 @@ def search(request):
             player = search_player(query)
             print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': [{'id': post.post_id} for post in posts].reverse})
+            return JsonResponse({'team': team, 'player': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))})
         except:
             return JsonResponse({"error:": "error in search, please try again"})
         

@@ -40,7 +40,7 @@ const Team = () => {
 
   useEffect(() => {
     handleData();
-  }, []);
+  });
 
   return (
     <div className= "bg-sky-50 min-h-screen bg-top-left">

@@ -18,6 +18,8 @@ urlpatterns = [
     
     path('profile_view_edit_auth', views.profile_view_edit_auth, name='profile_view_edit_auth'),
     path('profile_view_edit_others/<str:username>', views.profile_view_edit_others, name='profile_view_edit_others'),
+
+    path('get_bookmarked_post_ids/', views.get_bookmarked_post_ids, name='get_bookmarked_post_ids'),
     
     path('reset_password/', views.reset_password, name='reset_password'),
     
