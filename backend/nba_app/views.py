@@ -143,7 +143,15 @@ def bookmark_or_unbookmark_post(request, post_id):
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
 
 
-
+def video_or_image(file_path):
+    if file_path == None:
+        return None
+    else:
+        file_extension = file_path.split('.')[-1].lower()
+        video_exts = ['avi', 'mp4', 'mov', 'mkv', "wmv"]
+        if file_extension in video_exts:
+            return "vid"
+        return "img"
 
 @login_required
 def post_detail(request, post_id):
@@ -174,6 +182,7 @@ def post_detail(request, post_id):
         'post': post.content,
         'post_id': post_id,
         'image': image_url,
+        'video_or_image': video_or_image(image_url),
         'comments': comments_list,
         'username': post.user.username,
         'created_at': post.created_at,
