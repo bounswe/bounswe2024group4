@@ -21,6 +21,7 @@ function Post({ postId }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [profilePicture, setProfilePicture] = useState("");
 
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
@@ -102,6 +103,7 @@ function Post({ postId }) {
       setLikesCount(response.data.likes_count);
       setIsBookmarked(response.data.user_has_bookmarked);
       setAuthor(response.data.username);
+      setProfilePicture(baseURL + response.data.profile_picture);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -115,7 +117,7 @@ function Post({ postId }) {
     <div className="border border-gray-300 rounded-md overflow-hidden mb-2">
       <div className="bg-white shadow-md p-4 hover:bg-slate-50">
         <div className="flex gap-4">
-          {/* <img src={author.avatar} alt={author.name} className="w-12 h-12 rounded-full" /> */}
+          <img src={profilePicture} className="w-12 h-12 rounded-full border border-gray-300" />
           <div className="w-full">
             <div className="flex items-center mb-2 gap-2">
               <div className="flex items-center gap-2">
