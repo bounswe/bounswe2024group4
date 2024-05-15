@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, ActivityIndi
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Context } from "../globalContext/globalContext.js"
 import axios from 'axios';
+import moment from 'moment';
 
 const Feed = ({ navigation }) => {
   const { baseURL } = useContext(Context);
@@ -18,20 +19,16 @@ const Feed = ({ navigation }) => {
         const response = await axios.get(`${baseURL}/feed/`);
         const postIds = response.data.post_ids;
         setPostIds(postIds);
-  
         const postRequests = postIds.map(postId => axios.get(`${baseURL}/post_detail/${postId}/`));
         const postResponses = await Promise.all(postRequests);
         const fetchedPosts = postResponses.map(response => response.data);
-        fetchedPosts.sort((obj1, obj2) => {
-          return obj2.post_id - obj1.post_id;
-        });
         setPosts(fetchedPosts);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching followed profiles posts:', error);
         setIsLoading(false);
       }
-      };
+    };
       fetchFollowedProfilesPosts();
   }, []);
 
@@ -39,12 +36,16 @@ const Feed = ({ navigation }) => {
     return (
       
     <View style={styles.postContainer}>
+
       <View style={styles.userInfoContainer}>
-        <Image
-          source={{ uri: '/Users/buseaydin/Desktop/bounswe2024group4/backend/media/profile_pictures/default_nba_app_pp.jpg' }}
-          style={styles.profileImage}
-        />
-        <Text style={styles.username}>Zbuse</Text>
+        <View style={styles.userDetails}>
+          <Image
+            source={{ uri: baseURL + item.profile_picture }}
+            style={styles.profileImage}
+          />
+          <Text style={styles.username}>{item.username}</Text>
+        </View>
+        <Text>{moment(item.created_at).fromNow()}</Text>
       </View>
 
       <Text style={styles.postText}>{item.post}</Text>
@@ -55,7 +56,7 @@ const Feed = ({ navigation }) => {
         />
       ) : null}
       <View style={styles.actionsContainer}>
-      <TouchableOpacity onPress={handleLike} style={[styles.actionButton]}>
+      <TouchableOpacity onPress={() => handleLike(item.post_id)} style={[styles.actionButton]}>
         <Icon name={item.user_has_liked ? 'heart' : 'heart-o'} size={20} color="#fff" />
       </TouchableOpacity>
       <TouchableOpacity onPress={handleComment} style={styles.actionButton}>
@@ -68,14 +69,26 @@ const Feed = ({ navigation }) => {
     </View>
   )};
 
-  const handleCreatePost = () => {
-    // Navigate to the screen where users can create a new post
-  };
-
-
   // TODO: Handler for liking a post 
-  const handleLike = () => {
-    setLiked(!liked); 
+  const handleLike = async (post_id) => {
+    try {
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+        .csrf_token;
+
+      const response = await axios.post(baseURL + "/like_or_unlike_post/" + post_id, "", 
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+      });
+
+      if (response.status == 200) {
+
+      } 
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   // TODO: Handler for bookmarking a post 
@@ -100,10 +113,6 @@ const Feed = ({ navigation }) => {
       ) : (
         <ActivityIndicator size="large" color="#ffff" />
       )}
-      <TouchableOpacity style={styles.createPostButton} onPress={handleCreatePost}>
-        <Text><Text style={styles.createPostButtonText}>Create a Post</Text></Text> 
-      </TouchableOpacity>
-      
     </View>
 
   );
@@ -167,6 +176,7 @@ const styles = StyleSheet.create({
   userInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 5,
   },
   profileImage: {
@@ -180,6 +190,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  userDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  }
 });
 
 export default Feed;
