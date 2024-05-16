@@ -3,30 +3,29 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import axios from 'axios';
 import { Context } from "../globalContext/globalContext.js";
-import SearchResults from './SearchResults'; // Import SearchResults component
+import { useNavigation } from '@react-navigation/native';
 
-const Search = ({ navigation }) => {
+const Search = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState(null); // Store search results
   const [error, setError] = useState('');
-
   const { baseURL } = useContext(Context);
+  const navigation = useNavigation();
 
-  const handleSearch = async (query) => {
-    if (!query.trim()) {
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
       setError("Please enter a valid search query.");
       return;
     }
     setIsLoading(true);
     setError('');
     try {
-      const encodedQuery = encodeURIComponent(query);
+      const encodedQuery = encodeURIComponent(searchQuery);
       const response = await axios.get(`${baseURL}/search/?query=${encodedQuery}`);
       setIsLoading(false);
-      if (response.data && (response.data.player || response.data.team)) {
-        setResults(response.data); // Store results in state
-        console.log(results)
+      if (response.data) {
+        console.log(response.data)
+        navigation.navigate('SearchResults', { query: searchQuery, data: response.data });
       } else {
         setError("No data found for the query.");
       }
@@ -43,14 +42,12 @@ const Search = ({ navigation }) => {
         placeholder="Search for a NBA team/player!"
         value={searchQuery}
         onChangeText={setSearchQuery}
-        onSubmitEditing={() => handleSearch(searchQuery)}
+        onSubmitEditing={handleSearch}
       />
       {isLoading ? (
-        <ActivityIndicator size="large" color="#FFFF" />
+        <ActivityIndicator size="large" color="#0000ff" />
       ) : error ? (
-        <Text>{error}</Text>
-      ) : results ? (
-        <SearchResults results={results} navigation={navigation} />
+        <Text style={styles.error}>{error}</Text>
       ) : null}
     </View>
   );
@@ -58,10 +55,15 @@ const Search = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 25,
+    padding: 20,
     flex: 1,
     backgroundColor: '#55A1E6',
   },
+  error: {
+    color: 'red',
+    marginTop: 10,
+    fontWeight: 'bold'
+  }
 });
 
 export default Search;
