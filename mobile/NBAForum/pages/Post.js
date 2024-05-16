@@ -1,7 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { Context } from "../globalContext/globalContext.js"
-import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, FlatList } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { faBookmark as sBookmark, faHeart as sHeart, faComment as sComment } from '@fortawesome/free-solid-svg-icons';
+import { faBookmark, faHeart, faComment } from '@fortawesome/free-regular-svg-icons';
 import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
 import axios from 'axios';
@@ -14,6 +16,13 @@ const Post = ({ post, navigation }) => {
   const [ isLiked, setIsLiked ] = useState(post.user_has_liked);
   const [ isBookmarked, setIsBookmarked ] = useState(post.user_has_bookmarked);
   const [ likesCount, setLikesCount ] = useState(post.likes_count);
+
+  const commentsWithIds = comments.map((comment, index) => ({
+    ...comment,
+    id: index,
+  }));
+
+  console.log(commentsWithIds);
 
   const handleLike = async () => {
     const previousLikesCount = likesCount;
@@ -94,6 +103,7 @@ const Post = ({ post, navigation }) => {
           }
         );
         setComments(response.data.comments);
+        console.log(comments);
         if (response.status !== 200) {
           console.log("Couldn't comment on the post");
         }
@@ -125,29 +135,48 @@ const Post = ({ post, navigation }) => {
           style={styles.postImage}
         />
       )}
+
       <View style={styles.separator} />
       <View style={styles.actionsContainer}>
         <View style={styles.likeContainer}>
           <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
-            <Icon name={isLiked ? 'heart' : 'heart-o'} size={20} color="#fff" />
+            <FontAwesomeIcon icon={isLiked ? sHeart : faHeart} size={20} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.likeCount}>{likesCount}</Text>
         </View>
         <View style={styles.userDetails}>
           <TouchableOpacity onPress={toggleComments} style={styles.actionButton}>
-            <Icon name='comments' size={20} color="#fff" />
+            <FontAwesomeIcon icon={showComments ? sComment : faComment} size={20} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleBookmark} style={styles.actionButton}>
-            <Icon name={isBookmarked ? 'bookmark' : 'bookmark-o'} size={20} color="#fff" />
+            <FontAwesomeIcon icon={isBookmarked ? sBookmark : faBookmark} size={20} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
 
         {showComments && (
           <View style={styles.commentsContainer}>
-            {comments.map((comment, index) => (
-              <Text key={index} style={styles.comment}>{comment.content}</Text>
-            ))}
+          {
+              <FlatList
+                data={commentsWithIds}
+                renderItem={({ item }) => (
+                  <View style={styles.row}>
+                    <TouchableOpacity onPress={() => navigation.navigate('OthersProfile',  {username: item.comment_username} )}>
+                        <View style={{alignItems: 'flex-start'}}>
+                          <Image source={{ uri: baseURL + item.comment_user_pp }} style={styles.smallProfileImage} />
+                        </View>
+                    </TouchableOpacity>
+                    <View>
+                      <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('OthersProfile',  {username: item.comment_username} )}>
+                        <Text style={styles.smallUsername}>{item.comment_username}</Text>
+                      </TouchableOpacity>
+                      <Text>{item.content}</Text>
+                    </View>
+                  </View>
+                )}
+                keyExtractor={(item) => item.id}
+                />
+              }
             <View style={styles.createCommentContainer}>
               <TextInput
                 style={styles.commentInput}
@@ -207,9 +236,29 @@ const styles = StyleSheet.create({
     marginBottom: 1,
     justifyContent: 'space-between',
   },
+  container: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#F0F9FF'
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 10,
+    margin: 3,
+    borderRadius: 8,
+  },
   profileImage: {
     width: 50,
     height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  smallProfileImage: {
+    width: 35,
+    height: 35,
     borderRadius: 25,
     marginRight: 10,
   },
@@ -219,6 +268,11 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  smallUsername: {
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#333',
   },
