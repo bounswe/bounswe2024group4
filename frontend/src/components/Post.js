@@ -22,7 +22,7 @@ function Post({ postId, updateComments }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [profilePicture, setProfilePicture] = useState("");
-
+  const [commentCount, setCommentCount] = useState(0);
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
 
@@ -154,6 +154,7 @@ function Post({ postId, updateComments }) {
       setAuthor(response.data.username);
       setProfilePicture(baseURL + response.data.profile_picture);
       updateComments(response.data.comments);
+      setCommentCount(response.data.comments.length);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -211,7 +212,7 @@ function Post({ postId, updateComments }) {
               <div className="group flex items-center mr-4">
                 <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-500 mr-1 cursor-pointer rounded-full group-hover:text-blue-500 group-hover:bg-blue-100" />
                 <span className="text-gray-600 group-hover:text-blue-500">
-                  {/* {commentCount} */}
+                  {commentCount}
                 </span>
               </div>
               <div className="group flex items-center mr-4 absolute right-0">
