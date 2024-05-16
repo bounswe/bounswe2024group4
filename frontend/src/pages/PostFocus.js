@@ -22,12 +22,7 @@ const PostFocus = () => {
   });
 
   const updateComments = (newComments) => {
-    if (newComments.length == 0) {
-      setComments(null);
-    }
-    else {
       setComments(newComments);
-    }
   };
 
   const handleCommentSubmit = async () => {
