@@ -389,6 +389,8 @@ def user_followings(request):
     return JsonResponse({'followings_info': followings_info}, status=200)
 
 
+
+
 @swagger_auto_schema(
     method='post',
     operation_description="Get the list of users who are following the authenticated user",
@@ -416,10 +418,18 @@ def user_followers(request):
     followers_info = [{'user_id': follower.user_id, 'username':follower.username} for follower in followers]
     return JsonResponse({'followers_info': followers_info}, status=200)
 
+
 @api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
+def get_users_like_post(request, post_id):
+    post = Post.objects.get(post_id=post_id)
+    likes = LikePost.objects.filter(post=post)
+    usernames = [{'username' : like.user.username} for like in likes]
+    return JsonResponse({'usernames': usernames}, status=200)
 
 
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
 def get_bookmarked_post_ids(request):
     user = request.user
     bookmarks = Bookmark.objects.filter(user=user)
