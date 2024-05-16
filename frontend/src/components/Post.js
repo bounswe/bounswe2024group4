@@ -26,6 +26,50 @@ function Post({ postId }) {
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
 
+  const parseContentWithHyperlinks = (content) => {
+    // Check if content is defined and not empty
+    if (!content || content.trim() === "") return null;
+
+    // Regular expression to match anchor tags with href attribute
+    const anchorRegex = /<a\s+href="([^"]+)">([^<]+)<\/a>/g;
+
+    // Extract URLs and anchor text from content
+    const parts = [];
+    let match;
+    let lastIndex = 0;
+    while ((match = anchorRegex.exec(content)) !== null) {
+      // Push preceding text as plain text
+      parts.push(content.slice(lastIndex, match.index));
+      // Push URL and anchor text
+      parts.push({
+        url: match[1], // URL
+        text: match[2], // Anchor text
+      });
+      lastIndex = anchorRegex.lastIndex;
+    }
+    // Push remaining text after the last match
+    parts.push(content.slice(lastIndex));
+
+    // Render content with clickable links
+    return parts.map((part, index) => {
+      if (typeof part === "string") {
+        // Plain text
+        return part;
+      } else {
+        // Anchor text, render as clickable link
+        return (
+          <span
+            key={index}
+            onClick={() => window.open(part.url, "_blank")}
+            style={{ textDecoration: "underline", cursor: "pointer" }}
+          >
+            {part.text}
+          </span>
+        );
+      }
+    });
+  };
+
   const handleLike = async () => {
     // Store the previous values in case of reverting back
     const previousLikesCount = likesCount;
@@ -125,7 +169,9 @@ function Post({ postId }) {
                 <p className="text-gray-500 text-sm">{createdAt}</p>
               </div>
             </div>
-            <p className="text-gray-800 mb-4">{content}</p>
+            <p className="text-gray-800 mb-4">
+              {parseContentWithHyperlinks(content)}
+            </p>
             {imageURL && (
               <img
                 src={imageURL}
