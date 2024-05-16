@@ -530,7 +530,7 @@ def team(request):
                     ?venue rdfs:label ?venueLabel. FILTER(LANG(?venueLabel) = "en").
                 }
                 ?venue (wdt:P625) ?venue_location.
-                FILTER(lang(?itemLabel) = "en" && ?item = wd:Q121783)
+                FILTER(lang(?itemLabel) = "en" && ?item = wd:'''+ id +''')
             }
             LIMIT 1
         '''
