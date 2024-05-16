@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { TouchableOpacity, View, Text, StyleSheet, Modal } from "react-native";
-import { Provider } from "./globalContext/globalContext.js";
+import { TouchableOpacity, View, Text, StyleSheet, Modal, Alert } from "react-native";
+import { Provider, Context } from "./globalContext/globalContext.js";
 import Navigator from "./navigator.js";
 import CommonNavigator from "./commonNavigator.js";
 import CreatePost from "./pages/CreatePost.js";
@@ -35,7 +35,15 @@ export default function App() {
   );
 }
 
+const showAlert = (title, message, onPress) =>
+  Alert.alert(title, message, [
+    { text: "OK", onPress: onPress },
+  ]);
+
 const CustomTabBar = ({ state, descriptors, navigation, setShowCreatePostModal }) => {
+  const globalContext = useContext(Context)
+  const { isLoggedIn } = globalContext;
+
   return (
     <View style={styles.tabBar}>
       {state.routes.map((route, index) => {
@@ -76,7 +84,15 @@ const CustomTabBar = ({ state, descriptors, navigation, setShowCreatePostModal }
         );
       })}
       <TouchableOpacity
-        onPress={() => setShowCreatePostModal(true)}
+        onPress={() => 
+          {
+            if (isLoggedIn) {
+              setShowCreatePostModal(true)
+            } else {
+              showAlert("Login Required", "Please login to create a post", () => {})
+            }
+          }          
+        }
         style={styles.plusButton}
       >
         <Text style={styles.plusButtonText}>+</Text>

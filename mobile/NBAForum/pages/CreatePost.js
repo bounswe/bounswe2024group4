@@ -5,11 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Modal,
-  Button,
+  Alert,
 } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { Context } from "../globalContext/globalContext.js";
 
 const CreatePostScreen = ({ setShowCreatePostModal }) => {
@@ -17,12 +16,11 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
   const { baseURL } = globalContext;
   const [description, setDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
+  const showAlert = (title, message, onPress) =>
+    Alert.alert(title, message, [
+      { text: "OK", onPress: onPress },
+    ]);
 
   const openImagePicker = () => {
     const options = {
@@ -48,26 +46,30 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
     console.log("Content:", description);
     console.log("Image:", selectedImage);
 
+    var formData = new FormData();
+    formData.append("content", description);
+    formData.append("image", selectedImage);
+
     try {
-      const response = await axios.post(
-        baseURL + "/post",
-        {
-          content: description,
-          image: selectedImage,
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+        .csrf_token;
+      const response = await axios.post(baseURL + "/post/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-CSRFToken": csrfToken,
         },
-      );
-      console.log(response.data);
-      if (response.status == 200) {
-        setMessage("Post created successfully!");
-        setShowCreatePostModal(false);
+      });
+      
+      if (response.status == 201) {
+        showAlert("Success", "Post created successfully!", () => {
+          setShowCreatePostModal(false);
+        });
       } else {
-        setMessage("Something went wrong, please try again.");
-        toggleModal();
+        showAlert("Error", "Something went wrong, please try again.");
       }
     } catch (error) {
       console.log(error.message);
-      setMessage("Something went wrong, please try again.");
-      toggleModal();
+      showAlert("Error", "Something went wrong, please try again.");
     }
   };
 
@@ -88,32 +90,6 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
       <TouchableOpacity style={styles.shareButton} onPress={share}>
         <Text style={styles.shareButtonText}>Share</Text>
       </TouchableOpacity>
-      <Modal
-          visible={isModalVisible}
-          animationType="slide"
-          transparent={false}
-          onRequestClose={toggleModal}
-        >
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "white",
-                padding: 20,
-                borderRadius: 10,
-              }}
-            >
-              <Text>{message}</Text>
-              <Button title="Close" onPress={toggleModal} />
-            </View>
-          </View>
-        </Modal>
     </View>
   );
 };
@@ -125,6 +101,8 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 24,
     borderRadius: 24,
+    borderColor: "gray",
+    borderWidth: 1,
   },
   descriptionInput: {
     borderColor: "gray",
