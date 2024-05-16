@@ -5,6 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Modal,
+  Button,
 } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import axios, { Axios } from "axios";
@@ -15,7 +17,12 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
   const { baseURL } = globalContext;
   const [description, setDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [message, setMessage] = useState("");
+
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
 
   const openImagePicker = () => {
     const options = {
@@ -38,24 +45,16 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
   };
 
   const share = async () => {
-    console.log("Description:", description);
+    console.log("Content:", description);
     console.log("Image:", selectedImage);
 
     try {
-      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
-        .csrf_token;
       const response = await axios.post(
         baseURL + "/post",
         {
-          description: description,
+          content: description,
           image: selectedImage,
         },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "X-CSRFToken": csrfToken,
-          },
-        }
       );
       console.log(response.data);
       if (response.status == 200) {
@@ -63,10 +62,12 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
         setShowCreatePostModal(false);
       } else {
         setMessage("Something went wrong, please try again.");
+        toggleModal();
       }
     } catch (error) {
       console.log(error.message);
       setMessage("Something went wrong, please try again.");
+      toggleModal();
     }
   };
 
@@ -87,6 +88,32 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
       <TouchableOpacity style={styles.shareButton} onPress={share}>
         <Text style={styles.shareButtonText}>Share</Text>
       </TouchableOpacity>
+      <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={toggleModal}
+        >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "white",
+                padding: 20,
+                borderRadius: 10,
+              }}
+            >
+              <Text>{message}</Text>
+              <Button title="Close" onPress={toggleModal} />
+            </View>
+          </View>
+        </Modal>
     </View>
   );
 };
