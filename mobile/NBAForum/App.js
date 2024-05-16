@@ -27,7 +27,7 @@ export default function App() {
             <TouchableOpacity onPress={() => setShowCreatePostModal(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
-            <CreatePost />
+            <CreatePost setShowCreatePostModal={setShowCreatePostModal}/>
           </View>
         </Modal>
       </NavigationContainer>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,72 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { launchImageLibrary } from "react-native-image-picker";
+import axios, { Axios } from "axios";
+import { Context } from "../globalContext/globalContext.js";
 
-const CreatePostScreen = () => {
+const CreatePostScreen = ({ setShowCreatePostModal }) => {
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
   const [description, setDescription] = useState("");
-  const [link, setLink] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [message, setMessage] = useState("");
+
+  const openImagePicker = () => {
+    const options = {
+      mediaType: "photo",
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.error) {
+        console.log("Image picker error: ", response.error);
+      } else {
+        let imageUri = response.uri || response.assets?.[0]?.uri;
+        setSelectedImage(imageUri);
+      }
+    });
+  };
+
+  const share = async () => {
+    console.log("Description:", description);
+    console.log("Image:", selectedImage);
+
+    try {
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+        .csrf_token;
+      const response = await axios.post(
+        baseURL + "/post",
+        {
+          description: description,
+          image: selectedImage,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "X-CSRFToken": csrfToken,
+          },
+        }
+      );
+      console.log(response.data);
+      if (response.status == 200) {
+        setMessage("Post created successfully!");
+        setShowCreatePostModal(false);
+      } else {
+        setMessage("Something went wrong, please try again.");
+      }
+    } catch (error) {
+      console.log(error.message);
+      setMessage("Something went wrong, please try again.");
+    }
+  };
 
   return (
-    <View
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <Text style={{ fontSize: 24 }}>Create a New Post</Text>
       <TextInput
         style={styles.descriptionInput}
@@ -24,16 +81,10 @@ const CreatePostScreen = () => {
         multiline
         numberOfLines={4}
       />
-      <TextInput
-        style={styles.linkInput}
-        onChangeText={(text) => setLink(text)}
-        value={link}
-        placeholder="Enter a link"
-      />
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={openImagePicker}>
         <Text style={styles.addButtonText}>Add Photo</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.shareButton}>
+      <TouchableOpacity style={styles.shareButton} onPress={share}>
         <Text style={styles.shareButtonText}>Share</Text>
       </TouchableOpacity>
     </View>
@@ -41,10 +92,10 @@ const CreatePostScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "white", 
-    width: "100%", 
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+    width: "100%",
     padding: 24,
     borderRadius: 24,
   },
@@ -54,15 +105,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "auto",
     minHeight: 300,
-    marginTop: 10,
-    padding: 10,
-    borderRadius: 8,
-  },
-  linkInput: {
-    borderColor: "gray",
-    borderWidth: 1,
-    width: "100%",
-    height: 40,
     marginTop: 10,
     padding: 10,
     borderRadius: 8,
