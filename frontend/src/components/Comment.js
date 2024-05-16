@@ -4,6 +4,8 @@ import { HeartIcon as HeartIconOutline } from "@heroicons/react/24/outline";
 import { Context } from "../globalContext/globalContext.js";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 function Comment({ content, username, profilePicture, commentId, initialIsLiked, initialLikesCount }) {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
@@ -11,6 +13,12 @@ function Comment({ content, username, profilePicture, commentId, initialIsLiked,
 
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
+
+  const navigate = useNavigate();
+
+  const handleProfilePictureClick  = () => {
+    navigate("/user/" + username);
+  };
 
   const handleLike = async () => {
     // Store the previous values in case of reverting back
@@ -52,11 +60,12 @@ function Comment({ content, username, profilePicture, commentId, initialIsLiked,
           <img
             src={profilePicture}
             className="w-12 h-12 rounded-full aspect-square border border-gray-300 object-cover object-center"
+            onClick={handleProfilePictureClick}
           />
           <div className="w-full">
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-medium text-black">{username}</h2>
+                <h2 className="text-lg font-medium text-black" onClick={handleProfilePictureClick}>{username}</h2>
               </div>
             </div>
             <div className="flex relative">
