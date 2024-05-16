@@ -6,6 +6,7 @@ import { Provider, Context } from "./globalContext/globalContext.js";
 import Navigator from "./navigator.js";
 import CommonNavigator from "./commonNavigator.js";
 import CreatePost from "./pages/CreatePost.js";
+import Profile from './pages/Profile.js';
 
 export default function App() {
   const Tab = createBottomTabNavigator();
@@ -17,6 +18,7 @@ export default function App() {
         <Tab.Navigator tabBar={props => <CustomTabBar {...props} setShowCreatePostModal={setShowCreatePostModal} />}>
           <Tab.Screen name="Main" component={Navigator} options={{ headerShown: false }} />
           <Tab.Screen name="Search" component={CommonNavigator} />
+          <Tab.Screen name="Profile" component={Profile} />
         </Tab.Navigator>
         <Modal
           visible={showCreatePostModal}

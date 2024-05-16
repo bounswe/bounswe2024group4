@@ -4,7 +4,7 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Post from "./Post.js";
 
-const Feed = () => {
+const Feed = ( {navigation} ) => {
   const { baseURL } = useContext(Context);
   const [postIds, setPostIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,10 +35,15 @@ const Feed = () => {
   return (
     <View style={styles.container}>
       {!isLoading ? (
-        <FlatList
-          data={posts}
-          renderItem={({ item }) => <Post post={item} />}
-          keyExtractor={(item) => item.post_id.toString()}
+      <FlatList
+        data={posts}
+        renderItem={({ item }) => (
+          <Post
+            post={item}
+            navigation={navigation}
+          />
+        )}
+        keyExtractor={(item) => item.post_id.toString()}
         />
       ) : (
         <ActivityIndicator size="large" color="#ffff" />
