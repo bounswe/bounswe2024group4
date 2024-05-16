@@ -7,6 +7,8 @@ import { faBookmark, faHeart, faComment } from '@fortawesome/free-regular-svg-ic
 import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
 import axios from 'axios';
+import Comment from "./Comment.js";
+
 
 const Post = ({ post, navigation }) => {
   const { baseURL } = useContext(Context);
@@ -16,13 +18,6 @@ const Post = ({ post, navigation }) => {
   const [ isLiked, setIsLiked ] = useState(post.user_has_liked);
   const [ isBookmarked, setIsBookmarked ] = useState(post.user_has_bookmarked);
   const [ likesCount, setLikesCount ] = useState(post.likes_count);
-
-  const commentsWithIds = comments.map((comment, index) => ({
-    ...comment,
-    id: index,
-  }));
-
-  console.log(commentsWithIds);
 
   const handleLike = async () => {
     const previousLikesCount = likesCount;
@@ -158,21 +153,12 @@ const Post = ({ post, navigation }) => {
           <View style={styles.commentsContainer}>
           {
               <FlatList
-                data={commentsWithIds}
+                data={comments}
                 renderItem={({ item }) => (
-                  <View style={styles.row}>
-                    <TouchableOpacity onPress={() => navigation.navigate('OthersProfile',  {username: item.comment_username} )}>
-                        <View style={{alignItems: 'flex-start'}}>
-                          <Image source={{ uri: baseURL + item.comment_user_pp }} style={styles.smallProfileImage} />
-                        </View>
-                    </TouchableOpacity>
-                    <View>
-                      <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('OthersProfile',  {username: item.comment_username} )}>
-                        <Text style={styles.smallUsername}>{item.comment_username}</Text>
-                      </TouchableOpacity>
-                      <Text>{item.content}</Text>
-                    </View>
-                  </View>
+                  <Comment
+                    comment={item}
+                    navigation={navigation}
+                  />
                 )}
                 keyExtractor={(item) => item.id}
                 />
@@ -244,7 +230,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#ffffff',
     padding: 10,
     margin: 3,
@@ -278,6 +264,7 @@ const styles = StyleSheet.create({
   },
   commentsContainer: {
     marginTop: 10,
+    width: '%100'
   },
   comment: {
     marginBottom: 5,

@@ -78,14 +78,14 @@ function Navigator() {
             name="Profile"
             component={Profile}
             options={{
-              title: "Profile",
+              title: "Your Profile",
             }}
           />
           <Stack.Screen
             name="OthersProfile"
             component={OthersProfile}
             options={{
-              title: "OthersProfile",
+              title: "Profile Page",
             }}
           />
           <Stack.Screen

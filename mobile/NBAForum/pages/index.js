@@ -11,6 +11,7 @@ import Profile from "./Profile";
 import EditProfile from "./EditProfile";
 import OthersProfile from "./OthersProfile";
 import BookmarkedPosts from "./BookmarkedPosts";
+import Comment from "./Comment";
 
 export{
     Login,
@@ -25,5 +26,6 @@ export{
     OthersProfile,
     Post,
     SearchResults,
-    BookmarkedPosts
+    BookmarkedPosts,
+    Comment
 }
