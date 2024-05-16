@@ -536,6 +536,7 @@ def team(request):
         try:
             response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
             data = response.json()
+            #print("data:", data)   
             bindings = data['results']['bindings'][0]
             if 'venue_location' in bindings:
                 venue_location = bindings['venue_location']['value']
@@ -544,12 +545,12 @@ def team(request):
             else:
                 venue_latitude = None
                 venue_longitude = None
-            return JsonResponse({'name': bindings['itemLabel']['value'] if 'itemLabel' in bindings else None,
+            return JsonResponse({'name': bindings['itemLabel']['value'],
                                 'image': bindings['image']['value'] if 'image' in bindings else None,
-                                'coach': bindings['coach']['value'] if 'coach' in bindings else None,
-                                'division': bindings['division']['value'] if 'division' in bindings else None,
-                                'conference': bindings['conference']['value'] if 'conference' in bindings else None,
-                                'venue': bindings['venue']['value'] if 'venue' in bindings else None,
+                                'coach': bindings['coachLabel']['value'] if 'coachLabel' in bindings else None,
+                                'division': bindings['divisionLabel']['value'] if 'divisionLabel' in bindings else None,
+                                'conference': bindings['conferenceLabel']['value'] if 'conferenceLabel' in bindings else None,
+                                'venue': bindings['venueLabel']['value'] if 'venueLabel' in bindings else None,
                                 'venue_latitude': venue_latitude,
                                 'venue_longitude': venue_longitude}, status=200)
                             
