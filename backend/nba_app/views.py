@@ -323,6 +323,7 @@ def post_detail(request, post_id):
 
     # Prepare comments list with like status
     comments_list = [{
+        'id': comment.comment_id,
         'content': comment.content,
         'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists(),
         'likes_count': LikeComment.objects.filter(comment=comment).count(),  # Count of likes for each comment
