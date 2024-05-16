@@ -13,102 +13,156 @@ const SearchResult = () => {
   const params = useParams();
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
-  const [team, setTeam] = useState('');
-  const [teamID, setTeamID] = useState('');
-  const [player, setPlayer] = useState('');
-  const [playerID, setPlayerID] = useState('');
+
+  const [players, setPlayers] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [logo, setLogo] = useState('');
-  const [image, setImage] = useState('');
+  const [teams, setTeams] = useState([]);
+  const [teamIds, setTeamIds] = useState([]);
+  const [logos, setLogos] = useState([]);
+  const [coaches, setCoaches] = useState([]);
+  const [conferences, setConferences] = useState([]);
+  const [mapArray, setMapArray] = useState([]);
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
 
   const handleData = async () => {
     try {
       const response = await axios.get(baseURL + '/search/?query=' + params.query);
-      setTeam(response.data.team ? response.data.team.team : '');
-      setTeamID(response.data.team ? response.data.team.id : '');
-      setPlayer(response.data.player ? response.data.player.player : '');
-      setPlayerID(response.data.player ? response.data.player.id : '');
+      setPlayers(response.data.players || []);
       setPosts(response.data.posts || []);
+
       if (response.data.team) {
-        handleTeamLogo(response.data.team.id);
-      }
-      if (response.data.player) {
-        handlePlayerImage(response.data.player.id);
+        const teamData = response.data.team.map((team, index) => ({
+          name: team[0],
+          id: team[1],
+          index
+        }));
+        setTeams(teamData.map(team => team.name));
+        setTeamIds(teamData.map(team => team.id));
+        setMapArray(teamData.map(team => team.index));
+        teamData.forEach(team => handleTeamAttributes(team.id, team.index));
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const handleTeamLogo = async (teamId) => {
+  const handleTeamAttributes = async (teamId, index) => {
     try {
-      const response2 = await axios.get(baseURL + '/team/?id=' + teamId);
-      setLogo(response2.data.image ? response2.data.image : '');
+      const response = await axios.get(baseURL + '/team/?id=' + teamId);
+      setLogos(prev => {
+        const newLogos = [...prev];
+        newLogos[index] = response.data.image;
+        return newLogos;
+      });
+      setCoaches(prev => {
+        const newCoaches = [...prev];
+        newCoaches[index] = response.data.coach;
+        return newCoaches;
+      });
+      setConferences(prev => {
+        const newConferences = [...prev];
+        newConferences[index] = response.data.conference;
+        return newConferences;
+      });
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const handlePlayerImage = async (playerId) => {
-    try {
-      const response3 = await axios.get(baseURL + '/player/?id=' + playerId);
-      setImage(response3.data.image ? response3.data.image : '');
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-  
   useEffect(() => {
-    setTeam('');
-    setTeamID('');
-    setPlayer('');
-    setPlayerID('');
+    setPlayers([]);
     setPosts([]);
-    setLogo('');
-    setImage('');
+    setTeams([]);
+    setTeamIds([]);
+    setLogos([]);
+    setCoaches([]);
+    setConferences([]);
+    setMapArray([]);
     handleData();
   }, [params.query]);
 
-  const handleTeam = () => {
-    navigate("/team/" + teamID);
+  const handleTeam = (id) => {
+    navigate("/team/" + id);
   };
 
-  const handlePlayer = () => {
-    navigate("/player/" + playerID);
+  const handlePlayer = (id) => {
+    navigate("/player/" + id);
   };
 
   return (
     <div className="bg-sky-50 min-h-screen">
       <Navbar />
-      <div className="relative bg-white p-8 mb-10 mt-10 rounded-3xl shadow-sm w-3/4 mx-auto max-h-screen">
+      <div className="relative bg-white p-8 mb-10 mt-20 rounded-3xl shadow-sm w-3/4 mx-auto max-h-screen">
         { /* <AdjustmentsHorizontalIcon className="w-8 h-8 border-2 rounded-full border-black absolute top-4 right-4" Filter />*/}
         <h2 className="text-2xl font-bold mb-10">Search Results for “{params.query}”:</h2>
         <div className="overflow-auto max-h-96 pr-2">
-          {team && (
-            <div className="border-b pb-4 mb-4 flex items-center">
-              <img src={logo} alt={`${team} Logo`} className="w-20 h-20 object-contain mr-4"/>
-              <div className="ml-5">
-                <h3 className="text-xl font-semibold">{team}</h3>
-                <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handleTeam} >Go to Team Page</button>
+          <div className="border-b pb-4 mb-4">
+            <h1 className="text-2xl font-bold mb-4">Related Teams</h1>
+            {teams.length > 0
+            ? mapArray.map((index) => (
+              <div key={index} className="border-b pb-4 mb-4 flex items-center">
+                <img 
+                  src={logos[index]} 
+                  alt={`${teams[index]} Image`} 
+                  className="w-20 h-20 object-contain mr-4"
+                />
+                <h3 className="text-xl font-semibold mr-4">{teams[index]}</h3>
+                <div className="flex flex-col mr-4">
+                  <p> Conference:   {conferences[index]}</p>
+                  <p> Coach:   {coaches[index]}</p>
+                </div>
+                <button 
+                  className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md ml-auto" 
+                  onClick={() => handleTeam(teamIds[index])}
+                >
+                  Go to Team Page
+                </button>
               </div>
-            </div>
-          )}
-          {player && (
-            <div className="border-b pb-4 mb-4 flex items-center">
-              <img src={image} alt={`${player} Image`} className="w-20 h-20 object-cover object-top rounded-full mr-4"/>
-              <div className="ml-5">
-                <h3 className="text-xl font-semibold">{player}</h3>
-                <button className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md mt-2" onClick={handlePlayer} >Go to Player Page</button>
-              </div>
-            </div>
-          )}
+            ))
+          :
+          <p className="text-center text-gray-500">Not found</p>}
+        </div>
+          <div className="border-b pb-4 mb-4">
+            <h1 className="text-2xl font-bold mb-4">Related Players</h1>
+            {players.length > 0
+              ? players.map((player, index) => (
+                <div key={index} className="border-b pb-4 mb-4 flex items-center">
+                  <img 
+                    src={player[2]} 
+                    alt={`${player[0]} Image`} 
+                    className="w-20 h-20 object-cover object-top rounded-full mr-4"
+                  />
+                  <h3 className="text-xl font-semibold mr-4">{player[0]}</h3>
+                  <div className="flex flex-col mr-4">
+                    <p> Date of birth:  { player[4] ? formatDate(player[4].replace("+", "").split("T")[0]) : "" }</p>
+                    <p> Height:   {player[3].replace("+", "") } cm</p>
+                  </div>
+                  <button 
+                    className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md ml-auto" 
+                    onClick={() => handlePlayer(player[1])}
+                  >
+                    Go to Player Page
+                  </button>
+                </div>
+              ))
+            :
+            <p className="text-center text-gray-500">Not found</p>}
+          </div>
           <div className="border-b pb-4 mb-4">
             <h1 className="text-2xl font-bold mb-4">Related Posts</h1>
             {posts.length > 0 
               ? posts.map((post) => (
                   <Post key={post.id} postId={post.id} />
                 ))
-              : "Not found"}
+              : 
+              <p className="text-center text-gray-500">Not found</p>}
           </div>
         </div>
       </div>

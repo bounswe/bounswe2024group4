@@ -61,7 +61,11 @@ const Player = () => {
                       <p className="text-lg mb-1 my-4">Height:</p>
                     </div>
                     <div>
-                      <p className="text-lg mb-1 my-4">{ height ? height.replace("+", "") : "null" } cm</p>
+                      {height
+                      ?
+                      <p className="text-lg mb-1 my-4">{ height.replace("+", "") } cm</p>
+                      :
+                      <p className="text-lg mb-1 my-4"> </p>}
                     </div>
                   <div className="flex items-center">
                     <p className="text-lg mb-1 my-4">Date of Birth:</p>
@@ -95,8 +99,14 @@ const Player = () => {
                       return 0;
                     }
                   }).map(([team, dates]) => (
+                    dates.start
+                    ?
                     <li className="text-lg mb-2" key={ team }>
-                      { team } ({dates.start ? dates.start.slice(1, 5) : "null"} - {dates.end ? dates.end.slice(1, 5) : ""})
+                      { team } ({ dates.start.slice(1, 5) } - { dates.end ? dates.end.slice(1, 5) : "" })
+                    </li>
+                    :
+                    <li className="text-lg mb-2" key={ team }>
+                      { team }
                     </li>
                   ))}
                 </ul>
@@ -109,8 +119,14 @@ const Player = () => {
                       return 0;
                     }
                   }).map(([award, date]) => (
+                    date
+                    ?
                     <li className="mb-1" key={ award }>
-                      { award } ({date ? date.slice(1, 5) : "null"})
+                      { award } ({ date.slice(1, 5) })
+                    </li>
+                    :
+                    <li className="mb-1" key={ award }>
+                      { award }
                     </li>
                   ))}
                 </ul>
