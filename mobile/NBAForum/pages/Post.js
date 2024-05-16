@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Context } from "../globalContext/globalContext.js"
 import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
 import axios from 'axios';
 
@@ -99,6 +100,9 @@ const Post = ({ post, navigation }) => {
         <Text>{moment(post.created_at).fromNow()}</Text>
       </TouchableOpacity>
 
+      <View style={styles.separator} />
+      <RenderHTML contentWidth={300} source={{ html: post.post }} />
+
       <Text style={styles.postText}>{post.post}</Text>
       {post.image && (
         <Image
@@ -106,6 +110,7 @@ const Post = ({ post, navigation }) => {
           style={styles.postImage}
         />
       )}
+      <View style={styles.separator} />
       <View style={styles.actionsContainer}>
         <View style={styles.likeContainer}>
           <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
@@ -184,7 +189,7 @@ const styles = StyleSheet.create({
   userInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 1,
     justifyContent: 'space-between',
   },
   profileImage: {
@@ -235,6 +240,11 @@ const styles = StyleSheet.create({
   },
   likeCount: {
     marginLeft: 5,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#BCBCBC',
+    marginVertical: 10,
   },
 });
 
