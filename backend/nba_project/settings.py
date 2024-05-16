@@ -18,6 +18,8 @@ import os
 # Load environment variables from .env file
 load_dotenv('./.env')
 
+LOGIN_URL = '/login/'
+
 print('DB_HOST:', os.getenv('DB_HOST'))
 print('DB_USER:', os.getenv('DB_USER'))
 
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_yasg',
     'nba_app',
     'corsheaders'
 ]
