@@ -785,7 +785,8 @@ def search(request):
 
     #return render(request, 'search.html')
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
     sparql_query = '''
@@ -820,7 +821,8 @@ def search_player(query):
                 players.append([player_bindings['itemLabel']['value'], player_id, image, height, date_of_birth])
     return players
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def search_team(query):
     teams = [ ["atlanta", "hawks", "atlanta hawks"], 
              ["boston", "celtics", "boston celtics"], 
@@ -1004,7 +1006,8 @@ def team(request):
         except:
             return JsonResponse({"error:": "error, please try again"}, status=500)
 """
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_label(id):
     url = 'https://www.wikidata.org/w/api.php'
     response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
@@ -1184,6 +1187,8 @@ def player(request):
             return JsonResponse({"error:": "error, please try again"}, status=500)
 """
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def list_wikidata_property(lst):
     names = []
     for item in lst:
