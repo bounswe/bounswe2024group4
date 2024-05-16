@@ -19,6 +19,7 @@ import { isAuthorized } from "../components/Auth.js";
 import CreatePost from "../pages/CreatePost.js";
 import SearchResult from '../pages/SearchResult.js';
 import Bookmarks from '../pages/Bookmarks.js';
+import PostFocus from '../pages/PostFocus.js';
 
 function Router() {
   const PrivateRoutes = () => {
@@ -36,6 +37,7 @@ function Router() {
           <Route path="/team/:id" element={<Team />} />
           <Route path="/player/:id" element={<Player />} />
           <Route path="/user/:username" element={<Profile />} />
+          <Route path="/post/:id" element={<PostFocus />} />
           <Route path="/search/:query" element={<SearchResult />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/sign-up" element={<SignUp />} />

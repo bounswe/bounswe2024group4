@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   HeartIcon as HeartIconSolid,
   BookmarkIcon as BookmarkIconSolid,
@@ -12,8 +12,9 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { Link } from "react-router-dom";
 
-function Post({ postId }) {
+function Post({ postId, updateComments }) {
   const [content, setContent] = useState("");
   const [imageURL, setImageURL] = useState("");
   const [createdAt, setCreatedAt] = useState("");
@@ -22,7 +23,7 @@ function Post({ postId }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [profilePicture, setProfilePicture] = useState("");
-
+  const [commentCount, setCommentCount] = useState(0);
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
 
@@ -139,7 +140,11 @@ function Post({ postId }) {
       );
       console.log(response);
       setContent(response.data.post);
-      setImageURL(baseURL + response.data.image);
+      if (response.data.image == null) {
+        setImageURL(null);
+      } else {
+        setImageURL(baseURL + response.data.image);
+      }
       setCreatedAt(
         formatDistanceToNowStrict(response.data.created_at, { addSuffix: true })
       );
@@ -148,6 +153,8 @@ function Post({ postId }) {
       setIsBookmarked(response.data.user_has_bookmarked);
       setAuthor(response.data.username);
       setProfilePicture(baseURL + response.data.profile_picture);
+      updateComments(response.data.comments);
+      setCommentCount(response.data.comments.length);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -161,24 +168,33 @@ function Post({ postId }) {
     <div className="border border-gray-300 rounded-md overflow-hidden mb-2">
       <div className="bg-white shadow-md p-4 hover:bg-slate-50">
         <div className="flex gap-4">
-          <img src={profilePicture} className="w-12 h-12 rounded-full border border-gray-300" />
+          <Link to={`/user/${author}`}>
+            <img
+              src={profilePicture}
+              className="w-12 h-12 rounded-full border border-gray-300"
+            />
+          </Link>
           <div className="w-full">
             <div className="flex items-center mb-2 gap-2">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold">{author}</h2>
+                <Link to={`/user/${author}`}>
+                  <h2 className="text-lg font-semibold">{author}</h2>
+                </Link>
                 <p className="text-gray-500 text-sm">{createdAt}</p>
               </div>
             </div>
-            <p className="text-gray-800 mb-4">
-              {parseContentWithHyperlinks(content)}
-            </p>
-            {imageURL && (
-              <img
-                src={imageURL}
-                alt=""
-                className="rounded-3xl mb-4 object-cover min-w-96 max-h-[55vh]"
-              />
-            )}
+              <p className="text-gray-800 mb-4">
+                {parseContentWithHyperlinks(content)}
+              </p>
+              <Link to={`/post/${postId}`}>
+                {imageURL && (
+                  <img
+                    src={imageURL}
+                    alt=""
+                    className="rounded-3xl mb-4 object-cover border min-w-96 max-h-[55vh]"
+                  />
+                )}
+              </Link>
             <div className="flex items-center relative">
               <div className="group flex items-center mr-4">
                 {isLiked ? (
@@ -202,12 +218,14 @@ function Post({ postId }) {
                   {likesCount}
                 </span>
               </div>
-              <div className="group flex items-center mr-4">
-                <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-500 mr-1 cursor-pointer rounded-full group-hover:text-blue-500 group-hover:bg-blue-100" />
-                <span className="text-gray-600 group-hover:text-blue-500">
-                  {/* {commentCount} */}
-                </span>
-              </div>
+              <Link to={`/post/${postId}`}>
+                <div className="group flex items-center mr-4">
+                  <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-500 mr-1 cursor-pointer rounded-full group-hover:text-blue-500 group-hover:bg-blue-100" />
+                  <span className="text-gray-600 group-hover:text-blue-500">
+                    {commentCount}
+                  </span>
+                </div>
+              </Link>
               <div className="group flex items-center mr-4 absolute right-0">
                 {isBookmarked ? (
                   <BookmarkIconSolid
