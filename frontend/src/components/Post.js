@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   HeartIcon as HeartIconSolid,
   BookmarkIcon as BookmarkIconSolid,
@@ -13,7 +13,7 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-function Post({ postId }) {
+function Post({ postId, updateComments }) {
   const [content, setContent] = useState("");
   const [imageURL, setImageURL] = useState("");
   const [createdAt, setCreatedAt] = useState("");
@@ -139,7 +139,12 @@ function Post({ postId }) {
       );
       console.log(response);
       setContent(response.data.post);
-      setImageURL(baseURL + response.data.image);
+      if (response.data.image == null) {
+        setImageURL(null);
+      } 
+      else {
+        setImageURL(baseURL + response.data.image);
+      };
       setCreatedAt(
         formatDistanceToNowStrict(response.data.created_at, { addSuffix: true })
       );
@@ -148,6 +153,7 @@ function Post({ postId }) {
       setIsBookmarked(response.data.user_has_bookmarked);
       setAuthor(response.data.username);
       setProfilePicture(baseURL + response.data.profile_picture);
+      updateComments(response.data.comments);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -176,7 +182,7 @@ function Post({ postId }) {
               <img
                 src={imageURL}
                 alt=""
-                className="rounded-3xl mb-4 object-cover min-w-96 max-h-[55vh]"
+                className="rounded-3xl mb-4 object-cover border min-w-96 max-h-[55vh]"
               />
             )}
             <div className="flex items-center relative">
