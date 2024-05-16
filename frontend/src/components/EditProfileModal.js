@@ -64,7 +64,6 @@ const EditProfileModal = ({
         config
       );
       if (response.status === 200) {
-        // onUpdate(response.data.bio, response.data.profile_picture, response.data.);
         onClose();
       }
     } catch (error) {
