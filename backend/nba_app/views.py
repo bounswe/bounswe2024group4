@@ -380,7 +380,9 @@ def feed(request):
         posts = Post.objects.filter(user=follow)
         for post in posts:
             post_ids.append(post.post_id)
-    post_ids = list(reversed(post_ids))
+    post_ids += [post.post_id for post in Post.objects.filter(user=user)]
+    post_ids = list(post_ids)
+    post_ids.sort()
     return JsonResponse({'post_ids': post_ids}, status=200)
 
     #all_feed_posts = [Post.objects.filter(user=follow.user) for follow in following]
