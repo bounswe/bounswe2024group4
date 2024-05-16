@@ -506,17 +506,29 @@ def team(request):
     if request.method == "GET" and "id" in request.GET:
         id = request.GET.get("id")
         sparql_query = '''
-            SELECT DISTINCT ?item ?itemLabel ?image ?coach ?division ?conference ?venue ?venue_location 
+            SELECT DISTINCT ?item ?itemLabel ?image ?coachLabel ?divisionLabel ?conferenceLabel ?venueLabel ?venue_location 
             WHERE {
                 ?item (wdt:P31) [].
                 ?item rdfs:label ?itemLabel.
-                ?item (wdt:P286) ?coach.
-                ?item (wdt:P361) ?division.
+                OPTIONAL {
+                    ?item (wdt:P286) ?coach.
+                    ?coach rdfs:label ?coachLabel. FILTER(LANG(?coachLabel) = "en").
+                }
+                OPTIONAL {
+                    ?item (wdt:P361) ?division.
+                    ?division rdfs:label ?divisionLabel. FILTER(LANG(?divisionLabel) = "en").
+                }
                 ?item (wdt:P154) ?image.
-                ?division (wdt:P361) ?conference.
-                ?item (wdt:P115) ?venue.
+                OPTIONAL {
+                    ?division (wdt:P361) ?conference.
+                    ?conference rdfs:label ?conferenceLabel. FILTER(LANG(?conferenceLabel) = "en").
+                }
+                OPTIONAL {
+                    ?item (wdt:P115) ?venue.
+                    ?venue rdfs:label ?venueLabel. FILTER(LANG(?venueLabel) = "en").
+                }
                 ?venue (wdt:P625) ?venue_location.
-                FILTER(lang(?itemLabel) = "en" && ?item = wd:''' + id + ''')
+                FILTER(lang(?itemLabel) = "en" && ?item = wd:Q121783)
             }
             LIMIT 1
         '''
@@ -617,13 +629,13 @@ def get_label(id):
 def player(request):
 
     if request.method == "GET" and "id" in request.GET:
-
+        """
         id = request.GET.get("id")
         sparql_query = '''
             SELECT DISTINCT ?item ?itemLabel ?image ?height ?date_of_birth ?insta
                 (GROUP_CONCAT(DISTINCT ?teamLabel; separator=", ") AS ?teams) 
                 (GROUP_CONCAT(DISTINCT ?positionLabel; separator=", ") AS ?positions)
-                (GROUP_CONCAT(DISTINCT ?awardLabel; separator=", ") AS ?awards)
+                (GROUP_CONCAT(DISTINCT ?awardLabel ?awardDate; separator=", ") AS ?awards)
             WHERE {
                 ?item (wdt:P3647) [].
                 ?item rdfs:label ?itemLabel.
@@ -633,7 +645,8 @@ def player(request):
                 OPTIONAL { ?item (wdt:P2003) ?insta. }
                 OPTIONAL { 
                     ?item (wdt:P166) ?award.
-                    ?award rdfs:label ?awardLabel. 
+                    ?award rdfs:label ?awardLabel.
+                    ?award (wdt:P585) ?awardDate.
                     FILTER(lang(?awardLabel) = "en") 
                 }
 
@@ -661,21 +674,37 @@ def player(request):
             response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
             data = response.json()
             bindings = data['results']['bindings'][0]
-            print("awards:", bindings['teams']['value'])
+            try:
+                team_lst = bindings['teams']['value'].split(', ') if bindings['teams']['value'] != "" else [],
+                teams = {}
+                for item in team_lst:
+                    if bindings['teams']['value'] != "":
+                    
+                    team = get_label(team_id)
+                    try:
+                        start = item['qualifiers']['P580'][0]['datavalue']['value']['time']
+                    except:
+                        start = None
+                    try:
+                        end = item['qualifiers']['P582'][0]['datavalue']['value']['time']
+                    except:
+                        end = None
+                    teams[team] = {'start': start, 'end': end}
+            except:
+                teams = []
             return JsonResponse({'name': bindings['itemLabel']['value'] if 'itemLabel' in bindings else None,
                                 'image': bindings['image']['value'] if 'image' in bindings else None,
                                 'height': bindings['height']['value'] if 'height' in bindings else None,
                                 'date_of_birth': bindings['date_of_birth']['value'] if 'date_of_birth' in bindings else None,
                                 'instagram': bindings['insta']['value'] if 'insta' in bindings else None,
-                                'teams': bindings['teams']['value'].split(', ') if bindings['teams']['value'] != "" else [],
+                                'teams': bindings['teams']['value'].split(', ')  else [],
                                 'positions': bindings['positions']['value'].split(', ') if bindings['positions']['value'] != "" else [],
-                                'awards': bindings['awards']['value'].split(', ') if bindings['awards']['value'] != "" else []
+                                'awards': awards
                                 }, status=200)
         except:
             return JsonResponse({"error:": "error, please try again"}, status=500)
-    
+        """    
 
-"""
         id = request.GET.get("id")
         try:
             url = 'https://www.wikidata.org/w/api.php'
@@ -749,7 +778,7 @@ def player(request):
                                  
         except:
             return JsonResponse({"error:": "error, please try again"}, status=500)
-"""
+
 
 def list_wikidata_property(lst):
     names = []
