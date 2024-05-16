@@ -413,9 +413,12 @@ def search(request):
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
     sparql_query = '''
-        SELECT DISTINCT ?item ?itemLabel WHERE {
+        SELECT DISTINCT ?item ?itemLabel ?image ?height ?date_of_birth WHERE {
             ?item (wdt:P3647) [].
             ?item rdfs:label ?itemLabel.
+            ?item (wdt:P18) ?image.
+            ?item (wdt:P2048) ?height.
+            ?item (wdt:P569) ?date_of_birth                    
             FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel), "''' + query.lower() + '''")).
         }
     '''
@@ -423,7 +426,7 @@ def search_player(query):
     #print(sparql_query)
     response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
     data = response.json()
-    #print("data:", data)
+    print("data:", data)
     players = []
     if response.status_code == 500:
         return {"response:": "error, please try a different query"}
@@ -431,11 +434,14 @@ def search_player(query):
         return players
     
     for player_bindings in data['results']['bindings']:
+        image = player_bindings['image']['value']
+        height = player_bindings['height']['value']
+        date_of_birth = player_bindings['date_of_birth']['value']
         url_lst = player_bindings['item']['value'].split('/')
         for item in url_lst:
             if 'Q' in item:
                 player_id = item
-                players.append([player_bindings['itemLabel']['value'], player_id])
+                players.append([player_bindings['itemLabel']['value'], player_id, image, height, date_of_birth])
     return players
 
 
@@ -499,6 +505,46 @@ def search_team(query):
 def team(request):
     if request.method == "GET" and "id" in request.GET:
         id = request.GET.get("id")
+        sparql_query = '''
+            SELECT DISTINCT ?item ?itemLabel ?image ?coach ?division ?conference ?venue ?venue_location 
+            WHERE {
+                ?item (wdt:P31) [].
+                ?item rdfs:label ?itemLabel.
+                ?item (wdt:P286) ?coach.
+                ?item (wdt:P361) ?division.
+                ?item (wdt:P154) ?image.
+                ?division (wdt:P361) ?conference.
+                ?item (wdt:P115) ?venue.
+                ?venue (wdt:P625) ?venue_location.
+                FILTER(lang(?itemLabel) = "en" && ?item = wd:''' + id + ''')
+            }
+            LIMIT 1
+        '''
+        endpoint_url = "https://query.wikidata.org/sparql"
+        try:
+            response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
+            data = response.json()
+            bindings = data['results']['bindings'][0]
+            if 'venue_location' in bindings:
+                venue_location = bindings['venue_location']['value']
+                venue_longitude = venue_location.split(' ')[0].replace('Point(', '')
+                venue_latitude = venue_location.split(' ')[1].replace(')', '')
+            else:
+                venue_latitude = None
+                venue_longitude = None
+            return JsonResponse({'name': bindings['itemLabel']['value'] if 'itemLabel' in bindings else None,
+                                'image': bindings['image']['value'] if 'image' in bindings else None,
+                                'coach': bindings['coach']['value'] if 'coach' in bindings else None,
+                                'division': bindings['division']['value'] if 'division' in bindings else None,
+                                'conference': bindings['conference']['value'] if 'conference' in bindings else None,
+                                'venue': bindings['venue']['value'] if 'venue' in bindings else None,
+                                'venue_latitude': venue_latitude,
+                                'venue_longitude': venue_longitude}, status=200)
+                            
+        except:
+            return JsonResponse({"error:": "error, please try again"}, status=500)
+        
+"""        
         try:
             url = 'https://www.wikidata.org/w/api.php'
             response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
@@ -556,7 +602,7 @@ def team(request):
                                  'image': image_url}, status=200)
         except:
             return JsonResponse({"error:": "error, please try again"}, status=500)
-
+"""
 
 def get_label(id):
     url = 'https://www.wikidata.org/w/api.php'
@@ -569,7 +615,67 @@ def get_label(id):
 
 
 def player(request):
+
     if request.method == "GET" and "id" in request.GET:
+
+        id = request.GET.get("id")
+        sparql_query = '''
+            SELECT DISTINCT ?item ?itemLabel ?image ?height ?date_of_birth ?insta
+                (GROUP_CONCAT(DISTINCT ?teamLabel; separator=", ") AS ?teams) 
+                (GROUP_CONCAT(DISTINCT ?positionLabel; separator=", ") AS ?positions)
+                (GROUP_CONCAT(DISTINCT ?awardLabel; separator=", ") AS ?awards)
+            WHERE {
+                ?item (wdt:P3647) [].
+                ?item rdfs:label ?itemLabel.
+                OPTIONAL { ?item (wdt:P18) ?image. }
+                OPTIONAL { ?item (wdt:P2048) ?height. }
+                OPTIONAL { ?item (wdt:P569) ?date_of_birth. }
+                OPTIONAL { ?item (wdt:P2003) ?insta. }
+                OPTIONAL { 
+                    ?item (wdt:P166) ?award.
+                    ?award rdfs:label ?awardLabel. 
+                    FILTER(lang(?awardLabel) = "en") 
+                }
+
+                OPTIONAL { 
+                    ?item (wdt:P54) ?team.
+                    ?team rdfs:label ?teamLabel. 
+                    FILTER(lang(?teamLabel) = "en") 
+                }
+                OPTIONAL { 
+                    ?item (wdt:P413) ?position.
+                    ?position rdfs:label ?positionLabel. 
+                    FILTER(lang(?positionLabel) = "en") 
+                }
+
+                FILTER(lang(?itemLabel) = "en" && ?item = wd:''' + id + ''')
+            }
+            GROUP BY ?item ?itemLabel ?image ?height ?date_of_birth ?insta
+            LIMIT 1
+            '''
+
+ 
+
+        endpoint_url = "https://query.wikidata.org/sparql"
+        try:
+            response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
+            data = response.json()
+            bindings = data['results']['bindings'][0]
+            print("awards:", bindings['teams']['value'])
+            return JsonResponse({'name': bindings['itemLabel']['value'] if 'itemLabel' in bindings else None,
+                                'image': bindings['image']['value'] if 'image' in bindings else None,
+                                'height': bindings['height']['value'] if 'height' in bindings else None,
+                                'date_of_birth': bindings['date_of_birth']['value'] if 'date_of_birth' in bindings else None,
+                                'instagram': bindings['insta']['value'] if 'insta' in bindings else None,
+                                'teams': bindings['teams']['value'].split(', ') if bindings['teams']['value'] != "" else [],
+                                'positions': bindings['positions']['value'].split(', ') if bindings['positions']['value'] != "" else [],
+                                'awards': bindings['awards']['value'].split(', ') if bindings['awards']['value'] != "" else []
+                                }, status=200)
+        except:
+            return JsonResponse({"error:": "error, please try again"}, status=500)
+    
+
+"""
         id = request.GET.get("id")
         try:
             url = 'https://www.wikidata.org/w/api.php'
@@ -643,7 +749,7 @@ def player(request):
                                  
         except:
             return JsonResponse({"error:": "error, please try again"}, status=500)
-
+"""
 
 def list_wikidata_property(lst):
     names = []
