@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
+import Post from './Post.js';
 import { Context } from '../globalContext/globalContext'; 
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -12,6 +13,7 @@ const SearchResults = () => {
   const [data, setData] = useState({ team: null, player: null, posts: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [postDetails, setPostDetails] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -29,6 +31,9 @@ const SearchResults = () => {
         }
         if (response.data.player) {
           fetchPlayerDetails(response.data.player.id);
+        }
+        if (response.data.posts) {
+          fetchPostDetails(response.data.posts);
         }
       } else {
         setError('No results found');
@@ -65,6 +70,18 @@ const SearchResults = () => {
     }
   };
 
+  const fetchPostDetails = async (postIds) => {
+    try {
+      const postRequests = postIds.map(postId => axios.get(`${baseURL}/post_detail/${postId.id}/`));
+      const postResponses = await Promise.all(postRequests);
+      const fetchedPosts = postResponses.map(response => response.data);
+      setPostDetails(fetchedPosts);
+
+    } catch (error) {
+      console.error('Error fetching post details:', error);
+    }
+  };
+
   if (isLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -74,7 +91,7 @@ const SearchResults = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.header}>Search Results for "{query}":</Text>
       {data.team && (
         <View>
@@ -93,28 +110,40 @@ const SearchResults = () => {
           <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Player', { id: data.player.id })}>
             <View style={styles.row}>
               <Image source={{ uri: data.player.image }} style={styles.image} />
-              <Text style={styles.text}>{data.player.name}</Text>
+              <View>
+                <Text style={styles.text}>{data.player.name}</Text>
+                <Text> {data.player.height ? data.player.height.substr(1,4) + "cm" :""} </Text>
+              </View>
             </View>
           </TouchableOpacity>
         </View>
       )}
       {data.posts && data.posts.length > 0 && (
-        <View style={styles.postsContainer}>
-          <Text style={styles.subheader}>Related Posts:</Text>
-          {data.posts.map((post) => (
-            <Text key={post.id} style={styles.postText}>{post.id}</Text>
-          ))}
+        <View  style={{ flex: 1 }}>
+        <Text style={styles.subheader}>Posts:</Text>
+          {
+          <FlatList
+            data={postDetails}
+            renderItem={({ item }) => (
+              <Post
+                post={item}
+              />
+            )}
+            keyExtractor={(item) => item.post_id.toString()}
+            />
+          }
         </View>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#55A1E6'
+    position: 'relative',
+    backgroundColor: '#55A1E6',
+    padding: 5,
   },
   header: {
     fontSize: 22,
@@ -132,8 +161,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#ffffff',
     padding: 10,
-    backgroundColor: '#eaeaea',
+    margin: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BCBCBC',
   },
   image: {
     width: 70,
@@ -142,10 +175,8 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   text: {
-    fontSize: 20
-  },
-  postsContainer: {
-    marginTop: 20
+    fontSize: 20,
+    marginBottom: 5
   },
   postText: {
     marginTop: 5,
