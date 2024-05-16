@@ -6,6 +6,7 @@ import axios from "axios";
 import { Context } from "../globalContext/globalContext.js";
 import { useParams } from "react-router-dom";
 import Cookies from "js-cookie";
+import EditProfileModal  from "../components/EditProfileModal.js";
 
 const Profile = () => {
   const [ownProfile, setOwnProfile] = useState(false);
@@ -14,8 +15,10 @@ const Profile = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [profilePictureURL, setProfilePictureURL] = useState("");
+  const [email, setEmail] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
   const [posts, setPosts] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const params = useParams();
 
   const handleData = async () => {
@@ -25,6 +28,7 @@ const Profile = () => {
       if (localStorage.getItem("username") === params.username) {
         setOwnProfile(true);
         response = await axios.get(baseURL + "/profile_view_edit_auth");
+        setEmail(response.data.email);
       } else {
         response = await axios.get(
           baseURL + "/profile_view_edit_others/" + params.username
@@ -43,6 +47,7 @@ const Profile = () => {
 
   const handleFollow = async () => {
     if (ownProfile) {
+      setIsModalOpen(true);
     } else if (isFollowing) {
       // Optimistically update the follow state so we don't wait for the server
       const prevFollowerCount = followerCount;
@@ -104,9 +109,14 @@ const Profile = () => {
     }
   };
 
+  const handleUpdateProfile = (newBio, newProfilePictureURL) => {
+    setBio(newBio);
+    setProfilePictureURL(baseURL + newProfilePictureURL);
+  };
+
   useEffect(() => {
     handleData();
-  }, []);
+  }, [params.username, profilePictureURL]);
 
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
@@ -121,11 +131,15 @@ const Profile = () => {
               src={profilePictureURL}
               alt=""
             />
-            <p className="mx-auto font-extrabold text-center text-3xl mb-4">
+            <p className="mx-auto font-extrabold text-center text-3xl mb-2">
               {" "}
               {username}{" "}
             </p>
-            {bio && <p className="mb-8">{bio}</p>}
+            {ownProfile && <p className="mx-auto font-light text-center text-sm mb-4">
+              {" "}
+              {email}{" "}
+            </p>}
+            {bio && <p className="mb-4">{bio}</p>}
             <div className="flex justify-center items-center gap-x-3 mx-auto mb-3">
               <div className="flex flex-col items-center">
                 <span className="font-bold">{followerCount}</span>
@@ -170,6 +184,14 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      <EditProfileModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        currentBio={bio}
+        currentProfilePictureURL={profilePictureURL}
+        currentEmail={email}
+        onUpdate={handleUpdateProfile}
+      />
     </div>
   );
 };
