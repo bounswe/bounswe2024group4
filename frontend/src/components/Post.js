@@ -161,7 +161,6 @@ function Post({ postId, updateComments }) {
       setProfilePicture(baseURL + response.data.profile_picture);
       if (updateComments) updateComments(response.data.comments);
       setCommentCount(response.data.comments.length);
-      console.log(response.data.comments_count);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -177,7 +176,7 @@ function Post({ postId, updateComments }) {
         <div className="flex gap-4">
           <img
             src={profilePicture}
-            className="w-12 h-12 rounded-full border border-gray-300 object-cover object-center"
+            className="w-12 h-12 aspect-square rounded-full border border-gray-300 object-cover object-center"
             onClick={handleProfilePictureClick}
           />
           <div className="w-full">
