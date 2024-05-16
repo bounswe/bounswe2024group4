@@ -154,7 +154,9 @@ def post_detail(request, post_id):
     comments_list = [{
         'content': comment.content,
         'liked_by_user': LikeComment.objects.filter(user=request.user, comment=comment).exists(),
-        'likes_count': LikeComment.objects.filter(comment=comment).count()  # Count of likes for each comment
+        'likes_count': LikeComment.objects.filter(comment=comment).count(),  # Count of likes for each comment
+        'comment_username': comment.user.username,
+        'comment_user_pp' : comment.user.profile_picture.url if comment.user.profile_picture else None
     } for comment in comments]
 
     # Prepare the image URL if the image exists
