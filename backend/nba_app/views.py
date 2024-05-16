@@ -424,8 +424,8 @@ def user_followers(request):
 def get_users_like_post(request, post_id):
     post = Post.objects.get(post_id=post_id)
     likes = LikePost.objects.filter(post=post)
-    usernames = [{'username' : like.user.username} for like in likes]
-    return JsonResponse({'usernames': usernames}, status=200)
+    user_info = [{'user_id' : like.user.user_id, 'username' : like.user.username} for like in likes]
+    return JsonResponse({'user_info': user_info}, status=200)
 
 
 @api_view(['POST', 'GET'])
