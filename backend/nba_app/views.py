@@ -399,7 +399,7 @@ def search(request):
             player = search_player(query)
             print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
+            return JsonResponse({'team': team, 'players': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
         except:
             return JsonResponse({"error:": "error in search, please try again"}, status=500)
         
@@ -410,29 +410,30 @@ def search(request):
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
     sparql_query = '''
-        SELECT DISTINCT ?item ?itemLabel ?altLabel WHERE {
+        SELECT DISTINCT ?item ?itemLabel WHERE {
             ?item (wdt:P3647) [].
             ?item rdfs:label ?itemLabel.
-            ?item skos:altLabel ?altLabel.
             FILTER(lang(?itemLabel) = "en" && contains(lcase(?itemLabel), "''' + query.lower() + '''")).
         }
-        LIMIT 1
     '''
     endpoint_url = "https://query.wikidata.org/sparql"
     #print(sparql_query)
     response = requests.get(endpoint_url, params={'format': 'json', 'query': sparql_query})
     data = response.json()
+    #print("data:", data)
+    players = []
     if response.status_code == 500:
         return {"response:": "error, please try a different query"}
     elif data['results']['bindings'] == []:
-        return None
+        return players
     
-    url_lst = data['results']['bindings'][0]['item']['value'].split('/')
-    for item in url_lst:
-        if 'Q' in item:
-            player_id = item
-
-    return {'player': data['results']['bindings'][0]['itemLabel']['value'], 'id': player_id} 
+    for player_bindings in data['results']['bindings']:
+        url_lst = player_bindings['item']['value'].split('/')
+        for item in url_lst:
+            if 'Q' in item:
+                player_id = item
+                players.append([player_bindings['itemLabel']['value'], player_id])
+    return players
 
 
 def search_team(query):
@@ -448,8 +449,8 @@ def search_team(query):
              ["golden state", "warriors", "golden state warriors"], 
              ["houston", "rockets", "houston rockets"],
              ["indiana", "pacers", "indiana pacers"],
-             ["los angeles", "clippers", "los angeles clippers"],
-             ["los angeles", "lakers", "los angeles lakers"],
+             ["angeles", "clippers", "los angeles clippers"],
+             ["angeles", "lakers", "los angeles lakers"],
              ["memphis", "grizzlies", "memphis grizzlies"],
              ["miami", "heat", "miami heat"],
              ["milwaukee", "bucks", "milwaukee bucks"],
@@ -467,23 +468,27 @@ def search_team(query):
              ["utah", "jazz", "utah jazz"],
              ["washington", "wizards", "washington wizards"]]
     
-    query_team = ''
-    for team in teams:
-        if query_team != '':
-            break
-        for word in team:
-            if query.lower() == word:
-                query_team = team
-    print("query_team:", query_team)
-    if query_team == '':
-        return None
-    team_name = query_team[2]
+    team_lst = []
+    if query == 'los angeles' or query == 'los':
+        team_lst = ['los angeles lakers', 'los angeles clippers']
+    else:
+        for team in teams:
+            for word in team:
+                if query.lower() == word:
+                    team_lst = [team[2]]
+                    break
+    if team_lst == []:
+        return team_lst
+    
     url = 'https://www.wikidata.org/w/api.php'
     try:
-        response1 = requests.get(url, params = {'action': 'wbsearchentities', 'format': 'json', 'search': team_name, 'language': 'en'})
-        data1 = response1.json()
-        id = data1['search'][0]['id']
-        return {'team': team_name, 'id': id}
+        teams = []
+        for team_name in team_lst:
+            response1 = requests.get(url, params = {'action': 'wbsearchentities', 'format': 'json', 'search': team_name, 'language': 'en'})
+            data1 = response1.json()
+            id = data1['search'][0]['id']
+            teams.append([team_name, id])
+        return teams
     except:
         return {"error:": "error, please try again"}
 
