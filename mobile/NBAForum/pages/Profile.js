@@ -1,14 +1,14 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
 
 const Profile = ({ navigation }) => {
-  const globalContext = useContext(Context)
   const { baseURL } = useContext(Context); 
-  const [userInfo, setUserInfo] = useState({
+  const [ isLoading, setIsLoading ] = useState(true);
+  const [ profileInfo, setProfileInfo ] = useState({
     username: "",
-    profile_picture: "",
+    profile_picture: "https://cdn.nba.com/manage/2020/10/NBA20Primary20Logo-1-259x588.jpg",
     bio: "",
     followers_count: 0,
     following_count: 0,
@@ -21,19 +21,27 @@ const Profile = ({ navigation }) => {
         const response = await axios.get(`${baseURL}/profile_view_edit_auth`);
         console.log(response.data);
         if (response.status === 200) {
-          setUserInfo({
-            username: response.data.username,
-            profile_picture: baseURL + response.data.profile_picture,
-            bio: response.data.bio,
-            followers_count: response.data.followers_count,
-            following_count: response.data.following_count,
-            postsCount: response.data.posts.length,
-            posts: response.data.posts,
+          const userProfileData = response.data;
+          const postIds = userProfileData.posts;
+          // Fetch post details for each post
+          const postRequests = postIds.map(postId => axios.get(`${baseURL}/post_detail/${postId.post_id}/`));
+          const postResponses = await Promise.all(postRequests);
+          const fetchedPosts = postResponses.map(response => response.data);
+          setProfileInfo({
+            username: userProfileData.username,
+            profile_picture: userProfileData.profile_picture || profileInfo.profile_picture,
+            bio: userProfileData.bio,
+            followers_count: userProfileData.followers_count,
+            following_count: userProfileData.following_count,
+            posts: fetchedPosts, // Set fetched posts here
+            isFollowing: userProfileData.is_following
           });
-          console.log("User profile data:", response.data);
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
+        Alert.alert('Error', 'Failed to fetch user profile data');
+        setIsLoading(false);
       }
     };
   
@@ -41,37 +49,55 @@ const Profile = ({ navigation }) => {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.profileImageContainer}>
-        <View style={styles.profileImageWrapper}>
-          <Image source={{ uri: userInfo.profile_picture }} style={styles.profileImage} />
+    <View style={styles.scrollContainer}>
+      {!isLoading ? (
+        <>
+        <View>
+          <View style={styles.profileImageContainer}>
+            <Image source={{ uri: baseURL + profileInfo.profile_picture }} style={styles.profileImage} />
+            <View style={styles.scrollContainer}>
+              <Text style={styles.heading}>{profileInfo.username}</Text>
+              <Text style={styles.bioText}>{profileInfo.bio}</Text>
+              <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EditProfile')}>
+                <Text style={styles.buttonText}>Edit Profile</Text>
+              </TouchableOpacity>
+            </View> 
+          </View>
+        
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statTitle}>Posts</Text>
+              <Text style={styles.statValue}>{profileInfo.posts.length}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statTitle}>Followers</Text>
+              <Text style={styles.statValue}>{profileInfo.followers_count}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statTitle}>Following</Text>
+              <Text style={styles.statValue}>{profileInfo.following_count}</Text>
+            </View>
+          </View>
+  
+          <FlatList
+            data={profileInfo.posts}
+            renderItem={({ item }) => (
+              <Post
+                post={item}
+                navigation={navigation}
+              />
+            )}
+            keyExtractor={(item) => item.post_id.toString()}
+          />
         </View>
-      </View>
-      <Text style={styles.heading}>{userInfo.username}</Text>
-      <Text style={styles.bioText}>{userInfo.bio}</Text>
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statTitle}>Posts</Text>
-          <Text style={styles.statValue}>{userInfo.postsCount}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statTitle}>Followers</Text>
-          <Text style={styles.statValue}>{userInfo.followers_count}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statTitle}>Following</Text>
-          <Text style={styles.statValue}>{userInfo.following_count}</Text>
-        </View>
-      </View>
-      
-
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EditProfile')}>
-        <Text style={styles.buttonText}>Edit Profile</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        </>
+      ) : (
+        <ActivityIndicator size="large" color="#00" />
+      )}
+    </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -81,29 +107,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F9FF'
   },
   profileImageContainer: {
-    alignItems: 'center',  
+    alignItems: 'center',
     marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
-  profileImageWrapper: {
+  profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    overflow: 'hidden',
-  },
-  profileImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
+    overflow: 'hidden'
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    textAlign: 'center'
+    alignSelf: 'flex-start'
   },
   bioText: {
     fontSize: 16,
-    textAlign: 'center',
+    alignSelf: 'flex-start',
     marginBottom: 20
   },
   statsContainer: {
@@ -126,12 +149,10 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#1B64EB",
-    fontSize: 18,
     padding: 10,
     borderRadius: 16,
     marginTop: 10,
-    alignSelf: "center",
-    width: "90%",
+    alignSelf: "flex-start",
   },
   buttonText: {
     color: 'white',
@@ -139,10 +160,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center'
   },
-  postItem: {
-    fontSize: 16,
-    marginBottom: 10
-  }
 });
 
 export default Profile;
