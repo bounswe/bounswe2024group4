@@ -35,6 +35,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
+    following = models.ManyToManyField('self', symmetrical=False, through='Follow', related_name='followers')
+
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
@@ -46,9 +49,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Post(models.Model):
     post_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user    = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(max_length=500, blank=False) 
-    #image = models.ImageField(upload_to='post_images/', blank=True, null=True)
+    #image   = models.BinaryField(blank=True, null=True)
+    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -60,9 +64,42 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(max_length=300, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return f'{self.user.username} on {self.post.post_id}: {self.content}'
 
-        
-                
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following_set')
+    followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower_set')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'followed')
+
+
+class LikePost(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')
+
+
+class LikeComment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'comment')
+
+
+
+class Bookmark(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')

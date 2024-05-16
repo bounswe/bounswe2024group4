@@ -4,11 +4,11 @@ from .models import User, Post
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['user_id', 'username', 'email', 'bio']
+        model = User                                     
+        fields = ['user_id', 'username', 'email', 'bio', 'profile_picture']
 
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['username', 'content', 'created_at']
+        fields = ['user_id', 'content', 'created_at', 'image']

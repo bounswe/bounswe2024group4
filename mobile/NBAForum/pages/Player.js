@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Context } from "../globalContext/globalContext.js"
 import axios from 'axios';
 
@@ -7,7 +7,7 @@ const Player = ({ route }) => {
   const { baseURL } = useContext(Context);
   const [ playerInfo, setPlayerInfo ] = useState("LL");
   const [ isLoading, setIsLoading ] = useState(true);
-  const  playerID  =  route.params['id'];
+  const playerID = route.params['id'];
   console.log(playerID)
 
   const handleSearch = async (id) => {
@@ -36,49 +36,51 @@ const Player = ({ route }) => {
       <Text style={styles.heading}>{playerInfo.name}</Text>
 
       <View style={styles.frame}>
-        <View style={[styles.sideContainer, styles.backgroundGrey]}>
+        <View style={styles.leftsideContainer}>
           <View style={styles.playerImageContainer}>
             <View style={styles.playerImageWrapper}>
               <Image src={playerInfo.image}  style={styles.playerImage} />
             </View>
-            <View style={styles.personalInfoContainer}>
-              <Text style={styles.personalInfoText}>Personal Information</Text>
+            <View style={styles.infoContainer}>
+              <Text style={styles.sub1Heading}>Personal Information</Text>
               <View style={styles.personalInfoItem}>
-                <Text>Height: {playerInfo.height.substr(-4)}</Text>
-                <Text>Date of Birth: {playerInfo.date_of_birth.substr(1,10)}</Text>
+                <Text style={styles.sub2Heading}>Height:</Text> 
+                <Text>{playerInfo.height.substr(1,4)} cm</Text>
+                <Text style={styles.sub2Heading}>Date of Birth:</Text> 
+                <Text>{playerInfo.date_of_birth.substr(1,10)}</Text>
               </View>
             </View>
           </View>
         </View>
 
-        <View style={[styles.sideContainer, styles.backgroundGrey]}>
+        <View style={styles.rightsideContainer}>
 
-          <View style={[styles.personalCareerContainer, styles.careerContainer]}>
-            <Text style={styles.personalCareerHeading}>Professional Career</Text>
+          <View style={styles.infoContainer}>
+            <Text style={styles.sub1Heading}>Professional Career</Text>
             <View style={styles.careerItem}>
               <View style={styles.careerData}>
-                <Text>Teams:</Text>
+                <Text style={styles.sub2Heading}>Teams</Text>
                   {Object.keys(playerInfo.teams).map((team) => (
-                    <Text key={team}>{team}</Text>
+                    <Text key={team}>{'\u2022'} {team}</Text>
                   ))}
               </View>
             </View>
           </View>
 
-          <View style={[styles.teamInfoContainer, styles.careerContainer]}>
-            <Text style={styles.teamInfoHeading}>Position</Text>
+          <View style={styles.infoContainer}>
+            <Text style={styles.sub2Heading}>Positions</Text>
             <View style={styles.teamInfoItem}>
             {playerInfo.positions.map((position) => (
-                    <Text key={position}>{position}</Text>
+                    <Text key={position}>{'\u2022'} {position}</Text>
                   ))}
             </View>
           </View>
 
-          <View style={[styles.awardsContainer, styles.careerContainer]}>
-            <Text style={styles.awardsHeading}>Awards</Text>
+          <View style={styles.infoContainer}>
+            <Text style={styles.sub2Heading}>Awards</Text>
             <View style={styles.teamInfoItem}>
                   {Object.keys(playerInfo.awards).map((award) => (
-                    <Text key={award}>{award}</Text>
+                    <Text key={award}>{'\u2022'} {award}</Text>
                   ))}
             </View>
           </View>
@@ -88,32 +90,37 @@ const Player = ({ route }) => {
     )
     :(
       <View style={styles.scrollContainer}>
+        <ActivityIndicator size="large" color="#FFFF" />
       </View>
     )
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 30,
-    backgroundColor: "#1B64EB",
+  infoContainer: {
+    padding: 10,
+    marginBottom: 5,
+    marginTop: 5,
   },
   frame: {
-    height: '60%',
     flexDirection: 'row',
     padding: 10,
   },
   scrollContainer: {
     flexGrow: 1,
+    backgroundColor: "#55A1E6",
   },
-  sideContainer: {
+  leftsideContainer: {
     flex: 1,
+    backgroundColor: '#eaeaea', 
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
   },
-  backgroundGrey: {
-    backgroundColor: 'white',
+  rightsideContainer: {
+    flex: 1,
+    backgroundColor: '#eaeaea', 
+    borderTopRightRadius: 16,
+    borderBottomRightRadius: 16,
   },
   playerImageContainer: {
     alignItems: 'center',
@@ -132,32 +139,15 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'contain',
     borderRadius: 16,
+    marginTop: 10,
   },
-  personalInfoText: {
+  sub2Heading: {
     marginTop: 5,
     fontWeight: 'bold',
-  },
-  personalInfoContainer: {
-    padding: 10,
-    borderRadius: 10,
-    borderRadius: 16,
+    fontSize: 15,
   },
   personalInfoItem: {
     marginBottom: 5,
-  },
-  personalCareerContainer: {
-    marginBottom: 20,
-    borderRadius: 16,
-  },
-  careerContainer: {
-    padding: 10,
-    borderRadius: 10,
-    borderRadius: 16,
-  },
-  personalCareerHeading: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 10,
   },
   careerItem: {
     flexDirection: 'row',
@@ -167,11 +157,7 @@ const styles = StyleSheet.create({
   careerData: {
     flexDirection: 'column',
   },
-  teamInfoContainer: {
-    marginBottom: 20,
-    borderRadius: 16,
-  },
-  teamInfoHeading: {
+  sub1Heading: {
     fontWeight: 'bold',
     fontSize: 18,
     marginBottom: 10,
@@ -179,19 +165,13 @@ const styles = StyleSheet.create({
   teamInfoItem: {
     marginBottom: 5,
   },
-  awardsContainer: {
-    marginBottom: 20,
-    borderRadius: 16,
-  },
-  awardsHeading: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 10,
-  },
+
   heading: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+    marginTop: 10,
+    marginLeft: 10,
   },
 });
 

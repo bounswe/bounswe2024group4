@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import axios from 'axios';
@@ -50,7 +50,7 @@ const Search = ({ navigation }) => {
         onSubmitEditing={() => handleSearch(searchQuery)}
       />
       {isLoading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#FFFF" />
       ) : error ? (
         <Text>{error}</Text>
       ) : null}
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 25,
     flex: 1,
-    backgroundColor: '#87CEEB',
+    backgroundColor: '#55A1E6',
   },
 });
 

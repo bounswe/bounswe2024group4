@@ -7,11 +7,14 @@
 </head>
 <body>
     <h1>Post Detail</h1>
-    <p>{{ post.content }}</p>
+    <p>{{ post_content }}</p>
+    {% if image %}
+        <img src="{{ image }}" alt="Post Image">
+    {% endif %}
     <h2>Comments</h2>
     <ul>
     {% for comment in comments %}
-        <li>{{ comment.user.username }}: {{ comment.content }}</li>
+        <li>{{ comment.content }}</li>  <!-- Note: Adjust this if 'content' is nested differently -->
     {% empty %}
         <li>No comments yet.</li>
     {% endfor %}
@@ -19,8 +22,9 @@
     <h3>Add a Comment</h3>
     <form action="{% url 'create_comment' post.post_id %}" method="post">
         {% csrf_token %}
-        <textarea name="content" placeholder="Write your comment..."></textarea><br>
-        <button type="submit">Comment</button>
+        <textarea name="content" placeholder="Write your comment..." required></textarea><br>
+        <button type="submit">Add Comment</button>
     </form>
+    <p>Posted by User: {{ username }}</p>
 </body>
 </html>

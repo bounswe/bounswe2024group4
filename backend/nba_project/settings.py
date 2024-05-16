@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
-load_dotenv('././.env')
+load_dotenv('./.env')
 
 print('DB_HOST:', os.getenv('DB_HOST'))
 print('DB_USER:', os.getenv('DB_USER'))
@@ -56,9 +56,9 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + os.getenv('DEPLOY_MACHINE_IP') + ':3306', 'http://' + os.getenv('DEPLOY_MACHINE_IP') + ':3000']
+CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3306', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3000']
 ALLOWED_HOSTS = ['*', os.getenv('DEPLOY_MACHINE_IP')]
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + os.getenv('DEPLOY_MACHINE_IP') + ':3306', 'http://' + os.getenv('DEPLOY_MACHINE_IP') + ':3000']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3306', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3000']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -96,14 +96,15 @@ WSGI_APPLICATION = 'nba_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'USER': os.getenv('DB_USER'), #'root',   # for privileged user : root
+        'PASSWORD': os.getenv('DB_PASSWORD'), #'admin_group4_dbnba'
     }
 }
 
@@ -150,3 +151,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
