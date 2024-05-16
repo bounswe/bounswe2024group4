@@ -153,12 +153,25 @@ def post(request):
         post = Post.objects.create(user=user, content=content, image=image)
         return Response({'message': f'Post created successfully with ID {post.post_id}'}, status=201)
 
-        # Instead of redirecting, return an HttpResponse showing the Post ID
-        return HttpResponse(f'Post created successfully with ID {post.post_id}', status=201)
     return render(request, 'post.html')
 
-
-@login_required
+@swagger_auto_schema(
+    method='post',
+    operation_description="Create a comment on a specific post",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'content': openapi.Schema(type=openapi.TYPE_STRING, description='Content of the comment'),
+        },
+        required=['content'],
+    ),
+    responses={
+        201: openapi.Response('Comment created successfully'),
+        404: 'Post not found'
+    }
+)
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
 def create_comment(request, post_id):
     if request.method == "POST":
         user = request.user
@@ -170,10 +183,12 @@ def create_comment(request, post_id):
             return HttpResponse("Post not found", status=404)
         
         Comment.objects.create(user=user, content=content, post=post)
+        
         return HttpResponseRedirect(f'/post_detail/{post_id}/')
+        
 
-    #return render(request, 'comment.html', {'post_id': post_id})
-    return HttpResponse("Only post requests are allowed", status=404)
+
+    return render(request, 'comment.html', {'post_id': post_id})
 
 
 #user like or unlike post
@@ -204,6 +219,7 @@ def like_or_unlike_post(request, post_id):
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
 
 
+
 #user like or unlike comment
 # User like or unlike comment
 @swagger_auto_schema(
@@ -231,6 +247,7 @@ def like_or_unlike_comment(request, comment_id):
             return JsonResponse({'message': 'Comment liked'}, status=200)
     
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+
 
 
 #user bookmark or unbookmark post
@@ -266,6 +283,39 @@ def bookmark_or_unbookmark_post(request, post_id):
     return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
 
 
+
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Retrieve details of a specific post including comments, likes, and bookmarks",
+    responses={
+        200: openapi.Response('Post details retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'post': openapi.Schema(type=openapi.TYPE_STRING),
+                'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'image': openapi.Schema(type=openapi.TYPE_STRING, description='URL of the image'),
+                'comments': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'content': openapi.Schema(type=openapi.TYPE_STRING),
+                        'liked_by_user': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        'likes_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )),
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                'user_has_liked': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'likes_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'user_has_bookmarked': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, description='URL of the profile picture'),
+            }
+        )),
+        404: 'Post not found',
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, post_id=post_id)
@@ -374,7 +424,52 @@ def get_bookmarked_post_ids(request):
     bookmarked_post_ids = [{'post_id' : bookmark.post.post_id} for bookmark in bookmarks]
     return JsonResponse({'posts': bookmarked_post_ids}, status=200)     
 
-
+@swagger_auto_schema(
+    method='post',
+    operation_description="Update the authenticated user's profile information",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='New username'),
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description='New email'),
+            'profile_picture': openapi.Schema(type=openapi.TYPE_FILE, description='New profile picture'),
+            'bio': openapi.Schema(type=openapi.TYPE_STRING, description='New bio'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='New password')
+        },
+        required=['username', 'email', 'bio', 'password'],
+    ),
+    responses={
+        200: openapi.Response('Account information updated successfully.'),
+        400: 'Bad request'
+    }
+)
+@swagger_auto_schema(
+    method='get',
+    operation_description="Retrieve the authenticated user's profile information",
+    responses={
+        200: openapi.Response('Profile information retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'bio': openapi.Schema(type=openapi.TYPE_STRING),
+                'following_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'followers_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, description='URL of the profile picture'),
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'post_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+                    }
+                ))
+            }
+        )),
+        401: 'Unauthorized'
+    }
+)
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
+@login_required
 def profile_view_edit_auth(request):
     if request.method == 'POST':
         new_username = request.POST.get('username')
@@ -453,6 +548,7 @@ def profile_view_edit_others(request, username):
 
     return JsonResponse(data, status=200)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def reset_password(request):
@@ -494,6 +590,25 @@ def reset_password(request):
     return JsonResponse({'message': 'Password reset successful.'}, status = 200)
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Follow a user",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user to follow'),
+        },
+        required=['username']
+    ),
+    responses={
+        200: 'Success response',
+        400: 'Bad Request',
+        404: 'Not Found',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def follow_user(request, username):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
@@ -518,6 +633,25 @@ def follow_user(request, username):
     return JsonResponse({'message': 'You have successfully followed the user.'}, status=200)
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Unfollow a user",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user to unfollow'),
+        },
+        required=['username']
+    ),
+    responses={
+        200: 'Success response',
+        400: 'Bad Request',
+        404: 'Not Found',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def unfollow_user(request, username):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
@@ -538,6 +672,20 @@ def unfollow_user(request, username):
     follow_instance.delete()
     return JsonResponse({'message': 'You have successfully unfollowed the user.'}, status=200)
 
+
+@swagger_auto_schema(
+    method='post',
+    operation_description="Get the list of posts from users the authenticated user is following",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'post_ids': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_INTEGER))
+            }
+        )),
+        401: 'Unauthorized'
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @login_required
@@ -558,7 +706,37 @@ def feed(request):
     #is_like = LikePost.objects.filter(user=user, post=post).exists()
     #return JsonResponse({'all_feed_posts': [{'post_id':post.post_id, 'content': post.content, 'created_at': post.created_at, 'image':post.image} for post in all_feed_posts]}, status=200)
 
-@api_view(['POST','GET'])
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Search for a team, player, or post",
+    manual_parameters=[
+        openapi.Parameter('query', openapi.IN_QUERY, description='Search query', type=openapi.TYPE_STRING)
+    ],
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'team': openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+                    'team': openapi.Schema(type=openapi.TYPE_STRING),
+                    'id': openapi.Schema(type=openapi.TYPE_STRING)
+                }),
+                'player': openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+                    'player': openapi.Schema(type=openapi.TYPE_STRING),
+                    'id': openapi.Schema(type=openapi.TYPE_STRING)
+                }),
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER)
+                    }
+                ))
+            }
+        )),
+        500: 'Internal server error'
+    }
+)
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def search(request):
     if request.method == "GET" and "query" in request.GET:
@@ -570,9 +748,9 @@ def search(request):
             player = search_player(query)
             print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'player': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
+            return JsonResponse({'team': team, 'player': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))})
         except:
-            return JsonResponse({"error:": "error in search, please try again"}, status=500)
+            return JsonResponse({"error:": "error in search, please try again"})
         
 
     #return render(request, 'search.html')
@@ -659,6 +837,31 @@ def search_team(query):
         return {"error:": "error, please try again"}
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get the details of a team",
+    manual_parameters=[
+        openapi.Parameter('id', openapi.IN_QUERY, description='ID of the team', type=openapi.TYPE_STRING)
+    ],
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'conference': openapi.Schema(type=openapi.TYPE_STRING),
+                'coach': openapi.Schema(type=openapi.TYPE_STRING),
+                'division': openapi.Schema(type=openapi.TYPE_STRING),
+                'venue': openapi.Schema(type=openapi.TYPE_STRING),
+                'venue_latitude': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'venue_longitude': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'image': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        500: 'Internal server error'
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def team(request):
     if request.method == "GET" and "id" in request.GET:
         id = request.GET.get("id")
@@ -731,6 +934,38 @@ def get_label(id):
         return None
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get the details of a player",
+    manual_parameters=[
+        openapi.Parameter('id', openapi.IN_QUERY, description='ID of the player', type=openapi.TYPE_STRING)
+    ],
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'height': openapi.Schema(type=openapi.TYPE_STRING),
+                'date_of_birth': openapi.Schema(type=openapi.TYPE_STRING),
+                'instagram': openapi.Schema(type=openapi.TYPE_STRING),
+                'teams': openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+                    'team_name': openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+                        'start': openapi.Schema(type=openapi.TYPE_STRING),
+                        'end': openapi.Schema(type=openapi.TYPE_STRING)
+                    })
+                }),
+                'positions': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                'awards': openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+                    'award_name': openapi.Schema(type=openapi.TYPE_STRING)
+                }),
+                'image': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        500: 'Internal server error'
+    }
+)    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def player(request):
     if request.method == "GET" and "id" in request.GET:
         id = request.GET.get("id")
@@ -817,12 +1052,41 @@ def list_wikidata_property(lst):
     return names
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get the CSRF token",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'csrf_token': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ))
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def csrf_token(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrf_token': csrf_token}, status=200)
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get the session status",
+    responses={
+        200: openapi.Response('Success response', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'session': openapi.Schema(type=openapi.TYPE_BOOLEAN)
+            }
+        ))
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def session(request):
     if request.method == "GET":
         session = request.session
         return JsonResponse({'session': session.session_key != None }, status=200)
+
