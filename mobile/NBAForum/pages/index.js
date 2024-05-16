@@ -20,6 +20,6 @@ export{
     Search,
     Profile,
     EditProfile,
-    OthersProfile
+    OthersProfile,
     Post,
 }
