@@ -25,7 +25,6 @@ const HomePage = ({ navigation }) => {
                 onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-            
             </View>
         </View>
     );
