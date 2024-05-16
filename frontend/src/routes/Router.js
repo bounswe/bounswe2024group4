@@ -18,6 +18,7 @@ import { Provider } from "../globalContext/globalContext.js";
 import { isAuthorized } from "../components/Auth.js";
 import CreatePost from "../pages/CreatePost.js";
 import SearchResult from '../pages/SearchResult.js';
+import Bookmarks from '../pages/Bookmarks.js';
 
 function Router() {
   const PrivateRoutes = () => {
@@ -36,6 +37,7 @@ function Router() {
           <Route path="/player/:id" element={<Player />} />
           <Route path="/user/:username" element={<Profile />} />
           <Route path="/search/:query" element={<SearchResult />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/sign-up-prompt" element={<SignUpPrompt />} />
           <Route path="/sign-in" element={<SignIn />} />
