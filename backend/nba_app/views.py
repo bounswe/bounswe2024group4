@@ -781,14 +781,16 @@ def search(request):
             print("player:", player)
             posts = Post.objects.filter(content__icontains=query)
             return JsonResponse({'team': team, 'players': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
+
         except:
             return JsonResponse({"error:": "error in search, please try again"})
+        
+   
         
 
     #return render(request, 'search.html')
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
 def search_player(query):
     # SPARQL query to retrieve all instances of teams
     sparql_query = '''
@@ -823,8 +825,7 @@ def search_player(query):
                 players.append([player_bindings['itemLabel']['value'], player_id, image, height, date_of_birth])
     return players
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
 def search_team(query):
     teams = [ ["atlanta", "hawks", "atlanta hawks"], 
              ["boston", "celtics", "boston celtics"], 
@@ -909,6 +910,7 @@ def search_team(query):
 @permission_classes([IsAuthenticated])
 def team(request):
     if request.method == "GET" and "id" in request.GET:
+        """
         id = request.GET.get("id")
         sparql_query = '''
             SELECT DISTINCT ?item ?itemLabel ?image ?coachLabel ?divisionLabel ?conferenceLabel ?venueLabel ?venue_location 
@@ -961,8 +963,9 @@ def team(request):
                             
         except:
             return JsonResponse({"error:": "error, please try again"}, status=500)
+        """
         
-"""        
+        id = request.GET.get("id")
         try:
             url = 'https://www.wikidata.org/w/api.php'
             response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
@@ -1020,9 +1023,8 @@ def team(request):
                                  'image': image_url}, status=200)
         except:
             return JsonResponse({"error:": "error, please try again"}, status=500)
-"""
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
+
 def get_label(id):
     url = 'https://www.wikidata.org/w/api.php'
     response = requests.get(url, params = {'action': 'wbgetentities', 'format': 'json', 'ids': id, 'language': 'en'})
@@ -1219,8 +1221,6 @@ def player(request):
             return JsonResponse({"error:": "error, please try again"}, status=500)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def list_wikidata_property(lst):
     names = []
     for item in lst:
