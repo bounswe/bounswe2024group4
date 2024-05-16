@@ -2,35 +2,30 @@ import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import axios from 'axios';
-import { Context } from "../globalContext/globalContext.js"; // Ensure the correct path
+import { Context } from "../globalContext/globalContext.js";
+import { useNavigation } from '@react-navigation/native';
 
-const Search = ({ navigation }) => {
+const Search = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
   const { baseURL } = useContext(Context);
+  const navigation = useNavigation();
 
-  const handleSearch = async (query) => {
-    if (!query.trim()) {
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
       setError("Please enter a valid search query.");
       return;
     }
     setIsLoading(true);
     setError('');
     try {
-      const encodedQuery = encodeURIComponent(query);
+      const encodedQuery = encodeURIComponent(searchQuery);
       const response = await axios.get(`${baseURL}/search/?query=${encodedQuery}`);
-      const data = response.data;
       setIsLoading(false);
-
-      if (data.player) {
-
-        // If player data is not null, navigate to the PlayerDetails screen
-        navigation.navigate('Player', { id: data.player.id });
-      } else if (data.team) {
-        // If team data is not null, navigate to the TeamDetails screen
-        navigation.navigate('Team', { id: data.team.id });
+      if (response.data) {
+        console.log(response.data)
+        navigation.navigate('SearchResults', { query: searchQuery, data: response.data });
       } else {
         setError("No data found for the query.");
       }
@@ -47,24 +42,28 @@ const Search = ({ navigation }) => {
         placeholder="Search for a NBA team/player!"
         value={searchQuery}
         onChangeText={setSearchQuery}
-        onSubmitEditing={() => handleSearch(searchQuery)}
+        onSubmitEditing={handleSearch}
       />
       {isLoading ? (
-        <ActivityIndicator size="large" color="#FFFF" />
+        <ActivityIndicator size="large" color="#0000ff" />
       ) : error ? (
-        <Text>{error}</Text>
+        <Text style={styles.error}>{error}</Text>
       ) : null}
     </View>
-    
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 25,
+    padding: 20,
     flex: 1,
     backgroundColor: '#55A1E6',
   },
+  error: {
+    color: 'red',
+    marginTop: 10,
+    fontWeight: 'bold'
+  }
 });
 
 export default Search;

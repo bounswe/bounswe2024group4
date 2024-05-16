@@ -5,6 +5,7 @@ import HomePage from "./HomePage";
 import Player from "./Player";
 import Feed from "./Feed";
 import Search from "./Search";
+import SearchResults from "./SearchResults";
 import Post from "./Post";
 
 export{
@@ -16,4 +17,5 @@ export{
     Feed,
     Search,
     Post,
+    SearchResults,
 }
