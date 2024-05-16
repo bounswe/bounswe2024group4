@@ -1,13 +1,17 @@
-import React, { useRef, useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import Post from './Post.js';
 import { Context } from "../globalContext/globalContext.js";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const OthersProfile = ({ route, navigation }) => {
   const { username } = route.params;
   const { baseURL } = useContext(Context);
   const [ isLoading, setIsLoading ] = useState(true);
+  const [ isFollowing, setIsFollowing ] = useState(false);
+  const [ followerCount, setFollowerCount ] = useState(0);
+  const [ ownProfile, setOwnProfile ] = useState(false);
   const [ profileInfo, setProfileInfo ] = useState({
     username: "",
     profile_picture: "https://cdn.nba.com/manage/2020/10/NBA20Primary20Logo-1-259x588.jpg",
@@ -17,11 +21,16 @@ const OthersProfile = ({ route, navigation }) => {
     posts: [],
     isFollowing: false
   });
+  
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const response = await axios.get(`${baseURL}/profile_view_edit_others/${username}`);
+        const thisUsername = await AsyncStorage.getItem('username');
+        console.log('uuuuu', thisUsername);
+        setOwnProfile(thisUsername === username);
+        console.log(ownProfile)
         if (response.status === 200) {
           const userProfileData = response.data;
           const postIds = userProfileData.posts;
@@ -39,6 +48,8 @@ const OthersProfile = ({ route, navigation }) => {
             isFollowing: userProfileData.is_following
           });
           setIsLoading(false);
+          setIsFollowing(userProfileData.is_following);
+          setFollowerCount(userProfileData.followers_count);
         }
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
@@ -50,18 +61,35 @@ const OthersProfile = ({ route, navigation }) => {
     fetchUserProfile();
   }, []);
 
-  const handleFollowToggle = async () => {
+  const handleFollow = async () => {
+    const prevFollowerCount = profileInfo.followers_count;
+    
+    
     try {
-      const endpoint = profileInfo.isFollowing ? '/unfollow_user/' : '/follow_user/';
-      const response = await axios.post(`${baseURL}${endpoint}${username}`);
-      if (response.status === 200) {
-        setProfileInfo(prevState => ({
-          ...prevState,
-          isFollowing: !prevState.isFollowing,
-          followers_count: prevState.followers_count + (prevState.isFollowing ? -1 : 1)
-        }));
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+        .csrf_token;
+      const endpoint = isFollowing ? '/unfollow_user/' : '/follow_user/';
+      setFollowerCount(isFollowing ? (prev) => prev - 1 : (prev) => prev + 1);
+      setIsFollowing(!isFollowing);
+      console.log(baseURL + endpoint + username);
+      const response = await axios.post(
+        baseURL + endpoint + username,
+        "",
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+        }
+      );
+      if (response.status !== 200) {
+        setIsFollowing(!isFollowing);
+        setFollowerCount(prevFollowerCount);
       }
     } catch (error) {
+      setIsFollowing(!isFollowing);
+      setFollowerCount(prevFollowerCount);
       console.error("Error updating follow status:", error);
       Alert.alert('Error', 'Failed to update follow status');
     }
@@ -77,9 +105,11 @@ const OthersProfile = ({ route, navigation }) => {
             <View style={styles.scrollContainer}>
               <Text style={styles.heading}>{profileInfo.username}</Text>
               <Text style={styles.bioText}>{profileInfo.bio}</Text>
-              <TouchableOpacity style={styles.followButton} onPress={handleFollowToggle}>
-                <Text style={styles.buttonText}>{profileInfo.isFollowing ? 'Unfollow' : 'Follow'}</Text>
+              {!ownProfile && 
+              <TouchableOpacity style={styles.followButton} onPress={handleFollow}>
+                <Text style={styles.buttonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
               </TouchableOpacity>
+              }
             </View> 
           </View>
         
@@ -90,7 +120,7 @@ const OthersProfile = ({ route, navigation }) => {
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statTitle}>Followers</Text>
-              <Text style={styles.statValue}>{profileInfo.followers_count}</Text>
+              <Text style={styles.statValue}>{followerCount}</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statTitle}>Following</Text>
