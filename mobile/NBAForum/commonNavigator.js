@@ -10,7 +10,7 @@ function CommonNavigator() {
   return(
     <Stack.Navigator>
         <Stack.Screen
-            name="Search"
+            name="Search sth"
             component={Search}
             options={{
                 headerShown: false

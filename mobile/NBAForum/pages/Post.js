@@ -103,7 +103,6 @@ const Post = ({ post, navigation }) => {
       <View style={styles.separator} />
       <RenderHTML contentWidth={300} source={{ html: post.post }} />
 
-      <Text style={styles.postText}>{post.post}</Text>
       {post.image && (
         <Image
           source={{ uri: baseURL + post.image }}

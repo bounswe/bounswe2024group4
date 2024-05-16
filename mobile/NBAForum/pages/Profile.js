@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
+import Post from './Post.js';
 
 const Profile = ({ navigation }) => {
   const { baseURL } = useContext(Context); 
@@ -97,7 +98,6 @@ const Profile = ({ navigation }) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   scrollContainer: {
