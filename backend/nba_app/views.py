@@ -380,7 +380,7 @@ def feed(request):
         posts = Post.objects.filter(user=follow)
         for post in posts:
             post_ids.append(post.post_id)
-    #post_ids += [post.post_id for post in Post.objects.filter(user=user)]
+    post_ids += [post.post_id for post in Post.objects.filter(user=user)]
     #post_ids = list(post_ids.sort())
     #post_ids = post_ids.sort(reverse=True)
     post_ids.sort(reverse=True)
