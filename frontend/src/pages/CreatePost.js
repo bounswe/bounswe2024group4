@@ -3,6 +3,7 @@ import { Navbar } from "../components/Navbar";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Context } from "../globalContext/globalContext.js";
+import { useNavigate } from "react-router-dom";
 
 function CreatePost({ onCreatePost }) {
   const [authorName, setAuthorName] = useState("");
@@ -14,6 +15,7 @@ function CreatePost({ onCreatePost }) {
   const [profilePictureURL, setProfilePictureURL] = useState("");
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfilePicture = async () => {
@@ -52,11 +54,12 @@ function CreatePost({ onCreatePost }) {
         hyperlinkWords.map(async (word) => {
           try {
             const results = await search(word);
-            if (results && results.team) {
-              return `/team/${results.team.id}`;
+            console.log(results);
+            if (results && results.team && results.team.length > 0) {
+              return `/team/${results.team[0][1]}`;
             }
-            if (results && results.player) {
-              return `/player/${results.player.id}`;
+            if (results && results.players && results.players.length > 0) {
+              return `/player/${results.players[0][1]}`;
             }
             alert(
               "There is a error in hyperlinking.Check your input and try again"
@@ -115,6 +118,7 @@ function CreatePost({ onCreatePost }) {
       );
       // Handle success, maybe show a success message
       console.log("Post created:", response.data);
+
       // Call the onCreatePost function passed from parent component
       //onCreatePost(response.data);
       // Clear input fields after submission
@@ -122,6 +126,7 @@ function CreatePost({ onCreatePost }) {
       setSelectedImage(null);
       setHyperlinkWords([]);
       setHyperlinkURLs([]);
+      navigate("/");
     } catch (error) {
       // Handle errors, maybe show an error message
       console.error("Error:", error);
