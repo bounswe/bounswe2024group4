@@ -417,7 +417,6 @@ def user_followers(request):
 @permission_classes([IsAuthenticated])
 
 
-
 def get_bookmarked_post_ids(request):
     user = request.user
     bookmarks = Bookmark.objects.filter(user=user)
@@ -523,6 +522,34 @@ def profile_view_edit_auth(request):
         return JsonResponse(data, status=200)
     
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="View or edit profile information of other users",
+    responses={
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'bio': openapi.Schema(type=openapi.TYPE_STRING),
+                'following_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'followers_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url', description='URL of the profile picture'),
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    }
+                )),
+                'is_following': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user'),
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def profile_view_edit_others(request, username):
     user = User.objects.get(username=username)
     following_count = user.following.count()
@@ -607,7 +634,7 @@ def reset_password(request):
         405: 'Method Not Allowed'
     }
 )
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 def follow_user(request, username):
     if request.method != 'POST':
@@ -650,7 +677,7 @@ def follow_user(request, username):
         405: 'Method Not Allowed'
     }
 )
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 def unfollow_user(request, username):
     if request.method != 'POST':
@@ -686,7 +713,7 @@ def unfollow_user(request, username):
         401: 'Unauthorized'
     }
 )
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 @login_required
 def feed(request):
