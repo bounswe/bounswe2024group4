@@ -51,7 +51,7 @@ function Comment({ content, username, profilePicture, commentId, initialIsLiked,
         <div className="flex gap-4">
           <img
             src={profilePicture}
-            className="w-12 h-12 rounded-full border border-gray-300 object-cover object-center"
+            className="w-12 h-12 rounded-full aspect-square border border-gray-300 object-cover object-center"
           />
           <div className="w-full">
             <div className="flex items-center gap-2">

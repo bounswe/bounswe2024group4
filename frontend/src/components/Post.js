@@ -12,7 +12,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Post({ postId, updateComments }) {
   const [content, setContent] = useState("");
@@ -26,6 +26,8 @@ function Post({ postId, updateComments }) {
   const [commentCount, setCommentCount] = useState(0);
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
+
+  const navigate = useNavigate();
 
   const parseContentWithHyperlinks = (content) => {
     // Check if content is defined and not empty
@@ -133,6 +135,10 @@ function Post({ postId, updateComments }) {
     }
   };
 
+  const handleProfilePictureClick  = () => {
+    navigate("/user/" + author);
+  };
+
   const handleData = async () => {
     try {
       const response = await axios.get(
@@ -153,8 +159,9 @@ function Post({ postId, updateComments }) {
       setIsBookmarked(response.data.user_has_bookmarked);
       setAuthor(response.data.username);
       setProfilePicture(baseURL + response.data.profile_picture);
-      updateComments(response.data.comments);
+      if (updateComments) updateComments(response.data.comments);
       setCommentCount(response.data.comments.length);
+      console.log(response.data.comments_count);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -168,12 +175,11 @@ function Post({ postId, updateComments }) {
     <div className="border border-gray-300 rounded-md overflow-hidden mb-2">
       <div className="bg-white shadow-md p-4 hover:bg-slate-50">
         <div className="flex gap-4">
-          <Link to={`/user/${author}`}>
-            <img
-              src={profilePicture}
-              className="w-12 h-12 rounded-full border border-gray-300"
-            />
-          </Link>
+          <img
+            src={profilePicture}
+            className="w-12 h-12 rounded-full border border-gray-300 object-cover object-center"
+            onClick={handleProfilePictureClick}
+          />
           <div className="w-full">
             <div className="flex items-center mb-2 gap-2">
               <div className="flex items-center gap-2">
