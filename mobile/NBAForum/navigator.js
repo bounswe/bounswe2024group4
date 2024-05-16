@@ -96,6 +96,7 @@ function Navigator() {
             }}
           />
           <Stack.Screen name="Post" component={Post} options={{}} />
+          <Stack.Screen name="BookmarkedPosts" component={BookmarkedPosts} />
         </>
       )}
     </Stack.Navigator>
