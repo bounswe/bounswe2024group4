@@ -63,6 +63,10 @@ export function Navbar() {
     navigate("/user/" + localStorage.getItem("username"));
   };
 
+  const handleBookmarks = () => {
+    navigate("/bookmarks");
+  };
+
   const handleLogo = () => {
     // Navigate to main page
     navigate("/");
@@ -101,6 +105,13 @@ export function Navbar() {
                 >
                   {" "}
                   Profile{" "}
+                </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100"
+                  onClick={handleBookmarks}
+                >
+                  {" "}
+                  Bookmarks{" "}
                 </li>
               </ul>
             </div>
