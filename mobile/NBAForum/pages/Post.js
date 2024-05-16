@@ -1,7 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { Context } from "../globalContext/globalContext.js"
 import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { faBookmark as sBookmark, faHeart as sHeart, faComment as sComment } from '@fortawesome/free-solid-svg-icons';
+import { faBookmark, faHeart, faComment } from '@fortawesome/free-regular-svg-icons';
 import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
 import axios from 'axios';
@@ -109,20 +111,21 @@ const Post = ({ post, navigation }) => {
           style={styles.postImage}
         />
       )}
+
       <View style={styles.separator} />
       <View style={styles.actionsContainer}>
         <View style={styles.likeContainer}>
           <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
-            <Icon name={isLiked ? 'heart' : 'heart-o'} size={20} color="#fff" />
+            <FontAwesomeIcon icon={isLiked ? sHeart : faHeart} size={20} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.likeCount}>{likesCount}</Text>
         </View>
         <View style={styles.userDetails}>
           <TouchableOpacity onPress={toggleComments} style={styles.actionButton}>
-            <Icon name='comments' size={20} color="#fff" />
+            <FontAwesomeIcon icon={showComments ? sComment : faComment} size={20} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleBookmark} style={styles.actionButton}>
-            <Icon name={isBookmarked ? 'bookmark' : 'bookmark-o'} size={20} color="#fff" />
+            <FontAwesomeIcon icon={isBookmarked ? sBookmark : faBookmark} size={20} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
