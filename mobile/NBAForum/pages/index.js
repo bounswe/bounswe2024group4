@@ -6,6 +6,7 @@ import Player from "./Player";
 import Feed from "./Feed";
 import Search from "./Search";
 import Post from "./Post";
+import BookmarkedPosts from "./BookmarkedPosts";
 
 export{
     Login,
@@ -16,4 +17,5 @@ export{
     Feed,
     Search,
     Post,
+    BookmarkedPosts
 }

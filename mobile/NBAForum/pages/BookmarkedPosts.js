@@ -4,17 +4,17 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Post from "./Post.js";
 
-const Feed = () => {
+const BookmarkedPosts = () => {
   const { baseURL } = useContext(Context);
   const [postIds, setPostIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    const fetchFollowedProfilesPosts = async () => {
+    const fetchBookmarkedPosts = async () => {
       try {
-        const response = await axios.get(`${baseURL}/feed/`);
-        const postIds = response.data.post_ids;
+        const response = await axios.get(`${baseURL}/get_bookmarked_post_ids/`);
+        const postIds = response.data.posts.map((post) => post.post_id);
         setPostIds(postIds);
 
         const postRequests = postIds.map((postId) =>
@@ -25,11 +25,11 @@ const Feed = () => {
         setPosts(fetchedPosts);
         setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching followed profiles posts:", error);
+        console.error("Error fetching bookmarked posts:", error);
         setIsLoading(false);
       }
     };
-    fetchFollowedProfilesPosts();
+    fetchBookmarkedPosts();
   }, []);
 
   return (
@@ -55,4 +55,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Feed;
+export default BookmarkedPosts;
