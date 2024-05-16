@@ -8,6 +8,7 @@ import Search from "./Search";
 import Profile from "./Profile";
 import EditProfile from "./EditProfile";
 import OthersProfile from "./OthersProfile";
+import Post from "./Post";
 
 export{
     Login,
@@ -20,4 +21,5 @@ export{
     Profile,
     EditProfile,
     OthersProfile
+    Post,
 }

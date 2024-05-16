@@ -44,6 +44,8 @@ export function Navbar() {
   const handleCreatePost = () => {
     if (!isAuthorized()) {
       navigate("/sign-up-prompt");
+    } else {
+      navigate("/create-post");
     }
   };
 
@@ -91,7 +93,7 @@ export function Navbar() {
             </span>
           </div>
           {isMenuOpen && (
-            <div className="dropdown-menu z-10 absolute top-full left-0 bg-white border border-gray-200 rounded shadow-lg">
+            <div className="dropdown-menu z-10 absolute top-full left-0 bg-white border border-gray-200 rounded shadow-lg cursor-pointer">
               <ul>
                 <li
                   className="px-4 py-2 hover:bg-gray-100"
