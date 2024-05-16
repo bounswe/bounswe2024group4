@@ -50,7 +50,23 @@ const Post = ({ post, navigation }) => {
     const prevIsBookmarked = isBookmarked;
     setIsBookmarked((prev) => !prev);
 
-    // send request, if fails revert the changes
+    try {
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
+        .csrf_token;
+      const response = await axios.post(baseURL + "/bookmark_or_unbookmark_post/" + post.post_id, "", {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+      });
+      if (response.status !== 200) {
+        setIsBookmarked(prevIsBookmarked);
+      }
+    } catch (error) {
+      console.error("Error bookmarking the post:", error);
+      setIsBookmarked(prevIsBookmarked);
+    }
   };
 
   const toggleComments = () => {
