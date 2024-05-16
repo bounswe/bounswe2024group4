@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Context } from "./globalContext/globalContext.js"
-import { HomePage, Login, SignUp, Feed } from "./pages";
+import { HomePage, Login, SignUp, Feed, Post } from "./pages";
 import { Button } from 'react-native';
 import axios from 'axios';
 
@@ -61,6 +61,12 @@ function Navigator() {
                         title="Log Out"
                     />
                 )
+            }}
+        />
+        <Stack.Screen
+            name="Post"
+            component={Post}
+            options={{
             }}
         />
         </>
