@@ -12,7 +12,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 
 function Post({ postId, updateComments }) {
   const [content, setContent] = useState("");
@@ -183,17 +183,18 @@ function Post({ postId, updateComments }) {
                 <p className="text-gray-500 text-sm">{createdAt}</p>
               </div>
             </div>
-            <Link to={`/post/${postId}`}>
-            <p className="text-gray-800 mb-4">
-              {parseContentWithHyperlinks(content)}
-            </p>
-            {imageURL && (
-              <img
-                src={imageURL}
-                alt=""
-                className="rounded-3xl mb-4 object-cover border min-w-96 max-h-[55vh]"
-              />
-            )}
+              <p className="text-gray-800 mb-4">
+                {parseContentWithHyperlinks(content)}
+              </p>
+              <Link to={`/post/${postId}`}>
+                {imageURL && (
+                  <img
+                    src={imageURL}
+                    alt=""
+                    className="rounded-3xl mb-4 object-cover border min-w-96 max-h-[55vh]"
+                  />
+                )}
+              </Link>
             <div className="flex items-center relative">
               <div className="group flex items-center mr-4">
                 {isLiked ? (
@@ -217,12 +218,14 @@ function Post({ postId, updateComments }) {
                   {likesCount}
                 </span>
               </div>
-              <div className="group flex items-center mr-4">
-                <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-500 mr-1 cursor-pointer rounded-full group-hover:text-blue-500 group-hover:bg-blue-100" />
-                <span className="text-gray-600 group-hover:text-blue-500">
-                  {commentCount}
-                </span>
-              </div>
+              <Link to={`/post/${postId}`}>
+                <div className="group flex items-center mr-4">
+                  <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-500 mr-1 cursor-pointer rounded-full group-hover:text-blue-500 group-hover:bg-blue-100" />
+                  <span className="text-gray-600 group-hover:text-blue-500">
+                    {commentCount}
+                  </span>
+                </div>
+              </Link>
               <div className="group flex items-center mr-4 absolute right-0">
                 {isBookmarked ? (
                   <BookmarkIconSolid
@@ -237,7 +240,6 @@ function Post({ postId, updateComments }) {
                 )}
               </div>
             </div>
-            </Link>
           </div>
         </div>
       </div>
