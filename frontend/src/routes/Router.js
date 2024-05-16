@@ -17,6 +17,7 @@ import {
 import { Provider } from "../globalContext/globalContext.js";
 import { isAuthorized } from "../components/Auth.js";
 import CreatePost from "../pages/createPost.js";
+import SearchResult from '../pages/SearchResult.js';
 
 function Router() {
   const PrivateRoutes = () => {
