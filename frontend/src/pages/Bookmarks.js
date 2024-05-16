@@ -28,9 +28,9 @@ const Bookmarks = () => {
     <div className="bg-sky-50 min-h-screen">
       <Navbar />
       <div className="flex container mx-auto mt-[5vh] gap-8">
-        <div className="w-full p-4 mx-40 mt-8 mb-10">
+        <div className="w-full p-4 mx-40 mt-6 mb-12">
           <div className="bg-white p-6 rounded-2xl overflow-auto shadow h-full">
-            <h1 className="text-2xl font-bold mb-4"> Bookmarked Posts </h1>
+            <h1 className="text-2xl font-bold mb-6"> Bookmarked Posts </h1>
             {bookmarkedPosts.length > 0 ? (
               bookmarkedPosts.map((post) => (
                 <Post key={post.post_id} postId={post.post_id} />
