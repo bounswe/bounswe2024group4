@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
 import Post from './Post.js';
 import { Context } from '../globalContext/globalContext'; 
@@ -10,10 +10,12 @@ const SearchResults = () => {
   const route = useRoute();
   const { query } = route.params;
   const { baseURL } = useContext(Context);
-  const [data, setData] = useState({ team: null, player: null, posts: [] });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [postDetails, setPostDetails] = useState([]);
+  const [ data, setData ] = useState({ team: null, players: null, posts: [] });
+  const [ isLoading, setIsLoading ] = useState(true);
+  const [ error, setError ] = useState('');
+  const [ postDetails, setPostDetails]  = useState([]);
+  const [ teamDetails, setTeamDetails] = useState([]);
+  const [ playerDetails, setPlayerDetails] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -27,10 +29,10 @@ const SearchResults = () => {
       if (response.data) {
         setData(response.data);
         if (response.data.team) {
-          fetchTeamDetails(response.data.team.id);
+          fetchTeamDetails(response.data.team);
         }
-        if (response.data.player) {
-          fetchPlayerDetails(response.data.player.id);
+        if (response.data.players) {
+          fetchPlayerDetails(response.data.players);
         }
         if (response.data.posts) {
           fetchPostDetails(response.data.posts);
@@ -46,25 +48,32 @@ const SearchResults = () => {
     }
   };
 
-  const fetchTeamDetails = async (teamId) => {
+  const fetchTeamDetails = async (teams) => {
     try {
-      const teamResponse = await axios.get(`${baseURL}/team/?id=${teamId}`);
-      setData(prevState => ({
-        ...prevState,
-        team: { ...prevState.team, ...teamResponse.data }
+      const teamRequests = teams.map(team => axios.get(`${baseURL}/team/?id=${team[1]}`));
+      const teamResponses = await Promise.all(teamRequests);
+      const fetchedTeams = teamResponses.map(response => response.data);
+      const fetchedTeamsWithIds = fetchedTeams.map((team, index) => ({
+        ...team,
+        id: teams[index][1], // Use the ID from the teams list
       }));
+      setTeamDetails(fetchedTeamsWithIds);
     } catch (error) {
       console.error('Error fetching team details:', error);
     }
   };
 
-  const fetchPlayerDetails = async (playerId) => {
+  const fetchPlayerDetails = async (players) => {
     try {
-      const playerResponse = await axios.get(`${baseURL}/player/?id=${playerId}`);
-      setData(prevState => ({
-        ...prevState,
-        player: { ...prevState.player, ...playerResponse.data }
+      const playerRequests = players.map(player => axios.get(`${baseURL}/player/?id=${player[1]}`));
+      const playerResponses = await Promise.all(playerRequests);
+      const fetchedPlayers = playerResponses.map(response => response.data);
+      const fetchedPlayersWithIds = fetchedPlayers.map((player, index) => ({
+        ...player,
+        id: players[index][1], // Use the ID from the teams list
       }));
+      setPlayerDetails(fetchedPlayersWithIds);
+      console.log('aaaaaaaaa', playerDetails);
     } catch (error) {
       console.error('Error fetching player details:', error);
     }
@@ -93,29 +102,46 @@ const SearchResults = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Search Results for "{query}":</Text>
-      {data.team && (
-        <View>
+      {data.team && data.team.length > 0 && (
+        <View style={{ flex: 1 }}>
           <Text style={styles.subheader}>Teams:</Text>
-          <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Team', { id: data.team.id })}>
-            <View style={styles.row}>
-              <Image source={{ uri: data.team.image }} style={styles.image} />
-              <Text style={styles.text}>{data.team.name}</Text>
-            </View>
-          </TouchableOpacity>
+            {
+              <FlatList
+                data={teamDetails}
+                renderItem={({ item }) => (
+                  <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Team', { id: item.id })}>
+                      <View style={styles.row}>
+                        <Image source={{ uri: item.image }} style={styles.image} />
+                        <Text style={styles.text}>{item.name}</Text>
+                      </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id}
+                />
+              }
+              
         </View>
       )}
-      {data.player && (
-        <View>
+      {data.players && data.players.length > 0 && (
+        <View style={{ flex: 1 }}>
           <Text style={styles.subheader}>Players:</Text>
-          <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Player', { id: data.player.id })}>
-            <View style={styles.row}>
-              <Image source={{ uri: data.player.image }} style={styles.image} />
-              <View>
-                <Text style={styles.text}>{data.player.name}</Text>
-                <Text> {data.player.height ? data.player.height.substr(1,4) + "cm" :""} </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            {
+              <FlatList
+                data={playerDetails}
+                renderItem={({ item }) => (
+                  <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Player', { id: item.id })}>
+                    <View style={styles.row}>
+                      <Image source={{ uri: item.image }} style={styles.image} />
+                      <View>
+                        <Text style={styles.text}>{item.name}</Text>
+                        <Text> {item.height ? item.height.substr(1,4) + "cm" :""} </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id}
+                />
+            }
         </View>
       )}
       {data.posts && data.posts.length > 0 && (
@@ -163,7 +189,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ffffff',
     padding: 10,
-    margin: 10,
+    margin: 3,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#BCBCBC',

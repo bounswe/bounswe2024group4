@@ -6,7 +6,7 @@ import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
 import axios from 'axios';
 
-const Post = ({ post }) => {
+const Post = ({ post, navigation }) => {
   const { baseURL } = useContext(Context);
   const [ showComments, setShowComments ] = useState(false);
   const [ commentText, setCommentText ] = useState('');
@@ -89,7 +89,7 @@ const Post = ({ post }) => {
 
   return (
     <View style={styles.postContainer}>
-      <View style={styles.userInfoContainer}>
+      <TouchableOpacity style={styles.userInfoContainer} onPress={() => navigation.navigate('OthersProfile', { username: post.username })}>
         <View style={styles.userDetails}>
           <Image
             source={{ uri: baseURL + post.profile_picture }}
@@ -98,9 +98,11 @@ const Post = ({ post }) => {
           <Text style={styles.username}>{post.username}</Text>
         </View>
         <Text>{moment(post.created_at).fromNow()}</Text>
-      </View>
+      </TouchableOpacity>
+
       <View style={styles.separator} />
       <RenderHTML contentWidth={300} source={{ html: post.post }} />
+
       {post.image && (
         <Image
           source={{ uri: baseURL + post.image }}
@@ -127,11 +129,9 @@ const Post = ({ post }) => {
 
         {showComments && (
           <View style={styles.commentsContainer}>
-            {/* Display comments */}
             {comments.map((comment, index) => (
               <Text key={index} style={styles.comment}>{comment.content}</Text>
             ))}
-            {/* Create a comment */}
             <View style={styles.createCommentContainer}>
               <TextInput
                 style={styles.commentInput}
