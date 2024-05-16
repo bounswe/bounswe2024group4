@@ -6,10 +6,13 @@ import { useNavigate } from "react-router-dom";
 const SearchBar = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSearch = () => {
-    if (searchTerm.trim() != '') {
+    if (searchTerm.trim().length > 2) {
       navigate("/search/" + searchTerm);
+    } else {
+      setErrorMessage("Search term must be at least 3 characters long.");
     }
   };
 
@@ -17,6 +20,10 @@ const SearchBar = () => {
     if (event.key === "Enter") {
       handleSearch();
     }
+  };
+
+  const clearErrorMessage = () => {
+    setErrorMessage("");
   };
 
   return (
@@ -32,6 +39,14 @@ const SearchBar = () => {
       <button onClick={handleSearch}>
         <FontAwesomeIcon icon={faSearch} />
       </button>
+      {errorMessage && (
+        <div className="text-red-500 text-sm mt-1">
+          {errorMessage}
+          <button onClick={clearErrorMessage} className="ml-2">
+            X
+          </button>
+        </div>
+      )}
     </div>
   );
 };
