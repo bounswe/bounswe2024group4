@@ -21,6 +21,7 @@ const SearchResult = () => {
   const [logos, setLogos] = useState([]);
   const [coaches, setCoaches] = useState([]);
   const [conferences, setConferences] = useState([]);
+  const [users, setUsers] = useState([]);
   const [mapArray, setMapArray] = useState([]);
 
   function formatDate(dateString) {
@@ -36,6 +37,7 @@ const SearchResult = () => {
       const response = await axios.get(baseURL + '/search/?query=' + params.query);
       setPlayers(response.data.players || []);
       setPosts(response.data.posts || []);
+      setUsers(response.data.users || []);
 
       if (response.data.team) {
         const teamData = response.data.team.map((team, index) => ({
@@ -84,6 +86,7 @@ const SearchResult = () => {
     setLogos([]);
     setCoaches([]);
     setConferences([]);
+    setUsers([]);
     setMapArray([]);
     handleData();
   }, [params.query]);
@@ -94,6 +97,10 @@ const SearchResult = () => {
 
   const handlePlayer = (id) => {
     navigate("/player/" + id);
+  };
+
+  const handleUser = (username) => {
+    navigate("/user/" + username);
   };
 
   return (
@@ -114,12 +121,12 @@ const SearchResult = () => {
                   className="w-20 h-20 object-contain mr-4"
                 />
                 <h3 className="text-xl font-semibold mr-4">{teams[index]}</h3>
-                <div className="flex flex-col mr-4">
+                <div className="flex flex-col mx-4">
                   <p> Conference:   {conferences[index]}</p>
                   <p> Coach:   {coaches[index]}</p>
                 </div>
                 <button 
-                  className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md ml-auto" 
+                  className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 mr-4 rounded-md ml-auto" 
                   onClick={() => handleTeam(teamIds[index])}
                 >
                   Go to Team Page
@@ -128,7 +135,7 @@ const SearchResult = () => {
             ))
           :
           <p className="text-center text-gray-500">Not found</p>}
-        </div>
+          </div>
           <div className="border-b pb-4 mb-4">
             <h1 className="text-2xl font-bold mb-4">Related Players</h1>
             {players.length > 0
@@ -140,15 +147,37 @@ const SearchResult = () => {
                     className="w-20 h-20 object-cover object-top rounded-full mr-4"
                   />
                   <h3 className="text-xl font-semibold mr-4">{player[0]}</h3>
-                  <div className="flex flex-col mr-4">
+                  <div className="flex flex-col mx-4">
                     <p> Date of birth:  { player[4] ? formatDate(player[4].replace("+", "").split("T")[0]) : "" }</p>
                     <p> Height:   {player[3].replace("+", "") } cm</p>
                   </div>
                   <button 
-                    className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md ml-auto" 
+                    className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 mr-4 rounded-md ml-auto" 
                     onClick={() => handlePlayer(player[1])}
                   >
                     Go to Player Page
+                  </button>
+                </div>
+              ))
+            :
+            <p className="text-center text-gray-500">Not found</p>}
+          </div>
+          <div className="border-b pb-4 mb-4">
+            <h1 className="text-2xl font-bold mb-4">Related Users</h1>
+            {users.length > 0
+              ? users.map((user, index) => (
+                <div key={index} className="border-b pb-4 mb-4 flex items-center">
+                  <img 
+                    src={baseURL + user.profile_picture} 
+                    alt={`${user.username} Profile`} 
+                    className="w-20 h-20 object-cover object-top rounded-full mr-4"
+                  />
+                  <h3 className="text-xl font-semibold mr-4">{user.username}</h3>
+                  <button 
+                    className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 mr-4 rounded-md ml-auto" 
+                    onClick={() => handleUser(user.username)}
+                  >
+                    Go to Profile Page
                   </button>
                 </div>
               ))
