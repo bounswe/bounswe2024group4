@@ -9,7 +9,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 const Profile = ({ navigation }) => {
   const { baseURL } = useContext(Context); 
   const [ isLoading, setIsLoading ] = useState(true);
-  const [ userLoggedIn, setUserLoggedIn ] = useState('false');
   const [ bool, setBool ] = useState(false);
   const [ profileInfo, setProfileInfo ] = useState({
     username: "",
@@ -23,7 +22,6 @@ const Profile = ({ navigation }) => {
 
   const fetchUserProfile = async () => {
     const loggedin = await AsyncStorage.getItem('loggedIn');
-    setUserLoggedIn(loggedin);
     console.log(loggedin);
     setBool(loggedin === 'true');
     console.log(bool);
