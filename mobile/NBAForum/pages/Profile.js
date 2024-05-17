@@ -1,6 +1,6 @@
 import React, { useContext, useState, useCallback} from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Button } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
 import Post from './Post.js';
@@ -76,7 +76,6 @@ const Profile = ({ navigation }) => {
                 <Text style={styles.buttonText}>Edit Profile</Text>
               </TouchableOpacity>
             </View>
-            <Button title="Refresh" onPress={fetchUserProfile} />
           </View>
         
           <View style={styles.statsContainer}>
