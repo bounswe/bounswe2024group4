@@ -315,8 +315,7 @@ def bookmark_or_unbookmark_post(request, post_id):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@login_required
+@permission_classes([AllowAny])
 def post_detail(request, post_id):
     post = get_object_or_404(Post, post_id=post_id)
     comments = post.comments.all()
@@ -752,7 +751,7 @@ def feed(request):
 
 @swagger_auto_schema(
     method='get',
-    operation_description="Search for a team, player, or post",
+    operation_description="Search for a team, player, user, or post",
     manual_parameters=[
         openapi.Parameter('query', openapi.IN_QUERY, description='Search query', type=openapi.TYPE_STRING)
     ],
@@ -768,6 +767,13 @@ def feed(request):
                     'player': openapi.Schema(type=openapi.TYPE_STRING),
                     'id': openapi.Schema(type=openapi.TYPE_STRING)
                 }),
+                'users': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'user': openapi.Schema(type=openapi.TYPE_STRING),
+                        'profile_picture': openapi.Schema(type=openapi.TYPE_FILE)
+                    }
+                )),
                 'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
