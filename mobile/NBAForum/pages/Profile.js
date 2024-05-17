@@ -1,12 +1,15 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useCallback} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
 import Post from './Post.js';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Profile = ({ navigation }) => {
   const { baseURL } = useContext(Context); 
   const [ isLoading, setIsLoading ] = useState(true);
+  const [ bool, setBool ] = useState(false);
   const [ profileInfo, setProfileInfo ] = useState({
     username: "",
     profile_picture: "https://cdn.nba.com/manage/2020/10/NBA20Primary20Logo-1-259x588.jpg",
@@ -14,10 +17,15 @@ const Profile = ({ navigation }) => {
     followers_count: 0,
     following_count: 0,
     postsCount: 0,
+    posts:[]
   });
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
+  const fetchUserProfile = async () => {
+    const loggedin = await AsyncStorage.getItem('loggedIn');
+    console.log(loggedin);
+    setBool(loggedin === 'true');
+    console.log(bool);
+    if(loggedin === 'true'){
       try {
         const response = await axios.get(`${baseURL}/profile_view_edit_auth`);
         console.log(response.data);
@@ -44,14 +52,17 @@ const Profile = ({ navigation }) => {
         Alert.alert('Error', 'Failed to fetch user profile data');
         setIsLoading(false);
       }
-    };
-  
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
     fetchUserProfile();
-  }, []);
+  }, []));
 
   return (
     <View style={styles.scrollContainer}>
-      {!isLoading ? (
+      {!isLoading && bool ? (
         <>
         <View>
           <View style={styles.profileImageContainer}>
@@ -62,7 +73,7 @@ const Profile = ({ navigation }) => {
               <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EditProfile')}>
                 <Text style={styles.buttonText}>Edit Profile</Text>
               </TouchableOpacity>
-            </View> 
+            </View>
           </View>
         
           <View style={styles.statsContainer}>
@@ -92,10 +103,14 @@ const Profile = ({ navigation }) => {
           />
         </View>
         </>
-      ) : (
+      ) : isLoading && bool ? (
         <ActivityIndicator size="large" color="#00" />
-      )}
+      ) : (
+        null
+      ) 
+      }
     </View>
+    
   );
 };
 

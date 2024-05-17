@@ -14,6 +14,7 @@ import {
 } from "./pages";
 import { Button } from "react-native";
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,15 @@ function Navigator() {
     try {
       const response = await axios.get(baseURL + "/log_out/");
       setIsLoggedIn(false);
+      await AsyncStorage.setItem(
+        'username',
+        '',
+      );
+      await AsyncStorage.setItem(
+        'loggedIn',
+        'false',
+      );
+
     } catch (error) {
       console.log(error.message);
     }

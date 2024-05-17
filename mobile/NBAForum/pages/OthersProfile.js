@@ -28,7 +28,6 @@ const OthersProfile = ({ route, navigation }) => {
       try {
         const response = await axios.get(`${baseURL}/profile_view_edit_others/${username}`);
         const thisUsername = await AsyncStorage.getItem('username');
-        console.log('uuuuu', thisUsername);
         setOwnProfile(thisUsername === username);
         console.log(ownProfile)
         if (response.status === 200) {

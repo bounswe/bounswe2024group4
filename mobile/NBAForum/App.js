@@ -1,12 +1,13 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { TouchableOpacity, View, Text, StyleSheet, Modal, Alert } from "react-native";
-import { Provider, Context } from "./globalContext/globalContext.js";
+import { Provider } from "./globalContext/globalContext.js";
 import Navigator from "./navigator.js";
 import CommonNavigator from "./commonNavigator.js";
 import CreatePost from "./pages/CreatePost.js";
 import Profile from './pages/Profile.js';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function App() {
   const Tab = createBottomTabNavigator();
@@ -43,8 +44,7 @@ const showAlert = (title, message, onPress) =>
   ]);
 
 const CustomTabBar = ({ state, descriptors, navigation, setShowCreatePostModal }) => {
-  const globalContext = useContext(Context)
-  const { isLoggedIn } = globalContext;
+  const [ isLoggedIn, setIsLoggedIn ] = useState(false);
 
   return (
     <View style={styles.tabBar}>
@@ -86,9 +86,10 @@ const CustomTabBar = ({ state, descriptors, navigation, setShowCreatePostModal }
         );
       })}
       <TouchableOpacity
-        onPress={() => 
+        onPress={async () => 
           {
-            if (isLoggedIn) {
+            const log = await AsyncStorage.getItem('loggedIn');
+            if (log == 'true') {
               setShowCreatePostModal(true)
             } else {
               showAlert("Login Required", "Please login to create a post", () => {})
