@@ -53,6 +53,10 @@ const Login = () => {
           'username',
           response.data.username,
         );
+        await AsyncStorage.setItem(
+          'loggedIn',
+          'true',
+        );
         setIsLoggedIn(true);
       } else {
         setMessage("Something went wrong, please try again.");

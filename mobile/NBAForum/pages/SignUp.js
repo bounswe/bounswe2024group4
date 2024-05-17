@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
 import axios from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Context } from "../globalContext/globalContext.js"
 
 
@@ -83,6 +84,14 @@ const SignUp = () => {
         setHasSession(true);
         setUserObj(response.data);
         setIsLoggedIn(true);
+        await AsyncStorage.setItem(
+          'username',
+          response.data.username,
+        );
+        await AsyncStorage.setItem(
+          'loggedIn',
+          'true',
+        );
       } else {
         setMessage(response.data);
         toggleModal();

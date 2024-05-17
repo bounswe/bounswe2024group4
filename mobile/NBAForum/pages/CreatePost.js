@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from 'expo-image-picker';
 import axios from "axios";
 import { Context } from "../globalContext/globalContext.js";
 
@@ -15,32 +15,28 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
   const [description, setDescription] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
 
   const showAlert = (title, message, onPress) =>
     Alert.alert(title, message, [
       { text: "OK", onPress: onPress },
     ]);
 
-  const openImagePicker = () => {
-    const options = {
-      mediaType: "photo",
-      includeBase64: false,
-      maxHeight: 2000,
-      maxWidth: 2000,
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.error) {
-        console.log("Image picker error: ", response.error);
-      } else {
-        let imageUri = response.uri || response.assets?.[0]?.uri;
-        setSelectedImage(imageUri);
+    const pickImage = async () => {
+      // No permissions request is necessary for launching the image library
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      console.log(result);
+  
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
       }
-    });
-  };
+    };
 
   const share = async () => {
     console.log("Content:", description);
@@ -84,7 +80,7 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
         multiline
         numberOfLines={4}
       />
-      <TouchableOpacity style={styles.addButton} onPress={openImagePicker}>
+      <TouchableOpacity style={styles.addButton} onPress={pickImage}>
         <Text style={styles.addButtonText}>Add Photo</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.shareButton} onPress={share}>

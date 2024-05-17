@@ -8,9 +8,10 @@ import RenderHTML from 'react-native-render-html';
 import moment from 'moment';
 import axios from 'axios';
 import Comment from "./Comment.js";
+import { useNavigation } from '@react-navigation/native';
 
-
-const Post = ({ post, navigation }) => {
+const Post = ({ post }) => {
+  const navigation = useNavigation();
   const { baseURL } = useContext(Context);
   const [ showComments, setShowComments ] = useState(false);
   const [ commentText, setCommentText ] = useState('');

@@ -1,11 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
 import { Context } from "../globalContext/globalContext.js";
 
 const EditProfile = ({ navigation }) => {
   const { baseURL } = useContext(Context);
+  const [selectedImage, setSelectedImage] = useState("");
+
   const [userInfo, setUserInfo] = useState({
     username: "",
     email: "",
@@ -29,22 +31,26 @@ const EditProfile = ({ navigation }) => {
         console.error('Failed to load profile:', error);
         Alert.alert('Error', 'Could not fetch profile data');
       }
+      
     };
 
     fetchProfile();
   }, []);
 
-  const handleChoosePhoto = () => {
-    const options = {
-      noData: true,
-      mediaType: 'photo',
-    };
-
-    ImagePicker.launchImageLibrary(options, response => {
-      if (response.uri) {
-        setUserInfo({ ...userInfo, profilePicture: response.uri });
-      }
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+    }
   };
 
   const handleSave = async () => {
@@ -58,7 +64,7 @@ const EditProfile = ({ navigation }) => {
       formData.append('profile_picture', {
         name: 'profile.jpg',
         type: 'image/jpeg',
-        uri: userInfo.profilePicture,
+        uri: selectedImage,
       });
     }
 
@@ -89,7 +95,7 @@ const EditProfile = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.imageContainer}>
-        <TouchableOpacity onPress={handleChoosePhoto}>
+        <TouchableOpacity onPress={pickImage}>
           <Image source={{ uri: userInfo.profilePicture }} style={styles.profileImage} />
         </TouchableOpacity>
       </View>
