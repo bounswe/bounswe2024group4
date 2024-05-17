@@ -33,17 +33,17 @@ function Router() {
         <Routes>
           <Route element={<PrivateRoutes />}>
             <Route path="/" element={<Feed />} />
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/bookmarks" element={<Bookmarks />} />
           </Route>
           <Route path="/team/:id" element={<Team />} />
           <Route path="/player/:id" element={<Player />} />
           <Route path="/user/:username" element={<Profile />} />
           <Route path="/post/:id" element={<PostFocus />} />
           <Route path="/search/:query" element={<SearchResult />} />
-          <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/sign-up-prompt" element={<SignUpPrompt />} />
           <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/create-post" element={<CreatePost />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </BrowserRouter>
