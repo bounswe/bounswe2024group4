@@ -1,4 +1,5 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import { View, StyleSheet, FlatList, ActivityIndicator } from "react-native";
 import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
@@ -10,7 +11,11 @@ const Feed = ( {navigation} ) => {
   const [isLoading, setIsLoading] = useState(true);
   const [posts, setPosts] = useState([]);
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
+      fetchFollowedProfilesPosts();
+  }, []));
+  
     const fetchFollowedProfilesPosts = async () => {
       try {
         const response = await axios.get(`${baseURL}/feed/`);
@@ -29,8 +34,7 @@ const Feed = ( {navigation} ) => {
         setIsLoading(false);
       }
     };
-    fetchFollowedProfilesPosts();
-  }, []);
+   
 
   return (
     <View style={styles.container}>

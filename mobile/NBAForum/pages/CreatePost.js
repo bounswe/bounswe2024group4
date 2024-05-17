@@ -30,9 +30,7 @@ const CreatePostScreen = ({ setShowCreatePostModal }) => {
         aspect: [4, 3],
         quality: 1,
       });
-  
-      console.log(result);
-  
+    
       if (!result.canceled) {
         setSelectedImage(result.assets[0].uri);
       }
