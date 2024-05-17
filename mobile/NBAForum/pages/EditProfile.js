@@ -12,7 +12,9 @@ const EditProfile = ({ navigation }) => {
     username: "",
     email: "",
     bio: "",
-    profilePicture: ""
+    profilePicture: "",
+    password: "",  
+    confirmPassword: "" 
   });
 
   useEffect(() => {
@@ -24,7 +26,9 @@ const EditProfile = ({ navigation }) => {
             username: response.data.username,
             email: response.data.email,
             bio: response.data.bio,
-            profilePicture: response.data.profile_picture ? `${baseURL}${response.data.profile_picture}` : userInfo.profilePicture
+            profilePicture: response.data.profile_picture ? `${baseURL}${response.data.profile_picture}` : userInfo.profilePicture,
+            password: "", 
+            confirmPassword: "" 
           });
         }
       } catch (error) {
@@ -54,10 +58,16 @@ const EditProfile = ({ navigation }) => {
   };
 
   const handleSave = async () => {
+    if (userInfo.password !== userInfo.confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('username', userInfo.username);
     formData.append('email', userInfo.email);
     formData.append('bio', userInfo.bio);
+    formData.append('password', userInfo.password); 
 
     // Check if the profile picture is a new file and not just a URL from the server
     if (userInfo.profilePicture && !userInfo.profilePicture.includes(baseURL)) {
@@ -69,9 +79,7 @@ const EditProfile = ({ navigation }) => {
     }
 
     try {
-
-      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data
-      .csrf_token;
+      const csrfToken = (await axios.get(baseURL + "/csrf_token/")).data.csrf_token;
 
       const response = await axios.post(`${baseURL}/profile_view_edit_auth`, formData, {
         headers: {
@@ -82,13 +90,33 @@ const EditProfile = ({ navigation }) => {
 
       if (response.status === 200) {
         Alert.alert("Profile Updated", "Your profile has been successfully updated.");
+        if (userInfo.password) {
+          await handleLogout();
+        }
         navigation.navigate('Profile');
+      } else if (response.data.error) {
+        Alert.alert('Update Failed', response.data.error);
       } else {
         throw new Error('Server responded with an error');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
       Alert.alert('Update Failed', 'Failed to update profile.');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/log_out`);
+      if (response.status === 200) {
+        Alert.alert('Logged Out', 'You have been logged out. Please log in again.');
+        navigation.navigate('Login');
+      } else {
+        throw new Error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+      Alert.alert('Logout Failed', 'Failed to log out.');
     }
   };
 
@@ -117,6 +145,20 @@ const EditProfile = ({ navigation }) => {
         onChangeText={bio => setUserInfo({ ...userInfo, bio })}
         placeholder="Bio"
         multiline
+      />
+      <TextInput
+        style={styles.input}
+        value={userInfo.password}
+        onChangeText={password => setUserInfo({ ...userInfo, password })}
+        placeholder="New Password"
+        secureTextEntry
+      />
+      <TextInput
+        style={styles.input}
+        value={userInfo.confirmPassword}
+        onChangeText={confirmPassword => setUserInfo({ ...userInfo, confirmPassword })}
+        placeholder="Confirm New Password"
+        secureTextEntry
       />
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Save Changes</Text>
