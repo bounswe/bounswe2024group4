@@ -12,7 +12,7 @@ const EditProfile = ({ navigation }) => {
     username: "",
     email: "",
     bio: "",
-    profilePicture: "",
+    profilePicture: "https://cdn.nba.com/manage/2020/10/NBA20Primary20Logo-1-259x588.jpg",
     password: "",  
     confirmPassword: "" 
   });
@@ -93,7 +93,6 @@ const EditProfile = ({ navigation }) => {
         if (userInfo.password) {
           await handleLogout();
         }
-        navigation.navigate('Profile');
       } else if (response.data.error) {
         Alert.alert('Update Failed', response.data.error);
       } else {
@@ -109,8 +108,8 @@ const EditProfile = ({ navigation }) => {
     try {
       const response = await axios.get(`${baseURL}/log_out`);
       if (response.status === 200) {
-        Alert.alert('Logged Out', 'You have been logged out. Please log in again.');
         navigation.navigate('Login');
+        Alert.alert('Logged Out', 'You have been logged out. Please log in again.');
       } else {
         throw new Error('Failed to log out');
       }
