@@ -418,44 +418,6 @@ def user_followers(request):
     return JsonResponse({'followers_info': followers_info}, status=200)
 
 
-@swagger_auto_schema(
-    method='post',
-    operation_description="Get the list of users who liked a specific post",
-    responses={
-        200: openapi.Response('Success response', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'users': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'username': openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                ))
-            }
-        )),
-        401: 'Unauthorized'
-    }
-)
-@swagger_auto_schema(
-    method='get',
-    operation_description="Get the list of users who liked a specific post",
-    responses={
-        200: openapi.Response('Success response', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'users': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'username': openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                ))
-            }
-        )),
-        401: 'Unauthorized'
-    }
-)
 @api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 def get_users_like_post(request, post_id):
@@ -465,44 +427,6 @@ def get_users_like_post(request, post_id):
     return JsonResponse({'user_info': user_info}, status=200)
 
 
-@swagger_auto_schema(
-    method='post',
-    operation_description="Get the list of users who liked a specific comment",
-    responses={
-        200: openapi.Response('Success response', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'users': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'username': openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                ))
-            }
-        )),
-        401: 'Unauthorized'
-    }
-)
-@swagger_auto_schema(
-    method='get',
-    operation_description="Get the list of users who liked a specific comment",
-    responses={
-        200: openapi.Response('Success response', openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'users': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'username': openapi.Schema(type=openapi.TYPE_STRING),
-                    }
-                ))
-            }
-        )),
-        401: 'Unauthorized'
-    }
-)
 @api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
 def get_bookmarked_post_ids(request):
@@ -637,7 +561,7 @@ def profile_view_edit_auth(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def profile_view_edit_others(request, username):
     user = User.objects.get(username=username)
     following_count = user.following.count()
@@ -862,7 +786,7 @@ def feed(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def search(request):
     if request.method == "GET" and "query" in request.GET:
         query = request.GET.get("query")
@@ -1005,7 +929,7 @@ def search_team(query):
     }
 )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def team(request):
     if request.method == "GET" and "id" in request.GET:
         """
@@ -1164,7 +1088,7 @@ def get_label(id):
     }
 )    
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def player(request):
 
     if request.method == "GET" and "id" in request.GET:
