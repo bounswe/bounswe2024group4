@@ -13,6 +13,7 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Link, useNavigate } from "react-router-dom";
+import UserListInfoModal from "../components/UserListInfoModal.js";
 
 function Post({ postId, updateComments }) {
   const [content, setContent] = useState("");
@@ -24,6 +25,8 @@ function Post({ postId, updateComments }) {
   const [likesCount, setLikesCount] = useState(0);
   const [profilePicture, setProfilePicture] = useState("");
   const [commentCount, setCommentCount] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [likers, setLikers] = useState([]);
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
 
@@ -161,6 +164,10 @@ function Post({ postId, updateComments }) {
       setProfilePicture(baseURL + response.data.profile_picture);
       if (updateComments) updateComments(response.data.comments);
       setCommentCount(response.data.comments.length);
+      const likersResponse = await axios.get(
+        baseURL + "/get_users_like_post/" + postId
+      );
+      setLikers(likersResponse.data.user_info.map(info => info.username));
     } catch (error) {
       console.error("Error:", error);
     }
@@ -218,7 +225,7 @@ function Post({ postId, updateComments }) {
                     isLiked
                       ? "text-red-500"
                       : "text-gray-500 group-hover:text-red-500"
-                  }`}
+                  }`} onClick={() => setIsModalOpen(true)}
                 >
                   {likesCount}
                 </span>
@@ -248,6 +255,12 @@ function Post({ postId, updateComments }) {
           </div>
         </div>
       </div>
+      <UserListInfoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        usernames={likers}
+        title="People who liked this post"
+      />
     </div>
   );
 }

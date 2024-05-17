@@ -31,7 +31,7 @@ const Feed = () => {
         <div className="w-full p-4 mx-40 mt-6 mb-12">
           <div className="bg-white p-6 rounded-2xl overflow-auto shadow h-full">
             <h1 className="text-2xl font-bold mb-6"> Feed </h1>
-            {feedPosts.length > 0 ? (
+            {feedPosts ? (
               feedPosts.map((post) => <Post key={post} postId={post} />)
             ) : (
               <p className="text-center text-gray-500">

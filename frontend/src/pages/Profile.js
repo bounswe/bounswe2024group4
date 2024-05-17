@@ -7,6 +7,7 @@ import { Context } from "../globalContext/globalContext.js";
 import { useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import EditProfileModal  from "../components/EditProfileModal.js";
+import UserListInfoModal from "../components/UserListInfoModal.js";
 
 const Profile = () => {
   const [ownProfile, setOwnProfile] = useState(false);
@@ -18,7 +19,11 @@ const Profile = () => {
   const [email, setEmail] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
   const [posts, setPosts] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [followings, setFollowings] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFollowerModalOpen, setIsFollowerModalOpen] = useState(false);
+  const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
   const params = useParams();
 
   const handleData = async () => {
@@ -29,6 +34,14 @@ const Profile = () => {
         setOwnProfile(true);
         response = await axios.get(baseURL + "/profile_view_edit_auth");
         setEmail(response.data.email);
+        let followersResponse = await axios.get(
+          baseURL + "/user_followers/"
+        );
+        let followingsResponse = await axios.get(
+          baseURL + "/user_followings/"
+        );
+        setFollowers(followersResponse.data.followers_info.map(info => info.username));
+        setFollowings(followingsResponse.data.followings_info.map(info => info.username));
       } else {
         response = await axios.get(
           baseURL + "/profile_view_edit_others/" + params.username
@@ -40,6 +53,8 @@ const Profile = () => {
       setFollowingCount(response.data.following_count);
       setIsFollowing(response.data.is_following);
       setPosts(response.data.posts);
+
+      
     } catch (error) {
       console.error("Error:", error);
     }
@@ -114,6 +129,16 @@ const Profile = () => {
     setProfilePictureURL(baseURL + newProfilePictureURL);
   };
 
+  const handleFollowingModal = () => {
+    if (!ownProfile) return;
+    setIsFollowingModalOpen(true);
+  };
+
+  const handleFollowerModal = () => {
+    if (!ownProfile) return;
+    setIsFollowerModalOpen(true);
+  };
+
   useEffect(() => {
     handleData();
   }, [params.username, profilePictureURL]);
@@ -141,11 +166,11 @@ const Profile = () => {
             </p>}
             {bio && <p className="mb-4">{bio}</p>}
             <div className="flex justify-center items-center gap-x-3 mx-auto mb-3">
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center" onClick={handleFollowerModal}>
                 <span className="font-bold">{followerCount}</span>
                 <span className="font-light">Followers</span>
               </div>
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center" onClick={handleFollowingModal}>
                 <span className="font-bold">{followingCount}</span>
                 <span className="font-light">Following</span>
               </div>
@@ -191,6 +216,18 @@ const Profile = () => {
         currentProfilePictureURL={profilePictureURL}
         currentEmail={email}
         onUpdate={handleUpdateProfile}
+      />
+      <UserListInfoModal
+        isOpen={isFollowerModalOpen}
+        onClose={() => setIsFollowerModalOpen(false)}
+        usernames={followers}
+        title="Followers"
+      />
+      <UserListInfoModal
+        isOpen={isFollowingModalOpen}
+        onClose={() => setIsFollowingModalOpen(false)}
+        usernames={followings}
+        title="Following"
       />
     </div>
   );
