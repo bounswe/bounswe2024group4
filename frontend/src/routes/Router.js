@@ -17,9 +17,9 @@ import {
 import { Provider } from "../globalContext/globalContext.js";
 import { isAuthorized } from "../components/Auth.js";
 import CreatePost from "../pages/CreatePost.js";
-import SearchResult from '../pages/SearchResult.js';
-import Bookmarks from '../pages/Bookmarks.js';
-import PostFocus from '../pages/PostFocus.js';
+import SearchResult from "../pages/SearchResult.js";
+import Bookmarks from "../pages/Bookmarks.js";
+import PostFocus from "../pages/PostFocus.js";
 
 function Router() {
   const PrivateRoutes = () => {
