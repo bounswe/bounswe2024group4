@@ -796,8 +796,13 @@ def search(request):
             print("team:", team)
             player = search_player(query)
             print("player:", player)
+            users = User.objects.filter(username__icontains=query)
             posts = Post.objects.filter(content__icontains=query)
-            return JsonResponse({'team': team, 'players': player, 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
+            return JsonResponse({'team': team, 
+                                 'players': player, 
+                                 'users': [{'username': user.username, 'profile_picture': user.profile_picture.url if user.profile_picture else None} for user in users],
+                                 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
+            #return JsonResponse({'team': team, 'players': player, 'users': users, 'posts': list(reversed([{'id': post.post_id} for post in posts]))}, status=200)
 
         except:
             return JsonResponse({"error:": "error in search, please try again"})
