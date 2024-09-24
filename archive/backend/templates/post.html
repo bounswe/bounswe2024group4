@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post</title>
+</head>
+<body>
+    <h1>Create Post</h1>
+
+    <!-- Form for creating new posts -->
+    <form method="post" enctype="multipart/form-data" action="{% url 'post' %}">
+        {% csrf_token %}
+        <textarea name="content" rows="4" cols="50" placeholder="Enter your post content"></textarea><br>
+        <input type="file" name="image"><br>
+        <button type="submit">Post</button>
+    </form>
+</body>
+</html>

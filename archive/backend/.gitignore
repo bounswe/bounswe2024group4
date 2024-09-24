@@ -1,0 +1,4 @@
+nba_app/__pycache__
+nba_app/migrations/__pycache__
+nba_project/__pycache__
+nba_project/.env
