@@ -23,11 +23,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('posts/', include('posts_app.urls')),
     path('profiles/', include('profiles_app.urls')),
-    path('programs/', include('programs_app.urls')),
+    #path('programs/', include('programs_app.urls')),
     path('feed/', include('social_feed_app.urls')),
     path('messages/', include('messaging_app.urls')),
     path('search/', include('search_app.urls')),
     path('auth/', include('user_auth_app.urls')),
-    path('api/', include('external_api_app.urls')),
+    path('diet-program/', include('diet_program_app.urls')),
+    path('exercise-program/', include('exercise_program_app.urls')),
+
 ]
 
