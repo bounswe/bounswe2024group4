@@ -1,6 +1,10 @@
 import React from 'react';
 import { FlatList, View, StyleSheet } from 'react-native';
-import Post from '/Users/nurullahucan/Documents/GitHub/bounswe2024group4/mobile/components/Post';
+import Post from '../../components/Post';
+
+
+
+
 
 
 const posts = [
