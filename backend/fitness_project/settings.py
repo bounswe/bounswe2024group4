@@ -46,15 +46,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
         # Your custom apps
+    'diet_program_app',
+    'exercise_program_app',
+    'messaging_app',
     'fitness_app',
     'posts_app',
     'profiles_app',
-    'programs_app',
-    'social_feed_app',
-    'messaging_app',
     'search_app',
+    'social_feed_app',
     'user_auth_app',
-    'external_api_app',
+
+    
 ]
 
 MIDDLEWARE = [
