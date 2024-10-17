@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import pymysql
+pymysql.install_as_MySQLdb()
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -42,6 +45,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+        # Your custom apps
+    'diet_program_app',
+    'exercise_program_app',
+    'messaging_app',
+    'fitness_app',
+    'posts_app',
+    'profiles_app',
+    'search_app',
+    'social_feed_app',
+    'user_auth_app',
+
+    
 ]
 
 MIDDLEWARE = [
