@@ -1,0 +1,24 @@
+<!-- templates/my_app/my_template.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Text Inputs</title>
+</head>
+<body>
+    <h1>Enter Text Inputs</h1>
+
+    <!-- Form that sends the data to the endpoint -->
+    <form method="POST" action="{% url 'workout_program' %}">
+        {% csrf_token %}
+        <label for="input1">Input 1:</label>
+        <input type="text" id="input1" name="input1" required><br><br>
+
+        <label for="input2">Input 2:</label>
+        <input type="text" id="input2" name="input2" required><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
