@@ -6,7 +6,7 @@ import '../css/index.css';
 const Sidebar = () => {
   return (
     <div className="min-h-screen bg-black text-white p-4 flex flex-col space-y-4">
-      <h1 className="text-xl font-bold text-center text-blue-500"> {/* Metni mavi yapmak için text-blue-500 ekledik */}
+      <h1 className="text-xl font-bold text-center text-blue-500"> 
         FITNESS <br /> DIET <br /> FORUM
       </h1>
       <nav className="flex flex-col space-y-2">
