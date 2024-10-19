@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import '../css/index.css';
+import '../css/index.css'; // Ensure correct CSS path
 
-const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredientAmounts, imageUrl }) => {
+// Utility function to capitalize the first letter of each word
+const capitalizeWords = (string) => {
+  return string.replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredientAmounts, imageUrl, recipeUrl }) => {
   const [activeTab, setActiveTab] = useState('nutrients'); // State for tab switching
 
   return (
-    <div className="w-full max-w-lg mx-auto">  {/* Ensure all divs have the same width */}
+    <div className="w-full max-w-xl mx-auto relative">  {/* Increased width from max-w-lg to max-w-xl */}
       {/* Reduce margin between tabs and div */}
       <div className="flex justify-end space-x-4 pb-2">
         <button
@@ -16,7 +21,6 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
         >
           Nutrients
         </button>
-        {/*
         <button
           onClick={() => setActiveTab('ingredients')}
           className={`text-lg font-semibold pb-2 transition-colors duration-300 ${
@@ -25,14 +29,13 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
         >
           Ingredients
         </button>
-        */}
       </div>
 
       {/* Main Content Container */}
       <div className="bg-purple-600 p-6 rounded-lg text-white shadow-lg transition-all duration-500 ease-in-out w-full">
-        
-        {/* Meal Image and Name with Calories underneath */}
-        <div className="flex items-center mb-4">
+
+        {/* Meal Image, Name, and Calories */}
+        <div className="flex items-start mb-4">
           <img
             src={imageUrl}
             alt={mealName}
@@ -45,7 +48,7 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
         </div>
 
         {/* Content Div */}
-        <div className="mt-2">  {/* Reduced margin to bring the content closer */}
+        <div className="mt-2">
           {activeTab === 'nutrients' ? (
             <div className="nutrients transition-opacity duration-500 ease-in-out opacity-100">
               <div className="flex justify-between text-lg">
@@ -62,22 +65,29 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
               </div>
             </div>
           ) : (
-            // Commenting out the Ingredients content for future use
-            /*
-            <div className="ingredients transition-opacity duration-500 ease-in-out opacity-100 break-words">
-              <ul className="ml-6 mt-4 space-y-2">
+            <div className="ingredients transition-opacity duration-500 ease-in-out opacity-100">
+              <ul className="mt-4 space-y-2 list-none">  {/* Removed unnecessary margin */}
                 {ingredients.map((ingredient, index) => (
-                  <li key={index} className="flex items-center text-lg break-words w-full">
-                    <span className="break-words">{ingredient}</span>
+                  <li key={index} className="flex justify-between text-lg w-full">
+                    <span className="break-words">{capitalizeWords(ingredient)}</span> {/* Capitalized each word */}
                     <span className="ml-auto">{ingredientAmounts[index]}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            */
-            null
           )}
         </div>
+
+        {/* Recipe Button - Only visible in Ingredients tab */}
+        {activeTab === 'ingredients' && (
+          <div className="mt-6">
+            <a href={recipeUrl} target="_blank" rel="noopener noreferrer">
+              <button className="text-white border-2 border-white hover:bg-gray-700 hover:text-gray-300 font-semibold py-2 px-6 rounded-lg transition-all duration-300">
+                View Recipe
+              </button>
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
