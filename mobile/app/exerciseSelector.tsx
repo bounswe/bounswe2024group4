@@ -15,7 +15,7 @@ export default function ExerciseSelect() {
       try {
         const response = await axios.get(`https://api.api-ninjas.com/v1/exercises?muscle=${params.exerciseName}`, {
           headers: {
-            'X-API-KEY': 'dkisHXwHySCTPxU+CB7IrA==PVJuktxJUeljgiDP'
+            'X-API-KEY': ''
           }
         });
         setExercises(response.data);
