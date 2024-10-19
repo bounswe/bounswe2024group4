@@ -10,6 +10,7 @@ const Meal = () => {
       carbs: 20,
       fat: 10,
       ingredients: ['Chicken breast', 'Lettuce', 'Tomatoes', 'Cucumbers', 'Olive oil'],
+      ingredientAmounts: ['200g', '2 cups', '1 cup', '1 cup', '2 tbsp'],
       imageUrl: '/grilled_chicken_salad.jpeg',
     },
     {
@@ -19,6 +20,7 @@ const Meal = () => {
       carbs: 30,
       fat: 20,
       ingredients: ['Avocado', 'Whole grain bread', 'Poached egg', 'Lemon', 'Salt', 'Pepper'],
+      ingredientAmounts: ['1 whole', '2 slices', '1', '1/2 tsp', 'to taste', 'to taste'],
       imageUrl: '/avocado_toast.jpg',
     },
     {
@@ -28,6 +30,7 @@ const Meal = () => {
       carbs: 40,
       fat: 15,
       ingredients: ['Bananas', 'Berries', 'Greek yogurt', 'Granola', 'Honey'],
+      ingredientAmounts: ['1', '1 cup', '1/2 cup', '1/4 cup', '1 tbsp'],
       imageUrl: '/smoothie_bowl.jpeg',
     },
     // Add more meals if needed
@@ -46,6 +49,7 @@ const Meal = () => {
             carbs={meal.carbs}
             fat={meal.fat}
             ingredients={meal.ingredients}
+            ingredientAmounts={meal.ingredientAmounts}  
             imageUrl={meal.imageUrl}
           />
         ))}
