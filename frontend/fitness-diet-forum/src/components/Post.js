@@ -3,7 +3,7 @@ import { FaHeart, FaComment } from "react-icons/fa";
 import { IoIosStar } from "react-icons/io";
 import Food from "../components/Food"; // Import the Food component
 
-const Post = ({ user, title, bodyContent, foodData }) => {
+const Post = ({ user, title, bodyContent, meals }) => {
     return (
         <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg mb-6 max-w-xl mx-auto">
             {/* Header */}
@@ -14,7 +14,8 @@ const Post = ({ user, title, bodyContent, foodData }) => {
                     className="w-12 h-12 rounded-full mr-4"
                 />
                 <div>
-                    <h3 className="text-xl font-semibold">{user.name} @{user.username}</h3>
+                    {/* Updated line to include surname */}
+                    <h3 className="text-xl font-semibold">{user.name} {user.surname} @{user.username}</h3>
                     <div className="flex items-center text-yellow-400">
                         {/* Dynamic rating */}
                         {[...Array(5)].map((_, i) => (
@@ -29,18 +30,23 @@ const Post = ({ user, title, bodyContent, foodData }) => {
             <h2 className="text-lg font-bold mb-2">{title}</h2>
             <div className="mb-4">{bodyContent}</div> {/* Body content can be text or an image */}
 
-            {/* Food Component */}
-            <Food
-                mealName={foodData.mealName}
-                calories={foodData.calories}
-                protein={foodData.protein}
-                carbs={foodData.carbs}
-                fat={foodData.fat}
-                ingredients={foodData.ingredients}
-                ingredientAmounts={foodData.ingredientAmounts}
-                imageUrl={foodData.imageUrl}
-                recipeUrl={foodData.recipeUrl}
-            />
+            {/* Scrollable List of Food Components (Meals) */}
+            <div className="h-96 overflow-y-scroll mb-4">
+                {meals.map((meal, index) => (
+                    <Food
+                        key={index}
+                        mealName={meal.mealName}
+                        calories={meal.calories}
+                        protein={meal.protein}
+                        carbs={meal.carbs}
+                        fat={meal.fat}
+                        ingredients={meal.ingredients}
+                        ingredientAmounts={meal.ingredientAmounts}
+                        imageUrl={meal.imageUrl}
+                        recipeUrl={meal.recipeUrl}
+                    />
+                ))}
+            </div>
 
             {/* Actions: Like & Comment */}
             <div className="flex justify-between mt-4 text-gray-400">
