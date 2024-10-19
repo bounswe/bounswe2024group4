@@ -16,6 +16,7 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
         >
           Nutrients
         </button>
+        {/*
         <button
           onClick={() => setActiveTab('ingredients')}
           className={`text-lg font-semibold pb-2 transition-colors duration-300 ${
@@ -24,6 +25,7 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
         >
           Ingredients
         </button>
+        */}
       </div>
 
       {/* Main Content Container */}
@@ -60,6 +62,8 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
               </div>
             </div>
           ) : (
+            // Commenting out the Ingredients content for future use
+            /*
             <div className="ingredients transition-opacity duration-500 ease-in-out opacity-100 break-words">
               <ul className="ml-6 mt-4 space-y-2">
                 {ingredients.map((ingredient, index) => (
@@ -70,6 +74,8 @@ const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredient
                 ))}
               </ul>
             </div>
+            */
+            null
           )}
         </div>
       </div>
