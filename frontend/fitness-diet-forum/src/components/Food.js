@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../index.css';
+import '../css/index.css';
 
 const Food = ({ mealName, calories, protein, carbs, fat, ingredients, ingredientAmounts, imageUrl }) => {
   const [activeTab, setActiveTab] = useState('nutrients'); // State for tab switching

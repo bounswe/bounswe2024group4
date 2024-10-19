@@ -1,4 +1,4 @@
-import './index.css';
+import './css/index.css';
 import React from 'react';
 import Meal from './pages/Meal'; // Import Meal component
 
