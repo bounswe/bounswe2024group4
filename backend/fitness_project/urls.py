@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from exercise_program_app import views
 
 
 urlpatterns = [
@@ -31,5 +31,7 @@ urlpatterns = [
     path('diet-program/', include('diet_program_app.urls')),
     path('exercise-program/', include('exercise_program_app.urls')),
 
+    path('workout_program/', views.workout_program, name='workout_program'),
+    path('get_exercises/', views.get_exercises, name='get_exercises'),
 ]
 

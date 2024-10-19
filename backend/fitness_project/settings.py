@@ -14,15 +14,14 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import pymysql
-pymysql.install_as_MySQLdb()
-
 
 # Load environment variables from .env file
 load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+pymysql.install_as_MySQLdb()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -45,18 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-        # Your custom apps
     'diet_program_app',
     'exercise_program_app',
     'messaging_app',
-    'fitness_app',
     'posts_app',
     'profiles_app',
     'search_app',
     'social_feed_app',
     'user_auth_app',
-
-    
 ]
 
 MIDDLEWARE = [
@@ -74,7 +69,7 @@ ROOT_URLCONF = 'fitness_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,9 +93,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME'),
         'HOST': os.getenv('DB_HOST'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
         'PORT': os.getenv('DB_PORT'),
-        'USER': os.getenv('DB_USER'), #'root',   # for privileged user : root
-        'PASSWORD': os.getenv('DB_PASSWORD'), #'admin_group4_dbnba'
+        'USER': os.getenv('DB_USER'), #'root', # for privileged user : root
     }
 }
 
