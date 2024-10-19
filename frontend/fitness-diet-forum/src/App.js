@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Meal from './pages/Meal';
 import './css/index.css';
+import PostPage from "./pages/PostPage";
 
 function App() {
   return (
@@ -21,12 +22,25 @@ function App() {
                   </button>
                 </Link>
               </div>
+
+              {/* Button to navigate to Posts Page */}
+              <div className="mt-4">
+                <Link to="/posts">
+                  <button className="bg-accent hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300">
+                    Go to Posts Page
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
         } />
 
+
         {/* Meals Page Route */}
         <Route path="/meals" element={<Meal />} />
+
+        {/* Posts Page Route */}
+        <Route path="/posts" element={<PostPage />} />
 
         {/* Add other routes here as needed */}
       </Routes>
