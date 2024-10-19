@@ -1,6 +1,6 @@
 import React from 'react';
-import Food from '../components/Food'; // Import the Food component
-import '../css/index.css'; // Correct path for the CSS file
+import Food from '../components/Food';
+import '../css/index.css';
 
 const Meal = () => {
   const meals = [
