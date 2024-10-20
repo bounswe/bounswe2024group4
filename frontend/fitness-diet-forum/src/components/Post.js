@@ -5,7 +5,7 @@ import Food from "../components/Food"; // Import the Food component
 
 const Post = ({ user, title, bodyContent, meals }) => {
     return (
-        <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg mb-6 max-w-xl mx-auto">
+        <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto"> {/* Genişlik artırıldı ve padding ayarlandı */}
             {/* Header */}
             <div className="flex items-center mb-4">
                 <img
