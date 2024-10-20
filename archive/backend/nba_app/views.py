@@ -94,7 +94,7 @@ def log_in(request):
     if request.method == "POST":
         username = request.data.get("username")
         password = request.data.get("password")
-
+        
         user = authenticate(request, username=username, password=password)
         if user is None:
             return HttpResponse("Invalid credentials", status=401)
