@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
@@ -20,25 +20,27 @@ interface WorkoutProgramProps {
 }
 
 const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
-  const [rating, setRating] = useState(workout.rating);
-
+  
   const handleShare = () => {
     console.log(`Sharing workout: ${workout.name}`);
+    // Will be implemented later
   };
 
   return (
     <View style={styles.programContainer}>
       <View style={styles.headerContainer}>
-        <Text style={styles.programTitle}>{workout.name}</Text>
-        <View style={styles.iconRow}>
-          <TouchableOpacity onPress={handleShare}>
-            <FontAwesome name="share" size={24} color="#fff" style={styles.icon} />
-          </TouchableOpacity>
-          <View style={styles.ratingContainer}>
-            <FontAwesome name="star" size={24} color="#FFD700" />
-            <Text style={styles.ratingNumber}>{rating}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>{workout.name}</Text>
+        {workout.rating && (
+          <View style={styles.iconRow}>
+            <TouchableOpacity onPress={handleShare}>
+              <FontAwesome name="share" size={24} color="#fff" style={styles.icon} />
+            </TouchableOpacity>
+            <View style={styles.ratingContainer}>
+              <FontAwesome name="star" size={24} color="#FFD700" />
+              <Text style={styles.ratingNumber}>{workout.rating}</Text>
+            </View>
           </View>
-        </View>
+        )}
       </View>
       {workout.exercises.map((exercise) => (
         <View key={exercise.id} style={styles.exerciseRow}>
@@ -74,20 +76,20 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 10,
+    flexShrink: 1,
+    marginRight: 10,
   },
   iconRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 10,
   },
   icon: {
-    marginLeft: 15,
+    marginLeft: 10,
   },
   ratingContainer: {
     alignItems: 'center',
-    marginLeft: 15,
-    flexDirection: 'row', 
+    marginLeft: 10,
+    flexDirection: 'row',
   },
   ratingNumber: {
     color: '#FFD700',

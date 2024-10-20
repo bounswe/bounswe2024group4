@@ -29,7 +29,7 @@ const workoutPrograms = [
   {
     id: '2',
     name: 'Back and Biceps',
-    rating: '4.8',  // Hardcoded rating
+    rating: '4.8',
     exercises: [
       {
         id: '1',
