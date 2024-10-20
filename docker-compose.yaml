@@ -1,0 +1,46 @@
+services:
+  db:
+    image: mysql:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    env_file: .env
+    expose: 
+      - "3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}  
+    networks:
+      - mynetwork   
+    
+  backend:
+    # build the image or use an existing one
+    build:
+        context: ./backend
+        dockerfile: Dockerfile
+    env_file: .env
+    volumes:
+      - ./backend:/home/app/backend
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+
+    restart: "on-failure"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+volumes:
+  db_data:
+
+networks:
+  mynetwork:
+    driver: bridge
