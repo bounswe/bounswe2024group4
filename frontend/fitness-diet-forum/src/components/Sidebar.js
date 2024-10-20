@@ -32,7 +32,7 @@ const Sidebar = () => {
           to="/meals" 
           className={({ isActive }) => isActive ? 'bg-blue-700 p-2 rounded flex items-center space-x-2' : 'hover:bg-blue-700 p-2 rounded flex items-center space-x-2'}
         >
-          <FaUtensils /> <span>My Meals</span>
+          <FaUtensils /> <span>Meals</span>
         </NavLink>
         <NavLink 
           to="/exercises" 
