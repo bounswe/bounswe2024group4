@@ -42,7 +42,7 @@ const PostPage = () => {
     const mealsData = [
         [
             {
-                "mealName": "Scrambled Eggs with Avocado and Bacon",
+                "foodName": "Scrambled Eggs with Avocado and Bacon",
                 "calories": 450,
                 "protein": 25,
                 "carbs": 5,
@@ -58,7 +58,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.taste.com.au/recipes/scrambled-eggs-bacon-avocado/5791598d-9e24-4627-b522-566ede4574ec"
             },
             {
-                "mealName": "Cobb Salad with Grilled Chicken",
+                "foodName": "Cobb Salad with Grilled Chicken",
                 "calories": 500,
                 "protein": 45,
                 "carbs": 10,
@@ -78,7 +78,7 @@ const PostPage = () => {
                 "recipeUrl": "https://chefsavvy.com/grilled-chicken-cobb-salad/"
             },
             {
-                "mealName": "Grilled Salmon with Asparagus",
+                "foodName": "Grilled Salmon with Asparagus",
                 "calories": 550,
                 "protein": 40,
                 "carbs": 10,
@@ -95,7 +95,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.somewhatsimple.com/grilled-salmon/"
             },
             {
-                "mealName": "Paleo Beef Jerky Snack",
+                "foodName": "Paleo Beef Jerky Snack",
                 "calories": 150,
                 "protein": 20,
                 "carbs": 2,
@@ -112,7 +112,7 @@ const PostPage = () => {
                 "recipeUrl": "https://whatgreatgrandmaate.com/paleo-beef-jerky/"
             },
             {
-                "mealName": "Zucchini Noodles with Pesto and Grilled Shrimp",
+                "foodName": "Zucchini Noodles with Pesto and Grilled Shrimp",
                 "calories": 480,
                 "protein": 35,
                 "carbs": 12,
@@ -130,7 +130,7 @@ const PostPage = () => {
         ],
         [
             {
-                "mealName": "Gluten-Free Oatmeal with Berries and Almond Butter",
+                "foodName": "Gluten-Free Oatmeal with Berries and Almond Butter",
                 "calories": 350,
                 "protein": 10,
                 "carbs": 50,
@@ -146,7 +146,7 @@ const PostPage = () => {
                 "recipeUrl": "https://marisamoore.com/berry-nut-butter-oatmeal/"
             },
             {
-                "mealName": "Grilled Chicken Caesar Salad (Gluten-Free)",
+                "foodName": "Grilled Chicken Caesar Salad (Gluten-Free)",
                 "calories": 450,
                 "protein": 40,
                 "carbs": 8,
@@ -163,7 +163,7 @@ const PostPage = () => {
                 "recipeUrl": "https://damndelicious.net/2023/04/21/best-chicken-caesar-salad-with-homemade-croutons/"
             },
             {
-                "mealName": "Gluten-Free Spaghetti with Marinara and Meatballs",
+                "foodName": "Gluten-Free Spaghetti with Marinara and Meatballs",
                 "calories": 600,
                 "protein": 35,
                 "carbs": 60,
@@ -181,7 +181,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.letthemeatgfcake.com/gluten-free-pasta-with-meatballs-and-sausage/"
             },
             {
-                "mealName": "Rice Cakes with Peanut Butter and Banana",
+                "foodName": "Rice Cakes with Peanut Butter and Banana",
                 "calories": 200,
                 "protein": 6,
                 "carbs": 28,
@@ -196,7 +196,7 @@ const PostPage = () => {
                 "recipeUrl": "https://jennifermaune.com/peanut-butter-banana-rice-cakes/"
             },
             {
-                "mealName": "Grilled Salmon with Quinoa and Steamed Vegetables",
+                "foodName": "Grilled Salmon with Quinoa and Steamed Vegetables",
                 "calories": 500,
                 "protein": 35,
                 "carbs": 45,
@@ -216,7 +216,7 @@ const PostPage = () => {
         ],
         [
             {
-                "mealName": "Omelette with Herbs and Smoked Salmon",
+                "foodName": "Omelette with Herbs and Smoked Salmon",
                 "calories": 400,
                 "protein": 30,
                 "carbs": 4,
@@ -233,7 +233,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.food.com/recipe/smoked-salmon-omelet-with-herbs-283505"
             },
             {
-                "mealName": "Grilled Chicken Ratatouille",
+                "foodName": "Grilled Chicken Ratatouille",
                 "calories": 500,
                 "protein": 40,
                 "carbs": 30,
@@ -253,7 +253,7 @@ const PostPage = () => {
                 "recipeUrl": "https://emeals.com/recipes/recipe-30914-201282-Grilled-Chicken-Ratatouille"
             },
             {
-                "mealName": "Nicoise Salad with Tuna",
+                "foodName": "Nicoise Salad with Tuna",
                 "calories": 450,
                 "protein": 35,
                 "carbs": 25,
@@ -273,7 +273,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.recipetineats.com/nicoise-salad-french-salad-with-tuna/"
             },
             {
-                "mealName": "Coq au Vin (Sport-Friendly)",
+                "foodName": "Coq au Vin (Sport-Friendly)",
                 "calories": 600,
                 "protein": 45,
                 "carbs": 20,
@@ -293,7 +293,7 @@ const PostPage = () => {
                 "recipeUrl": "https://davethewinemerchant.com/food-wine-recipes/recipe-coq-au-vin/"
             },
             {
-                "mealName": "French Apple Tart (Healthy Version)",
+                "foodName": "French Apple Tart (Healthy Version)",
                 "calories": 300,
                 "protein": 5,
                 "carbs": 55,
@@ -313,7 +313,7 @@ const PostPage = () => {
         ],
         [
             {
-                "mealName": "Yogurt with Honey and Walnuts",
+                "foodName": "Yogurt with Honey and Walnuts",
                 "calories": 300,
                 "protein": 10,
                 "carbs": 30,
@@ -328,7 +328,7 @@ const PostPage = () => {
                 "recipeUrl": "hhttps://www.mygreekdish.com/recipe/greek-yogurt-with-honey-walnuts-recipe-yiaourti-meli/"
             },
             {
-                "mealName": "Quick Veggie Omelette",
+                "foodName": "Quick Veggie Omelette",
                 "calories": 250,
                 "protein": 20,
                 "carbs": 5,
@@ -345,7 +345,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.allrecipes.com/recipe/14057/yummy-veggie-omelet/"
             },
             {
-                "mealName": "Chicken Caesar Salad",
+                "foodName": "Chicken Caesar Salad",
                 "calories": 400,
                 "protein": 35,
                 "carbs": 15,
@@ -362,7 +362,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.bbcgoodfood.com/recipes/chicken-caesar-salad"
             },
             {
-                "mealName": "Tuna Salad on Whole Grain Bread",
+                "foodName": "Tuna Salad on Whole Grain Bread",
                 "calories": 350,
                 "protein": 30,
                 "carbs": 30,
@@ -379,7 +379,7 @@ const PostPage = () => {
                 "recipeUrl": "https://www.food.com/recipe/dijon-cilantro-tuna-salad-on-whole-grain-bread-359277"
             },
             {
-                "mealName": "Banana Protein Smoothie",
+                "foodName": "Banana Protein Smoothie",
                 "calories": 250,
                 "protein": 25,
                 "carbs": 40,

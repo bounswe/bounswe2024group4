@@ -35,7 +35,7 @@ const Post = ({ user, title, bodyContent, meals }) => {
                 {meals.map((meal, index) => (
                     <Food
                         key={index}
-                        mealName={meal.mealName}
+                        foodName={meal.foodName}
                         calories={meal.calories}
                         protein={meal.protein}
                         carbs={meal.carbs}
