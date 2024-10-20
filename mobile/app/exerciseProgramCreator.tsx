@@ -39,8 +39,9 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: "flex-start",
-    alignItems: "start",
-    backgroundColor: "#1b1d21"
+    // alignItems: "start",
+    backgroundColor: "#1b1d21",
+    padding: 10
   },
   headerText: {
     fontSize: 24,
