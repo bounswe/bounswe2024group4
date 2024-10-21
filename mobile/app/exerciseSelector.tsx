@@ -5,7 +5,9 @@ import { Link } from 'expo-router';
 import axios from 'axios';
 
 export default function ExerciseSelect() {
-  const params = useLocalSearchParams();
+  const { muscleName } = useLocalSearchParams<{
+    muscleName: string;
+  }>();
   const [exercises, setExercises] = useState([]);
   const [selectedExercises, setSelectedExercises] = useState([]);
 
@@ -13,7 +15,7 @@ export default function ExerciseSelect() {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const response = await axios.get(`https://api.api-ninjas.com/v1/exercises?muscle=${params.exerciseName}`, {
+        const response = await axios.get(`https://api.api-ninjas.com/v1/exercises?muscle=${muscleName}`, {
           headers: {
             'X-API-KEY': ''
           }
@@ -25,32 +27,32 @@ export default function ExerciseSelect() {
     };
 
     fetchExercises();
-  }, [params.exerciseName]);
+  }, [muscleName]);
 
-  const handleSelectExercise = (exercise) => {
-    const isAlreadySelected = selectedExercises.some(selected => selected.name === exercise.name);
+  const handleSelectExercise = (exerciseName) => {
+    const isAlreadySelected = selectedExercises.some(selected => selected === exerciseName);
   
     if (isAlreadySelected) {
-      setSelectedExercises(selectedExercises.filter(selected => selected.name !== exercise.name));
+      setSelectedExercises(selectedExercises.filter(selected => selected !== exerciseName));
     } else {
-      setSelectedExercises([...selectedExercises, exercise]);
+      setSelectedExercises([...selectedExercises, exerciseName]);
     }
   };
   
   return (
     <SafeAreaView style={styles.screen}>
       <SafeAreaView style={styles.background}>
-        <Text style={styles.headerText}> {params.exerciseName} exercises </Text>
+        <Text style={styles.headerText}> {muscleName} exercises </Text>
         {exercises.map((exercise) => (
           <TouchableOpacity
             key={exercise.name}
-            style={[styles.exerciseItem, selectedExercises.some(selected => selected.name === exercise.name) && styles.selected]}
-            onPress={() => handleSelectExercise(exercise)}
+            style={[styles.exerciseItem, selectedExercises.some(selected => selected === exercise.name) && styles.selected]}
+            onPress={() => handleSelectExercise(exercise.name)}
           >
             <Text style={styles.exerciseText}>{exercise.name}</Text>
           </TouchableOpacity>
         ))}
-        <Link href={{pathname: "../exerciseProgramCreator", params: {selectedExercises: selectedExercises}}} asChild>
+        <Link href={{pathname: "../exerciseProgramCreator", params: {selectedExercises: selectedExercises, muscleName: muscleName}}} asChild>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => {}}

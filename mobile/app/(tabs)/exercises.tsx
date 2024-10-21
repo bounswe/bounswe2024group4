@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import WorkoutProgram from '../../components/WorkoutProgram';
 
 const workoutPrograms = [
@@ -50,6 +51,19 @@ const workoutPrograms = [
 ];
 
 export default function Index() {
+  useEffect(() => {
+    const clearAsyncStorage = async () => {
+      try {
+        await AsyncStorage.clear();
+        console.log('AsyncStorage cleared!');
+      } catch (error) {
+        console.error('Failed to clear AsyncStorage:', error);
+      }
+    };
+
+    clearAsyncStorage();
+  }, []);
+
   return (
     <SafeAreaView style={styles.screen}>
       <FlatList
