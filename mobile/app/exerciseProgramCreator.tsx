@@ -71,10 +71,18 @@ export default function ExerciseCreate() {
       <SafeAreaView style={styles.background}>
         {workoutProgram && <WorkoutProgram workout={workoutProgram} />}
         <Link href="../muscleGroupSelector" asChild>
-        <TouchableOpacity onPress={() => {  }} style={styles.addButton}>
-          <FontAwesome5 name="plus" size={24} color="#fff" />
-        </TouchableOpacity>
-      </Link>
+          <TouchableOpacity onPress={() => {  }} style={styles.addButton}>
+            <FontAwesome5 name="plus" size={24} color="#fff" />
+          </TouchableOpacity>
+        </Link>
+        <Link href={{pathname: "../exercises"}} asChild>
+          <TouchableOpacity
+            style={styles.proceedButton}
+            onPress={() => {}}
+          >
+            <Text style={styles.proceedButtonText}>Save</Text>
+          </TouchableOpacity>
+        </Link>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -107,5 +115,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#1B55AC',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  proceedButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 280,
+    width: 75,
+    backgroundColor: '#1B55AC',
+    borderRadius: 10,
+    padding: 20,
+  },
+  proceedButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'justify',
   },
 });

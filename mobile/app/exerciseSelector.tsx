@@ -37,7 +37,7 @@ export default function ExerciseSelect() {
   return (
     <SafeAreaView style={styles.screen}>
       <SafeAreaView style={styles.background}>
-        <Text style={styles.headerText}> {muscleName} exercises </Text>
+        <Text style={styles.headerText}> {muscleName.replace(/_/g, ' ')} exercises </Text>
         {exercises.map((exercise) => (
           <TouchableOpacity
             key={exercise.name}
