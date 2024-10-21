@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
+import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 interface Exercise {
@@ -81,15 +81,15 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
   };
 
   return (
-    <View style={styles.programContainer}>
-      <View style={styles.headerContainer}>
+    <SafeAreaView style={styles.programContainer}>
+      <SafeAreaView style={styles.headerContainer}>
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>{currentWorkout.name}</Text>
-        <View style={styles.iconRow}>
+        <SafeAreaView style={styles.iconRow}>
           {workout.rating && (
-            <View style={styles.ratingContainer}>
+            <SafeAreaView style={styles.ratingContainer}>
               <FontAwesome name="star" size={24} color="#FFD700" />
               <Text style={styles.ratingNumber}>{workout.rating}</Text>
-            </View>
+            </SafeAreaView>
           )}
           <TouchableOpacity onPress={handleShare}>
             <FontAwesome name="share" size={24} color="#fff" style={styles.icon} />
@@ -97,22 +97,22 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
           <TouchableOpacity onPress={handleEdit}>
             <FontAwesome name="edit" size={24} color="#fff" style={styles.icon} />
           </TouchableOpacity>
-        </View>
-      </View>
+        </SafeAreaView>
+      </SafeAreaView>
       {currentWorkout.exercises.map((exercise) => (
-        <View key={exercise.id} style={styles.exerciseRow}>
+        <SafeAreaView key={exercise.id} style={styles.exerciseRow}>
           <Image source={exercise.image} style={styles.exerciseImage} />
-          <View style={styles.exerciseDetails}>
+          <SafeAreaView style={styles.exerciseDetails}>
             <Text style={styles.exerciseName}>{exercise.name}</Text>
             <Text style={styles.exerciseSetsReps}>
               {exercise.sets} sets x {exercise.reps} reps
             </Text>
-          </View>
-        </View>
+          </SafeAreaView>
+        </SafeAreaView>
       ))}
 
       <Modal visible={isModalVisible} animationType="slide">
-        <View style={styles.modalContainer}>
+        <SafeAreaView style={styles.modalContainer}>
           <TextInput
             style={styles.input}
             value={editableWorkout.name}
@@ -120,7 +120,7 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
             placeholder="Workout Name"
           />
           {editableWorkout.exercises.map((exercise, index) => (
-            <View key={exercise.id} style={styles.exerciseEditRow}>
+            <SafeAreaView key={exercise.id} style={styles.exerciseEditRow}>
               <Text>{exercise.name}</Text>
               <TextInput
                 style={styles.input}
@@ -136,13 +136,13 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
                 onChangeText={text => handleInputChange(text, index, 'reps')}
                 placeholder="Reps"
               />
-            </View>
+            </SafeAreaView>
           ))}
           <Button title="Save" onPress={handleSave} />
           <Button title="Cancel" onPress={handleCancel} />
-        </View>
+        </SafeAreaView>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
