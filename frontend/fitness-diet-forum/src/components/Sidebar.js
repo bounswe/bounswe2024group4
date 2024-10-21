@@ -5,11 +5,11 @@ import '../css/index.css';
 
 const Sidebar = () => {
   return (
-    <div className="min-h-screen bg-black text-white p-4 flex flex-col space-y-4">
-      <h1 className="text-xl font-bold text-center text-blue-500"> 
+    <div className="fixed top-0 left-0 w-64 min-h-screen bg-black text-white p-4">
+      <h1 className="text-xl font-bold text-left text-blue-500"> 
         FITNESS <br /> DIET <br /> FORUM
       </h1>
-      <nav className="flex flex-col space-y-2">
+      <nav className="flex flex-col space-y-2 mt-6">
         <NavLink 
           to="/" 
           className={({ isActive }) => isActive ? 'bg-blue-700 p-2 rounded flex items-center space-x-2' : 'hover:bg-blue-700 p-2 rounded flex items-center space-x-2'}
@@ -52,5 +52,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-
-

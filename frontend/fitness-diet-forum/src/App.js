@@ -9,16 +9,18 @@ import MealList from './pages/MealList';
 function App() {
   return (
     <Router>
-      <div className="flex min-h-screen bg-darkBackground"> {/* Dark background for entire app */}
-        {/* Sidebar */}
+      {/* Wrapper for sidebar and content */}
+      <div className="flex bg-darkBackground">
+        {/* Sidebar fixed to the left */}
         <Sidebar />
 
-        <div className="flex-1 flex flex-col">
+        {/* Main content area with margin to the right of the sidebar */}
+        <div className="ml-64 flex-1">
           {/* Topbar */}
           <Topbar /> 
 
           {/* Main content */}
-          <div className="flex-1 p-8">
+          <div className="p-8">
             <Routes>
               {/* Home Page Route: Display PostPage */}
               <Route path="/" element={<PostPage />} />
