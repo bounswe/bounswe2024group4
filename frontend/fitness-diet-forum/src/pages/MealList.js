@@ -6,7 +6,7 @@ const MealList = () => {
   const [meals, setMeals] = useState([
     {
       id: 1,
-      mealName: 'Breakfast',
+      mealName: 'Lunch',
       foods: [
         {
           foodName: 'Grilled Chicken Salad',
@@ -34,7 +34,7 @@ const MealList = () => {
     },
     {
       id: 2,
-      mealName: 'Lunch',
+      mealName: 'Breakfast',
       foods: [
         {
           foodName: 'Avocado Toast with Poached Egg',
