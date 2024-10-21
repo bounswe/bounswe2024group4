@@ -50,12 +50,16 @@ const MealList = () => {
       ],
     },
   ]);  
+
   const [newMeal, setNewMeal] = useState({ mealName: '', foods: [] });
   const [newFood, setNewFood] = useState({ foodName: '', calories: '', protein: '', carbs: '', fat: '', ingredients: [], ingredientAmounts: [], imageUrl: '', recipeUrl: '' });
   const [ingredientName, setIngredientName] = useState(''); // Track ingredient name
   const [ingredientAmount, setIngredientAmount] = useState(''); // Track ingredient amount
   const [mealCreated, setMealCreated] = useState(false); // Track whether the meal is created
   const [showForm, setShowForm] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState(''); // Track the search input
+  const [foodFound, setFoodFound] = useState(true); // Track if the food is found
 
   const deleteMeal = (mealId) => {
     setMeals(meals.filter(meal => meal.id !== mealId));
@@ -109,6 +113,10 @@ const MealList = () => {
 
     // Reset the newFood form
     setNewFood({ foodName: '', calories: '', protein: '', carbs: '', fat: '', ingredients: [], ingredientAmounts: [], imageUrl: '', recipeUrl: '' });
+
+    // Clear search term and result
+    setSearchTerm(''); // Clear search input
+    setFoodFound(true); // Reset search result
   };
 
   // Function to finalize and add the meal to the list
@@ -121,6 +129,12 @@ const MealList = () => {
     setNewMeal({ mealName: '', foods: [] });
     setMealCreated(false); // Reset the meal creation process
     setShowForm(false); // Hide the form after creation
+  };
+
+  // Function to handle food search
+  const searchFood = () => {
+    const found = meals.some(meal => meal.foods.some(food => food.foodName.toLowerCase() === searchTerm.toLowerCase()));
+    setFoodFound(found); // Update whether the food is found or not
   };
 
   return (
@@ -197,116 +211,137 @@ const MealList = () => {
                 )}
               </div>
 
-              {/* Food Item Inputs */}
+              {/* Food Search Input */}
               <div className="space-y-6">
-                <h3 className="text-2xl font-semibold text-white tracking-wide">Add Food Item</h3>
-
+                <h3 className="text-2xl font-semibold text-white tracking-wide">Search for Food</h3>
                 <input 
                   type="text" 
-                  name="foodName" 
-                  value={newFood.foodName} 
-                  onChange={handleFoodInputChange} 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)} 
                   className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
-                  placeholder="Food name"
+                  placeholder="Enter food name"
                 />
-                <input 
-                  type="number" 
-                  name="calories" 
-                  value={newFood.calories} 
-                  onChange={handleFoodInputChange} 
-                  className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
-                  placeholder="Calories"
-                />
-                <div className="flex space-x-4">
-                  <input 
-                    type="number" 
-                    name="protein" 
-                    value={newFood.protein} 
-                    onChange={handleFoodInputChange} 
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
-                    placeholder="Protein (g)"
-                  />
-                  <input 
-                    type="number" 
-                    name="carbs" 
-                    value={newFood.carbs} 
-                    onChange={handleFoodInputChange} 
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
-                    placeholder="Carbs (g)"
-                  />
-                  <input 
-                    type="number" 
-                    name="fat" 
-                    value={newFood.fat} 
-                    onChange={handleFoodInputChange} 
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
-                    placeholder="Fat (g)"
-                  />
-                </div>
+                <button
+                  className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
+                  onClick={searchFood}
+                >
+                  Search
+                </button>
 
+                {/* Display message if food not found */}
+                {!foodFound && (
+                  <>
+                    <p className="text-red-500 mt-4">Food not found. Please enter the food information below.</p>
+                    
+                    {/* Food Item Inputs */}
+                    <div className="space-y-6">
+                      <h4 className="text-lg font-semibold text-white tracking-wide">Add Food Item</h4>
+                      <input 
+                        type="text" 
+                        name="foodName" 
+                        value={newFood.foodName} 
+                        onChange={handleFoodInputChange} 
+                        className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
+                        placeholder="Food name"
+                      />
+                      <input 
+                        type="number" 
+                        name="calories" 
+                        value={newFood.calories} 
+                        onChange={handleFoodInputChange} 
+                        className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
+                        placeholder="Calories"
+                      />
+                      <div className="flex space-x-4">
+                        <input 
+                          type="number" 
+                          name="protein" 
+                          value={newFood.protein} 
+                          onChange={handleFoodInputChange} 
+                          className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
+                          placeholder="Protein (g)"
+                        />
+                        <input 
+                          type="number" 
+                          name="carbs" 
+                          value={newFood.carbs} 
+                          onChange={handleFoodInputChange} 
+                          className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
+                          placeholder="Carbs (g)"
+                        />
+                        <input 
+                          type="number" 
+                          name="fat" 
+                          value={newFood.fat} 
+                          onChange={handleFoodInputChange} 
+                          className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
+                          placeholder="Fat (g)"
+                        />
+                      </div>
+                      <h4 className="text-lg font-semibold text-white tracking-wide">Add Ingredient</h4>
+                      <div className="flex items-center space-x-4">
+                        <input
+                          type="text"
+                          value={ingredientName}
+                          onChange={(e) => setIngredientName(e.target.value)}
+                          className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
+                          placeholder="Ingredient name"
+                        />
+                        <input
+                          type="text"
+                          value={ingredientAmount}
+                          onChange={(e) => setIngredientAmount(e.target.value)}
+                          className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
+                          placeholder="Amount"
+                        />
+                        <button
+                          className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
+                          onClick={addIngredient}
+                        >
+                          Add Ingredient
+                        </button>
+                      </div>
 
-                <h4 className="text-lg font-semibold text-white tracking-wide">Add Ingredient</h4>
-                <div className="flex items-center space-x-4">
-                  <input
-                    type="text"
-                    value={ingredientName}
-                    onChange={(e) => setIngredientName(e.target.value)}
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
-                    placeholder="Ingredient name"
-                  />
-                  <input
-                    type="text"
-                    value={ingredientAmount}
-                    onChange={(e) => setIngredientAmount(e.target.value)}
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
-                    placeholder="Amount"
-                  />
-                  <button
-                    className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
-                    onClick={addIngredient}
-                  >
-                    Add Ingredient
-                  </button>
-                </div>
+                      {/* Show added ingredients */}
+                      {newFood.ingredients.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="text-lg font-semibold text-white tracking-wide">Ingredients Added</h4>
+                          <ul className="list-disc list-inside text-lightText">
+                            {newFood.ingredients.map((ingredient, index) => (
+                              <li key={index}>
+                                {ingredient} - {newFood.ingredientAmounts[index]}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
+                      {/* Buttons in a Row */}
+                      <div className="flex justify-between mt-6 space-x-4">
+                        <button 
+                          className="w-full py-3 px-6 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                          onClick={addFoodToMeal}
+                        >
+                          Add Food to Meal
+                        </button>
 
-                {/* Show added ingredients */}
-                {newFood.ingredients.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-lg font-semibold text-white tracking-wide">Ingredients Added</h4>
-                    <ul className="list-disc list-inside text-lightText">
-                      {newFood.ingredients.map((ingredient, index) => (
-                        <li key={index}>
-                          {ingredient} - {newFood.ingredientAmounts[index]}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                        <button 
+                          className="w-full py-3 px-6 bg-purple-600 text-white text-lg font-semibold rounded-lg hover:bg-purple-800 transition-colors duration-300"
+                          onClick={handleCreateMeal}
+                        >
+                          Finalize and Save Meal
+                        </button>
+
+                        <button 
+                          className="w-full py-3 px-6 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition-colors duration-300"
+                          onClick={() => setShowForm(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
-
-                {/* Buttons in a Row */}
-                <div className="flex justify-between mt-6 space-x-4">
-                  <button 
-                    className="w-full py-3 px-6 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300"
-                    onClick={addFoodToMeal}
-                  >
-                    Add Food to Meal
-                  </button>
-
-                  <button 
-                    className="w-full py-3 px-6 bg-purple-600 text-white text-lg font-semibold rounded-lg hover:bg-purple-800 transition-colors duration-300"
-                    onClick={handleCreateMeal}
-                  >
-                    Finalize and Save Meal
-                  </button>
-
-                  <button 
-                    className="w-full py-3 px-6 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition-colors duration-300"
-                    onClick={() => setShowForm(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
               </div>
             </>
           )}
