@@ -11,15 +11,10 @@ export default function ExerciseSelect() {
   const [exercises, setExercises] = useState([]);
   const [selectedExercises, setSelectedExercises] = useState([]);
 
-  // TODO: Fix this by using backend's endpoint
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const response = await axios.get(`https://api.api-ninjas.com/v1/exercises?muscle=${muscleName}`, {
-          headers: {
-            'X-API-KEY': ''
-          }
-        });
+        const response = await axios.get(`http://68.183.213.92:8000/get_exercises/?muscle=${muscleName}`, {});
         setExercises(response.data);
       } catch (error) {
         console.error(error);
