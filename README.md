@@ -20,3 +20,24 @@ This is the repository for the BOUN SWE Group 4.
 ---
 
 You can check our [wiki](https://github.com/bounswe/bounswe2024group4/wiki) for further information.
+
+
+To run the project, put the following as .env in the root folder:
+
+```
+DB_HOST=db
+DB_NAME=fitness_database
+DB_USER=root
+DB_PASSWORD=admin_group4_dbfitness123
+DB_PORT=3306
+DB_ROOT_PASSWORD=admin_group4_dbfitness123
+EXERCISES_API_KEY=<Your API Ninjas Exercises API Key>
+```
+
+You can get your personal `Exercises API` key by creating an account in `Ninjas API`s [website] (https://www.api-ninjas.com/api/exercises).
+
+Also note that the variable `MYSQL_USER` is assigned to `django_user` in the `docker-compose.yaml` file 
+
+Then run the command `docker-compose up` or `docker compose up`. (Developer's suggestion is using the latter with Docker Desktop downloaded on your device)
+
+To run the project locally without containerization, consult the `README`s of `backend`, `frontend` and `mobile` directories. 
