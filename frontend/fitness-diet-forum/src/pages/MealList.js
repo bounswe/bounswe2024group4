@@ -49,12 +49,17 @@ const MealList = () => {
         },
       ],
     },
-  ]);  const [newMeal, setNewMeal] = useState({ mealName: '', foods: [] });
+  ]);  
+  const [newMeal, setNewMeal] = useState({ mealName: '', foods: [] });
   const [newFood, setNewFood] = useState({ foodName: '', calories: '', protein: '', carbs: '', fat: '', ingredients: [], ingredientAmounts: [], imageUrl: '', recipeUrl: '' });
   const [ingredientName, setIngredientName] = useState(''); // Track ingredient name
   const [ingredientAmount, setIngredientAmount] = useState(''); // Track ingredient amount
   const [mealCreated, setMealCreated] = useState(false); // Track whether the meal is created
   const [showForm, setShowForm] = useState(false);
+
+  const deleteMeal = (mealId) => {
+    setMeals(meals.filter(meal => meal.id !== mealId));
+  };
 
   const handleMealInputChange = (e) => {
     const { name, value } = e.target;
@@ -123,7 +128,12 @@ const MealList = () => {
       <h1 className="text-4xl font-bold text-lightText mb-10 tracking-wider">Meals</h1>
       <div className="grid gap-10">
         {meals.map(meal => (
-          <Meal key={meal.id} mealName={meal.mealName} foods={meal.foods} />
+          <Meal 
+            key={meal.id}
+            mealName={meal.mealName} 
+            foods={meal.foods}
+            onDelete={() => deleteMeal(meal.id)}
+          />
         ))}
       </div>
 
