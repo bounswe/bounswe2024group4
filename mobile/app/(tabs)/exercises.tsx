@@ -51,18 +51,14 @@ const workoutPrograms = [
 ];
 
 export default function Index() {
-  useEffect(() => {
-    const clearAsyncStorage = async () => {
-      try {
-        await AsyncStorage.clear();
-        console.log('AsyncStorage cleared!');
-      } catch (error) {
-        console.error('Failed to clear AsyncStorage:', error);
-      }
-    };
-
-    clearAsyncStorage();
-  }, []);
+  const clearAsyncStorage = async () => {
+    try {
+      await AsyncStorage.removeItem('existingExercises');
+      console.log('AsyncStorage cleared!');
+    } catch (error) {
+      console.error('Failed to clear AsyncStorage:', error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -73,7 +69,7 @@ export default function Index() {
         contentContainerStyle={styles.programList}
       />
       <Link href="../muscleGroupSelector" asChild>
-        <TouchableOpacity onPress={() => {  }} style={styles.addButton}>
+        <TouchableOpacity onPress={clearAsyncStorage} style={styles.addButton}>
           <FontAwesome5 name="plus" size={24} color="#fff" />
         </TouchableOpacity>
       </Link>
