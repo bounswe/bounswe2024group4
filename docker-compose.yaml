@@ -38,6 +38,22 @@ services:
     networks:
       - mynetwork
 
+  frontend:
+    build:
+      context: ./frontend/fitness-diet-forum
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/fitness-diet-forum:/home/app/frontend
+    command: "npm start"
+    restart: "on-failure"
+    depends_on:
+      - backend
+    networks:
+      - mynetwork
+
 volumes:
   db_data:
 
