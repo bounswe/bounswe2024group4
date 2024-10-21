@@ -20,7 +20,6 @@ def get_exercises(request):
             return JsonResponse({'error': str(e)}, status=response.status_code)
 
 
-
 def workout_program(request):
     if request.method == 'POST':
         try:
