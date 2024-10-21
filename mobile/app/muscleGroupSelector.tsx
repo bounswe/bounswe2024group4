@@ -1,22 +1,9 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { Link } from 'expo-router';
+import images from '../constants/image_map';
 
 export default function Exercises() {
-    const images = [
-        ["Chest", require(`../assets/images/chest.png`)],
-        ["Biceps", require(`../assets/images/biceps.png`)],
-        ["Shoulder", require(`../assets/images/shoulder.png`)],
-        ["Triceps", require(`../assets/images/triceps.png`)],
-        ["Back", require(`../assets/images/back.png`)],
-        ["Lower back", require(`../assets/images/lower_back.png`)],
-        ["Upper back", require(`../assets/images/upper_back.png`)],
-        ["Abs", require(`../assets/images/abs.png`)],
-        ["Quadriceps", require(`../assets/images/quad.png`)],
-        ["Hamstrings", require(`../assets/images/hamstring.png`)],
-        ["Glutes", require(`../assets/images/glutes.png`)],
-        ["Legs", require(`../assets/images/legs.png`)],
-    ];
   const [selectedImage, setSelectedImage] = useState(0);
 
   return (
@@ -24,20 +11,19 @@ export default function Exercises() {
       <SafeAreaView style={styles.background}>
         <Text style={styles.headerText}> Select a muscle group to train </Text>
         <View style={styles.cardContainer}>
-          {Array.from({ length: 12 }).map((_, index) => (
+          {Object.keys(images).map((muscleName, index) => (
             <TouchableOpacity
               key={index}
               style={[styles.card, selectedImage === index ? styles.selectedCard : null]}
               onPress={() => setSelectedImage(index)}
             >
-              <Image source={images[index % images.length][1]} style={styles.cardImage} />
+              <Image source={images[muscleName]} style={styles.cardImage} />
             </TouchableOpacity>
           ))}
         </View>
-        <Link href={{pathname: "../exerciseSelector", params: {exerciseName: images[selectedImage][0]}}} asChild>
+        <Link href={{pathname: "../exerciseSelector", params: {muscleName: Object.keys(images)[selectedImage]}}} asChild>
           <TouchableOpacity
             style={styles.proceedButton}
-            onPress={() => {}}
           >
             <Text style={styles.proceedButtonText}>Proceed</Text>
           </TouchableOpacity>
