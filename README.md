@@ -34,7 +34,7 @@ DB_ROOT_PASSWORD=admin_group4_dbfitness123
 EXERCISES_API_KEY=<Your API Ninjas Exercises API Key>
 ```
 
-You can get your personal `Exercises API` key from `Ninjas API`s website.
+You can get your personal `Exercises API` key by creating an account in `Ninjas API`s [website] (https://www.api-ninjas.com/api/exercises).
 
 Also note that the variable `MYSQL_USER` is assigned to `django_user` in the `docker-compose.yaml` file 
 
