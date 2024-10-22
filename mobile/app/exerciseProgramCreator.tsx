@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet, TouchableOpacity, Text } from "react-native";
 import React, { useEffect, useState } from 'react';
-import { useLocalSearchParams, Link } from "expo-router";
+import { useLocalSearchParams, Link, Stack } from "expo-router";
 import WorkoutProgram from '../components/WorkoutProgram';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -68,6 +68,7 @@ export default function ExerciseCreate() {
 
   return (
     <SafeAreaView style={styles.screen}>
+      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.background}>
         {workoutProgram && <WorkoutProgram workout={workoutProgram} />}
         <Link href="../muscleGroupSelector" asChild>

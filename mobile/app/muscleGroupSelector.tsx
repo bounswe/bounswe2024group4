@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import images from '../constants/image_map';
 
 export default function Exercises() {
@@ -8,6 +8,7 @@ export default function Exercises() {
 
   return (
     <SafeAreaView style={styles.screen}>
+      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.background}>
         <Text style={styles.headerText}> Select a muscle group to train </Text>
         <View style={styles.cardContainer}>

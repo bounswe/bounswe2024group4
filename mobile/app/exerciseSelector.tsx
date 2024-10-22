@@ -1,6 +1,6 @@
 import { Text, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from 'react';
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { Link } from 'expo-router';
 import axios from 'axios';
 
@@ -36,6 +36,7 @@ export default function ExerciseSelect() {
   
   return (
     <SafeAreaView style={styles.screen}>
+      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.background}>
         <Text style={styles.headerText}> {muscleName.replace(/_/g, ' ')} exercises </Text>
         {exercises.map((exercise) => (
