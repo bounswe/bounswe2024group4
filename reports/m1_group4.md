@@ -27,7 +27,7 @@ empty cell -> None
 | | Berat Yılmaz | Bilge Kaan Güneyli | Miraç Öztürk | Murat Can Kocakulak | Zeynep Buse Aydın | Nurullah Uçan | Ceyhun Sonyürek | Ahmet Batuhan Canlı | Talha Ordukaya |
 | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 **Design**| -- | -- | -- | -- | -- | -- | -- | -- | -- |
-Create scenario for creating and sharing diet program | -- | :large_blue_circle: | -- | -- | :red_circle: | -- | -- | -- | -- |
+Create scenario for creating and sharing diet program | -- | :large_blue_circle: | -- | :red_circle: | :red_circle: | -- | -- | -- | -- |
 | Create scenario for rating shared exercises and diet programs | -- | -- | -- | -- | -- | -- | :red_circle: | -- | -- |
 | Create scenario for logging in and interacting with a post | -- | -- | 🔴  | -- | -- | -- | -- | -- | -- |
 | Create scenario for chatting with another user | -- | -- | -- | -- | -- |:red_circle:| -- | -- | -- |
@@ -47,7 +47,7 @@ Create scenario for creating and sharing diet program | -- | :large_blue_circle:
 | Create sequence diagram for Wikidata and Nutrition Analysis API Integration | -- | :large_blue_circle: | -- | -- | :red_circle: | -- | -- | -- | :large_blue_circle: |
 | Create sequence diagram of Exercises API integration | -- | :red_circle: | -- | -- | :large_blue_circle: | -- | -- | -- | :large_blue_circle: |
 | Create sequence diagram of post interactions | -- | -- | 🔴  | -- | -- | -- | -- | -- | -- |
-| Create the class diagram of the "Fitness and Diet Forum" project | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Create the class diagram of the "Fitness and Diet Forum" project | -- | -- | -- | :red_circle: | -- | -- | -- | -- | -- |
 | Create the use case diagram of the "Fitness and Diet Forum" project | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | **Mobile Implementation** | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Initialize | :large_blue_circle: | -- | -- | -- | -- | :large_blue_circle: | :red_circle: | -- | -- |
@@ -67,12 +67,12 @@ Create scenario for creating and sharing diet program | -- | :large_blue_circle:
 | implement create a meal UI | -- | -- | -- | -- | :red_circle: | -- | -- | -- | -- |
 | Create readme for frontend | -- | -- | -- | -- | :red_circle: | -- | -- | -- | -- |
 | **Backend Implementation** | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Initialize | -- | :red_circle: | -- | -- | -- | -- | -- | -- | :large_blue_circle: |
-| Implement Workout Program Creation | -- | :red_circle: | -- | -- | -- | -- | -- | -- | :large_blue_circle: |
-| Implement Authentication in Backend | -- | -- | -- | -- | -- | -- | -- | -- | :red_circle: |
-| Create README for Backend | -- | :large_blue_circle: | -- | -- | -- | -- | -- | -- | :large_blue_circle: |
+| Initialize | -- | :red_circle: | -- | :red_circle: | -- | -- | -- | -- | :large_blue_circle: |
+| Implement Workout Program Creation | -- | :red_circle: | -- | :large_blue_circle: | -- | -- | -- | -- | :large_blue_circle: |
+| Implement Authentication in Backend | -- | -- | -- | :large_blue_circle: | -- | -- | -- | -- | :red_circle: |
+| Create README for Backend | -- | :large_blue_circle: | -- | :red_circle: | -- | -- | -- | -- | :large_blue_circle: |
 | Create general README | -- | :red_circle: | -- | -- | :large_blue_circle: | -- | -- | -- | :large_blue_circle: |
-| Dockerize | -- | :red_circle: | -- | -- | -- | -- | -- | -- | :large_blue_circle: |
+| Dockerize | -- | :red_circle: | -- | :red_circle: | -- | -- | -- | -- | :large_blue_circle: |
 | **Report** | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Create RAM for Milestone | :red_circle: | -- | -- | -- | -- | -- | -- | -- | -- |
 | Requirements addressed | -- | :red_circle: | -- | -- | -- | -- | -- | -- | -- |
@@ -374,6 +374,34 @@ We created the presentation scenario with my friends. I participated in all the 
 
 <details>
 <summary>Member: Murat Can Kocakulak</summary>
+Responsibilities:
+I was responsible for creating exercise program scenario, reviewing the backend initialization, creating the app structure inside backend folder, creating class diagram and reviewing authentication in the backend for sign-up, login, and logout functionalities and creating exercise program. Additionally, i added the ReadMe file for backend 
+
+#### Main contributions:
+- Create the general structure of Backend: In order to be able to work on it together without potential conflicts, I have separated the backend apps like use_auth, exercise_program, diet_program etc
+- DockerFile: Finalized the Docker File, getting it ready for deployment
+- Project Evaluation: Evaluated the status of our deliverables, analyzed their impact on the project plan, and provided reflections to guide future development.
+
+#### Code-related significant issues:
+- [#342](https://github.com/bounswe/bounswe2024group4/issues/342) I reviewed initializing of the backend and created the app file structure.
+- [#361](https://github.com/bounswe/bounswe2024group4/issues/361) I finalized the dockerization of backend
+- [#375](https://github.com/bounswe/bounswe2024group4/issues/375) I created the ReadMe of backend stating which prompts to write on the terminal in order to start the backend
+
+#### Non-code-related significant issues:
+- [#375](https://github.com/bounswe/bounswe2024group4/issues/375) I created Readme for Backend
+- [#358](https://github.com/bounswe/bounswe2024group4/issues/358) I created class diagram of the project
+- [#340](https://github.com/bounswe/bounswe2024group4/issues/340) I created scenario for creating and sharing exercise program
+
+#### Pull requests that you have created, merged, and reviewed:
+- [#371](https://github.com/bounswe/bounswe2024group4/pull/371) I structured the backend app files accordingly
+- [#389](https://github.com/bounswe/bounswe2024group4/pull/389) I have changed the urls structure to fitness_project urls file instead of keeping urls separate inside apps
+- [#394](https://github.com/bounswe/bounswe2024group4/pull/394) I finalized the dockerazation of the project
+- [#400](https://github.com/bounswe/bounswe2024group4/pull/400) I created ReadMe for the Backend
+- [#377](https://github.com/bounswe/bounswe2024group4/pull/377) I reviewed implementing workout program
+- [#388](https://github.com/bounswe/bounswe2024group4/pull/388) I reviewed authentication properties that Talha made
+
+#### Additional information:
+Throughout the project, I had the change to communicate with my group and design our path. Because I was more experienced on the Backend part thanks to last semester, I managed to be more comfortable with the changes that I made. I think separating the app structure inside backend will boost our collaboration and work management in the future
 
 </details>
 
