@@ -33,3 +33,5 @@ _**Notes by:**_ \
 | Start implementing user profile endpoints | Bilge Kaan Güneyli  | 20/11/2024 |
 | Start implementing creating weekly program endpoints | Murat Can Kocakulak  | 20/11/2024 |
 | Continue implementing workout related endpoints | Talha Ordukaya | 20/11/2024 |
+| Implement MealList component with meal display and add button | Nurullah Uçan | 12/11/2024 20.00|
+| Implementing MealProgram component to display created meals seperately | Ceyhun Sonyürek | 12/11/2024 20.00|
