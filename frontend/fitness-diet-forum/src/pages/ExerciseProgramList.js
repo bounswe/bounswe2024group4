@@ -1,5 +1,7 @@
+// ExerciseProgramList.js
 import React, { useState } from 'react';
-import ExerciseProgram from '../components/ExerciseProgram'; // Import the ExerciseProgram component
+import ExerciseProgram from '../components/ExerciseProgram';
+import MuscleGroups from "../components/MuscleGroups";
 
 const ExerciseProgramList = () => {
     const [programs, setPrograms] = useState([
@@ -41,14 +43,23 @@ const ExerciseProgramList = () => {
         },
     ]);
 
+    const [showExerciseCreation, setShowExerciseCreation] = useState(false);
+
     // Function to delete an exercise program
     const deleteProgram = (programId) => {
         setPrograms(programs.filter(program => program.id !== programId));
     };
 
+    // Function to handle "Create a New Program" button click
+    const handleCreateProgram = () => {
+        setShowExerciseCreation(true);
+    };
+
     return (
-        <div className="exercise-program-list p-8 bg-darkBackground min-h-screen">
-            <h1 className="text-4xl font-bold text-lightText mb-10 tracking-wider">Exercise Programs</h1>
+        <div className="exercise-program-list p-8 bg-darkBackground min-h-screen text-lightText">
+            <h1 className="text-4xl font-bold mb-10 tracking-wider">Exercise Programs</h1>
+
+            {/* Display existing exercise programs */}
             <div className="grid gap-10">
                 {programs.map(program => (
                     <ExerciseProgram
@@ -60,13 +71,21 @@ const ExerciseProgramList = () => {
                 ))}
             </div>
 
-            {/* Button to create a new program (functionality can be added later) */}
+            {/* Button to create a new program */}
             <button
                 className="mt-10 bg-primary text-white text-lg font-semibold py-3 px-6 rounded-lg hover:bg-primary-dark transition-colors duration-300"
-                onClick={() => alert('Add new program functionality here!')}
+                onClick={handleCreateProgram}
             >
                 Create a New Program
             </button>
+
+            {/* Conditionally render the exercise creation section */}
+            {showExerciseCreation && (
+                <div className="mt-10 w-full max-w-xl">
+                    <h2 className="text-3xl font-bold mb-6">My Exercises</h2>
+                    <MuscleGroups />
+                </div>
+            )}
         </div>
     );
 };
