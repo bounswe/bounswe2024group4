@@ -5,6 +5,7 @@ import PostPage from "./pages/PostPage";
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar'; 
 import MealList from './pages/MealList';
+import Exercises from './pages/Exercises';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/posts" element={<PostPage />} />
 
               {/* Add other routes here as needed */}
+              <Route path="/exercises" element={<Exercises />} />
             </Routes>
           </div>
         </div>
