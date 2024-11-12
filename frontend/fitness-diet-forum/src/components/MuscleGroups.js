@@ -1,7 +1,17 @@
 // MuscleGroups.js
 const muscleGroups = [
     { id: 1, label: "Chest", imgSrc: "/chest.png" },
-    { id: 2, label: "Back", imgSrc: "/upper_back.png" },
+    { id: 2, label: "u_Back", imgSrc: "/upper_back.png" },
+    { id: 3, label: "l_Back", imgSrc: "/lower_back.png" },
+    { id: 4, label: "Back", imgSrc: "/back.png" },
+    { id: 5, label: "Biceps", imgSrc: "/biceps.png" },
+    { id: 6, label: "Triceps", imgSrc: "/triceps.png" },
+    { id: 7, label: "Glutes", imgSrc: "/glutes.png" },
+    { id: 8, label: "Hamstring", imgSrc: "/hamstring.png" },
+    { id: 9, label: "Quad", imgSrc: "/quad.png" },
+    { id: 10, label: "Shoulder", imgSrc: "/shoulder.png" },
+    { id: 11, label: "Legs", imgSrc: "/legs.png" },
+    { id: 11, label: "Abs", imgSrc: "/Abs.png" },
     // Add more muscle groups as needed
   ];
   
