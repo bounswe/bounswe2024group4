@@ -35,10 +35,10 @@ const Sidebar = () => {
           <FaUtensils /> <span>Meals</span>
         </NavLink>
         <NavLink 
-          to="/exercises" 
+          to="/Exercises" 
           className={({ isActive }) => isActive ? 'bg-blue-700 p-2 rounded flex items-center space-x-2' : 'hover:bg-blue-700 p-2 rounded flex items-center space-x-2'}
         >
-          <FaDumbbell /> <span>My Exercises</span>
+          <FaDumbbell /> <span>Exercises</span>
         </NavLink>
         <NavLink 
           to="/leaderboard" 

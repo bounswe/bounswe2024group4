@@ -5,6 +5,8 @@ import PostPage from "./pages/PostPage";
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar'; 
 import MealList from './pages/MealList';
+import Exercises from './pages/Exercises';
+import ExerciseProgramList from './pages/ExerciseProgramList';
 
 function App() {
   return (
@@ -31,7 +33,11 @@ function App() {
               {/* Posts Page Route */}
               <Route path="/posts" element={<PostPage />} />
 
+              {/* Exercise Programs Page Route */}
+              <Route path="/exercise-programs" element={<ExerciseProgramList />} />
+
               {/* Add other routes here as needed */}
+              <Route path="/exercises" element={<Exercises />} />
             </Routes>
           </div>
         </div>
