@@ -1,3 +1,93 @@
 from django.shortcuts import render
+from user_auth_app.models import User, Weight
+from django.http import JsonResponse, HttpResponse
+from swagger_docs.swagger import edit_profile_schema, view_profile_schema
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import api_view, permission_classes
 
-# Create your views here.
+@swagger_auto_schema(method='post', **edit_profile_schema)
+@api_view(['POST'])
+def edit_profile(request):
+    if request.method == 'POST':
+        try:
+            new_username = request.POST.get('username')
+            new_email = request.POST.get('email')
+            new_bio = request.POST.get('bio')
+            new_profile_picture = request.POST.get('profile_picture')
+            new_weight = request.POST.get('weight')
+            new_height = request.POST.get('height')
+            new_password = request.POST.get('password')
+
+            user = request.user
+
+            if new_username:
+                user.username = new_username
+            if new_email:
+                user.email = new_email
+            if new_bio:
+                user.bio = new_bio
+            if new_profile_picture:
+                # customla aynı değilse ögeyi silmeyi ekle
+                user.profile_picture = new_profile_picture
+            if new_weight:
+                user.weight = new_weight
+                print(user.weight)
+                Weight.objects.create(user=user, weight=new_weight)
+            if new_height:
+                user.height = new_height
+            if new_password:
+                user.set_password(new_password)
+
+            user.save()
+            return render(request, 'edit_profile.html')
+            # return JsonResponse({'message': 'Profile updated successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'message': str(e)}, status=400)
+    return render(request, 'edit_profile.html')    
+    # return JsonResponse({'message': 'Invalid request method'}, status=405)
+
+
+@swagger_auto_schema(method='get', **view_profile_schema)
+@api_view(['GET'])
+def view_profile(request):
+    if request.method == 'GET':
+        username = request.GET.get('username')
+        user = User.objects.get(username=username)
+        bio = user.bio
+        profile_picture = user.profile_picture.url if user.profile_picture else None
+        score = user.score
+        following_count = user.following.count()
+        followers_count = user.followers.count()
+
+        if request.user == user: # If user is viewing their own profile
+            is_following = None
+            email = user.email
+            weight_history = Weight.objects.filter(user=user)
+            height = user.height
+        else:
+            is_following = user.followers.filter(username=request.user.username).exists()
+            email = None
+            weight_history = []
+            height = None
+
+        # posts = Post.objects.filter(user=user)
+        # workouts = Workout.objects.filter(user=user)
+        # meals = Diet.objects.filter(user=user)
+
+        context = {
+            'username': username,
+            'email': email,
+            'bio': bio,
+            'profile_picture': profile_picture,
+            'score': score,
+            'weight_history': [{'weight': weight.weight, 'date': weight.created_at} for weight in weight_history],
+            'height': height,
+            'following_count': following_count,
+            'followers_count': followers_count,
+            'is_following': is_following,
+            # 'posts': list(reversed([{'post_id': post.post_id} for post in posts])),
+            # 'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
+            # 'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
+        }
+
+    return JsonResponse(context, status=200)

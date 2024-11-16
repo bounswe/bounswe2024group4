@@ -1,9 +1,8 @@
 # profiles_app/urls.py
 from django.urls import path
-from . import views
+from .views import view_profile, edit_profile
 
 urlpatterns = [
-#    path('<int:user_id>/', views.view_profile, name='view_profile'),
- #   path('<int:user_id>/edit/', views.edit_profile, name='edit_profile'),
-    # Add other profile-related URLs...
+    path('view_profile/', view_profile, name='view_profile'),
+    path('edit_profile/', edit_profile, name='edit_profile'),
 ]
