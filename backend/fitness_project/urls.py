@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from exercise_program_app import views as exercise_program_views
 from user_auth_app import views as auth_views
+from profiles_app import views as profile_views
 
 
 urlpatterns = [
@@ -27,5 +28,7 @@ urlpatterns = [
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
     path('log_out/', auth_views.log_out, name='log_out'),
+    path('edit_profile/', profile_views.edit_profile, name='edit_profile'),
+    path('view_profile/', profile_views.view_profile, name='view_profile'),
 ]
 
