@@ -43,7 +43,10 @@ def rate_workout(request):
             rating = float(request.POST.get('rating'))
             user = request.user
 
-            workout = Workout.objects.get(id=workout_id)
+            if rating < 0 or rating > 5:
+                return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
+
+            workout = get_object_or_404(Workout, id=workout_id)
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
             workout.save()
@@ -66,6 +69,7 @@ def get_workout_by_id(request, workout_id):
             workout_data = {
                 'id': workout.id,
                 'workout_name': workout.workout_name,
+                'created_by': workout.created_by.username,
                 'rating': workout.rating,
                 'rating_count': workout.rating_count,
                 'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
@@ -85,6 +89,7 @@ def get_workouts_by_user_id(request, user_id):
                 {
                     'id': workout.id,
                     'workout_name': workout.workout_name,
+                    'created_by': workout.created_by.username,
                     'rating': workout.rating,
                     'rating_count': workout.rating_count,
                     'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
