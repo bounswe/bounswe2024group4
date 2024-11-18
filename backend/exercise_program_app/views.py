@@ -1,8 +1,6 @@
-from django.shortcuts import render
 import requests
-from .models import Workout, Exercise, ExerciseInstance
+from .models import Workout, Exercise
 from django.http import JsonResponse
-from dotenv import load_dotenv
 import os
 
 def get_exercises(request):
@@ -35,3 +33,25 @@ def workout_program(request):
         
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+        
+def rate_workout(request):
+    if request.method == 'POST':
+        try:
+            workout_id = request.POST.get('workout_id')
+            rating = float(request.POST.get('rating'))
+            user = request.user
+
+            workout = Workout.objects.get(id=workout_id)
+            workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
+            workout.rating_count += 1
+            workout.save()
+
+            user.rating = (user.rating * user.rating_count + rating) / (user.rating_count + 1)
+            user.rating_count += 1
+            user.save()
+
+            return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
