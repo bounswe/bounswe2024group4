@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Weekly Program</title>
+    <script>
+        function updateDayInputs() {
+            const daysCount = document.getElementById('days_count').value;
+            const daysContainer = document.getElementById('days_container');
+            daysContainer.innerHTML = '';
+            
+            for (let i = 0; i < daysCount; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.innerHTML = `
+                    <label>Day ${i + 1}:</label>
+                    <select name="day_${i}" required>
+                        <option value="0">Monday</option>
+                        <option value="1">Tuesday</option>
+                        <option value="2">Wednesday</option>
+                        <option value="3">Thursday</option>
+                        <option value="4">Friday</option>
+                        <option value="5">Saturday</option>
+                        <option value="6">Sunday</option>
+                    </select>
+                    <select name="workout_${i}" required>
+                        {% for workout in workouts %}
+                            <option value="{{ workout.workout_id }}">{{ workout.workout_name }}</option>
+                        {% endfor %}
+                    </select>
+                `;
+                daysContainer.appendChild(dayDiv);
+            }
+        }
+
+        function submitProgram() {
+            const daysCount = document.getElementById('days_count').value;
+            const workouts = {};
+            
+            for (let i = 0; i < daysCount; i++) {
+                const day = document.querySelector(`select[name="day_${i}"]`).value;
+                const workout = document.querySelector(`select[name="workout_${i}"]`).value;
+                workouts[day] = workout;
+            }
+
+            fetch('/create-program/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    workouts: workouts
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Create Weekly Program</h1>
+    
+    <div>
+        <label>How many days per week?</label>
+        <select id="days_count" onchange="updateDayInputs()">
+            <option value="0">Select</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+        </select>
+    </div>
+
+    <div id="days_container"></div>
+
+    <button onclick="submitProgram()">Create Program</button>
+
+    <pre id="result"></pre>
+</body>
+</html>

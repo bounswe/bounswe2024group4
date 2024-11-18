@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('workout_program/', exercise_program_views.workout_program, name='workout_program'),
     path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'),
+    path('create-program/', exercise_program_views.create_program, name='create_program'),
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
     path('log_out/', auth_views.log_out, name='log_out'),

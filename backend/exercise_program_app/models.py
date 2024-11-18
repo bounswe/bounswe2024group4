@@ -42,3 +42,28 @@ class Exercise(models.Model):
 
     def _str_(self):
         return self.exercise_name
+
+
+
+# ... existing Workout model ...
+
+class WeeklyProgram(models.Model):
+    program_id = models.AutoField(primary_key=True)
+    # created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    days_per_week = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class WorkoutDay(models.Model):
+    DAYS_OF_WEEK = [
+        (0, 'Monday'),
+        (1, 'Tuesday'),
+        (2, 'Wednesday'),
+        (3, 'Thursday'),
+        (4, 'Friday'),
+        (5, 'Saturday'),
+        (6, 'Sunday'),
+    ]
+    
+    program = models.ForeignKey(WeeklyProgram, on_delete=models.CASCADE, related_name='workout_days')
+    day_of_week = models.IntegerField(choices=DAYS_OF_WEEK)
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)

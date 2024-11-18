@@ -21,4 +21,6 @@ from exercise_program_app import views
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('workout_program/', views.workout_program, name='workout_program'),
+    path('create-program/', views.create_program, name='create_program'),
+
 ]
