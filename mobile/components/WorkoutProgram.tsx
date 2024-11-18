@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
+import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import WorkoutEdit from './WorkoutEdit';
 
 interface Exercise {
   id: string;
@@ -21,10 +22,6 @@ interface WorkoutProgramProps {
 
 const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
   const [currentWorkout, setCurrentWorkout] = useState(workout);
-  const [editableWorkout, setEditableWorkout] = useState({
-    name: workout.name,
-    exercises: workout.exercises.map(ex => ({ ...ex }))
-  });
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleShare = () => {
@@ -32,52 +29,16 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
   };
 
   const handleEdit = () => {
-    setEditableWorkout({
-      name: currentWorkout.name,
-      exercises: currentWorkout.exercises.map(ex => ({ ...ex })),
-    });
     setIsModalVisible(true);
   };
 
-  const handleSave = () => {
-    const updatedWorkout = {
-      ...currentWorkout,
-      name: editableWorkout.name,
-      exercises: editableWorkout.exercises.map(ex => ({
-        ...ex,
-        sets: isNaN(ex.sets) ? 0 : ex.sets,
-        reps: isNaN(ex.reps) ? 0 : ex.reps,
-      })),
-    };
-  
+  const handleSave = (updatedWorkout: typeof currentWorkout) => {
     setCurrentWorkout(updatedWorkout);
     setIsModalVisible(false);
   };
 
   const handleCancel = () => {
-    setEditableWorkout({
-      name: currentWorkout.name,
-      exercises: currentWorkout.exercises.map(ex => ({ ...ex })),
-    });
     setIsModalVisible(false);
-  };
-
-  const handleInputChange = (value: string, index: number, field: 'sets' | 'reps') => {
-    let numericValue = parseInt(value, 10);
-    if (isNaN(numericValue) || value === '') {
-      numericValue = 0;
-    }
-
-    const updatedExercises = [...editableWorkout.exercises];
-    updatedExercises[index] = {
-      ...updatedExercises[index],
-      [field]: numericValue,
-    };
-
-    setEditableWorkout({
-      ...editableWorkout,
-      exercises: updatedExercises,
-    });
   };
 
   return (
@@ -99,49 +60,33 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
           </TouchableOpacity>
         </SafeAreaView>
       </SafeAreaView>
-      {currentWorkout.exercises.map((exercise) => (
-        <SafeAreaView key={exercise.id} style={styles.exerciseRow}>
-          <Image source={exercise.image} style={styles.exerciseImage} />
-          <SafeAreaView style={styles.exerciseDetails}>
-            <Text style={styles.exerciseName}>{exercise.name}</Text>
-            <Text style={styles.exerciseSetsReps}>
-              {exercise.sets} sets x {exercise.reps} reps
-            </Text>
+
+      {currentWorkout.exercises.map((exercise, index) => (
+        <React.Fragment key={exercise.id}>
+          <SafeAreaView style={styles.exerciseRow}>
+            <Image source={exercise.image} style={styles.exerciseImage} />
+            <SafeAreaView style={styles.exerciseDetails}>
+              <Text style={styles.exerciseName}>{exercise.name}</Text>
+              <Text style={styles.exerciseSetsReps}>
+                {exercise.sets} sets x {exercise.reps} reps
+              </Text>
+            </SafeAreaView>
           </SafeAreaView>
-        </SafeAreaView>
+          {index < currentWorkout.exercises.length - 1 && (
+            <View style={styles.separatorLine} />
+          )}
+        </React.Fragment>
       ))}
 
-      <Modal visible={isModalVisible} animationType="slide">
-        <SafeAreaView style={styles.modalContainer}>
-          <TextInput
-            style={styles.input}
-            value={editableWorkout.name}
-            onChangeText={text => setEditableWorkout({ ...editableWorkout, name: text })}
-            placeholder="Workout Name"
-          />
-          {editableWorkout.exercises.map((exercise, index) => (
-            <SafeAreaView key={exercise.id} style={styles.exerciseEditRow}>
-              <Text>{exercise.name}</Text>
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={exercise.sets.toString()}
-                onChangeText={text => handleInputChange(text, index, 'sets')}
-                placeholder="Sets"
-              />
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={exercise.reps.toString()}
-                onChangeText={text => handleInputChange(text, index, 'reps')}
-                placeholder="Reps"
-              />
-            </SafeAreaView>
-          ))}
-          <Button title="Save" onPress={handleSave} />
-          <Button title="Cancel" onPress={handleCancel} />
-        </SafeAreaView>
-      </Modal>
+      {/* Modal for editing workout */}
+      {isModalVisible && (
+        <WorkoutEdit
+          workout={currentWorkout}
+          isVisible={isModalVisible}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -207,23 +152,13 @@ const styles = StyleSheet.create({
     color: '#bbb',
     fontSize: 14,
   },
-  modalContainer: {
-    padding: 20,
-    backgroundColor: '#fff',
-    flex: 1,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-    marginBottom: 20,
-    padding: 10,
-    fontSize: 16,
-  },
-  exerciseEditRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+  separatorLine: {
+    height: 1,
+    backgroundColor: '#5C90E0',
+    marginTop: 5,
+    marginBottom: 10,
+    borderRadius: 1,
+    marginHorizontal: 0,
   },
 });
 
