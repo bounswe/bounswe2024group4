@@ -32,6 +32,9 @@ SECRET_KEY = 'django-insecure--qr@qbyb&b&7_0h-a7o8*6+ee15+=q&kmc%rgk#-6w187fvz-3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOGIN_URL = '/log_in/'  # Update to match your existing login URL
+LOGIN_REDIRECT_URL = '/create-program/'
+
 ALLOWED_HOSTS = []
 
 

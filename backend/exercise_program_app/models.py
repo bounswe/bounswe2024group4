@@ -1,4 +1,6 @@
 from django.db import models
+from user_auth_app.models import User  # Import User from your custom app
+
 
 # Create your models here.
 
@@ -49,7 +51,7 @@ class Exercise(models.Model):
 
 class WeeklyProgram(models.Model):
     program_id = models.AutoField(primary_key=True)
-    # created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)  # No null=True
     days_per_week = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -67,3 +69,6 @@ class WorkoutDay(models.Model):
     program = models.ForeignKey(WeeklyProgram, on_delete=models.CASCADE, related_name='workout_days')
     day_of_week = models.IntegerField(choices=DAYS_OF_WEEK)
     workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ['program', 'day_of_week']  # Add this to prevent duplicate days

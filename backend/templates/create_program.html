@@ -12,7 +12,8 @@
                 const dayDiv = document.createElement('div');
                 dayDiv.innerHTML = `
                     <label>Day ${i + 1}:</label>
-                    <select name="day_${i}" required>
+                    <select name="day_${i}" required onchange="checkDuplicateDays()">
+                        <option value="">Select Day</option>
                         <option value="0">Monday</option>
                         <option value="1">Tuesday</option>
                         <option value="2">Wednesday</option>
@@ -30,17 +31,42 @@
                 daysContainer.appendChild(dayDiv);
             }
         }
-
+    
+        function checkDuplicateDays() {
+            const daySelects = document.querySelectorAll('select[name^="day_"]');
+            const selectedDays = new Set();
+            const submitButton = document.querySelector('button');
+            
+            daySelects.forEach(select => {
+                const value = select.value;
+                if (value && selectedDays.has(value)) {
+                    alert('You cannot select the same day twice!');
+                    select.value = '';
+                    submitButton.disabled = true;
+                } else if (value) {
+                    selectedDays.add(value);
+                    submitButton.disabled = false;
+                }
+            });
+        }
+    
         function submitProgram() {
             const daysCount = document.getElementById('days_count').value;
             const workouts = {};
+            const selectedDays = new Set();
             
             for (let i = 0; i < daysCount; i++) {
                 const day = document.querySelector(`select[name="day_${i}"]`).value;
                 const workout = document.querySelector(`select[name="workout_${i}"]`).value;
+                
+                if (selectedDays.has(day)) {
+                    alert('Error: Duplicate days detected!');
+                    return;
+                }
+                selectedDays.add(day);
                 workouts[day] = workout;
             }
-
+    
             fetch('/create-program/', {
                 method: 'POST',
                 headers: {
@@ -53,6 +79,10 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'Error: ' + error.message;
             });
         }
     </script>

@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
 
 
 def get_exercises(request):
@@ -40,16 +42,19 @@ def workout_program(request):
             return JsonResponse({'error': str(e)}, status=400)
 
 
-
+@login_required  # This ensures user is logged in
 @csrf_exempt
 def create_program(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         
+        # Create weekly program with user
         program = WeeklyProgram.objects.create(
-            days_per_week=len(data['workouts'])
+            days_per_week=len(data['workouts']),
+            created_by=request.user  # Add the logged-in user
         )
         
+        # Create workout days
         for day_num, workout_id in data['workouts'].items():
             WorkoutDay.objects.create(
                 program=program,
@@ -60,6 +65,7 @@ def create_program(request):
         return JsonResponse({
             'status': 'success',
             'program_id': program.program_id,
+            'created_by': request.user.username,  # Include username in response
             'days': [{
                 'day': day.get_day_of_week_display(),
                 'workout': day.workout.workout_name
