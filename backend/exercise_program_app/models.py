@@ -1,7 +1,7 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-# Create your models here.
-
+User = get_user_model()
 
 # unique. holds the exercises created by super-members and maybe caches the api data 
 class ExerciseInstance(models.Model):
@@ -21,7 +21,7 @@ class ExerciseInstance(models.Model):
 class Workout(models.Model):
     workout_id = models.AutoField(primary_key=True)
     workout_name = models.CharField(max_length=50)
-    # created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)

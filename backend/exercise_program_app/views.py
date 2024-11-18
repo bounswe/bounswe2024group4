@@ -35,6 +35,7 @@ def workout_program(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
         
+        
 def rate_workout(request):
     if request.method == 'POST':
         try:
@@ -70,6 +71,27 @@ def get_workout_by_id(request, workout_id):
                 'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
             }
             return JsonResponse(workout_data, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def get_workouts_by_user_id(request, user_id):
+    if request.method == 'GET':
+        try:
+            workouts = Workout.objects.filter(created_by__id=user_id)
+            workouts_data = [
+                {
+                    'id': workout.id,
+                    'workout_name': workout.workout_name,
+                    'rating': workout.rating,
+                    'rating_count': workout.rating_count,
+                    'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
+                }
+                for workout in workouts
+            ]
+            return JsonResponse(workouts_data, safe=False, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
