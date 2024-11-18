@@ -37,6 +37,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    rating = models.FloatField(default=0)
+    rating_count = models.IntegerField(default=0)
 
     following = models.ManyToManyField('self', symmetrical=False, through='Follow', related_name='followers')
     

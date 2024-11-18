@@ -1,8 +1,8 @@
-from django.shortcuts import render
 import requests
+
 from .models import Workout, Exercise, ExerciseInstance, WeeklyProgram, WorkoutDay, WorkoutLog
 from django.http import JsonResponse
-from dotenv import load_dotenv
+from django.shortcuts import get_object_or_404
 import os
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -46,6 +46,7 @@ def workout_program(request):
         
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
 
 
 def error_response(message, status=400):
@@ -173,3 +174,72 @@ def log_workout(request):
     else:
         workouts = Workout.objects.all()
         return render(request, 'log_workout.html', {'workouts': workouts})
+
+        
+        
+def rate_workout(request):
+    if request.method == 'POST':
+        try:
+            workout_id = request.POST.get('workout_id')
+            rating = float(request.POST.get('rating'))
+            user = request.user
+
+            if rating < 0 or rating > 5:
+                return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
+
+            workout = get_object_or_404(Workout, id=workout_id)
+            workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
+            workout.rating_count += 1
+            workout.save()
+
+            user.rating = (user.rating * user.rating_count + rating) / (user.rating_count + 1)
+            user.rating_count += 1
+            user.save()
+
+            return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def get_workout_by_id(request, workout_id):
+    if request.method == 'GET':
+        try:
+            workout = get_object_or_404(Workout, id=workout_id)
+            workout_data = {
+                'id': workout.id,
+                'workout_name': workout.workout_name,
+                'created_by': workout.created_by.username,
+                'rating': workout.rating,
+                'rating_count': workout.rating_count,
+                'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
+            }
+            return JsonResponse(workout_data, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def get_workouts_by_user_id(request, user_id):
+    if request.method == 'GET':
+        try:
+            workouts = Workout.objects.filter(created_by__id=user_id)
+            workouts_data = [
+                {
+                    'id': workout.id,
+                    'workout_name': workout.workout_name,
+                    'created_by': workout.created_by.username,
+                    'rating': workout.rating,
+                    'rating_count': workout.rating_count,
+                    'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
+                }
+                for workout in workouts
+            ]
+            return JsonResponse(workouts_data, safe=False, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
