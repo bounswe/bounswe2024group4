@@ -72,3 +72,14 @@ class WorkoutDay(models.Model):
 
     class Meta:
         unique_together = ['program', 'day_of_week']  # Add this to prevent duplicate days
+
+
+class WorkoutLog(models.Model):
+    log_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+    date_completed = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'date_completed']  # Optional: prevent multiple workouts on same day
