@@ -8,6 +8,9 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
+from drf_yasg.utils import swagger_auto_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema
+from rest_framework.decorators import api_view
 
 
 
@@ -82,8 +85,10 @@ def validate_date(date_str):
     except ValueError:
         raise ValueError('Invalid date format. Use YYYY-MM-DD')
 
-@login_required
+
+
 @csrf_exempt
+@login_required
 def create_program(request):
     if request.method == 'POST':
         try:
@@ -127,8 +132,9 @@ def create_program(request):
         workouts = Workout.objects.all()
         return render(request, 'create_program.html', {'workouts': workouts})
 
-@login_required
+
 @csrf_exempt
+@login_required
 def log_workout(request):
     if request.method == 'POST':
         try:

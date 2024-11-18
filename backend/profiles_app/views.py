@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from user_auth_app.models import User, Weight
 from django.http import JsonResponse, HttpResponse
-from swagger_docs.swagger import edit_profile_schema, view_profile_schema
+from swagger_docs.swagger import edit_profile_schema, view_profile_schema, user_programs_schema, user_workout_logs_schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from exercise_program_app.models import WeeklyProgram, WorkoutLog
@@ -9,8 +9,8 @@ from django.contrib.auth.decorators import login_required
 
 
 
-@swagger_auto_schema(method='post', **edit_profile_schema)
 @api_view(['POST'])
+@swagger_auto_schema(**edit_profile_schema)
 def edit_profile(request):
     if request.method == 'POST':
         try:
@@ -51,10 +51,8 @@ def edit_profile(request):
     # return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 
-@swagger_auto_schema(method='get', **view_profile_schema)
 @api_view(['GET'])
-
-
+@swagger_auto_schema(**view_profile_schema)
 def view_profile(request):
     if request.method == 'GET':
         username = request.GET.get('username')
@@ -99,6 +97,9 @@ def view_profile(request):
     return JsonResponse(context, status=200)
 
 
+
+@api_view(['GET'])
+@swagger_auto_schema(**user_programs_schema)
 @login_required
 def get_user_programs(request):
     try:
@@ -138,6 +139,8 @@ def get_user_programs(request):
             'message': str(e)
         }, status=400)
 
+@api_view(['GET'])
+@swagger_auto_schema(**user_workout_logs_schema)
 @login_required
 def get_user_workout_logs(request):
     try:
