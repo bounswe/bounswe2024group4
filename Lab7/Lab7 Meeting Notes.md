@@ -34,10 +34,10 @@ _**Notes by:**_ \
 |-------------|-------------|-------------|
 | Implement sign up and login navigation. Connect backend to exercise creation. | Berat Yılmaz | 22.11.2024 
 | Create and implement profile screen. | Nurullah Uçan | 22.11.2024
-| Create and implement leaderboard screen. | Ceyhun | 22.11.2024
-| Create endpoints for post creation and feed features. | Talha | 25.11.2024
+| Create and implement leaderboard screen. | Ceyhun Sonyürek | 22.11.2024
+| Create endpoints for post creation and feed features. | Talha Ordukaya | 25.11.2024
 | Craete endpoints for meal. Seperate leaderboard according to meal and exercise. Check workout program part. | Kaan | 25.11.2024
-| Create endpoints for weekly program | Murat Can | 25.11.2024
-| Connect login and sign up to backend. Create and  implement weekly program. | Batuhan | 25.11.2024
-| Connect exercise creation to backend. Create done exercises UI.  | Miraç | 25.11.2024
-| Create and implement profile screen, leaderboard and exercise meal rate. | Buse | 25.11.2024
+| Create endpoints for weekly program | Murat Can Kocakulak | 25.11.2024
+| Connect login and sign up to backend. Create and  implement weekly program. | Batuhan Canlı | 25.11.2024
+| Connect exercise creation to backend. Create done exercises UI.  | Miraç Öztürk | 25.11.2024
+| Create and implement profile screen, leaderboard and exercise meal rate. | Zeynep Buse Aydın | 25.11.2024
