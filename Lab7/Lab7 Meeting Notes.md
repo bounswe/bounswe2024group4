@@ -36,7 +36,7 @@ _**Notes by:**_ \
 | Create and implement profile screen. | Nurullah Uçan | 22.11.2024
 | Create and implement leaderboard screen. | Ceyhun Sonyürek | 22.11.2024
 | Create endpoints for post creation and feed features. | Talha Ordukaya | 25.11.2024
-| Craete endpoints for meal. Seperate leaderboard according to meal and exercise. Check workout program part. | Kaan | 25.11.2024
+| Craete endpoints for meal. Seperate leaderboard according to meal and exercise. Check workout program part. | Bilge Kaan Güneyli | 25.11.2024
 | Create endpoints for weekly program | Murat Can Kocakulak | 25.11.2024
 | Connect login and sign up to backend. Create and  implement weekly program. | Batuhan Canlı | 25.11.2024
 | Connect exercise creation to backend. Create done exercises UI.  | Miraç Öztürk | 25.11.2024
