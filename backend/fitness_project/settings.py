@@ -37,7 +37,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -72,7 +71,10 @@ ROOT_URLCONF = 'fitness_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'venv/lib/python3.11/site-packages/drf_yasg/templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
