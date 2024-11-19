@@ -7,41 +7,67 @@ import Topbar from './components/Topbar';
 import MealList from './pages/MealList';
 import Exercises from './pages/Exercises';
 import ExerciseProgramList from './pages/ExerciseProgramList';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AuthenticatedLayout from './layouts/AuthenticatedLayout';
+import PublicLayout from './layouts/PublicLayout';
 
 function App() {
   return (
     <Router>
-      {/* Wrapper for sidebar and content */}
-      <div className="flex bg-darkBackground">
-        {/* Sidebar fixed to the left */}
-        <Sidebar />
+      <Routes>
+        {/* Public Routes (Login, Signup) */}
+        <Route
+          path="/"
+          element={
+            <PublicLayout>
+              <Login />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicLayout>
+              <Signup />
+            </PublicLayout>
+          }
+        />
 
-        {/* Main content area with margin to the right of the sidebar */}
-        <div className="ml-64 flex-1">
-          {/* Topbar */}
-          <Topbar /> 
-
-          {/* Main content */}
-          <div className="p-8">
-            <Routes>
-              {/* Home Page Route: Display PostPage */}
-              <Route path="/" element={<PostPage />} />
-
-              {/* Meals Page Route */}
-              <Route path="/meals" element={<MealList />} />
-
-              {/* Posts Page Route */}
-              <Route path="/posts" element={<PostPage />} />
-
-              {/* Exercise Programs Page Route */}
-              <Route path="/exercise-programs" element={<ExerciseProgramList />} />
-
-              {/* Add other routes here as needed */}
-              <Route path="/exercises" element={<Exercises />} />
-            </Routes>
-          </div>
-        </div>
-      </div>
+        {/* Protected Routes (Sidebar + Topbar) */}
+        <Route
+          path="/meals"
+          element={
+            <AuthenticatedLayout>
+              <MealList />
+            </AuthenticatedLayout>
+          }
+        />
+        <Route
+          path="/posts"
+          element={
+            <AuthenticatedLayout>
+              <PostPage />
+            </AuthenticatedLayout>
+          }
+        />
+        <Route
+          path="/exercise-programs"
+          element={
+            <AuthenticatedLayout>
+              <ExerciseProgramList />
+            </AuthenticatedLayout>
+          }
+        />
+        <Route
+          path="/exercises"
+          element={
+            <AuthenticatedLayout>
+              <Exercises />
+            </AuthenticatedLayout>
+          }
+        />
+      </Routes>
     </Router>
   );
 }
