@@ -1,19 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import axios from 'axios'; // You can use fetch as well
 import Meal from '../components/Meal'; // Assuming you have the Meal component
 import ExerciseProgram from '../components/ExerciseProgram'; // Assuming you have the ExerciseProgram component
 import '../css/index.css';
+import { Context } from "../globalContext/globalContext.js";
+
 
 const ProfilePage = () => {
     const { username } = useParams();
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState(null);
+    const globalContext = useContext(Context);
+    const { baseURL } = globalContext;
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_API_URL}view_profile/${username}`);
+                const response = await fetch(baseURL + `/view_profile/?username=${username}`);
+                console.log(response);
                 if (response.ok) {
                     const data = await response.json();
                     setUserData(data);
