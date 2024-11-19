@@ -3,12 +3,12 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import animationData from "../assets/Animation1.json"; 
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log("Email:", email, "Password:", password);
+    console.log("Username:", username, "Password:", password);
   };
 
   return (
@@ -17,13 +17,13 @@ const Login = () => {
       <div className="bg-blue-800 text-white p-8 rounded-lg shadow-lg max-w-sm w-full">
         <h1 className="text-2xl mb-6 font-bold text-center">Fitness & Diet Forum</h1>
         <form onSubmit={handleLogin}>
-          <label className="block mb-2">Email</label>
+          <label className="block mb-2">Username</label>
           <input
-            type="email"
+            type="username"
             className="w-full px-3 py-2 mb-4 border rounded text-black"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <label className="block mb-2">Password</label>
           <input
