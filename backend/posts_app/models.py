@@ -7,6 +7,7 @@ class Post(models.Model):
     content = models.TextField()
     exerciseId = models.IntegerField(null=True)
     mealId = models.IntegerField(null=True)
+    likeCount = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

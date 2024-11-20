@@ -58,6 +58,7 @@ urlpatterns = [
     path('follow/', simple_features_views.follow, name='follow'),
     path('unfollow/', simple_features_views.unfollow, name='unfollow'),
     path('post/', post_views.post, name='post'),
+    path('toggle_like/', post_views.toggle_like, name='toggle_like'),
     # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
