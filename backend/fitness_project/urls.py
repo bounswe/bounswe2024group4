@@ -20,6 +20,7 @@ from exercise_program_app import views as exercise_program_views
 from user_auth_app import views as auth_views
 from profiles_app import views as profile_views
 from simple_features_app import views as simple_features_views
+from posts_app import views as post_views
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
@@ -56,6 +57,10 @@ urlpatterns = [
     path('get_leaderboard/', simple_features_views.get_leaderboard, name='get_leaderboard'),
     path('follow/', simple_features_views.follow, name='follow'),
     path('unfollow/', simple_features_views.unfollow, name='unfollow'),
+    path('post/', post_views.post, name='post'),
+    path('toggle_like/', post_views.toggle_like, name='toggle_like'),
+    path('comment/', post_views.comment, name='comment'),
+    path('toggle_bookmark/', post_views.toggle_bookmark, name='toggle_bookmark'),
     # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
