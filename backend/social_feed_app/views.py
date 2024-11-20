@@ -7,6 +7,7 @@ def feed(request):
         posts = Post.objects.all().values()
         return JsonResponse({'posts': list(posts)}, status=200)
 
+
 def following_feed(request):
     if request.method == 'GET':
         user = request.user

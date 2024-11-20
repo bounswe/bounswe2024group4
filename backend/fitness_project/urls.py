@@ -64,6 +64,8 @@ urlpatterns = [
     path('toggle_bookmark/', post_views.toggle_bookmark, name='toggle_bookmark'),
     path('feed/', social_feed_views.feed, name='feed'),
     path('following_feed/', social_feed_views.following_feed, name='following_feed'),
+    path('liked_posts/', post_views.liked_posts, name='liked_posts'),
+    path('bookmarked_posts/', post_views.bookmarked_posts, name='bookmarked_posts'),
     # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
