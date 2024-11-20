@@ -75,3 +75,32 @@ def comment(request):
         except Exception as e:
             return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
     return render(request, 'comment.html')
+
+
+def toggle_bookmark(request):
+    if request.method == 'POST':
+        try:
+            postId = request.POST.get('postId')
+
+            if not postId:
+                return JsonResponse({'error': 'postId is required'}, status=400)
+            
+            try:
+                postId = int(postId)
+            except ValueError:
+                return JsonResponse({'error': 'postId must be an integer'}, status=400)
+            
+            user = User.objects.get(username=request.user.username)
+            post = Post.objects.get(id=postId)
+
+            if post in user.bookmarked_posts.all():
+                user.bookmarked_posts.remove(post)
+                return JsonResponse({'message': 'Post unbookmarked successfully'}, status=200)
+            else:
+                user.bookmarked_posts.add(post)
+                return JsonResponse({'message': 'Post bookmarked successfully'}, status=200)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
+    return render(request, 'toggle_bookmark.html')
