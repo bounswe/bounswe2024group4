@@ -21,6 +21,7 @@ from user_auth_app import views as auth_views
 from profiles_app import views as profile_views
 from simple_features_app import views as simple_features_views
 from posts_app import views as post_views
+from social_feed_app import views as social_feed_views
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
@@ -61,6 +62,8 @@ urlpatterns = [
     path('toggle_like/', post_views.toggle_like, name='toggle_like'),
     path('comment/', post_views.comment, name='comment'),
     path('toggle_bookmark/', post_views.toggle_bookmark, name='toggle_bookmark'),
+    path('feed/', social_feed_views.feed, name='feed'),
+    path('following_feed/', social_feed_views.following_feed, name='following_feed'),
     # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
