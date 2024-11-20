@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import LottieView from 'lottie-react-native';
+import { Ionicons } from '@expo/vector-icons'; 
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); 
 
   const handleLogin = () => {
     console.log('Username:', username, 'Password:', password);
@@ -24,22 +26,36 @@ const LoginScreen = () => {
       />
       <View style={styles.box}>
         <Text style={styles.title}>Login</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#888"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#888"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            placeholderTextColor="#888"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
+        </View>
+
+        
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            placeholderTextColor="#888"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword} 
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={24}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
@@ -84,14 +100,37 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    backgroundColor: '#fff', 
-    marginBottom: 12,
-    paddingHorizontal: 8,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
     borderRadius: 8,
+    paddingHorizontal: 8,
+    marginBottom: 12,
+    height: 40,
+  },
+  input: {
+    flex: 1,
+    height: '100%',
+    paddingHorizontal: 8,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginBottom: 12,
+    height: 40,
+  },
+  passwordInput: {
+    flex: 1,
+    height: '100%',
+    paddingHorizontal: 8,
   },
   loginButton: {
     backgroundColor: '#609FFF',
