@@ -70,7 +70,7 @@ const ProfilePage = () => {
                 {[...Array(emptyStars)].map((_, i) => (
                     <span key={i + fullStars + halfStar} className="text-gray-400">☆</span>
                 ))}
-                <span className="ml-2 text-lg font-semibold">
+                <span className="ml-2 text-lg font-semibold text-gray-300">
                     {score.toFixed(1)}
                 </span>
             </div>

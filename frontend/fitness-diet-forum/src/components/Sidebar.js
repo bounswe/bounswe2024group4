@@ -17,7 +17,7 @@ const Sidebar = () => {
           <FaHome /> <span>Home</span>
         </NavLink>
         <NavLink 
-          to="/profile" 
+          to="/profile/:username" 
           className={({ isActive }) => isActive ? 'bg-blue-700 p-2 rounded flex items-center space-x-2' : 'hover:bg-blue-700 p-2 rounded flex items-center space-x-2'}
         >
           <FaUser /> <span>Profile</span>

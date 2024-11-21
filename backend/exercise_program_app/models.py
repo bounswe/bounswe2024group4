@@ -1,9 +1,5 @@
 from django.db import models
-
-from django.contrib.auth import get_user_model
-
-
-User = get_user_model()
+from user_auth_app.models import User
 
 # unique. holds the exercises created by super-members and maybe caches the api data 
 class ExerciseInstance(models.Model):

@@ -176,7 +176,8 @@ def log_workout(request):
         return render(request, 'log_workout.html', {'workouts': workouts})
 
         
-        
+@csrf_exempt
+@login_required        
 def rate_workout(request):
     if request.method == 'POST':
         try:
@@ -203,6 +204,8 @@ def rate_workout(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@csrf_exempt
+@login_required
 def get_workout_by_id(request, workout_id):
     if request.method == 'GET':
         try:
@@ -222,6 +225,8 @@ def get_workout_by_id(request, workout_id):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@csrf_exempt
+@login_required
 def get_workouts_by_user_id(request, user_id):
     if request.method == 'GET':
         try:
