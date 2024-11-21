@@ -14,6 +14,7 @@ const ProfilePage = () => {
     const [activeSection, setActiveSection] = useState('meals'); // Default section is 'meals'
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
+    const loggedInUser = localStorage.getItem("username");
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -122,9 +123,15 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Follow Button */}
-                <button className={`follow-btn px-6 py-2 rounded-lg text-white ${userData.is_following ? 'bg-gray-600' : 'bg-blue-500'} hover:bg-blue-700`}>
-                    {userData.is_following ? 'Following' : 'Follow'}
-                </button>
+                {loggedInUser !== username && (
+                    <button
+                        className={`follow-btn px-6 py-2 rounded-lg text-white ${
+                            userData.is_following ? 'bg-gray-600' : 'bg-blue-500'
+                        } hover:bg-blue-700`}
+                    >
+                        {userData.is_following ? 'Following' : 'Follow'}
+                    </button>
+                )}
             </div>
 
             {/* Right Side: Section Tabs (Posts, Meals, Exercises) */}

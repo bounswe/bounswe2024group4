@@ -12,6 +12,7 @@ import Signup from './pages/Signup';
 import AuthenticatedLayout from './layouts/AuthenticatedLayout';
 import PublicLayout from './layouts/PublicLayout';
 import  PrivateRoute  from "./components/PrivateRoute";
+import ProfilePage from './pages/ProfilePage';
 function App() {
   return (
     <Router>
@@ -79,6 +80,16 @@ function App() {
         <PrivateRoute>
           <AuthenticatedLayout>
             <Exercises />
+          </AuthenticatedLayout>
+        </PrivateRoute>
+      }
+    />
+    <Route
+      path="/profile/:username"
+      element={
+        <PrivateRoute>
+          <AuthenticatedLayout>
+            <ProfilePage />
           </AuthenticatedLayout>
         </PrivateRoute>
       }
