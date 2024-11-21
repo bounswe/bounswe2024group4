@@ -20,7 +20,7 @@ const ProfilePage = () => {
             try {
                 const response = await axios.get(baseURL + `/view_profile/?username=${username}`);
                 if (response.status === 200) {
-                    const data = response.data
+                    const data = response.data;
                     setUserData(data);
                 } else {
                     setError('User not found');
@@ -52,6 +52,31 @@ const ProfilePage = () => {
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     };
 
+    const renderStars = (score) => {
+        if (typeof score !== 'number' || isNaN(score) || score < 0 || score > 5) {
+            return null; // If the score is not a valid number or out of range, do not render stars.
+        }
+    
+        const fullStars = Math.floor(score);
+        const halfStar = score % 1 >= 0.5 ? 1 : 0;
+        const emptyStars = 5 - fullStars - halfStar;
+    
+        return (
+            <div className="flex items-center">
+                {[...Array(fullStars)].map((_, i) => (
+                    <span key={i} className="text-yellow-400">★</span>
+                ))}
+                {halfStar === 1 && <span className="text-yellow-400">☆</span>}
+                {[...Array(emptyStars)].map((_, i) => (
+                    <span key={i + fullStars + halfStar} className="text-gray-400">☆</span>
+                ))}
+                <span className="ml-2 text-lg font-semibold">
+                    {score.toFixed(1)}
+                </span>
+            </div>
+        );
+    };
+
     if (error) {
         return (
             <div style={errorContainerStyle}>
@@ -69,107 +94,117 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="bg-gray-800 text-lightText min-h-screen p-6">
-            {/* User Profile Header */}
-            <div className="profile-header flex flex-col items-center">
-                <img
-                    src={userData.profile_picture}
-                    alt="Profile"
-                    className="profile-picture w-32 h-32 rounded-full border-4 border-gray-600 mb-4"
-                />
-                <h2 className="username text-3xl font-semibold">{userData.username}</h2>
-                <p className="email text-lg">{userData.email}</p>
-                <p className="bio mt-4 text-center">{userData.bio}</p>
+        <div className="profile-page flex flex-col md:flex-row min-h-screen">
+            {/* Left Side: Profile Info */}
+            <div className="profile-info w-full md:w-1/4 flex flex-col items-start p-8 bg-gray-800 rounded-lg shadow-md mb-6 md:mb-0">
+                {/* Profile Picture */}
+                <div className="flex justify-start mb-6">
+                    <img
+                        src={userData.profile_picture}
+                        alt="Profile"
+                        className="profile-picture w-32 h-32 rounded-full border-4 border-gray-600"
+                    />
+                </div>
 
-                <div className="followers-following mt-4 flex space-x-6">
-                    <div className="followers">
-                        <p>{userData.followers_count} Followers</p>
-                    </div>
-                    <div className="following">
-                        <p>{userData.following_count} Following</p>
+                {/* Username, Bio, Score */}
+                <div className="flex flex-col items-start mb-6">
+                    <h2 className="username text-3xl font-semibold text-white">{userData.username}</h2>
+                    <p className="bio mt-2 text-lg text-gray-300">{userData.bio}</p>
+                    <div className="score mt-4">
+                        {renderStars(userData.score)}
                     </div>
                 </div>
 
-                <button className={`follow-btn mt-4 px-6 py-2 rounded-lg text-white ${userData.is_following ? 'bg-gray-600' : 'bg-blue-500'} hover:bg-blue-700`}>
+                {/* Followers and Following */}
+                <div className="followers-following flex items-center space-x-4 mb-6">
+                    <p className="text-white">{userData.followers_count} Followers</p>
+                    <p className="text-white">{userData.following_count} Following</p>
+                </div>
+
+                {/* Follow Button */}
+                <button className={`follow-btn px-6 py-2 rounded-lg text-white ${userData.is_following ? 'bg-gray-600' : 'bg-blue-500'} hover:bg-blue-700`}>
                     {userData.is_following ? 'Following' : 'Follow'}
                 </button>
             </div>
 
-            {/* Section Selector */}
-            <div className="section-tabs mt-8 flex justify-center space-x-6">
-                <button
-                    className={`tab-btn px-4 py-2 rounded-lg text-white ${activeSection === 'posts' ? 'bg-blue-500' : 'bg-gray-600'}`}
-                    onClick={() => setActiveSection('posts')}
-                >
-                    Posts
-                </button>
-                <button
-                    className={`tab-btn px-4 py-2 rounded-lg text-white ${activeSection === 'meals' ? 'bg-blue-500' : 'bg-gray-600'}`}
-                    onClick={() => setActiveSection('meals')}
-                >
-                    Meals
-                </button>
-                <button
-                    className={`tab-btn px-4 py-2 rounded-lg text-white ${activeSection === 'exercises' ? 'bg-blue-500' : 'bg-gray-600'}`}
-                    onClick={() => setActiveSection('exercises')}
-                >
-                    Exercises
-                </button>
-            </div>
+            {/* Right Side: Section Tabs (Posts, Meals, Exercises) */}
+            <div className="section-tabs w-full md:w-2/3 flex flex-col items-center justify-start p-8">
+                {/* Tabs */}
+                <div className="tabs flex mb-6 space-x-4 justify-start w-full">
+                    <button
+                        className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'posts' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
+                        onClick={() => setActiveSection('posts')}
+                    >
+                        Posts
+                    </button>
+                    <button
+                        className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'meals' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
+                        onClick={() => setActiveSection('meals')}
+                    >
+                        Meals
+                    </button>
+                    <button
+                        className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'exercises' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
+                        onClick={() => setActiveSection('exercises')}
+                    >
+                        Exercises
+                    </button>
+                </div>
 
-            {/* Render Section Based on Active Tab */}
-            <div className="section-content mt-8">
-                {activeSection === 'posts' && (
-                    <div className="posts-section">
-                        {userData.posts && userData.posts.length > 0 ? (
-                            userData.posts.map((post, index) => (
-                                <Post
-                                    key={index}
-                                    user={post.user}
-                                    title={post.title}
-                                    bodyContent={post.bodyContent}
-                                    meals={post.meals}
-                                />
-                            ))
-                        ) : (
-                            <p>No posts.</p>
-                        )}
-                    </div>
-                )}
-
-                {activeSection === 'meals' && (
-                    <div className="meals-section">
-                        {userData.meals && userData.meals.length > 0 ? (
-                            userData.meals.map((meal, index) => (
-                                <div key={index} className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
-                                    <h3 className="text-lg font-bold mb-2">{meal.name}</h3>
-                                    <Meal mealName={meal.name} foods={meal.foods} onDelete={() => {}} />
-                                </div>
-                            ))
-                        ) : (
-                            <p>No meals.</p>
-                        )}
-                    </div>
-                )}
-
-                {activeSection === 'exercises' && (
-                    <div className="exercises-section">
-                        {userData.workouts && userData.workouts.length > 0 ? (
-                            userData.workouts.map((workout, index) => (
-                                <div key={index} className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
-                                    <h3 className="text-lg font-bold mb-2">{workout.name}</h3>
-                                    <ExerciseProgram
-                                        programName={workout.name}
-                                        exercises={workout.exercises}
-                                        onDelete={() => {}}
+                {/* Render Section Based on Active Tab */}
+                <div className="section-content w-full">
+                    {activeSection === 'posts' && (
+                        <div className="posts-section">
+                            {userData.posts && userData.posts.length > 0 ? (
+                                userData.posts.map((post, index) => (
+                                    <Post
+                                        key={index}
+                                        user={post.user}
+                                        title={post.title}
+                                        bodyContent={post.bodyContent}
+                                        meals={post.meals}
                                     />
-                                </div>
-                            ))
-                        ) : (
-                            <p>No exercise programs.</p>
-                        )}
-                    </div>
-                )}
+                                ))
+                            ) : (
+                                <p className="text-white">No posts.</p>
+                            )}
+                        </div>
+                    )}
+
+                    {activeSection === 'meals' && (
+                        <div className="meals-section">
+                            {userData.meals && userData.meals.length > 0 ? (
+                                userData.meals.map((meal, index) => (
+                                    <div key={index} className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
+                                        <h3 className="text-lg font-bold mb-2">{meal.name}</h3>
+                                        <Meal mealName={meal.name} foods={meal.foods} onDelete={() => {}} />
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-white">No meals.</p>
+                            )}
+                        </div>
+                    )}
+
+                    {activeSection === 'exercises' && (
+                        <div className="exercises-section">
+                            {userData.workouts && userData.workouts.length > 0 ? (
+                                userData.workouts.map((workout, index) => (
+                                    <div key={index} className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
+                                        <h3 className="text-lg font-bold mb-2">{workout.name}</h3>
+                                        <ExerciseProgram
+                                            programName={workout.name}
+                                            exercises={workout.exercises}
+                                            onDelete={() => {}}
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-white">No exercise programs.</p>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
