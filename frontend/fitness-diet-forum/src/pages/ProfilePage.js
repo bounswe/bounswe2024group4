@@ -9,7 +9,7 @@ import { Context } from "../globalContext/globalContext.js";
 
 const ProfilePage = () => {
     const { username } = useParams();
-    const [userData, setUserData] = useState(null);
+    const [userData, setUserData] = useState({});
     const [error, setError] = useState(null);
     const [activeSection, setActiveSection] = useState('meals'); // Default section is 'meals'
     const globalContext = useContext(Context);
@@ -18,9 +18,9 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch(baseURL + `/view_profile/?username=${username}`);
-                if (response.ok) {
-                    const data = await response.json();
+                const response = await axios.get(baseURL + `/view_profile/?username=${username}`);
+                if (response.status === 200) {
+                    const data = response.data
                     setUserData(data);
                 } else {
                     setError('User not found');
