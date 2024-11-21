@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Log Workout</title>
+    <style>
+        /* Add some basic styling for the JSON display */
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap; /* This preserves formatting */
+            font-family: monospace;
+        }
+    </style>
+    <script>
+        function logWorkout() {
+            const date = document.getElementById('workout_date').value;
+            const workoutId = document.getElementById('workout_select').value;
+            
+            // Validate inputs
+            if (!date) {
+                alert('Please select a date');
+                return;
+            }
+            if (!workoutId) {
+                alert('Please select a workout');
+                return;
+            }
+
+            fetch('/log-workout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: date,
+                    workout_id: workoutId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = 
+                    JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 
+                    JSON.stringify({status: 'error', message: error.message}, null, 2);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Log Your Workout</h1>
+    
+    <div>
+        <label>Date:</label>
+        <input type="date" id="workout_date" required>
+    </div>
+
+    <div>
+        <label>Workout:</label>
+        <select id="workout_select" required>
+            <option value="">Select Workout</option>
+            {% for workout in workouts %}
+                <option value="{{ workout.workout_id }}">{{ workout.workout_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button onclick="logWorkout()">Log Workout</button>
+
+    <pre id="result"></pre>
+</body>
+</html>

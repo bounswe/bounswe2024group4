@@ -8,20 +8,20 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory in the container
 WORKDIR /backend_code
 
-# Copy the requirements file into the container at /code
+# Copy the requirements file into the container
 COPY requirements.txt /backend_code/
 
-# install dependencies for mysqlclient
+# Install system-level dependencies for mysqlclient and other required packages
 RUN apt-get update && apt-get install -y pkg-config python3-dev default-libmysqlclient-dev build-essential
 
-# Install any needed packages specified in requirements.txt
+# Install Python dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the current directory contents into the container at /backend_code
+# Copy the Django project files into the container
 COPY . /backend_code/
 
 # Expose port 8000 to allow communication to/from server
 EXPOSE 8000
 
-# start server  
-# CMD python manage.py runserver
+# Command to run the Django development server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

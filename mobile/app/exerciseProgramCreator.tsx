@@ -1,35 +1,89 @@
-import { Text, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
-import React, { useState, useEffect } from 'react';
-import { useLocalSearchParams } from "expo-router";
+import { SafeAreaView, StyleSheet, TouchableOpacity, Text } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { useLocalSearchParams, Link, Stack } from "expo-router";
 import WorkoutProgram from '../components/WorkoutProgram';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import images from '../constants/image_map';
 
 export default function ExerciseCreate() {
-  const params = useLocalSearchParams();
-  const workoutProgram = {
-    id: '1',
-    name: 'a',
-    exercises: [
-      {
-        id: '1',
-        image: require('../assets/images/biceps.png'),
-        name: 'Pull Ups',
-        sets: 4,
-        reps: 8,
-      },
-      {
-        id: '2',
-        image: require('../assets/images/back.png'),
-        name: 'Deadlift',
-        sets: 3,
-        reps: 6,
-      },
-    ],
+  const { selectedExercises, muscleName } = useLocalSearchParams<{
+    selectedExercises: string;
+    muscleName: string;
+  }>();
+
+  const [workoutProgram, setWorkoutProgram] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const exercisesArray = selectedExercises ? selectedExercises.split(',') : [];
+        const existingExercisesString = await AsyncStorage.getItem('existingExercises');
+        const existingExercisesArray = existingExercisesString ? JSON.parse(existingExercisesString) : [];
+        
+        const newExercises = exercisesArray.map((name, index) => ({
+          id: String(existingExercisesArray.length + index + 1),
+          image: images[muscleName],
+          name,
+          sets: 0,
+          reps: 0,
+        }));
+        
+        const combinedExercisesArray = Array.from(new Set([...existingExercisesArray, ...newExercises]));
+        
+        const newWorkoutProgram = {
+          id: '1',
+          name: 'Draft',
+          exercises: combinedExercisesArray,
+        };
+        
+        await AsyncStorage.setItem('existingExercises', JSON.stringify(combinedExercisesArray));        
+        setWorkoutProgram(newWorkoutProgram);
+      } catch (error) {
+        console.error('Error loading exercises: ', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExercises();
+  }, [selectedExercises, muscleName]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </SafeAreaView>
+    );
   }
-  
+
+  if (!workoutProgram) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <Text style={styles.loadingText}>No workout program found.</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.screen}>
+      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.background}>
-        <WorkoutProgram workout={workoutProgram} />
+        {workoutProgram && <WorkoutProgram workout={workoutProgram} />}
+        <Link href="../muscleGroupSelector" asChild>
+          <TouchableOpacity onPress={() => {  }} style={styles.addButton}>
+            <FontAwesome5 name="plus" size={24} color="#fff" />
+          </TouchableOpacity>
+        </Link>
+        <Link href={{pathname: "../exercises"}} asChild>
+          <TouchableOpacity
+            style={styles.proceedButton}
+            onPress={() => {}}
+          >
+            <Text style={styles.proceedButtonText}>Save</Text>
+          </TouchableOpacity>
+        </Link>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -39,51 +93,43 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: "flex-start",
-    // alignItems: "start",
     backgroundColor: "#1b1d21",
     padding: 10
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    marginTop: 10,
-    marginBottom: 15,
-    marginLeft: 35
   },
   screen: {
     flex: 1,
     backgroundColor: "#1b1d21",
   },
-  exerciseItem: {
-    fontSize: 18,
+  loadingText: {
+    fontSize: 20,
     color: 'white',
-    marginLeft: 35,
-    marginBottom: 10,
-    padding: 10,
-    borderRadius: 5,
-    backgroundColor: '#16181A',
-  },
-  exerciseText: {
-    fontSize: 18,
-    color: 'white',
-  },
-  selected: {
-    backgroundColor: '#1B55AC',
+    textAlign: 'center',
+    marginTop: 20,
   },
   addButton: {
     position: 'relative',
-    top: 20,
-    left: 260,
+    top: 10,
+    left: 175,
+    width: 50,
+    height: 50,
+    borderRadius: 50 / 2,
+    backgroundColor: '#1B55AC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  proceedButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 280,
     width: 75,
     backgroundColor: '#1B55AC',
     borderRadius: 10,
-    padding: 10,
+    padding: 20,
   },
-  addButtonText: {
+  proceedButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: 'white',
-    textAlign: 'center',
-  }
+    textAlign: 'justify',
+  },
 });

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import WorkoutProgram from '../../components/WorkoutProgram';
 
 const workoutPrograms = [
@@ -50,6 +51,15 @@ const workoutPrograms = [
 ];
 
 export default function Index() {
+  const clearAsyncStorage = async () => {
+    try {
+      await AsyncStorage.removeItem('existingExercises');
+      console.log('AsyncStorage cleared!');
+    } catch (error) {
+      console.error('Failed to clear AsyncStorage:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       <FlatList
@@ -59,7 +69,7 @@ export default function Index() {
         contentContainerStyle={styles.programList}
       />
       <Link href="../muscleGroupSelector" asChild>
-        <TouchableOpacity onPress={() => {  }} style={styles.addButton}>
+        <TouchableOpacity onPress={clearAsyncStorage} style={styles.addButton}>
           <FontAwesome5 name="plus" size={24} color="#fff" />
         </TouchableOpacity>
       </Link>

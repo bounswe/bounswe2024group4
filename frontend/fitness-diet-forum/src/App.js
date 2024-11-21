@@ -5,35 +5,69 @@ import PostPage from "./pages/PostPage";
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar'; 
 import MealList from './pages/MealList';
+import Exercises from './pages/Exercises';
+import ExerciseProgramList from './pages/ExerciseProgramList';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AuthenticatedLayout from './layouts/AuthenticatedLayout';
+import PublicLayout from './layouts/PublicLayout';
 
 function App() {
   return (
     <Router>
-      <div className="flex min-h-screen bg-darkBackground"> {/* Dark background for entire app */}
-        {/* Sidebar */}
-        <Sidebar />
+      <Routes>
+        {/* Public Routes (Login, Signup) */}
+        <Route
+          path="/"
+          element={
+            <PublicLayout>
+              <Login />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicLayout>
+              <Signup />
+            </PublicLayout>
+          }
+        />
 
-        <div className="flex-1 flex flex-col">
-          {/* Topbar */}
-          <Topbar /> 
-
-          {/* Main content */}
-          <div className="flex-1 p-8">
-            <Routes>
-              {/* Home Page Route: Display PostPage */}
-              <Route path="/" element={<PostPage />} />
-
-              {/* Meals Page Route */}
-              <Route path="/meals" element={<MealList />} />
-
-              {/* Posts Page Route */}
-              <Route path="/posts" element={<PostPage />} />
-
-              {/* Add other routes here as needed */}
-            </Routes>
-          </div>
-        </div>
-      </div>
+        {/* Protected Routes (Sidebar + Topbar) */}
+        <Route
+          path="/meals"
+          element={
+            <AuthenticatedLayout>
+              <MealList />
+            </AuthenticatedLayout>
+          }
+        />
+        <Route
+          path="/posts"
+          element={
+            <AuthenticatedLayout>
+              <PostPage />
+            </AuthenticatedLayout>
+          }
+        />
+        <Route
+          path="/exercise-programs"
+          element={
+            <AuthenticatedLayout>
+              <ExerciseProgramList />
+            </AuthenticatedLayout>
+          }
+        />
+        <Route
+          path="/exercises"
+          element={
+            <AuthenticatedLayout>
+              <Exercises />
+            </AuthenticatedLayout>
+          }
+        />
+      </Routes>
     </Router>
   );
 }

@@ -1,23 +1,20 @@
 import { Text, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from 'react';
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { Link } from 'expo-router';
 import axios from 'axios';
 
 export default function ExerciseSelect() {
-  const params = useLocalSearchParams();
+  const { muscleName } = useLocalSearchParams<{
+    muscleName: string;
+  }>();
   const [exercises, setExercises] = useState([]);
   const [selectedExercises, setSelectedExercises] = useState([]);
 
-  // TODO: Fix this by using backend's endpoint
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const response = await axios.get(`https://api.api-ninjas.com/v1/exercises?muscle=${params.exerciseName}`, {
-          headers: {
-            'X-API-KEY': ''
-          }
-        });
+        const response = await axios.get(`http://68.183.213.92:8000/get_exercises/?muscle=${muscleName}`, {});
         setExercises(response.data);
       } catch (error) {
         console.error(error);
@@ -25,32 +22,33 @@ export default function ExerciseSelect() {
     };
 
     fetchExercises();
-  }, [params.exerciseName]);
+  }, [muscleName]);
 
-  const handleSelectExercise = (exercise) => {
-    const isAlreadySelected = selectedExercises.some(selected => selected.name === exercise.name);
+  const handleSelectExercise = (exerciseName) => {
+    const isAlreadySelected = selectedExercises.some(selected => selected === exerciseName);
   
     if (isAlreadySelected) {
-      setSelectedExercises(selectedExercises.filter(selected => selected.name !== exercise.name));
+      setSelectedExercises(selectedExercises.filter(selected => selected !== exerciseName));
     } else {
-      setSelectedExercises([...selectedExercises, exercise]);
+      setSelectedExercises([...selectedExercises, exerciseName]);
     }
   };
   
   return (
     <SafeAreaView style={styles.screen}>
+      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.background}>
-        <Text style={styles.headerText}> {params.exerciseName} exercises </Text>
+        <Text style={styles.headerText}> {muscleName.replace(/_/g, ' ')} exercises </Text>
         {exercises.map((exercise) => (
           <TouchableOpacity
             key={exercise.name}
-            style={[styles.exerciseItem, selectedExercises.some(selected => selected.name === exercise.name) && styles.selected]}
-            onPress={() => handleSelectExercise(exercise)}
+            style={[styles.exerciseItem, selectedExercises.some(selected => selected === exercise.name) && styles.selected]}
+            onPress={() => handleSelectExercise(exercise.name)}
           >
             <Text style={styles.exerciseText}>{exercise.name}</Text>
           </TouchableOpacity>
         ))}
-        <Link href={{pathname: "../exerciseProgramCreator", params: {selectedExercises: selectedExercises}}} asChild>
+        <Link href={{pathname: "../exerciseProgramCreator", params: {selectedExercises: selectedExercises, muscleName: muscleName}}} asChild>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => {}}

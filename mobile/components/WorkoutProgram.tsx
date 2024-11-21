@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import WorkoutEdit from './WorkoutEdit';
 
 interface Exercise {
   id: string;
@@ -20,40 +21,73 @@ interface WorkoutProgramProps {
 }
 
 const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
-  
+  const [currentWorkout, setCurrentWorkout] = useState(workout);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const handleShare = () => {
-    console.log(`Sharing workout: ${workout.name}`);
-    // Will be implemented later
+    console.log(`Sharing workout: ${currentWorkout.name}`);
+  };
+
+  const handleEdit = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleSave = (updatedWorkout: typeof currentWorkout) => {
+    setCurrentWorkout(updatedWorkout);
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
   };
 
   return (
-    <View style={styles.programContainer}>
-      <View style={styles.headerContainer}>
-        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>{workout.name}</Text>
-        {workout.rating && (
-          <View style={styles.iconRow}>
-            <TouchableOpacity onPress={handleShare}>
-              <FontAwesome name="share" size={24} color="#fff" style={styles.icon} />
-            </TouchableOpacity>
-            <View style={styles.ratingContainer}>
+    <SafeAreaView style={styles.programContainer}>
+      <SafeAreaView style={styles.headerContainer}>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>{currentWorkout.name}</Text>
+        <SafeAreaView style={styles.iconRow}>
+          {workout.rating && (
+            <SafeAreaView style={styles.ratingContainer}>
               <FontAwesome name="star" size={24} color="#FFD700" />
               <Text style={styles.ratingNumber}>{workout.rating}</Text>
-            </View>
-          </View>
-        )}
-      </View>
-      {workout.exercises.map((exercise) => (
-        <View key={exercise.id} style={styles.exerciseRow}>
-          <Image source={exercise.image} style={styles.exerciseImage} />
-          <View style={styles.exerciseDetails}>
-            <Text style={styles.exerciseName}>{exercise.name}</Text>
-            <Text style={styles.exerciseSetsReps}>
-              {exercise.sets} sets x {exercise.reps} reps
-            </Text>
-          </View>
-        </View>
+            </SafeAreaView>
+          )}
+          <TouchableOpacity onPress={handleShare}>
+            <FontAwesome name="share" size={24} color="#fff" style={styles.icon} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleEdit}>
+            <FontAwesome name="edit" size={24} color="#fff" style={styles.icon} />
+          </TouchableOpacity>
+        </SafeAreaView>
+      </SafeAreaView>
+
+      {currentWorkout.exercises.map((exercise, index) => (
+        <React.Fragment key={exercise.id}>
+          <SafeAreaView style={styles.exerciseRow}>
+            <Image source={exercise.image} style={styles.exerciseImage} />
+            <SafeAreaView style={styles.exerciseDetails}>
+              <Text style={styles.exerciseName}>{exercise.name}</Text>
+              <Text style={styles.exerciseSetsReps}>
+                {exercise.sets} sets x {exercise.reps} reps
+              </Text>
+            </SafeAreaView>
+          </SafeAreaView>
+          {index < currentWorkout.exercises.length - 1 && (
+            <View style={styles.separatorLine} />
+          )}
+        </React.Fragment>
       ))}
-    </View>
+
+      {/* Modal for editing workout */}
+      {isModalVisible && (
+        <WorkoutEdit
+          workout={currentWorkout}
+          isVisible={isModalVisible}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
+      )}
+    </SafeAreaView>
   );
 };
 
@@ -117,6 +151,14 @@ const styles = StyleSheet.create({
   exerciseSetsReps: {
     color: '#bbb',
     fontSize: 14,
+  },
+  separatorLine: {
+    height: 1,
+    backgroundColor: '#5C90E0',
+    marginTop: 5,
+    marginBottom: 10,
+    borderRadius: 1,
+    marginHorizontal: 0,
   },
 });
 

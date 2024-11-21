@@ -33,10 +33,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     user_type = models.CharField(max_length=20, choices=[('guest', 'Guest'), ('member', 'Member'), ('super_member', 'Super Member')], default='guest')
     score = models.IntegerField(default=0)  # For leaderboard ranking
+    height = models.FloatField(default=0)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-
+    rating = models.FloatField(default=0)
+    rating_count = models.IntegerField(default=0)
+    liked_posts = models.ManyToManyField('posts_app.Post', related_name='liked_by', blank=True)
+    bookmarked_posts = models.ManyToManyField('posts_app.Post', related_name='bookmarked_by', blank=True)
     following = models.ManyToManyField('self', symmetrical=False, through='Follow', related_name='followers')
     
     # Adding related_name to avoid clashes with Django's built-in auth.User
@@ -70,3 +74,12 @@ class Follow(models.Model):
 
     def __str__(self):
         return f"{self.follower} follows {self.following}"
+    
+
+class Weight(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    weight = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} weighed {self.weight} at {self.created_at}"
