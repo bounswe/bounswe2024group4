@@ -48,6 +48,7 @@ urlpatterns = [
     path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'), #Get a workout by id
     path('get-workouts/<int:user_id>/', exercise_program_views.get_workouts_by_user_id, name='get_workouts_by_user_id'), #Get workouts by user id
     path('workout-log/<int:workout_id>/', exercise_program_views.workout_log, name='workout_log'), #Log a workout and exercises inside it
+    path('workout-logs/<int:user_id>/', exercise_program_views.get_workout_logs_by_user_id, name='get_workout_logs_by_user_id'), #Get workout logs by user id
     path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'), # Rate a workout
     path('create-program/', exercise_program_views.create_program, name='create_program'), # Create a weekly program
     path('get-programs/<int:user_id>/', exercise_program_views.get_programs_by_user_id, name='get_programs_by_user_id'), # Get weekly programs by user id

@@ -267,6 +267,48 @@ def workout_log(request, workout_id):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+def get_workout_logs_by_user_id(request, user_id):
+    if request.method == 'GET':
+        try:
+            # Get all workout logs for this user
+            workout_logs = WorkoutLog.objects.filter(user__user_id=user_id).order_by('-date')
+            
+            # Format the response
+            logs_data = []
+            for log in workout_logs:
+                # Get all exercise logs for this workout log
+                exercise_logs = ExerciseLog.objects.filter(workout_log=log)
+                
+                log_data = {
+                    'log_id': log.log_id,
+                    'date': log.date.strftime('%Y-%m-%d'),
+                    'is_completed': log.is_completed,
+                    'workout': {
+                        'workout_id': log.workout.workout_id,
+                        'workout_name': log.workout.workout_name
+                    },
+                    'exercises': [{
+                        'exercise_id': ex_log.exercise.exercise_id,
+                        'name': ex_log.exercise.name,
+                        'type': ex_log.exercise.type,
+                        'muscle': ex_log.exercise.muscle,
+                        'equipment': ex_log.exercise.equipment,
+                        'instruction': ex_log.exercise.instruction,
+                        'is_completed': ex_log.is_completed
+                    } for ex_log in exercise_logs]
+                }
+                logs_data.append(log_data)
+            
+            return JsonResponse(logs_data, safe=False)
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+            
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+
 @csrf_exempt
 #@login_required        
 def rate_workout(request):
