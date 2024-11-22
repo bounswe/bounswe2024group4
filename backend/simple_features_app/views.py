@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from user_auth_app.models import User, Follow
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
-from swagger_docs.swagger import get_leaderboard_schema, follow_schema, unfollow_schema
+from swagger_docs.swagger import get_leaderboard_schema, follow_schema, unfollow_schema, get_workout_leaderboard_schema, get_meal_leaderboard_schema
 from django.db.models import F
 
 @swagger_auto_schema(method='get', **get_leaderboard_schema)
@@ -11,27 +11,35 @@ from django.db.models import F
 def get_leaderboard(request):
     if request.method == 'GET':
         ordered_user_list = (
-            User.objects.annotate(rating=F('workout_rating') + F('meal_rating'))
-            .order_by('rating')  # Order by the combined rating in descending order
+            User.objects.annotate(
+                rating= ( 
+                    (F('workout_rating') * F('workout_rating_count') +
+                        F('meal_rating') * F('meal_rating_count')) / 
+                    (F('workout_rating_count') + F('meal_rating_count'))
+                ) 
+            )
+            .order_by('-rating')  # Order by the combined rating in descending order
             .values('username', 'profile_picture', 'rating')
         )
         return JsonResponse({'leaderboard': list(ordered_user_list)})
         
-    
+@swagger_auto_schema(method='get', **get_workout_leaderboard_schema)
+@api_view(['GET'])
 def get_workout_leaderboard(request):
     if request.method == 'GET':
-        ordered_user_list = User.objects.order_by('workout_rating').values('username', 'profile_picture', 'workout_rating')
+        ordered_user_list = User.objects.order_by('-workout_rating').values('username', 'profile_picture', 'workout_rating')
         return JsonResponse({'workout_leaderboard': list(ordered_user_list)})
 
-
+@swagger_auto_schema(method='get', **get_meal_leaderboard_schema)
+@api_view(['GET'])
 def get_meal_leaderboard(request):
     if request.method == 'GET':
-        ordered_user_list = User.objects.order_by('meal_rating').values('username', 'profile_picture', 'meal_rating')
+        ordered_user_list = User.objects.order_by('-meal_rating').values('username', 'profile_picture', 'meal_rating')
         return JsonResponse({'meal_leaderboard': list(ordered_user_list)})
 
 
 @swagger_auto_schema(method='post', **follow_schema)
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 def follow(request):
     if request.method == 'POST':
         follower = User.objects.get(username=request.user.username)
@@ -56,7 +64,7 @@ def follow(request):
 @api_view(['POST'])
 def unfollow(request):
     if request.method == 'POST':
-        follower = User.objects.get(username=request.user.username)
+        # follower = User.objects.get(username=request.user.username)
         try:
             following = User.objects.get(username=request.POST.get('following'))
         except User.DoesNotExist:

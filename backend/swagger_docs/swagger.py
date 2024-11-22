@@ -39,7 +39,7 @@ view_profile_schema = {
                     'bio': openapi.Schema(type=openapi.TYPE_STRING),
                     'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url', description='URL of the profile picture'),
                     'score': openapi.Schema(type=openapi.TYPE_INTEGER),
-                    'weight': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    # 'weight': openapi.Schema(type=openapi.TYPE_NUMBER),
                     'weight_history': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
                         type=openapi.TYPE_OBJECT,
                         properties={
@@ -50,13 +50,20 @@ view_profile_schema = {
                     'height': openapi.Schema(type=openapi.TYPE_NUMBER),
                     'following_count': openapi.Schema(type=openapi.TYPE_INTEGER),
                     'followers_count': openapi.Schema(type=openapi.TYPE_INTEGER),
-                    # 'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    #     type=openapi.TYPE_OBJECT,
-                    #     properties={
-                    #         'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                    #     }
-                    # )),
                     'is_following': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user'),
+                    'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        }
+                    )),
+                    'workouts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'workout_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        }
+                    )),
+                    # 'meals': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
                 }
             )),
             401: openapi.Response('Unauthorized'),
