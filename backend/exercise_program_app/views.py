@@ -11,7 +11,7 @@ from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
 from swagger_docs.swagger import create_program_schema, log_workout_schema
 from rest_framework.decorators import api_view
-
+from user_auth_app.models import User
 
 
 
@@ -31,21 +31,55 @@ def get_exercises(request):
             return JsonResponse({'error': str(e)}, status=response.status_code)
 
 
+@csrf_exempt
 def workout_program(request):
     if request.method == 'POST':
         try:
-            workout_name = request.POST.get('workout_name')
-            exercises = request.POST.get('exercises')
-            workout = Workout(workout_name=workout_name)
+            data = json.loads(request.body)
+            workout_name = data.get('workout_name')
+            exercises = data.get('exercises', [])
+
+            if not workout_name:
+                return JsonResponse({'error': 'workout_name is required'}, status=400)
+            if not exercises:
+                return JsonResponse({'error': 'exercises are required'}, status=400)
+
+            # Get the first user for testing (you should use authenticated user in production)
+            user = User.objects.first()
+            if not user:
+                return JsonResponse({'error': 'No user found'}, status=400)
+
+            workout = Workout(
+                workout_name=workout_name,
+                created_by=user  # Add the user here
+            )
             workout.save()
-            for exercise in exercises:
-                exercise = Exercise(workout=workout, type=exercise.type, name=exercise.name, muscle=exercise.muscle, equipment=exercise.equipment, instruction=exercise.instruction)
+
+            for exercise_data in exercises:
+                exercise = Exercise(
+                    workout=workout,
+                    type=exercise_data['type'],
+                    name=exercise_data['name'],
+                    muscle=exercise_data['muscle'],
+                    equipment=exercise_data['equipment'],
+                    instruction=exercise_data['instruction']
+                )
                 exercise.save()
-            # return render(request, 'workout_program.html')
-            return JsonResponse({'message': 'Workout program created successfully'}, status=201)
+
+            return JsonResponse({
+                'message': 'Workout program created successfully',
+                'workout_id': workout.workout_id,
+                'workout_name': workout.workout_name,
+                'created_by': workout.created_by.username,
+                'exercises_count': len(exercises)
+            }, status=201)
         
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return render(request, 'workout_program.html')
 
 
 
@@ -205,15 +239,15 @@ def rate_workout(request):
 
 
 @csrf_exempt
-@login_required
+#@login_required
 def get_workout_by_id(request, workout_id):
     if request.method == 'GET':
         try:
-            workout = get_object_or_404(Workout, id=workout_id)
+            workout = get_object_or_404(Workout, workout_id=workout_id)
             workout_data = {
-                'id': workout.id,
+                'id': workout.workout_id,
                 'workout_name': workout.workout_name,
-                'created_by': workout.created_by.username,
+                'created_by': workout.created_by.username,  # This should work now
                 'rating': workout.rating,
                 'rating_count': workout.rating_count,
                 'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
@@ -224,16 +258,15 @@ def get_workout_by_id(request, workout_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 @csrf_exempt
-@login_required
+#@login_required
 def get_workouts_by_user_id(request, user_id):
     if request.method == 'GET':
         try:
             workouts = Workout.objects.filter(created_by__id=user_id)
             workouts_data = [
                 {
-                    'id': workout.id,
+                    'id': workout.workout_id,
                     'workout_name': workout.workout_name,
                     'created_by': workout.created_by.username,
                     'rating': workout.rating,
