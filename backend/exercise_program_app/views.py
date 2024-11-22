@@ -81,47 +81,6 @@ def workout_program(request):
     else:
         return render(request, 'workout_program.html')
 
-
-
-def error_response(message, status=400):
-    return JsonResponse({
-        'status': 'error',
-        'message': message
-    }, status=status)
-
-def success_response(data):
-    return JsonResponse({
-        'status': 'success',
-        **data
-    })
-
-def get_user_data(user):
-    return {
-        'id': user.user_id,
-        'username': user.username,
-        'email': user.email
-    }
-
-def validate_workout(workout_id):
-    if not workout_id:
-        raise ValueError('Workout ID is required')
-    
-    try:
-        return Workout.objects.get(workout_id=workout_id)
-    except Workout.DoesNotExist:
-        raise ValueError(f'Workout with ID {workout_id} not found')
-
-def validate_date(date_str):
-    if not date_str:
-        raise ValueError('Date is required')
-    
-    try:
-        return datetime.strptime(date_str, '%Y-%m-%d').date()
-    except ValueError:
-        raise ValueError('Invalid date format. Use YYYY-MM-DD')
-
-
-
 @csrf_exempt
 #@login_required
 def create_program(request):
@@ -218,8 +177,7 @@ def get_programs_by_user_id(request, user_id):
             
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
-
+#Log a workout and exercises and their statuses inside it
 @csrf_exempt
 #@login_required
 def workout_log(request, workout_id):
@@ -340,7 +298,6 @@ def rate_workout(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 @csrf_exempt
 #@login_required
 def get_workout_by_id(request, workout_id):
@@ -384,3 +341,42 @@ def get_workouts_by_user_id(request, user_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+#Other functions
+
+def error_response(message, status=400):
+    return JsonResponse({
+        'status': 'error',
+        'message': message
+    }, status=status)
+
+def success_response(data):
+    return JsonResponse({
+        'status': 'success',
+        **data
+    })
+
+def get_user_data(user):
+    return {
+        'id': user.user_id,
+        'username': user.username,
+        'email': user.email
+    }
+
+def validate_workout(workout_id):
+    if not workout_id:
+        raise ValueError('Workout ID is required')
+    
+    try:
+        return Workout.objects.get(workout_id=workout_id)
+    except Workout.DoesNotExist:
+        raise ValueError(f'Workout with ID {workout_id} not found')
+
+def validate_date(date_str):
+    if not date_str:
+        raise ValueError('Date is required')
+    
+    try:
+        return datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        raise ValueError('Invalid date format. Use YYYY-MM-DD')

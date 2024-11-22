@@ -46,7 +46,7 @@ urlpatterns = [
     path('workout_program/', exercise_program_views.workout_program, name='workout_program'), # Create a workout programs with exercises
     path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'), #Get exercises from api
     path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'), #Get a workout by id
-    path('get-workouts/<int:user_id>/', exercise_program_views.get_workouts_by_user_id, name='get_workouts_by_user_id'),
+    path('get-workouts/<int:user_id>/', exercise_program_views.get_workouts_by_user_id, name='get_workouts_by_user_id'), #Get workouts by user id
     path('workout-log/<int:workout_id>/', exercise_program_views.workout_log, name='workout_log'), #Log a workout and exercises inside it
     path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'), # Rate a workout
     path('create-program/', exercise_program_views.create_program, name='create_program'), # Create a weekly program
@@ -56,8 +56,6 @@ urlpatterns = [
     path('log_out/', auth_views.log_out, name='log_out'),
     path('edit_profile/', profile_views.edit_profile, name='edit_profile'),
     path('view_profile/', profile_views.view_profile, name='view_profile'),
- #  path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
-  # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
     path('get_leaderboard/', simple_features_views.get_leaderboard, name='get_leaderboard'),
     path('follow/', simple_features_views.follow, name='follow'),
     path('unfollow/', simple_features_views.unfollow, name='unfollow'),
@@ -65,7 +63,9 @@ urlpatterns = [
     path('toggle_like/', post_views.toggle_like, name='toggle_like'),
     path('comment/', post_views.comment, name='comment'),
     path('toggle_bookmark/', post_views.toggle_bookmark, name='toggle_bookmark'),
-    # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    #  path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
+  # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
+    # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
 ]
