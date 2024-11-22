@@ -172,7 +172,8 @@ def create_program(request):
         workouts = Workout.objects.all()
         return render(request, 'create_program.html', {'workouts': workouts})
 
-
+@csrf_exempt
+#@login_required
 def get_programs_by_user_id(request, user_id):
     if request.method == 'GET':
         try:
@@ -217,7 +218,7 @@ def get_programs_by_user_id(request, user_id):
             
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-    
+
 
 @csrf_exempt
 #@login_required
