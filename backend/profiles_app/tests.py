@@ -27,7 +27,6 @@ class TestProfile(TestCase):
         self.weight1_2 = Weight.objects.create(user=self.user1, weight=78)
         self.weight2_1 = Weight.objects.create(user=self.user2, weight=110)
 
-
     def test_view_profile_yourself(self):
         self.client.force_login(User.objects.get(username='user1'))
         response = self.client.get('/view_profile/', {'username': 'user1'})

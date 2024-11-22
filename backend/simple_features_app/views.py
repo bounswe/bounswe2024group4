@@ -23,12 +23,14 @@ def get_leaderboard(request):
         )
         return JsonResponse({'leaderboard': list(ordered_user_list)})
         
+
 @swagger_auto_schema(method='get', **get_workout_leaderboard_schema)
 @api_view(['GET'])
 def get_workout_leaderboard(request):
     if request.method == 'GET':
         ordered_user_list = User.objects.order_by('-workout_rating').values('username', 'profile_picture', 'workout_rating')
         return JsonResponse({'workout_leaderboard': list(ordered_user_list)})
+
 
 @swagger_auto_schema(method='get', **get_meal_leaderboard_schema)
 @api_view(['GET'])

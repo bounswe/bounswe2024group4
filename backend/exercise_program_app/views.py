@@ -1,5 +1,5 @@
 import requests
-
+from user_auth_app.models import User
 from .models import Workout, Exercise, ExerciseInstance, WeeklyProgram, WorkoutDay, WorkoutLog
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -9,10 +9,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import create_program_schema, log_workout_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema
 from rest_framework.decorators import api_view
 
-
+@api_view(['GET'])
+@swagger_auto_schema(**get_exercises_schema)
 def get_exercises(request):
     if request.method == 'GET':
         try:
@@ -28,34 +29,62 @@ def get_exercises(request):
             return JsonResponse({'error': str(e)}, status=response.status_code)
 
 
+@csrf_exempt
 def workout_program(request):
     if request.method == 'POST':
         try:
             workout_name = request.POST.get('workout_name')
-            exercises = request.POST.get('exercises')   # assumes the exercises will be send as an iterable from the frontend
+            exercises = request.POST.get('exercises')
+            data = json.loads(request.body)
+            workout_name = data.get('workout_name')
+            exercises = data.get('exercises', [])
+            workout = Workout(workout_name=workout_name)
+
+            if not workout_name:
+                return JsonResponse({'error': 'workout_name is required'}, status=400)
+            if not exercises:
+                return JsonResponse({'error': 'exercises are required'}, status=400)
+
+            # Get the first user for testing (you should use authenticated user in production)
+            user = User.objects.first()
+            # user = request.user
+            if not user:
+                return JsonResponse({'error': 'No user found'}, status=400)
+
             workout = Workout(
                 workout_name=workout_name,
-                created_by=request.user
-                )   
+                created_by=user  # Add the user here
+            )
             workout.save()
-            
-            for item in exercises:
+            for exercise in exercises:
+                exercise = Exercise(workout=workout, type=exercise.type, name=exercise.name, muscle=exercise.muscle, equipment=exercise.equipment, instruction=exercise.instruction)
+
+            for exercise_data in exercises:
                 exercise = Exercise(
                     workout=workout,
-                    type=item.type,
-                    name=item.name,
-                    muscle=item.muscle,
-                    equipment=item.equipment,
-                    instruction=item.instruction
-                    )
-            exercise.save()
+                    type=exercise_data['type'],
+                    name=exercise_data['name'],
+                    muscle=exercise_data['muscle'],
+                    equipment=exercise_data['equipment'],
+                    instruction=exercise_data['instruction']
+                )
+                exercise.save()
             # return render(request, 'workout_program.html')
             return JsonResponse({'message': 'Workout program created successfully'}, status=201)
-        
+
+            # return JsonResponse({
+            #     'message': 'Workout program created successfully',
+            #     'workout_id': workout.workout_id,
+            #     'workout_name': workout.workout_name,
+            #     'created_by': workout.created_by.username,
+            #     'exercises_count': len(exercises)
+            # }, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-    else:
-        return render(request, 'workout_program.html')
+
 
 
 def error_response(message, status=400):

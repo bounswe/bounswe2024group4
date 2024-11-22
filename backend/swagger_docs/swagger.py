@@ -184,6 +184,26 @@ get_meal_leaderboard_schema = {
     }
 }
 
+get_exercises_schema = {
+    'operation_summary': 'Get Exercises',
+    'operation_description': 'Get a list of exercises',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'exercise_name': openapi.Schema(type=openapi.TYPE_STRING),
+                    'muscle': openapi.Schema(type=openapi.TYPE_STRING),
+                    'equipment': openapi.Schema(type=openapi.TYPE_STRING),
+                    'instruction': openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )
+        )),
+        400: openapi.Response('Bad Request'),
+        404: openapi.Response('Not Found'),
+    }
+}
 
 
 user_programs_schema = {
