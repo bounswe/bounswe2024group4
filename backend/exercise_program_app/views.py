@@ -211,18 +211,22 @@ def log_workout(request):
 
         
 @csrf_exempt
-@login_required        
+#@login_required        
 def rate_workout(request):
     if request.method == 'POST':
         try:
             workout_id = request.POST.get('workout_id')
             rating = float(request.POST.get('rating'))
-            user = request.user
+            
+            # Get the first user for testing (remove this in production)
+            user = User.objects.first()
+            if not user:
+                return JsonResponse({'error': 'No user found'}, status=400)
 
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
 
-            workout = get_object_or_404(Workout, id=workout_id)
+            workout = get_object_or_404(Workout, workout_id=workout_id)  # Changed from id to workout_id
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
             workout.save()
@@ -237,7 +241,7 @@ def rate_workout(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
+    
 @csrf_exempt
 #@login_required
 def get_workout_by_id(request, workout_id):
@@ -263,7 +267,7 @@ def get_workout_by_id(request, workout_id):
 def get_workouts_by_user_id(request, user_id):
     if request.method == 'GET':
         try:
-            workouts = Workout.objects.filter(created_by__id=user_id)
+            workouts = Workout.objects.filter(created_by__user_id=user_id)
             workouts_data = [
                 {
                     'id': workout.workout_id,

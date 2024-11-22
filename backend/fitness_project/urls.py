@@ -47,6 +47,7 @@ urlpatterns = [
     path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'),
     path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'),
     path('get-workouts/<int:user_id>/', exercise_program_views.get_workouts_by_user_id, name='get_workouts_by_user_id'),
+    path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'),
     path('create-program/', exercise_program_views.create_program, name='create_program'),
     path('log-workout/', exercise_program_views.log_workout, name='log_workout'),
     path('sign_up/', auth_views.sign_up, name='sign_up'),
