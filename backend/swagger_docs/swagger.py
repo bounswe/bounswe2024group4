@@ -64,6 +64,72 @@ view_profile_schema = {
         }
     }
 
+follow_schema = {
+    'operation_summary': 'Follow User',
+    'operation_description': 'Follow a user',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'following': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user to follow'),
+        }
+    ),
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+    }
+}
+
+unfollow_schema = {
+    'operation_summary': 'Unfollow User',
+    'operation_description': 'Unfollow a user',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'following': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user to unfollow'),
+        }
+    ),
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+    }
+}
+
+get_leaderboard_schema = {
+    'operation_summary': 'Get Leaderboard',
+    'operation_description': 'Get the leaderboard of users',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'leaderboard': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'score': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        }
+                    )
+                )
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+    }
+}
 
 user_programs_schema = {
     'operation_description': "Get all workout programs for the logged-in user",
@@ -221,4 +287,116 @@ log_workout_schema = {
         401: 'Unauthorized - User not logged in'
     },
     'tags': ['Workout Logs']
+}
+
+rate_workout_schema = {
+    'operation_description': "Rate a workout",
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'workout_id': openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                description="ID of the workout to rate"
+            ),
+            'rating': openapi.Schema(
+                type=openapi.TYPE_NUMBER,
+                description="Rating value (0-5)",
+                example=4.5
+            )
+        },
+        required=['workout_id', 'rating']
+    ),
+    'responses': {
+        200: openapi.Response(
+            description="Success",
+            examples={
+                'application/json': {
+                    'message': 'Rating submitted successfully'
+                }
+            }
+        ),
+        400: 'Bad Request',
+        401: 'Unauthorized - User not logged in'
+    },
+    'tags': ['Workouts']
+}
+
+get_workout_by_id_schema = {
+    'operation_description': "Get a specific workout by its ID",
+    'manual_parameters': [
+        openapi.Parameter(
+            'workout_id',
+            openapi.IN_PATH,
+            description="ID of the workout to retrieve",
+            type=openapi.TYPE_INTEGER
+        )
+    ],
+    'responses': {
+        200: openapi.Response(
+            description="Success",
+            examples={
+                'application/json': {
+                    'id': 1,
+                    'workout_name': 'Upper Body Strength',
+                    'created_by': 'john_doe',
+                    'rating': 4.5,
+                    'rating_count': 10,
+                    'exercises': [
+                        {
+                            'type': 'strength',
+                            'name': 'Bench Press',
+                            'muscle': 'chest',
+                            'equipment': 'barbell',
+                            'instruction': 'Lie on the bench and press the barbell up.'
+                        }
+                    ]
+                }
+            }
+        ),
+        400: 'Bad Request',
+        401: 'Unauthorized - User not logged in',
+        404: 'Not Found - Workout not found'
+    },
+    'tags': ['Workouts']
+}
+
+get_workouts_by_user_id_schema = {
+    'operation_description': "Get workouts by user ID",
+    'manual_parameters': [
+        openapi.Parameter(
+            'user_id',
+            openapi.IN_PATH,
+            description="ID of the user whose workouts to retrieve",
+            type=openapi.TYPE_INTEGER
+        )
+    ],
+    'responses': {
+        200: openapi.Response(
+            description="Success",
+            examples={
+                'application/json': [
+                    {
+                        'id': 1,
+                        'workout_name': 'Upper Body Strength',
+                        'created_by': 'john_doe',
+                        'rating': 4.5,
+                        'rating_count': 10,
+                        'exercises': [
+                            {
+                                'type': 'strength',
+                                'name': 'Bench Press',
+                                'muscle': 'chest',
+                                'equipment': 'barbell',
+                                'instruction': 'Lie on the bench and press the barbell up.'
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
+        400: 'Bad Request',
+        401: 'Unauthorized - User not logged in',
+        404: 'Not Found - User not found'
+    },
+    'tags': ['Workouts']
 }
