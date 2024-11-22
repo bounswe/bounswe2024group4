@@ -6,7 +6,8 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from exercise_program_app.models import WeeklyProgram, WorkoutLog
 from django.contrib.auth.decorators import login_required
-
+from exercise_program_app.models import Workout
+from posts_app.models import Post
 
 
 @api_view(['POST'])
@@ -74,8 +75,8 @@ def view_profile(request):
             weight_history = []
             height = None
 
-        # posts = Post.objects.filter(user=user)
-        # workouts = Workout.objects.filter(user=user)
+        posts = Post.objects.filter(user=user)
+        workouts = Workout.objects.filter(user=user)
         # meals = Diet.objects.filter(user=user)
 
         context = {
@@ -89,8 +90,8 @@ def view_profile(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'is_following': is_following,
-            # 'posts': list(reversed([{'post_id': post.post_id} for post in posts])),
-            # 'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
+            'posts': list(reversed([{'post_id': post.post_id} for post in posts])),
+            'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
             # 'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
         }
 

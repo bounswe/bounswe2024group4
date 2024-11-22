@@ -2,7 +2,7 @@ import requests
 
 from .models import Workout, Exercise, ExerciseInstance, WeeklyProgram, WorkoutDay, WorkoutLog
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 import os
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -11,9 +11,6 @@ from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
 from swagger_docs.swagger import create_program_schema, log_workout_schema
 from rest_framework.decorators import api_view
-
-
-
 
 
 def get_exercises(request):
@@ -35,18 +32,30 @@ def workout_program(request):
     if request.method == 'POST':
         try:
             workout_name = request.POST.get('workout_name')
-            exercises = request.POST.get('exercises')
-            workout = Workout(workout_name=workout_name)
+            exercises = request.POST.get('exercises')   # assumes the exercises will be send as an iterable from the frontend
+            workout = Workout(
+                workout_name=workout_name,
+                created_by=request.user
+                )   
             workout.save()
-            for exercise in exercises:
-                exercise = Exercise(workout=workout, type=exercise.type, name=exercise.name, muscle=exercise.muscle, equipment=exercise.equipment, instruction=exercise.instruction)
-                exercise.save()
+            
+            for item in exercises:
+                exercise = Exercise(
+                    workout=workout,
+                    type=item.type,
+                    name=item.name,
+                    muscle=item.muscle,
+                    equipment=item.equipment,
+                    instruction=item.instruction
+                    )
+            exercise.save()
             # return render(request, 'workout_program.html')
             return JsonResponse({'message': 'Workout program created successfully'}, status=201)
         
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-
+    else:
+        return render(request, 'workout_program.html')
 
 
 def error_response(message, status=400):
@@ -55,11 +64,13 @@ def error_response(message, status=400):
         'message': message
     }, status=status)
 
+
 def success_response(data):
     return JsonResponse({
         'status': 'success',
         **data
     })
+
 
 def get_user_data(user):
     return {
@@ -67,6 +78,7 @@ def get_user_data(user):
         'username': user.username,
         'email': user.email
     }
+
 
 def validate_workout(workout_id):
     if not workout_id:
@@ -77,6 +89,7 @@ def validate_workout(workout_id):
     except Workout.DoesNotExist:
         raise ValueError(f'Workout with ID {workout_id} not found')
 
+
 def validate_date(date_str):
     if not date_str:
         raise ValueError('Date is required')
@@ -85,7 +98,6 @@ def validate_date(date_str):
         return datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
         raise ValueError('Invalid date format. Use YYYY-MM-DD')
-
 
 
 @csrf_exempt

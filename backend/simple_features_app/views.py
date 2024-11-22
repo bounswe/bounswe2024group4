@@ -4,15 +4,31 @@ from user_auth_app.models import User, Follow
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from swagger_docs.swagger import get_leaderboard_schema, follow_schema, unfollow_schema
-
+from django.db.models import F
 
 @swagger_auto_schema(method='get', **get_leaderboard_schema)
 @api_view(['GET'])
 def get_leaderboard(request):
     if request.method == 'GET':
-        ordered_user_list = User.objects.order_by('score').values('username', 'score')
+        ordered_user_list = (
+            User.objects.annotate(rating=F('workout_rating') + F('meal_rating'))
+            .order_by('rating')  # Order by the combined rating in descending order
+            .values('username', 'profile_picture', 'rating')
+        )
         return JsonResponse({'leaderboard': list(ordered_user_list)})
+        
     
+def get_workout_leaderboard(request):
+    if request.method == 'GET':
+        ordered_user_list = User.objects.order_by('workout_rating').values('username', 'profile_picture', 'workout_rating')
+        return JsonResponse({'workout_leaderboard': list(ordered_user_list)})
+
+
+def get_meal_leaderboard(request):
+    if request.method == 'GET':
+        ordered_user_list = User.objects.order_by('meal_rating').values('username', 'profile_picture', 'meal_rating')
+        return JsonResponse({'meal_leaderboard': list(ordered_user_list)})
+
 
 @swagger_auto_schema(method='post', **follow_schema)
 @api_view(['POST'])

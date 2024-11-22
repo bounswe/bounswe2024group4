@@ -131,6 +131,54 @@ get_leaderboard_schema = {
     }
 }
 
+get_workout_leaderboard_schema = {
+    'operation_summary': 'Get Workout Leaderboard',
+    'operation_description': 'Get the leaderboard of users based on workout ratings',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'workout_leaderboard': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'workout_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        }
+                    )
+                )
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+    }
+}
+
+get_meal_leaderboard_schema = {
+    'operation_summary': 'Get Meal Leaderboard',
+    'operation_description': 'Get the leaderboard of users based on meal ratings',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'meal_leaderboard': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'meal_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        }
+                    )
+                )
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+    }
+}
+
+
+
 user_programs_schema = {
     'operation_description': "Get all workout programs for the logged-in user",
     'responses': {
@@ -201,7 +249,6 @@ user_workout_logs_schema = {
     },
     'tags': ['Workout Logs']
 }
-
 
 create_program_schema = {
     'operation_description': "Create a new weekly workout program",
