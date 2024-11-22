@@ -173,6 +173,52 @@ def create_program(request):
         return render(request, 'create_program.html', {'workouts': workouts})
 
 
+def get_programs_by_user_id(request, user_id):
+    if request.method == 'GET':
+        try:
+            # Get all programs for this user
+            programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
+            
+            # Format the response
+            programs_data = []
+            for program in programs:
+                workout_days = WorkoutDay.objects.filter(program=program).order_by('day_of_week')
+                
+                program_data = {
+                    'program_id': program.program_id,
+                    'days_per_week': program.days_per_week,
+                    'created_by': {
+                        'user_id': program.created_by.user_id,
+                        'username': program.created_by.username
+                    },
+                    'workouts': [{
+                        'day': day.get_day_of_week_display(),
+                        'day_number': day.day_of_week,
+                        'workout': {
+                            'workout_id': day.workout.workout_id,
+                            'workout_name': day.workout.workout_name,
+                            'exercises': [{
+                                'exercise_id': exercise.exercise_id,
+                                'name': exercise.name,
+                                'type': exercise.type,
+                                'muscle': exercise.muscle,
+                                'equipment': exercise.equipment,
+                                'instruction': exercise.instruction
+                            } for exercise in Exercise.objects.filter(workout=day.workout)]
+                        }
+                    } for day in workout_days]
+                }
+                programs_data.append(program_data)
+            
+            return JsonResponse(programs_data, safe=False)
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+            
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    
+
 @csrf_exempt
 #@login_required
 def workout_log(request, workout_id):

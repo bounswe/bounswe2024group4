@@ -43,19 +43,20 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('workout_program/', exercise_program_views.workout_program, name='workout_program'),
-    path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'),
-    path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'),
+    path('workout_program/', exercise_program_views.workout_program, name='workout_program'), # Create a workout programs with exercises
+    path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'), #Get exercises from api
+    path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'), #Get a workout by id
     path('get-workouts/<int:user_id>/', exercise_program_views.get_workouts_by_user_id, name='get_workouts_by_user_id'),
-    path('workout-log/<int:workout_id>/', exercise_program_views.workout_log, name='workout_log'),
-    path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'),
-    path('create-program/', exercise_program_views.create_program, name='create_program'),
+    path('workout-log/<int:workout_id>/', exercise_program_views.workout_log, name='workout_log'), #Log a workout and exercises inside it
+    path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'), # Rate a workout
+    path('create-program/', exercise_program_views.create_program, name='create_program'), # Create a weekly program
+    path('get-programs/<int:user_id>/', exercise_program_views.get_programs_by_user_id, name='get_programs_by_user_id'), # Get weekly programs by user id
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
     path('log_out/', auth_views.log_out, name='log_out'),
     path('edit_profile/', profile_views.edit_profile, name='edit_profile'),
     path('view_profile/', profile_views.view_profile, name='view_profile'),
-    path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
+ #  path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
   # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
     path('get_leaderboard/', simple_features_views.get_leaderboard, name='get_leaderboard'),
     path('follow/', simple_features_views.follow, name='follow'),
