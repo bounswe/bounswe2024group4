@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Meal from '../components/Meal';
 import ExerciseProgram from '../components/ExerciseProgram';
-import Post from '../components/Post'; // Import Post component
+import Post from '../components/Post';
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
 
