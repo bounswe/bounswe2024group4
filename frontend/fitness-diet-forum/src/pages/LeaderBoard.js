@@ -57,11 +57,16 @@ const LeaderBoard = () => {
                     >
                         {/* Profile Section */}
                         <div className="flex items-center">
-                            <img
-                                src={user.profile_picture || "/default-avatar.png"}
-                                alt={`${user.username}'s profile`}
-                                className="w-16 h-16 rounded-full border-2 border-gray-600"
-                            />
+                            <Link
+                                to={`/profile/${user.username}`}
+                                className="text-lg font-bold text-blue-400 hover:underline"
+                            >
+                                <img
+                                    src={user.profile_picture || "/default-avatar.png"}
+                                    alt={`${user.username}'s profile`}
+                                    className="w-16 h-16 rounded-full border-2 border-gray-600"
+                                />
+                            </Link>
                             <div className="ml-4">
                                 <Link
                                     to={`/profile/${user.username}`}
