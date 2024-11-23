@@ -331,8 +331,8 @@ def rate_workout(request):
             workout.rating_count += 1
             workout.save()
 
-            user.rating = (user.rating * user.rating_count + rating) / (user.rating_count + 1)
-            user.rating_count += 1
+            user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
+            user.workout_rating_count += 1
             user.save()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
