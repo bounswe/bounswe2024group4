@@ -54,7 +54,7 @@ def edit_profile(request):
 
 @api_view(['GET'])
 @swagger_auto_schema(**view_profile_schema)
-@login_required
+#@login_required
 def view_profile(request):
     if request.method == 'GET':
         print(request.GET)
