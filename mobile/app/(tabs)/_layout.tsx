@@ -16,6 +16,7 @@ export default function TabLayout() {
         name="exercises"
         options={{
           title: 'Exercises',
+          headerStyle:{backgroundColor: '#1B55AC'},
           tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="dumbbell" color={color} />,
         }}
       />
@@ -23,6 +24,7 @@ export default function TabLayout() {
         name="meals"
         options={{
           title: 'Meals',
+          headerStyle:{backgroundColor: '#C23894'},
           tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="bowl-food" color={color} />,
         }}
       />
@@ -38,6 +40,14 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: 'Leaderboard',
+          headerStyle:{backgroundColor: '#FFDD00'},
+          tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="ranking-star" color={color} />,
         }}
       />
     </Tabs>
