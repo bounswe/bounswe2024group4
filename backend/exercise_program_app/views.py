@@ -331,8 +331,8 @@ def rate_workout(request):
             workout.rating_count += 1
             workout.save()
 
-            user.rating = (user.rating * user.rating_count + rating) / (user.rating_count + 1)
-            user.rating_count += 1
+            user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
+            user.workout_rating_count += 1
             user.save()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
@@ -380,6 +380,7 @@ def get_workouts_by_user_id(request, user_id):
             ]
             return JsonResponse(workouts_data, safe=False, status=200)
         except Exception as e:
+            print(f'Exception: {str(e)}')
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
