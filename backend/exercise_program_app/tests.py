@@ -105,20 +105,17 @@ class RateWorkoutTestCase(TestCase):
         self.assertEqual(json_data['error'], 'No user found')
 
     def test_rate_workout_invalid_method(self):
-        # Log in the user to simulate an authenticated request
-        self.client.login(username='testuser', password='password')
-
         # Simulate a GET request to the rate_workout endpoint
         url = reverse('rate_workout')
         response = self.client.get(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid request method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "GET" not allowed.')
 
 
 class GetWorkoutByIdTestCase(TestCase):
@@ -164,6 +161,19 @@ class GetWorkoutByIdTestCase(TestCase):
         # Check the JSON response data for the error message
         json_data = response.json()
         self.assertIn('error', json_data)
+
+    def test_get_workout_by_id_invalid_method(self):
+        # Simulate a POST request to the get_workout_by_id endpoint
+        url = reverse('get_workout_by_id', args=[self.workout.workout_id])
+        response = self.client.post(url)
+    
+        # Check that the response status code is 405 Method Not Allowed
+        self.assertEqual(response.status_code, 405)
+    
+        # Check the JSON response data for the error message
+        json_data = response.json()
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
 class GetWorkoutsByUserIdTestCase(TestCase):
@@ -228,11 +238,11 @@ class GetWorkoutsByUserIdTestCase(TestCase):
         # Simulate a POST request to the get_workouts_by_user_id endpoint
         url = reverse('get_workouts_by_user_id', args=[self.user.user_id])
         response = self.client.post(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid request method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')

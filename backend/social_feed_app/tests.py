@@ -30,14 +30,14 @@ class FeedViewTestCase(TestCase):
         # Simulate a POST request to the feed endpoint
         url = reverse('feed')
         response = self.client.post(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid request')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
 class FollowingFeedViewTestCase(TestCase):
@@ -71,11 +71,11 @@ class FollowingFeedViewTestCase(TestCase):
         # Simulate a POST request to the following_feed endpoint
         url = reverse('following_feed')
         response = self.client.post(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid request')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
