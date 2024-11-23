@@ -104,3 +104,17 @@ def toggle_bookmark(request):
         except Exception as e:
             return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
     return render(request, 'toggle_bookmark.html')
+
+
+def liked_posts(request):
+    if request.method == 'GET':
+        user = User.objects.get(username=request.user.username)
+        liked_posts = user.liked_posts.all().values()
+        return JsonResponse({'liked_posts': list(liked_posts)}, status=200)
+    
+
+def bookmarked_posts(request):
+    if request.method == 'GET':
+        user = User.objects.get(username=request.user.username)
+        bookmarked_posts = user.bookmarked_posts.all().values()
+        return JsonResponse({'bookmarked_posts': list(bookmarked_posts)}, status=200)

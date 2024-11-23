@@ -37,10 +37,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    rating = models.FloatField(default=0)
-    rating_count = models.IntegerField(default=0)
-    liked_posts = models.ManyToManyField('posts_app.Post', related_name='liked_by', blank=True)
-    bookmarked_posts = models.ManyToManyField('posts_app.Post', related_name='bookmarked_by', blank=True)
+    workout_rating = models.FloatField(default=0)
+    workout_rating_count = models.IntegerField(default=0)
+    meal_rating = models.FloatField(default=0)
+    meal_rating_count = models.IntegerField(default=0)
+    # liked_posts = models.ManyToManyField('posts_app.Post', related_name='liked_by', blank=True)
+    # bookmarked_posts = models.ManyToManyField('posts_app.Post', related_name='bookmarked_by', blank=True)
     following = models.ManyToManyField('self', symmetrical=False, through='Follow', related_name='followers')
     
     # Adding related_name to avoid clashes with Django's built-in auth.User
