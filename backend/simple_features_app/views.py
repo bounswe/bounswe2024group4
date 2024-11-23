@@ -44,7 +44,7 @@ def get_meal_leaderboard(request):
 @api_view(['POST', 'GET'])
 def follow(request):
     if request.method == 'POST':
-        follower = User.objects.get(username=request.user.username)
+        follower = User.objects.get(username=request.POST.get('follower'))
         try:
             following = User.objects.get(username=request.POST.get('following'))
         except User.DoesNotExist:
