@@ -380,6 +380,7 @@ def get_workouts_by_user_id(request, user_id):
             ]
             return JsonResponse(workouts_data, safe=False, status=200)
         except Exception as e:
+            print(f'Exception: {str(e)}')
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
