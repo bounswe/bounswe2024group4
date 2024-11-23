@@ -8,14 +8,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema
 from rest_framework.decorators import api_view
 from user_auth_app.models import User
 from datetime import datetime
 from django.utils import timezone
 
+
+@swagger_auto_schema(method='get', **get_exercises_schema)
 @api_view(['GET'])
-@swagger_auto_schema(**get_exercises_schema)
 def get_exercises(request):
     if request.method == 'GET':
         try:
@@ -31,6 +32,9 @@ def get_exercises(request):
             return JsonResponse({'error': str(e)}, status=response.status_code)
 
 
+
+@swagger_auto_schema(method='post', **workout_program_schema)
+@api_view(['POST'])
 @csrf_exempt
 def workout_program(request):
     if request.method == 'POST':
@@ -45,8 +49,8 @@ def workout_program(request):
                 return JsonResponse({'error': 'exercises are required'}, status=400)
 
             # Get the first user for testing (you should use authenticated user in production)
-            user = User.objects.first()
-            # user = request.user
+            # user = User.objects.first()
+            user = request.user
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
 
