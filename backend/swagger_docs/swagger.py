@@ -39,7 +39,7 @@ view_profile_schema = {
                     'bio': openapi.Schema(type=openapi.TYPE_STRING),
                     'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url', description='URL of the profile picture'),
                     'score': openapi.Schema(type=openapi.TYPE_INTEGER),
-                    'weight': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    # 'weight': openapi.Schema(type=openapi.TYPE_NUMBER),
                     'weight_history': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
                         type=openapi.TYPE_OBJECT,
                         properties={
@@ -50,13 +50,20 @@ view_profile_schema = {
                     'height': openapi.Schema(type=openapi.TYPE_NUMBER),
                     'following_count': openapi.Schema(type=openapi.TYPE_INTEGER),
                     'followers_count': openapi.Schema(type=openapi.TYPE_INTEGER),
-                    # 'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                    #     type=openapi.TYPE_OBJECT,
-                    #     properties={
-                    #         'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                    #     }
-                    # )),
                     'is_following': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='True if the authenticated user is following the user, False otherwise, None if the authenticated user is the user'),
+                    'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        }
+                    )),
+                    'workouts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'workout_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        }
+                    )),
+                    # 'meals': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
                 }
             )),
             401: openapi.Response('Unauthorized'),
@@ -131,6 +138,74 @@ get_leaderboard_schema = {
     }
 }
 
+get_workout_leaderboard_schema = {
+    'operation_summary': 'Get Workout Leaderboard',
+    'operation_description': 'Get the leaderboard of users based on workout ratings',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'workout_leaderboard': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'workout_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        }
+                    )
+                )
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+    }
+}
+
+get_meal_leaderboard_schema = {
+    'operation_summary': 'Get Meal Leaderboard',
+    'operation_description': 'Get the leaderboard of users based on meal ratings',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'meal_leaderboard': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'meal_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        }
+                    )
+                )
+            }
+        )),
+        401: openapi.Response('Unauthorized'),
+    }
+}
+
+get_exercises_schema = {
+    'operation_summary': 'Get Exercises',
+    'operation_description': 'Get a list of exercises',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'exercise_name': openapi.Schema(type=openapi.TYPE_STRING),
+                    'muscle': openapi.Schema(type=openapi.TYPE_STRING),
+                    'equipment': openapi.Schema(type=openapi.TYPE_STRING),
+                    'instruction': openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )
+        )),
+        400: openapi.Response('Bad Request'),
+        404: openapi.Response('Not Found'),
+    }
+}
+
+
 user_programs_schema = {
     'operation_description': "Get all workout programs for the logged-in user",
     'responses': {
@@ -201,7 +276,6 @@ user_workout_logs_schema = {
     },
     'tags': ['Workout Logs']
 }
-
 
 create_program_schema = {
     'operation_description': "Create a new weekly workout program",

@@ -1,21 +1,21 @@
 import requests
-
 from .models import Workout, Exercise, ExerciseInstance, WeeklyProgram, WorkoutDay, WorkoutLog, ExerciseLog
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 import os
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import create_program_schema, log_workout_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema
 from rest_framework.decorators import api_view
 from user_auth_app.models import User
 from datetime import datetime
 from django.utils import timezone
 
-
+@api_view(['GET'])
+@swagger_auto_schema(**get_exercises_schema)
 def get_exercises(request):
     if request.method == 'GET':
         try:
@@ -46,6 +46,7 @@ def workout_program(request):
 
             # Get the first user for testing (you should use authenticated user in production)
             user = User.objects.first()
+            # user = request.user
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
 
@@ -54,7 +55,7 @@ def workout_program(request):
                 created_by=user  # Add the user here
             )
             workout.save()
-
+            
             for exercise_data in exercises:
                 exercise = Exercise(
                     workout=workout,
