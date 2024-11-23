@@ -4,7 +4,6 @@ from django.http import JsonResponse, HttpResponse
 from swagger_docs.swagger import edit_profile_schema, view_profile_schema, user_programs_schema, user_workout_logs_schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
-from exercise_program_app.models import WeeklyProgram, WorkoutLog
 from django.contrib.auth.decorators import login_required
 
 
@@ -98,77 +97,3 @@ def view_profile(request):
 
 
 
-@api_view(['GET'])
-@swagger_auto_schema(**user_programs_schema)
-@login_required
-def get_user_programs(request):
-    try:
-        programs = WeeklyProgram.objects.filter(created_by=request.user)
-        
-        programs_data = []
-        for program in programs:
-            workout_days = []
-            for day in program.workout_days.all().order_by('day_of_week'):
-                workout_days.append({
-                    'day': day.get_day_of_week_display(),
-                    'workout': {
-                        'id': day.workout.workout_id,
-                        'name': day.workout.workout_name
-                    }
-                })
-                
-            programs_data.append({
-                'program_id': program.program_id,
-                'days_per_week': program.days_per_week,
-                'created_at': program.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'workout_days': workout_days
-            })
-        
-        return JsonResponse({
-            'status': 'success',
-            'user': {
-                'id': request.user.user_id,
-                'username': request.user.username,
-                'email': request.user.email
-            },
-            'programs': programs_data
-        })
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=400)
-
-@api_view(['GET'])
-@swagger_auto_schema(**user_workout_logs_schema)
-@login_required
-def get_user_workout_logs(request):
-    try:
-        logs = WorkoutLog.objects.filter(user=request.user).order_by('-date_completed')
-        
-        logs_data = []
-        for log in logs:
-            logs_data.append({
-                'log_id': log.log_id,
-                'workout': {
-                    'id': log.workout.workout_id,
-                    'name': log.workout.workout_name
-                },
-                'date_completed': log.date_completed.strftime('%Y-%m-%d'),
-                'created_at': log.created_at.strftime('%Y-%m-%d %H:%M:%S')
-            })
-        
-        return JsonResponse({
-            'status': 'success',
-            'user': {
-                'id': request.user.user_id,
-                'username': request.user.username,
-                'email': request.user.email
-            },
-            'workout_logs': logs_data
-        })
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=400)
