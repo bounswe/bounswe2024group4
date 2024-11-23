@@ -5,6 +5,8 @@ from .models import User
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import get_token
+from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
@@ -55,3 +57,17 @@ def log_out(request):
         logout(request)
         request.session.flush()
         return HttpResponse("Logged out successfully", status=200)
+    
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def csrf_token(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrf_token': csrf_token}, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def session(request):
+    session = request.session
+    return JsonResponse({'session': session.session_key != None }, status=200)
