@@ -3,7 +3,9 @@ from django.http import JsonResponse
 from user_auth_app.models import User
 from posts_app.models import Comment, Post
 from exercise_program_app.models import Workout
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def post(request):
     if request.method == 'POST':
         user = request.user
@@ -20,9 +22,12 @@ def post(request):
         post = Post.objects.create(user=user, content=content, workout=workout, mealId=mealId)
 
         return JsonResponse({'message': 'Post created successfully', 'post_id': post.id}, status=201)
-    return render(request, 'create_post.html')
+    else:
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+        # return render(request, 'create_post.html')
 
 
+@csrf_exempt
 def toggle_like(request):
     if request.method == 'POST':
         try:
@@ -53,11 +58,14 @@ def toggle_like(request):
         except Post.DoesNotExist:
             return JsonResponse({'error': 'Post not found'}, status=404)
         except Exception as e:
+            print(e)
             return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
-            
-    return render(request, 'toggle_like.html')
+    else:
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+        # return render(request, 'toggle_like.html')
 
 
+@csrf_exempt
 def comment(request):
     if request.method == 'POST':
         try:
@@ -83,9 +91,12 @@ def comment(request):
             return JsonResponse({'error': 'Post not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
-    return render(request, 'comment.html')
+    else:
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+        # return render(request, 'comment.html')
 
 
+@csrf_exempt
 def toggle_bookmark(request):
     if request.method == 'POST':
         try:
@@ -112,18 +123,26 @@ def toggle_bookmark(request):
             return JsonResponse({'error': 'Post not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
-    return render(request, 'toggle_bookmark.html')
+    else:
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+        # return render(request, 'toggle_bookmark.html')
 
 
+@csrf_exempt
 def liked_posts(request):
     if request.method == 'GET':
         user = User.objects.get(username=request.user.username)
         liked_posts = user.liked_posts.all().values()
         return JsonResponse({'liked_posts': list(liked_posts)}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid method'}, status=405)
     
 
+@csrf_exempt
 def bookmarked_posts(request):
     if request.method == 'GET':
         user = User.objects.get(username=request.user.username)
         bookmarked_posts = user.bookmarked_posts.all().values()
         return JsonResponse({'bookmarked_posts': list(bookmarked_posts)}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid method'}, status=405)
