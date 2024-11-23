@@ -28,6 +28,32 @@ const LeaderBoard = () => {
         fetchLeaderboard();
     }, []);
 
+    const renderStars = (score) => {
+        if (typeof score !== 'number' || isNaN(score) || score < 0 || score > 5) {
+            return null; // If the score is not a valid number or out of range, do not render stars.
+        }
+    
+        const fullStars = Math.floor(score);
+        const halfStar = score % 1 >= 0.5 ? 1 : 0;
+        const emptyStars = 5 - fullStars - halfStar;
+    
+        return (
+            <div className="flex items-center">
+                {[...Array(fullStars)].map((_, i) => (
+                    <span key={i} className="text-yellow-400">★</span>
+                ))}
+                {halfStar === 1 && <span className="text-yellow-400">★</span>} {/* Half star */}
+                {[...Array(emptyStars)].map((_, i) => (
+                    <span key={i + fullStars + halfStar} className="text-gray-400">☆</span>
+                ))}
+                <span className="ml-2 text-lg font-semibold text-gray-300">
+                    {score.toFixed(1)}
+                </span>
+            </div>
+        );
+    };
+    
+
     if (error) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-800">
@@ -52,7 +78,7 @@ const LeaderBoard = () => {
             <div className="leaderboard-list mx-auto max-w-4xl px-4">
                 {users.map((user, index) => (
                     <div
-                        key={user.user_id}
+                        key={user.username}
                         className="user-item flex items-center justify-between bg-gray-900 text-white p-4 mb-4 rounded-lg shadow-md hover:shadow-lg"
                     >
                         {/* Profile Section */}
@@ -74,7 +100,10 @@ const LeaderBoard = () => {
                                 >
                                     {user.username}
                                 </Link>
-                                <p className="text-gray-400">Score: {user.score}</p>
+                                <div className="text-gray-400">
+                                    {/* Render score as stars */}
+                                    {renderStars(user.rating)}
+                                </div>
                             </div>
                         </div>
                         {/* Ranking */}
