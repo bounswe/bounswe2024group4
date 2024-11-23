@@ -35,6 +35,39 @@ DEBUG = True
 #LOGIN_URL = '/log_in/'  # Update to match your existing login URL
 #LOGIN_REDIRECT_URL = '/create-program/'
 
+REST_FRAMEWORK = {
+    'DEFAULT_GENERATOR_CLASS': 'drf_yasg.generators.OpenAPISchemaGenerator',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}
+
+
+#CORS_ALLOW_ALL_ORIGINS = True
+
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    'diet_program_app',
+    'exercise_program_app',
+    'messaging_app',
+    'posts_app',
+    'profiles_app',
+    'search_app',
+    'social_feed_app',
+    'user_auth_app',
+    'simple_features_app',
+
+    'rest_framework',
+    'drf_yasg',
+    'corsheaders',
+]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
@@ -45,28 +78,6 @@ CORS_ALLOWED_ORIGINS = [
     ]
 ALLOWED_HOSTS = ['*', os.getenv('DEPLOY_MACHINE_IP')]
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3306', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3000']
-
-#CORS_ALLOW_ALL_ORIGINS = True
-
-# Application definition
-
-INSTALLED_APPS = [
-    'corsheaders',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'diet_program_app',
-    'exercise_program_app',
-    'messaging_app',
-    'posts_app',
-    'profiles_app',
-    'search_app',
-    'social_feed_app',
-    'user_auth_app',
-]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -86,7 +97,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
-            BASE_DIR / 'venv/lib/python3.11/site-packages/drf_yasg/templates',
+            # BASE_DIR / 'venv/lib/python3.11/site-packages/drf_yasg/templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
