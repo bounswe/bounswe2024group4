@@ -6,13 +6,13 @@ edit_profile_schema = {
     'request_body': openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            'username': openapi.Schema(type=openapi.TYPE_STRING),
-            'email': openapi.Schema(type=openapi.TYPE_STRING),
-            'bio': openapi.Schema(type=openapi.TYPE_STRING),
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='New username of the user'),
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description='New email of the user'),
+            'bio': openapi.Schema(type=openapi.TYPE_STRING, description='New bio of the user'),
             'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url', description='URL of the profile picture'),
-            'weight': openapi.Schema(type=openapi.TYPE_NUMBER),
-            'height': openapi.Schema(type=openapi.TYPE_NUMBER),
-            'password': openapi.Schema(type=openapi.TYPE_STRING),
+            'weight': openapi.Schema(type=openapi.TYPE_NUMBER, description='New weight of the user'),
+            'height': openapi.Schema(type=openapi.TYPE_NUMBER, description='New height of the user'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='New password of the user'),
         }
     ),
     'responses': {
@@ -128,7 +128,8 @@ get_leaderboard_schema = {
                         type=openapi.TYPE_OBJECT,
                         properties={
                             'username': openapi.Schema(type=openapi.TYPE_STRING),
-                            'score': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url'),
+                            'rating': openapi.Schema(type=openapi.TYPE_INTEGER),
                         }
                     )
                 )
@@ -151,6 +152,7 @@ get_workout_leaderboard_schema = {
                         type=openapi.TYPE_OBJECT,
                         properties={
                             'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url'),
                             'workout_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
                         }
                     )
@@ -174,6 +176,7 @@ get_meal_leaderboard_schema = {
                         type=openapi.TYPE_OBJECT,
                         properties={
                             'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url'),
                             'meal_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
                         }
                     )
@@ -183,6 +186,39 @@ get_meal_leaderboard_schema = {
         401: openapi.Response('Unauthorized'),
     }
 }
+
+workout_program_schema = {
+    'operation_summary': 'Create Workout Programs',
+    'operation_description': 'Creates a workout programs',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'workout_name': openapi.Schema(type=openapi.TYPE_STRING),
+            'exercises': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'exercise_type': openapi.Schema(type=openapi.TYPE_STRING),
+                    'exercise_name': openapi.Schema(type=openapi.TYPE_STRING),
+                    'muscle': openapi.Schema(type=openapi.TYPE_STRING),
+                    'equipment': openapi.Schema(type=openapi.TYPE_STRING),
+                    'instruction': openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )),
+        },
+        required=['workout_name', 'exercises']
+    ),
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+    }
+}
+            
 
 get_exercises_schema = {
     'operation_summary': 'Get Exercises',
@@ -204,7 +240,6 @@ get_exercises_schema = {
         404: openapi.Response('Not Found'),
     }
 }
-
 
 user_programs_schema = {
     'operation_description': "Get all workout programs for the logged-in user",
