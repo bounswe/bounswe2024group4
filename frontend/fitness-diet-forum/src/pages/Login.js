@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
 import animationData from "../assets/Animation1.json"; 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";  
 import { setLoggedIn } from "../components/Auth.js";
+import { Context } from "../globalContext/globalContext.js";
+
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");  
   const [loading, setLoading] = useState(false); 
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
   const navigate = useNavigate();  
 
   const handleLogin = async (e) => {
@@ -18,10 +22,21 @@ const Login = () => {
     setError("");  
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/log_in/", {
+      const csrfTokenResp = await axios.get(baseURL + "/csrf_token/");
+      console.log(csrfTokenResp.data.csrf_token);
+      const config = {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-CSRFToken": csrfTokenResp.data.csrf_token,
+        },
+      };
+      const response = await axios.post(baseURL + "/log_in/", {
         username,
         password,
-      });
+      }, config);
+      localStorage.setItem("csrfToken", csrfTokenResp.data.csrf_token);
+
       localStorage.setItem("username", username);
       console.log("Login successful", response.data);
       setLoggedIn("true");

@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; 
+import { Context } from "../globalContext/globalContext.js";
+
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -9,6 +11,8 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
 
   const navigate = useNavigate(); 
 
@@ -21,12 +25,22 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/sign_up/", {
+      const csrfTokenResp = await axios.get(baseURL + "/csrf_token/");
+      console.log(csrfTokenResp.data.csrf_token);
+      const config = {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-CSRFToken": csrfTokenResp.data.csrf_token,
+        },
+      };
+      const response = await axios.post(baseURL + "/sign_up/", {
         username,
         email,
         password,
         user_type: "member",
-      });
+      },config);
+      localStorage.setItem("csrfToken", csrfTokenResp.data.csrf_token);
 
       console.log("Signup Successful", response.data);
       setSuccess("Signup successful! Redirecting to login...");
