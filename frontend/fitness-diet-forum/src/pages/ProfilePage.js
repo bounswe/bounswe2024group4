@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Meal from '../components/Meal';
 import ExerciseProgram from '../components/ExerciseProgram';
-import Post from '../components/Post'; // Import Post component
+import Post from '../components/Post';
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
 
@@ -67,7 +67,7 @@ const ProfilePage = () => {
                 {[...Array(fullStars)].map((_, i) => (
                     <span key={i} className="text-yellow-400">★</span>
                 ))}
-                {halfStar === 1 && <span className="text-yellow-400">☆</span>}
+                {halfStar === 1 && <span className="text-yellow-400">★</span>} {/* Half star */}
                 {[...Array(emptyStars)].map((_, i) => (
                     <span key={i + fullStars + halfStar} className="text-gray-400">☆</span>
                 ))}
