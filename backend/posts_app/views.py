@@ -2,14 +2,23 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from user_auth_app.models import User
 from posts_app.models import Comment, Post
+from exercise_program_app.models import Workout
 
 def post(request):
     if request.method == 'POST':
         user = request.user
         content = request.POST.get('content')
-        exerciseId = request.POST.get('exerciseId')
+        workoutId = request.POST.get('workoutId')
         mealId = request.POST.get('mealId')
-        post = Post.objects.create(user=user, content=content, exerciseId=exerciseId, mealId=mealId)
+        
+        if workoutId:
+            try:
+                workout = Workout.objects.get(workout_id=workoutId)
+            except Workout.DoesNotExist:
+                return JsonResponse({'error': 'Workout not found'}, status=404)
+        
+        post = Post.objects.create(user=user, content=content, workout=workout, mealId=mealId)
+
         return JsonResponse({'message': 'Post created successfully', 'post_id': post.id}, status=201)
     return render(request, 'create_post.html')
 
