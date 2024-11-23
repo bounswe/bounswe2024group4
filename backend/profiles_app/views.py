@@ -23,7 +23,8 @@ def edit_profile(request):
             new_height = request.POST.get('height')
             new_password = request.POST.get('password')
 
-            user = request.user
+            # user = request.user
+            user = User.objects.get(username=request.POST.get('username'))
 
             if new_username:
                 user.username = new_username
@@ -74,16 +75,21 @@ def view_profile(request):
         following_count = Follow.objects.filter(follower=user).count()
         followers_count = Follow.objects.filter(following=user).count()
 
-        if request.user == user: # If user is viewing their own profile
-            is_following = None
-            email = user.email
-            weight_history = Weight.objects.filter(user=user)
-            height = user.height
-        else:
-            is_following = user.followers.filter(username=request.user.username).exists()
-            email = None
-            weight_history = []
-            height = None
+        # if request.user == user: # If user is viewing their own profile
+        #     is_following = None
+        #     email = user.email
+        #     weight_history = Weight.objects.filter(user=user)
+        #     height = user.height
+        # else:
+        #     is_following = user.followers.filter(username=request.user.username).exists()
+        #     email = None
+        #     weight_history = []
+        #     height = None
+
+        is_following = user.following.filter(username=user.username).exists()
+        email = user.email
+        weight_history = Weight.objects.filter(user=user)
+        height = user.height
 
         posts = Post.objects.filter(user=user)
         workouts = Workout.objects.filter(created_by=user)

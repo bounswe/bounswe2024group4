@@ -50,7 +50,8 @@ def workout_program(request):
 
             # Get the first user for testing (you should use authenticated user in production)
             # user = User.objects.first()
-            user = request.user
+            # user = request.user
+            user = User.objects.get(username=request.POST.get('username'))
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
 
