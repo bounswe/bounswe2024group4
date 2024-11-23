@@ -17,3 +17,4 @@ social_feed_app/__pycache__
 social_feed_app/migrations/__pycache__
 user_auth_app/__pycache__
 user_auth_app/migrations/__pycache__
+swagger_docs/__pycache__
