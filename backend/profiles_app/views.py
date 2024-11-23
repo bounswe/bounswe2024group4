@@ -1,16 +1,17 @@
 from django.shortcuts import render
-from user_auth_app.models import User, Weight
+from user_auth_app.models import User, Weight, Follow
 from django.http import JsonResponse, HttpResponse
 from swagger_docs.swagger import edit_profile_schema, view_profile_schema, user_programs_schema, user_workout_logs_schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
-from exercise_program_app.models import WeeklyProgram, WorkoutLog
 from django.contrib.auth.decorators import login_required
-
+from exercise_program_app.models import Workout
+from posts_app.models import Post
 
 
 @api_view(['POST'])
 @swagger_auto_schema(**edit_profile_schema)
+@login_required
 def edit_profile(request):
     if request.method == 'POST':
         try:
@@ -43,8 +44,8 @@ def edit_profile(request):
                 user.set_password(new_password)
 
             user.save()
-            return render(request, 'edit_profile.html')
-            # return JsonResponse({'message': 'Profile updated successfully'}, status=200)
+            # return render(request, 'edit_profile.html')
+            return JsonResponse({'message': 'Profile updated successfully'}, status=200)
         except Exception as e:
             return JsonResponse({'message': str(e)}, status=400)
     return render(request, 'edit_profile.html')    
@@ -53,15 +54,24 @@ def edit_profile(request):
 
 @api_view(['GET'])
 @swagger_auto_schema(**view_profile_schema)
+@login_required
 def view_profile(request):
     if request.method == 'GET':
+        print(request.GET)
         username = request.GET.get('username')
-        user = User.objects.get(username=username)
+        try:
+            user = User.objects.get(username=username)
+        except:
+            return JsonResponse({'message': 'User not found'}, status=404)
         bio = user.bio
-        profile_picture = user.profile_picture.url if user.profile_picture else None
-        score = user.score
-        following_count = user.following.count()
-        followers_count = user.followers.count()
+        profile_picture = user.profile_picture.url if user.profile_picture else ''
+        # score = user.score
+        workout_rating = user.workout_rating
+        meal_rating = user.meal_rating
+        workout_rating_count = user.workout_rating_count
+        meal_rating_count = user.meal_rating_count
+        following_count = Follow.objects.filter(follower=user).count()
+        followers_count = Follow.objects.filter(following=user).count()
 
         if request.user == user: # If user is viewing their own profile
             is_following = None
@@ -74,8 +84,8 @@ def view_profile(request):
             weight_history = []
             height = None
 
-        # posts = Post.objects.filter(user=user)
-        # workouts = Workout.objects.filter(user=user)
+        posts = Post.objects.filter(user=user)
+        workouts = Workout.objects.filter(created_by=user)
         # meals = Diet.objects.filter(user=user)
 
         context = {
@@ -83,14 +93,14 @@ def view_profile(request):
             'email': email,
             'bio': bio,
             'profile_picture': profile_picture,
-            'score': score,
+            'score': (workout_rating * workout_rating_count + meal_rating * meal_rating_count) / (workout_rating_count + meal_rating_count) if workout_rating_count + meal_rating_count > 0 else 0,
             'weight_history': [{'weight': weight.weight, 'date': weight.created_at} for weight in weight_history],
             'height': height,
             'following_count': following_count,
             'followers_count': followers_count,
             'is_following': is_following,
-            # 'posts': list(reversed([{'post_id': post.post_id} for post in posts])),
-            # 'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
+            'posts': list(reversed([{'post_id': post.id} for post in posts])),
+            'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
             # 'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
         }
 
@@ -98,77 +108,3 @@ def view_profile(request):
 
 
 
-@api_view(['GET'])
-@swagger_auto_schema(**user_programs_schema)
-@login_required
-def get_user_programs(request):
-    try:
-        programs = WeeklyProgram.objects.filter(created_by=request.user)
-        
-        programs_data = []
-        for program in programs:
-            workout_days = []
-            for day in program.workout_days.all().order_by('day_of_week'):
-                workout_days.append({
-                    'day': day.get_day_of_week_display(),
-                    'workout': {
-                        'id': day.workout.workout_id,
-                        'name': day.workout.workout_name
-                    }
-                })
-                
-            programs_data.append({
-                'program_id': program.program_id,
-                'days_per_week': program.days_per_week,
-                'created_at': program.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'workout_days': workout_days
-            })
-        
-        return JsonResponse({
-            'status': 'success',
-            'user': {
-                'id': request.user.user_id,
-                'username': request.user.username,
-                'email': request.user.email
-            },
-            'programs': programs_data
-        })
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=400)
-
-@api_view(['GET'])
-@swagger_auto_schema(**user_workout_logs_schema)
-@login_required
-def get_user_workout_logs(request):
-    try:
-        logs = WorkoutLog.objects.filter(user=request.user).order_by('-date_completed')
-        
-        logs_data = []
-        for log in logs:
-            logs_data.append({
-                'log_id': log.log_id,
-                'workout': {
-                    'id': log.workout.workout_id,
-                    'name': log.workout.workout_name
-                },
-                'date_completed': log.date_completed.strftime('%Y-%m-%d'),
-                'created_at': log.created_at.strftime('%Y-%m-%d %H:%M:%S')
-            })
-        
-        return JsonResponse({
-            'status': 'success',
-            'user': {
-                'id': request.user.user_id,
-                'username': request.user.username,
-                'email': request.user.email
-            },
-            'workout_logs': logs_data
-        })
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=400)
