@@ -41,10 +41,11 @@ def get_meal_leaderboard(request):
 
 
 @swagger_auto_schema(method='post', **follow_schema)
-@api_view(['POST', 'GET'])
+@api_view(['POST'])
 def follow(request):
     if request.method == 'POST':
-        follower = User.objects.get(username=request.user.username)
+        follower = User.objects.get(username=request.POST.get('follower'))
+        # follower = User.objects.get(username=request.user.username)
         try:
             following = User.objects.get(username=request.POST.get('following'))
         except User.DoesNotExist:
@@ -66,13 +67,15 @@ def follow(request):
 @api_view(['POST'])
 def unfollow(request):
     if request.method == 'POST':
+        follower = User.objects.get(username=request.POST.get('username'))
         # follower = User.objects.get(username=request.user.username)
         try:
             following = User.objects.get(username=request.POST.get('following'))
         except User.DoesNotExist:
             return JsonResponse({'message': 'User not found'}, status=404)
         
-        follow_instance = Follow.objects.filter(follower=request.user, following=following).first()
+        follow_instance = Follow.objects.filter(follower=follower, following=following).first()
+        # follow_instance = Follow.objects.filter(follower=request.user, following=following).first()
         if not follow_instance:
             return JsonResponse({'message': 'You are not following this user'}, status=400)
         

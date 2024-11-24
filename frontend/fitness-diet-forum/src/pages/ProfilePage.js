@@ -3,18 +3,20 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Meal from '../components/Meal';
 import ExerciseProgram from '../components/ExerciseProgram';
-import Post from '../components/Post'; // Import Post component
+import Post from '../components/Post';
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
 
 const ProfilePage = () => {
     const { username } = useParams();
     const [userData, setUserData] = useState({});
+    const [programs, setPrograms] = useState();
     const [error, setError] = useState(null);
-    const [activeSection, setActiveSection] = useState('meals'); // Default section is 'meals'
+    const [activeSection, setActiveSection] = useState('meals');
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
+    const csrf_token = localStorage.getItem("csrfToken");
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -22,6 +24,7 @@ const ProfilePage = () => {
                 const response = await axios.get(baseURL + `/view_profile/?username=${username}`);
                 if (response.status === 200) {
                     const data = response.data;
+                    console.log(data)
                     setUserData(data);
                 } else {
                     setError('User not found');
@@ -33,6 +36,21 @@ const ProfilePage = () => {
 
         fetchUserData();
     }, [username]);
+
+    const fetchUserPrograms = async (username) => {
+        try {
+            setActiveSection('exercises');
+            const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`);
+            console.log('get workout response', response);
+            setPrograms(response.data);
+        } catch (error) {
+            console.error("Error fetching user programs:", error);
+        }
+    };
+    
+    const handleDeleteProgram = (programId) => {
+        setPrograms(programs.filter(program => program.id !== programId));
+    };
 
     const errorContainerStyle = {
         display: 'flex',
@@ -67,7 +85,7 @@ const ProfilePage = () => {
                 {[...Array(fullStars)].map((_, i) => (
                     <span key={i} className="text-yellow-400">★</span>
                 ))}
-                {halfStar === 1 && <span className="text-yellow-400">☆</span>}
+                {halfStar === 1 && <span className="text-yellow-400">★</span>} {/* Half star */}
                 {[...Array(emptyStars)].map((_, i) => (
                     <span key={i + fullStars + halfStar} className="text-gray-400">☆</span>
                 ))}
@@ -76,6 +94,31 @@ const ProfilePage = () => {
                 </span>
             </div>
         );
+    };
+
+    const handleFollow = async () => {
+        try {
+            const action = userData.is_following ? 'unfollow' : 'follow';
+            const config = {
+                withCredentials: true,
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  "X-CSRFToken": csrf_token,
+                },
+              };
+            console.log(csrf_token);
+            const response = await axios.post(baseURL + `/${action}/`, { following: username, follower: loggedInUser }, config);
+            if (response.status === 200) {
+                // Toggle the is_following status
+                setUserData(prevData => ({
+                    ...prevData,
+                    is_following: !prevData.is_following,
+                    followers_count: prevData.is_following ? prevData.followers_count - 1 : prevData.followers_count + 1,
+                }));
+            }
+        } catch (error) {
+            setError('Something went wrong while updating follow status');
+        }
     };
 
     if (error) {
@@ -128,6 +171,7 @@ const ProfilePage = () => {
                         className={`follow-btn px-6 py-2 rounded-lg text-white ${
                             userData.is_following ? 'bg-gray-600' : 'bg-blue-500'
                         } hover:bg-blue-700`}
+                        onClick={handleFollow}
                     >
                         {userData.is_following ? 'Following' : 'Follow'}
                     </button>
@@ -146,13 +190,13 @@ const ProfilePage = () => {
                     </button>
                     <button
                         className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'meals' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
-                        onClick={() => setActiveSection('meals')}
+                        onClick={() =>  setActiveSection('meals')}
                     >
                         Meals
                     </button>
                     <button
                         className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'exercises' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
-                        onClick={() => setActiveSection('exercises')}
+                        onClick={() => fetchUserPrograms(userData.username) }
                     >
                         Exercises
                     </button>
@@ -195,19 +239,18 @@ const ProfilePage = () => {
 
                     {activeSection === 'exercises' && (
                         <div className="exercises-section">
-                            {userData.workouts && userData.workouts.length > 0 ? (
-                                userData.workouts.map((workout, index) => (
-                                    <div key={index} className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
-                                        <h3 className="text-lg font-bold mb-2">{workout.name}</h3>
-                                        <ExerciseProgram
-                                            programName={workout.name}
-                                            exercises={workout.exercises}
-                                            onDelete={() => {}}
-                                        />
-                                    </div>
+                            {programs && programs.length > 0 ? (
+                                programs.map((program) => (
+                                    <ExerciseProgram
+                                        key={program.id}  // Use `program.id` as the unique key
+                                        programName={program.workout_name}
+                                        exercises={program.exercises}
+                                        onDelete={() => handleDeleteProgram(program.id)}
+                                        isOwn = {loggedInUser === username}
+                                    />
                                 ))
                             ) : (
-                                <p className="text-white">No exercise programs.</p>
+                                <p className="text-white">No exercises.</p>
                             )}
                         </div>
                     )}

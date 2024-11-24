@@ -9,8 +9,8 @@ from exercise_program_app.models import Workout
 from posts_app.models import Post
 
 
+@swagger_auto_schema(method='post', **edit_profile_schema)
 @api_view(['POST'])
-@swagger_auto_schema(**edit_profile_schema)
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
@@ -23,7 +23,8 @@ def edit_profile(request):
             new_height = request.POST.get('height')
             new_password = request.POST.get('password')
 
-            user = request.user
+            # user = request.user
+            user = User.objects.get(username=request.POST.get('username'))
 
             if new_username:
                 user.username = new_username
@@ -52,9 +53,10 @@ def edit_profile(request):
     # return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 
+
+@swagger_auto_schema(method='get', **view_profile_schema)
 @api_view(['GET'])
-@swagger_auto_schema(**view_profile_schema)
-@login_required
+#@login_required
 def view_profile(request):
     if request.method == 'GET':
         print(request.GET)
@@ -73,16 +75,21 @@ def view_profile(request):
         following_count = Follow.objects.filter(follower=user).count()
         followers_count = Follow.objects.filter(following=user).count()
 
-        if request.user == user: # If user is viewing their own profile
-            is_following = None
-            email = user.email
-            weight_history = Weight.objects.filter(user=user)
-            height = user.height
-        else:
-            is_following = user.followers.filter(username=request.user.username).exists()
-            email = None
-            weight_history = []
-            height = None
+        # if request.user == user: # If user is viewing their own profile
+        #     is_following = None
+        #     email = user.email
+        #     weight_history = Weight.objects.filter(user=user)
+        #     height = user.height
+        # else:
+        #     is_following = user.followers.filter(username=request.user.username).exists()
+        #     email = None
+        #     weight_history = []
+        #     height = None
+
+        is_following = user.following.filter(username=user.username).exists()
+        email = user.email
+        weight_history = Weight.objects.filter(user=user)
+        height = user.height
 
         posts = Post.objects.filter(user=user)
         workouts = Workout.objects.filter(created_by=user)

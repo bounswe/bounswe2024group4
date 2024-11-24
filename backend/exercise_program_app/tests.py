@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from user_auth_app.models import User
 from .models import Workout, Exercise
 from django.urls import reverse
+import json
 
 class WorkoutProgramTestCase(TestCase):
     def setUp(self):
@@ -12,20 +13,41 @@ class WorkoutProgramTestCase(TestCase):
         response = self.client.get('/get_exercises/', {'muscle': 'biceps'})
         self.assertEqual(response.status_code, 200)
 
-    # def test_workout_program(self):
-    #     self.client.force_login(User.objects.get(username='user1'))
-    #     response = self.client.post(
-    #         '/workout_program/',
-    #         json.dumps({'workout_name': 'workout1',
-    #          'exercises': [{
-    #                 'type': 'type1',
-    #                 'name': 'name1',
-    #                 'muscle': 'muscle1', 
-    #                 'equipment': 'equipment1', 
-    #                 'instruction': 'instruction1'
-    #              }]
-    #         }), content_type='application/json')
-    #     self.assertEqual(response, 201)
+    def test_workout_program(self):
+        self.client.force_login(User.objects.get(username='user1'))
+        data = {"workout_name": "Full Body Workout",
+             "exercises": [{
+                    "type": "strength",
+                    "name": "Barbell Squat",
+                    "muscle": "legs",
+                    "equipment": "barbell",
+                    "instruction": "Stand with feet shoulder-width apart, barbell on upper back. Squat down until thighs are parallel to ground. Return to starting position."
+                },{
+                    "type": "strength",
+                    "name": "Bench Press",
+                    "muscle": "chest",
+                    "equipment": "barbell",
+                    "instruction": "Lie on bench, grip barbell slightly wider than shoulders. Lower bar to chest, then press up to starting position."
+                },{
+                    "type": "compound",
+                    "name": "Deadlift",
+                    "muscle": "back",
+                    "equipment": "barbell",
+                    "instruction": "Stand with feet hip-width apart, bend at hips and knees to grip barbell. Keep back straight, lift bar by extending hips and knees."
+                }
+            ]
+        }
+        response = self.client.post('/workout_program/', json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+    
+    def test_missing_exercises(self):
+        self.client.force_login(User.objects.get(username='user1'))
+        data = {'workout_name': 'Leg Day'}
+        response = self.client.post('/workout_program/', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'error': 'exercises are required'})
+
+
 
 
 class RateWorkoutTestCase(TestCase):
@@ -105,20 +127,17 @@ class RateWorkoutTestCase(TestCase):
         self.assertEqual(json_data['error'], 'No user found')
 
     def test_rate_workout_invalid_method(self):
-        # Log in the user to simulate an authenticated request
-        self.client.login(username='testuser', password='password')
-
         # Simulate a GET request to the rate_workout endpoint
         url = reverse('rate_workout')
         response = self.client.get(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid request method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "GET" not allowed.')
 
 
 class GetWorkoutByIdTestCase(TestCase):
@@ -164,6 +183,19 @@ class GetWorkoutByIdTestCase(TestCase):
         # Check the JSON response data for the error message
         json_data = response.json()
         self.assertIn('error', json_data)
+
+    def test_get_workout_by_id_invalid_method(self):
+        # Simulate a POST request to the get_workout_by_id endpoint
+        url = reverse('get_workout_by_id', args=[self.workout.workout_id])
+        response = self.client.post(url)
+    
+        # Check that the response status code is 405 Method Not Allowed
+        self.assertEqual(response.status_code, 405)
+    
+        # Check the JSON response data for the error message
+        json_data = response.json()
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
 class GetWorkoutsByUserIdTestCase(TestCase):
@@ -228,11 +260,11 @@ class GetWorkoutsByUserIdTestCase(TestCase):
         # Simulate a POST request to the get_workouts_by_user_id endpoint
         url = reverse('get_workouts_by_user_id', args=[self.user.user_id])
         response = self.client.post(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid request method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
