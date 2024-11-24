@@ -5,7 +5,6 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  View,
   Image,
   TouchableOpacity,
 } from 'react-native';
@@ -57,23 +56,38 @@ const Leaderboard: React.FC = () => {
     fetchLeaderboard(endpoints[activeTab]);
   }, [activeTab]);
 
-  const renderItem = ({ item, index }: { item: LeaderboardEntry; index: number }) => (
-    <View style={styles.entryContainer}>
-      <Text style={styles.rank}>#{index + 1}</Text>
-      <Image
-        source={{
-          uri: item.profile_picture || 'https://via.placeholder.com/50',
-        }}
-        style={styles.profileImage}
-      />
-      <Text style={styles.username}>{item.username}</Text>
-      <Text style={styles.score}>
-        {activeTab === 'combined' && item.rating?.toFixed(1)}
-        {activeTab === 'workout' && item.workout_rating?.toFixed(1)}
-        {activeTab === 'meal' && item.meal_rating?.toFixed(1)}
-      </Text>
-    </View>
-  );
+  const renderItem = ({ item, index }: { item: LeaderboardEntry; index: number }) => {
+    let entryStyle = styles.entryContainer;
+    let rankStyle = styles.rank;
+
+    if (index === 0) {
+      entryStyle = { ...entryStyle, ...styles.firstPlace };
+    } else if (index === 1) {
+      entryStyle = { ...entryStyle, ...styles.secondPlace };
+    } else if (index === 2) {
+      entryStyle = { ...entryStyle, ...styles.thirdPlace };
+    }
+
+    return (
+      <SafeAreaView style={entryStyle}>
+        <Text style={rankStyle}>
+          #{index + 1}
+        </Text>
+        <Image
+          source={{
+            uri: item.profile_picture || 'https://via.placeholder.com/50',
+          }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.username}>{item.username}</Text>
+        <Text style={styles.score}>
+          {activeTab === 'combined' && item.rating?.toFixed(1)}
+          {activeTab === 'workout' && item.workout_rating?.toFixed(1)}
+          {activeTab === 'meal' && item.meal_rating?.toFixed(1)}
+        </Text>
+      </SafeAreaView>
+    );
+  };
 
   if (loading) {
     return (
@@ -94,7 +108,7 @@ const Leaderboard: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.tabsContainer}>
+      <SafeAreaView style={styles.tabsContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'combined' && styles.activeTab]}
           onPress={() => setActiveTab('combined')}
@@ -113,7 +127,7 @@ const Leaderboard: React.FC = () => {
         >
           <Text style={styles.tabText}>Meal</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
       <FlatList
         data={leaderboardData}
         keyExtractor={(item, index) => index.toString()}
@@ -201,6 +215,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  firstPlace: {
+    backgroundColor: '#B08E2E',
+  },
+  secondPlace: {
+    backgroundColor: '#8C8C8C',
+  },
+  thirdPlace: {
+    backgroundColor: '#8B4513',
+  },
 });
+
 
 export default Leaderboard;
