@@ -22,7 +22,8 @@ const Leaderboard: React.FC = () => {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'combined' | 'workout' | 'meal'>('combined'); // Default tab
+  const [activeTab, setActiveTab] = useState<'combined' | 'workout' | 'meal'>('combined');
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000'
 
   const fetchLeaderboard = async (endpoint: string) => {
     try {
@@ -49,9 +50,9 @@ const Leaderboard: React.FC = () => {
 
   useEffect(() => {
     const endpoints = {
-      combined: 'http://127.0.0.1:8000/get_leaderboard/', //put your ip ex:http://192.100.5.5:8000/get_leaderboard/
-      workout: 'http://127.0.0.1:8000/get_workout_leaderboard/', //put your ip ex:http://192.100.5.5:8000/get_workout_leaderboard/
-      meal: 'http://127.0.0.1:8000/get_meal_leaderboard/', //put your ip ex:http://192.100.5.5:8000/get_meal_leaderboard/
+      combined: baseURL + '/get_leaderboard/',
+      workout: baseURL + '/get_workout_leaderboard/',
+      meal: baseURL + '/get_meal_leaderboard/',
     };
     fetchLeaderboard(endpoints[activeTab]);
   }, [activeTab]);
