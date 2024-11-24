@@ -12,7 +12,7 @@ const ProfilePage = () => {
     const [userData, setUserData] = useState({});
     const [programs, setPrograms] = useState();
     const [error, setError] = useState(null);
-    const [activeSection, setActiveSection] = useState('meals');
+    const [activeSection, setActiveSection] = useState('exercises');
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
