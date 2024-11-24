@@ -39,6 +39,8 @@ class Exercise(models.Model):
     equipment = models.CharField(max_length=50)
     instruction = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
+    sets = models.IntegerField(default=0)
+    reps = models.IntegerField(default=0)
 
     def _str_(self):
         return self.exercise_name
