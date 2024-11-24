@@ -85,6 +85,10 @@ const ExerciseProgramList = () => {
             alert("Please provide a name for the workout program.");
             return;
         }
+        if(selectedExercises.length <= 0) {
+            alert("Please provide at least one exercise for the workout program.");
+            return;
+        }
 
         try {
             const config = {
@@ -101,7 +105,7 @@ const ExerciseProgramList = () => {
                 muscle: exercise.muscle,
                 equipment: exercise.equipment,
                 instruction: exercise.instruction,
-                repetitions: exercise.repetitions,
+                reps: exercise.repetitions,
                 sets: exercise.sets,
                 instruction: exercise.instructions
             }));
@@ -165,7 +169,7 @@ const ExerciseProgramList = () => {
                                             {exercises.map((exercise, index) => (
                                                 <li
                                                     key={index}
-                                                    className={`exercise-item mb-4 ${activeExerciseIndex === index ? "bg-gray-800" : ""}`}
+                                                    className={`exercise-item mb-4 p-3 rounded-sm ${activeExerciseIndex === index ? "bg-gray-800" : ""}`}
                                                 >
                                                     <p 
                                                         onClick={() => setActiveExerciseIndex(index)} 
@@ -185,7 +189,7 @@ const ExerciseProgramList = () => {
                                                                         value={reps}
                                                                         onChange={(e) => setReps(e.target.value)}
                                                                         placeholder="Repetitions"
-                                                                        className="w-20 p-2 bg-darkText text-lightText text-sm rounded-sm"
+                                                                        className="w-20 p-2 bg-gray-200 text-gray-800 text-sm rounded-sm border border-gray-400 focus:outline-none focus:ring focus:ring-blue-300"
                                                                     />
                                                                 </div>
                                                                 
@@ -196,8 +200,8 @@ const ExerciseProgramList = () => {
                                                                         value={sets}
                                                                         onChange={(e) => setSets(e.target.value)}
                                                                         placeholder="Sets"
-                                                                        className="w-20 p-2 bg-darkText text-lightText text-sm rounded-sm"
-                                                                    />
+                                                                        className="w-20 p-2 bg-gray-200 text-gray-800 text-sm rounded-sm border border-gray-400 focus:outline-none focus:ring focus:ring-blue-300"
+                                                                        />
                                                                 </div>
                                                                 
                                                                 <button
@@ -225,7 +229,7 @@ const ExerciseProgramList = () => {
                             <label className="text-xl">Workout Program Name:</label>
                             <input
                                 type="text"
-                                className="mt-2 p-2 bg-darkText text-lightText rounded-lg"
+                                className="mt-2 p-2 bg-darkText text-gray-800 rounded-lg"
                                 value={workoutName}
                                 onChange={(e) => setWorkoutName(e.target.value)}
                                 placeholder="Enter workout name"
@@ -270,7 +274,17 @@ const ExerciseProgramList = () => {
             ) : (
                 // Display User Programs
                 <div className="user-programs-list w-full">
-                    <h1 className="text-4xl font-bold mb-10 tracking-wider">Your Exercise Programs</h1>
+                    <div className="flex flex-wrap items-start justify-between gap-8">
+                        <h1 className="text-4xl font-bold mb-10 tracking-wider">
+                            Your Exercise Programs
+                        </h1>
+                        <button
+                            onClick={() => setIsCreatingProgram(true)}
+                            className="p-2 bg-primary text-white rounded-lg"
+                        >
+                            Create New Program
+                        </button>
+                    </div>
                     <div className="flex flex-wrap gap-8">
                         {programs.length === 0 ? (
                             <p>No programs created yet.</p>
@@ -285,12 +299,7 @@ const ExerciseProgramList = () => {
                             ))
                         )}
                     </div>
-                    <button
-                        onClick={() => setIsCreatingProgram(true)}
-                        className="p-2 bg-primary text-white mt-8 rounded-lg"
-                    >
-                        Create New Program
-                    </button>
+                    
                 </div>
             )}
         </div>
