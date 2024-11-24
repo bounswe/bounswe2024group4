@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTimes,faPlay } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTimes, faPlay } from "@fortawesome/free-solid-svg-icons";
 
 const DayProgram = ({
   day,
@@ -14,12 +14,12 @@ const DayProgram = ({
   const [selectedProgram, setSelectedProgram] = useState(null);
 
   const handleAddClick = () => {
-    setIsModalOpen(true); 
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false); 
-    setSelectedProgram(null); 
+    setIsModalOpen(false);
+    setSelectedProgram(null);
   };
 
   const handleProgramSelect = (event) => {
@@ -31,7 +31,7 @@ const DayProgram = ({
   const handleAddToDay = () => {
     if (selectedProgram) {
       onAddProgram(day, selectedProgram);
-      handleCloseModal(); 
+      handleCloseModal();
     }
   };
 
@@ -43,19 +43,17 @@ const DayProgram = ({
     <div>
       {programs.length > 0 ? (
         programs.map((program) => (
-          <div key={program.id} className="mb-2 flex items-center justify-between">
-            <div>
-              <h3 className="font-bold">{program.programName}</h3>
-              <ul className="ml-4 list-disc">
-                {program.exercises.map((exercise, index) => (
-                  <li key={index}>
-                    {exercise.exerciseName} ({exercise.sets} sets of {exercise.reps})
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div key={program.id} className="mb-2">
+            <h3 className="font-bold text-lg mb-2">{program.workout_name}</h3>
+            <ul className="ml-4 list-disc">
+              {program.exercises.map((exercise, index) => (
+                <li key={index} className="mb-1">
+                  <strong>{exercise.name}</strong> - {exercise.sets} sets
+                </li>
+              ))}
+            </ul>
             <button
-              className="ml-4 text-red-500 hover:text-red-700"
+              className="mt-2 text-red-500 hover:text-red-700"
               onClick={() => handleRemove(program.id)}
               title="Remove program"
             >
@@ -91,7 +89,7 @@ const DayProgram = ({
               </option>
               {availablePrograms.map((program) => (
                 <option key={program.id} value={program.id}>
-                  {program.programName}
+                  {program.workout_name}
                 </option>
               ))}
             </select>
@@ -126,6 +124,8 @@ const DayProgram = ({
 };
 
 export default DayProgram;
+
+
 
 
 
