@@ -26,6 +26,7 @@ const ProfilePage = () => {
                     const data = response.data;
                     console.log(data)
                     setUserData(data);
+                    fetchUserPrograms(data.username);
                 } else {
                     setError('User not found');
                 }
