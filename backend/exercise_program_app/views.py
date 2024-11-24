@@ -68,7 +68,9 @@ def workout_program(request):
                     name=exercise_data['name'],
                     muscle=exercise_data['muscle'],
                     equipment=exercise_data['equipment'],
-                    instruction=exercise_data['instruction']
+                    instruction=exercise_data['instruction'],
+                    sets=exercise_data['sets'],
+                    reps=exercise_data['reps'],
                 )
                 exercise.save()
 
@@ -171,7 +173,9 @@ def get_programs_by_user_id(request):
                                 'type': exercise.type,
                                 'muscle': exercise.muscle,
                                 'equipment': exercise.equipment,
-                                'instruction': exercise.instruction
+                                'instruction': exercise.instruction,
+                                'sets': exercise.sets,
+                                'reps': exercise.reps
                             } for exercise in Exercise.objects.filter(workout=day.workout)]
                         }
                     } for day in workout_days]
@@ -210,6 +214,8 @@ def workout_log(request, workout_id):
                     'muscle': exercise.muscle,
                     'equipment': exercise.equipment,
                     'instruction': exercise.instruction,
+                    'sets': exercise.sets,
+                    'reps': exercise.reps,
                     'is_completed': exercise_log.is_completed
                 })
             return JsonResponse({
@@ -302,6 +308,8 @@ def get_workout_logs_by_user_id(request, user_id):
                         'muscle': ex_log.exercise.muscle,
                         'equipment': ex_log.exercise.equipment,
                         'instruction': ex_log.exercise.instruction,
+                        'sets': ex_log.exercise.sets,
+                        'reps': ex_log.exercise.reps,
                         'is_completed': ex_log.is_completed
                     } for ex_log in exercise_logs]
                 }
@@ -361,7 +369,7 @@ def get_workout_by_id(request, workout_id):
                 'created_by': workout.created_by.username,  # This should work now
                 'rating': workout.rating,
                 'rating_count': workout.rating_count,
-                'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'exercise_id'))
+                'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps', 'exercise_id'))
             }
             return JsonResponse(workout_data, status=200)
         except Exception as e:
@@ -384,7 +392,7 @@ def get_workouts_by_user_id(request, user_id):
                     'created_by': workout.created_by.username,
                     'rating': workout.rating,
                     'rating_count': workout.rating_count,
-                    'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
+                    'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps'))
                 }
                 for workout in workouts
             ]
