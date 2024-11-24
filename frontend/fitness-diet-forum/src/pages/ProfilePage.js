@@ -12,7 +12,7 @@ const ProfilePage = () => {
     const [userData, setUserData] = useState({});
     const [programs, setPrograms] = useState();
     const [error, setError] = useState(null);
-    const [activeSection, setActiveSection] = useState('meals');
+    const [activeSection, setActiveSection] = useState('exercises');
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
@@ -26,6 +26,7 @@ const ProfilePage = () => {
                     const data = response.data;
                     console.log(data)
                     setUserData(data);
+                    fetchUserPrograms(data.username);
                 } else {
                     setError('User not found');
                 }
@@ -249,6 +250,9 @@ const ProfilePage = () => {
                                         exercises={program.exercises}
                                         onDelete={() => handleDeleteProgram(program.id)}
                                         isOwn = {loggedInUser === username}
+                                        programId={program.id}
+                                        currentRating={program.rating}
+                                        ratingCount={program.rating_count}
                                     />
                                 ))
                             ) : (

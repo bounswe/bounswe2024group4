@@ -295,7 +295,10 @@ const ExerciseProgramList = () => {
                                     programName={program.workout_name}
                                     exercises={program.exercises}
                                     onDelete={() => handleDeleteProgram(program.id)}
-                                    isOwn = {true}
+                                    isOwn={true}
+                                    programId={program.id}
+                                    currentRating={program.rating}
+                                    ratingCount={program.rating_count}
                                 />
                             ))
                         )}
