@@ -30,7 +30,7 @@ def sign_up(request):
         user.save()
 
         login(request, user)
-        return JsonResponse({'username': username}, status=200)
+        return JsonResponse({'username': username, 'csrf_token': get_token(request)}, status=201)
     else:
         return JsonResponse({'error': 'Invalid request'}, status=405)
         # return render(request, 'sign_up.html')
@@ -50,7 +50,7 @@ def log_in(request):
             return HttpResponse("Invalid credentials", status=401)
 
         login(request, user)
-        return JsonResponse({'username': username}, status=200)
+        return JsonResponse({'username': username, 'csrf_token': get_token(request)}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request'}, status=405)
         # return render(request, 'log_in.html')
