@@ -13,7 +13,7 @@ const Exercises = () => {
   const csrf_token = localStorage.getItem("csrfToken");
   const username = localStorage.getItem("username");
 
-  // Backend'den programları al
+  
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
