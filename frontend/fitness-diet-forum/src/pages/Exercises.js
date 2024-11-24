@@ -5,9 +5,9 @@ import ExerciseProgramList from "./ExerciseProgramList";
 import { Context } from "../globalContext/globalContext.js";
 
 const Exercises = () => {
-  const [programs, setPrograms] = useState([]); // Backend'den alınacak programlar
-  const [loading, setLoading] = useState(true); // Yüklenme durumu
-  const [error, setError] = useState(null); // Hata durumu
+  const [programs, setPrograms] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null); 
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
   const csrf_token = localStorage.getItem("csrfToken");
