@@ -15,10 +15,11 @@ const ExerciseProgram = ({ programName, exercises, onDelete }) => {
                 {exercises.map((exercise, index) => (
                     <Exercise
                         key={index}
-                        exerciseName={exercise.exerciseName}
+                        exerciseName={exercise.name}
                         sets={exercise.sets}
                         reps={exercise.reps}
-                        imageUrl={exercise.imageUrl}
+                        instruction={exercise.instruction}
+                        equipment={exercise.equipment}
                     />
                 ))}
             </div>

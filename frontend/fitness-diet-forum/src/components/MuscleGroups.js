@@ -6,7 +6,7 @@ const muscleGroups = [
     { "id": 7, "label": "Glutes", "imgSrc": "/glutes.png", "matches": ["glutes"] },
     { "id": 8, "label": "Hamstring", "imgSrc": "/hamstring.png", "matches": ["hamstrings"] },
     { "id": 9, "label": "Quad", "imgSrc": "/quad.png", "matches": ["quadriceps"] },
-    { "id": 11, "label": "Legs", "imgSrc": "/legs.png", "matches": ["calves", "abductors", "adductors"] },
+    { "id": 12, "label": "Legs", "imgSrc": "/legs.png", "matches": ["calves", "abductors", "adductors"] },
     { "id": 6, "label": "Triceps", "imgSrc": "/triceps.png", "matches": ["triceps"] },
     { "id": 10, "label": "Shoulder", "imgSrc": "/shoulder.png", "matches": ["traps"] },
     { "id": 4, "label": "Back", "imgSrc": "/back.png", "matches": ["middle_back", "lats"] },
