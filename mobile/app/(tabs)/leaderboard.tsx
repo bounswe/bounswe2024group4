@@ -7,40 +7,55 @@ import {
   ActivityIndicator,
   View,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
 
 interface LeaderboardEntry {
   username: string;
   profile_picture: string | null;
-  rating: number;
+  rating?: number;
+  workout_rating?: number;
+  meal_rating?: number;
 }
 
 const Leaderboard: React.FC = () => {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'combined' | 'workout' | 'meal'>('combined'); // Default tab
+
+  const fetchLeaderboard = async (endpoint: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(endpoint);
+      if (response.status === 200) {
+        const dataKey =
+          activeTab === 'combined'
+            ? 'leaderboard'
+            : activeTab === 'workout'
+            ? 'workout_leaderboard'
+            : 'meal_leaderboard';
+        setLeaderboardData(response.data[dataKey]);
+      } else {
+        setError('Failed to fetch leaderboard data.');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await axios.get('http://127.0.0.1:8000/get_leaderboard/');
-        if (response.status === 200) {
-          setLeaderboardData(response.data.leaderboard);
-        } else {
-          setError('Failed to fetch leaderboard data.');
-        }
-      } catch (err) {
-        setError('Something went wrong. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
+    const endpoints = {
+      combined: 'http://127.0.0.1:8000/get_leaderboard/', //put your ip ex:http://192.100.5.5:8000/get_leaderboard/
+      workout: 'http://127.0.0.1:8000/get_workout_leaderboard/', //put your ip ex:http://192.100.5.5:8000/get_workout_leaderboard/
+      meal: 'http://127.0.0.1:8000/get_meal_leaderboard/', //put your ip ex:http://192.100.5.5:8000/get_meal_leaderboard/
     };
-
-    fetchLeaderboard();
-  }, []);
+    fetchLeaderboard(endpoints[activeTab]);
+  }, [activeTab]);
 
   const renderItem = ({ item, index }: { item: LeaderboardEntry; index: number }) => (
     <View style={styles.entryContainer}>
@@ -52,7 +67,11 @@ const Leaderboard: React.FC = () => {
         style={styles.profileImage}
       />
       <Text style={styles.username}>{item.username}</Text>
-      <Text style={styles.score}>{item.rating.toFixed(1)}</Text>
+      <Text style={styles.score}>
+        {activeTab === 'combined' && item.rating?.toFixed(1)}
+        {activeTab === 'workout' && item.workout_rating?.toFixed(1)}
+        {activeTab === 'meal' && item.meal_rating?.toFixed(1)}
+      </Text>
     </View>
   );
 
@@ -75,7 +94,26 @@ const Leaderboard: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>🏆 Leaderboard</Text>
+      <View style={styles.tabsContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'combined' && styles.activeTab]}
+          onPress={() => setActiveTab('combined')}
+        >
+          <Text style={styles.tabText}>Combined</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'workout' && styles.activeTab]}
+          onPress={() => setActiveTab('workout')}
+        >
+          <Text style={styles.tabText}>Workout</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'meal' && styles.activeTab]}
+          onPress={() => setActiveTab('meal')}
+        >
+          <Text style={styles.tabText}>Meal</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={leaderboardData}
         keyExtractor={(item, index) => index.toString()}
@@ -103,6 +141,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     textAlign: 'center',
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#333333',
+    marginHorizontal: 5,
+    borderRadius: 5,
+  },
+  activeTab: {
+    backgroundColor: '#FFD700',
+  },
+  tabText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   loadingText: {
     color: '#FFD700',
