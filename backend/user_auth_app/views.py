@@ -37,7 +37,7 @@ def sign_up(request):
 
 
 @swagger_auto_schema(method='post', **log_in_schema)
-@api_view(['POST', 'get'])
+@api_view(['POST'])
 @permission_classes([AllowAny])
 @csrf_exempt
 def log_in(request):
@@ -52,8 +52,8 @@ def log_in(request):
         login(request, user)
         return JsonResponse({'username': username, 'csrf_token': get_token(request)}, status=200)
     else:
-        # return JsonResponse({'error': 'Invalid request'}, status=405)
-        return render(request, 'log_in.html')
+        return JsonResponse({'error': 'Invalid request'}, status=405)
+        # return render(request, 'log_in.html')
 
 
 @swagger_auto_schema(method='post', **log_out_schema)
