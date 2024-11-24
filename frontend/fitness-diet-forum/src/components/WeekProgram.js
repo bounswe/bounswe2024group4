@@ -4,8 +4,8 @@ import TodaysExercises from "./TodaysExercises";
 
 const WeekProgram = ({ programs }) => {
   const [weekPrograms, setWeekPrograms] = useState([]);
-  const [currentDay, setCurrentDay] = useState(null); // Başlatılan gün
-  const [currentDayPrograms, setCurrentDayPrograms] = useState([]); // Günün programları
+  const [currentDay, setCurrentDay] = useState(null); 
+  const [currentDayPrograms, setCurrentDayPrograms] = useState([]); 
 
   const daysOfWeek = [
     "Monday",

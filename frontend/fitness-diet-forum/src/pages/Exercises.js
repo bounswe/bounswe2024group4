@@ -78,10 +78,9 @@ const Exercises = () => {
         </div>
       )}
       <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center p-8">
-      <h1 className="text-3xl font-bold mb-6">My Exercises</h1>
       
       <div className="p-8 bg-gray-800 text-white min-h-screen">
-      <h1 className="text-4xl font-bold mb-6">Weekly Exercise Programs</h1>
+      <h1 className="text-4xl font-bold mb-6">Weekly Exercise Program</h1>
       <WeekProgram programs={programs} />
     </div>
     </div>

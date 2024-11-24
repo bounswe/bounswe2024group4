@@ -12,7 +12,7 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
   };
 
   if (!day) {
-    return null; // Eğer bir gün seçili değilse hiçbir şey gösterme
+    return null; 
   }
 
   return (

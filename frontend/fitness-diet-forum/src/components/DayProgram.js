@@ -14,12 +14,12 @@ const DayProgram = ({
   const [selectedProgram, setSelectedProgram] = useState(null);
 
   const handleAddClick = () => {
-    setIsModalOpen(true); // Modal'ı aç
+    setIsModalOpen(true); 
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false); // Modal'ı kapat
-    setSelectedProgram(null); // Seçimi sıfırla
+    setIsModalOpen(false); 
+    setSelectedProgram(null); 
   };
 
   const handleProgramSelect = (event) => {
@@ -31,7 +31,7 @@ const DayProgram = ({
   const handleAddToDay = () => {
     if (selectedProgram) {
       onAddProgram(day, selectedProgram);
-      handleCloseModal(); // Modal'ı kapat
+      handleCloseModal(); 
     }
   };
 
