@@ -79,3 +79,6 @@ urlpatterns = [
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
