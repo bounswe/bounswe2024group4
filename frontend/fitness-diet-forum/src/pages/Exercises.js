@@ -1,75 +1,52 @@
-// Exercises.js
-import React, { useState } from "react";
-import MuscleGroups from "../components/MuscleGroups";
-import ExerciseProgramList from "./ExerciseProgramList"; // Import ExerciseProgramList component
+import React, { useState, useEffect,useContext } from "react";
+import axios from "axios";
 import WeekProgram from "../components/WeekProgram";
+import ExerciseProgramList from "./ExerciseProgramList";
+import { Context } from "../globalContext/globalContext.js";
 
 const Exercises = () => {
-  const [showMuscleGroups, setShowMuscleGroups] = useState(false);
+  const [programs, setPrograms] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null); 
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
+  const csrf_token = localStorage.getItem("csrfToken");
+  const username = localStorage.getItem("username");
+
+  
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`);
+        console.log('get workout response', response);
+        setPrograms(response.data);
+        setLoading(false);
+    } catch (error) {
+        console.error("Error fetching user programs:", error);
+    }
+    };
+
+    fetchPrograms();
+  }, []);
 
   
 
-  // Toggle between program list and exercise creation views
-  const handleCreateExercise = () => {
-    setShowMuscleGroups(true);
-  };
-
-  const [programs] = useState([
-    {
-      id: 1,
-      day: "Monday",
-      programName: "Leg Day",
-      exercises: [
-        {
-          exerciseName: "Chair Squats",
-          sets: 3,
-          reps: "6-8",
-          imageUrl: "/chair_squats.jpeg",
-        },
-        {
-          exerciseName: "Lunges",
-          sets: 4,
-          reps: "10-12",
-          imageUrl: "/lunges.jpeg",
-        },
-      ],
-    },
-    {
-      id: 2,
-      day: "Tuesday",
-      programName: "Upper Body Strength",
-      exercises: [
-        {
-          exerciseName: "Push-Ups",
-          sets: 3,
-          reps: "10-15",
-          imageUrl: "/push_ups.jpeg",
-        },
-        {
-          exerciseName: "Pull-Ups",
-          sets: 4,
-          reps: "5-8",
-          imageUrl: "/pull_ups.jpeg",
-        },
-      ],
-    },
-  ]);
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center p-8">
-        <div className="w-full">
-          <ExerciseProgramList />
-        </div>
-      <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center p-8">
-      
+      <div className="w-full">
+        <ExerciseProgramList />
+      </div>
       <div className="p-8 bg-gray-800 text-white min-h-screen">
-      <h1 className="text-4xl font-bold mb-6">Weekly Exercise Program</h1>
-      <WeekProgram programs={programs} />
-    </div>
-    </div>
-
+        <h1 className="text-4xl font-bold mb-6">Weekly Exercise Program</h1>
+        <WeekProgram programs={programs} />
+      </div>
     </div>
   );
 };
 
 export default Exercises;
+

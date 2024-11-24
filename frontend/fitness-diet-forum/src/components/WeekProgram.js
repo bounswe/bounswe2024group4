@@ -4,8 +4,8 @@ import TodaysExercises from "./TodaysExercises";
 
 const WeekProgram = ({ programs }) => {
   const [weekPrograms, setWeekPrograms] = useState([]);
-  const [currentDay, setCurrentDay] = useState(null); 
-  const [currentDayPrograms, setCurrentDayPrograms] = useState([]); 
+  const [currentDay, setCurrentDay] = useState(null);
+  const [currentDayPrograms, setCurrentDayPrograms] = useState([]);
 
   const daysOfWeek = [
     "Monday",
@@ -95,7 +95,6 @@ const WeekProgram = ({ programs }) => {
         </table>
       </div>
 
-      {/* Today's Exercises */}
       {currentDay && (
         <TodaysExercises
           day={currentDay}
@@ -108,6 +107,7 @@ const WeekProgram = ({ programs }) => {
 };
 
 export default WeekProgram;
+
 
 
 
