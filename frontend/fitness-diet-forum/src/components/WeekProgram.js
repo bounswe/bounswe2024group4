@@ -42,8 +42,18 @@ const WeekProgram = ({ programs }) => {
     setCurrentDayPrograms(dayPrograms);
   };
 
-  const handleEndExercise = async () => {
+  const handleEndExercise = async (completedExercises) => {
     console.log(currentDayPrograms[0]);
+
+    // Prepare exercises with their updated 'is_completed' status
+    const updatedExercises = currentDayPrograms.map(program => ({
+      ...program,
+      exercises: program.exercises.map(exercise => ({
+        ...exercise,
+        is_completed: completedExercises.includes(exercise.name), // Set the completion status based on user interaction
+      })),
+    }));
+
     const config = {
       withCredentials: true,
       headers: {
@@ -51,12 +61,19 @@ const WeekProgram = ({ programs }) => {
         "X-CSRFToken": csrf_token,
       },
     };
-    const body = { currentDayPrograms };
+
+    const body = {
+      exercises: updatedExercises,
+    };
 
     try {
-      // Here we would normally send the data to a workout log endpoint.
-      // const response = await axios.post(`${baseURL}/workout-log/`, body, config);
-      console.log('Workout saved:', body);
+      // Assuming you want to update the exercises' completion status and log the workout at the same time
+      const response = await axios.post(
+        `${baseURL}/workout-log/${currentDayPrograms[0].id}/`,
+        body,
+        config
+      );
+      console.log("Workout saved:", body);
     } catch (error) {
       console.error("Error saving workout log:", error);
     }
