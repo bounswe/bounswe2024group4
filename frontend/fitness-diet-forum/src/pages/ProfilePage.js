@@ -98,7 +98,9 @@ const ProfilePage = () => {
 
     const handleFollow = async () => {
         try {
+            console.log(userData.is_following);
             const action = userData.is_following ? 'unfollow' : 'follow';
+            const body = userData.is_following ? { username: loggedInUser, following: username} : { follower: loggedInUser, following: username }
             const config = {
                 withCredentials: true,
                 headers: {
@@ -107,7 +109,7 @@ const ProfilePage = () => {
                 },
               };
             console.log(csrf_token);
-            const response = await axios.post(baseURL + `/${action}/`, { following: username, follower: loggedInUser }, config);
+            const response = await axios.post(baseURL + `/${action}/`, body, config);
             if (response.status === 200) {
                 // Toggle the is_following status
                 setUserData(prevData => ({
@@ -173,7 +175,7 @@ const ProfilePage = () => {
                         } hover:bg-blue-700`}
                         onClick={handleFollow}
                     >
-                        {userData.is_following ? 'Following' : 'Follow'}
+                        {userData.is_following ? 'Unfollow' : 'Follow'}
                     </button>
                 )}
             </div>
