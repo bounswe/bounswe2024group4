@@ -13,7 +13,7 @@ const Topbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get(baseURL + "/log_out/");
+      await axios.post(baseURL + "/log_out/");
       setLoggedIn("false");
       navigate("/");
     } catch (error) {

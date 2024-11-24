@@ -51,7 +51,7 @@ def workout_program(request):
             # Get the first user for testing (you should use authenticated user in production)
             # user = User.objects.first()
             # user = request.user
-            user = User.objects.get(username=request.POST.get('username'))
+            user = User.objects.get(username=data.get('username'))
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
 
@@ -373,10 +373,11 @@ def get_workout_by_id(request, workout_id):
 @swagger_auto_schema(method='get', **get_workout_by_id_schema)
 @api_view(['GET'])
 @csrf_exempt
-def get_workouts_by_user_id(request, user_id):
+def get_workouts_by_user_id(request):
     if request.method == 'GET':
         try:
-            workouts = Workout.objects.filter(created_by__user_id=user_id)
+            user = User.objects.get(username=request.GET.get('username'))
+            workouts = Workout.objects.filter(created_by=user)
             workouts_data = [
                 {
                     'id': workout.workout_id,
