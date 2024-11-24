@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema, rate_workout_schema, get_workout_by_id_schema
 from rest_framework.decorators import api_view
 from user_auth_app.models import User
 from datetime import datetime
@@ -315,15 +315,14 @@ def get_workout_logs_by_user_id(request, user_id):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-
-
+@swagger_auto_schema(method='post', **rate_workout_schema)
+@api_view(['POST'])
 @csrf_exempt
-#@login_required        
 def rate_workout(request):
     if request.method == 'POST':
         try:
-            workout_id = request.POST.get('workout_id')
-            rating = float(request.POST.get('rating'))
+            workout_id = request.data.get('workout_id')
+            rating = float(request.data.get('rating'))
             
             # Get the first user for testing (remove this in production)
             user = User.objects.first()
@@ -333,7 +332,7 @@ def rate_workout(request):
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
 
-            workout = get_object_or_404(Workout, workout_id=workout_id)  # Changed from id to workout_id
+            workout = Workout.objects.get(workout_id=workout_id)
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
             workout.save()
@@ -348,12 +347,14 @@ def rate_workout(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+@swagger_auto_schema(method='get', **get_workout_by_id_schema)
+@api_view(['GET'])
 @csrf_exempt
-#@login_required
 def get_workout_by_id(request, workout_id):
     if request.method == 'GET':
         try:
-            workout = get_object_or_404(Workout, workout_id=workout_id)
+            workout = Workout.objects.get(workout_id=workout_id)
             workout_data = {
                 'id': workout.workout_id,
                 'workout_name': workout.workout_name,
@@ -368,8 +369,10 @@ def get_workout_by_id(request, workout_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+@swagger_auto_schema(method='get', **get_workout_by_id_schema)
+@api_view(['GET'])
 @csrf_exempt
-#@login_required
 def get_workouts_by_user_id(request, user_id):
     if request.method == 'GET':
         try:

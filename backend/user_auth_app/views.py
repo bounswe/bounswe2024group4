@@ -7,8 +7,11 @@ from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from swagger_docs.swagger import sign_up_schema, log_in_schema, log_out_schema, csrf_token_schema, session_schema
 
-@api_view(['POST', 'GET'])
+@swagger_auto_schema(method='post', **sign_up_schema)
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def sign_up(request):
     if request.method == "POST":
@@ -28,11 +31,13 @@ def sign_up(request):
 
         login(request, user)
         return JsonResponse({'username': username}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=405)
+        # return render(request, 'sign_up.html')
 
-    return render(request, 'sign_up.html')
 
-
-@api_view(['POST', 'GET'])
+@swagger_auto_schema(method='post', **log_in_schema)
+@api_view(['POST'])
 @permission_classes([AllowAny])
 @csrf_exempt
 def log_in(request):
@@ -46,28 +51,40 @@ def log_in(request):
 
         login(request, user)
         return JsonResponse({'username': username}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=405)
+        # return render(request, 'log_in.html')
 
-    return render(request, 'log_in.html')
 
-
-@api_view(['GET'])
+@swagger_auto_schema(method='post', **log_out_schema)
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def log_out(request):
-    if request.method == "GET":
+    if request.method == "POST":
         logout(request)
         request.session.flush()
         return HttpResponse("Logged out successfully", status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=405)
     
 
+@swagger_auto_schema(method='get', **csrf_token_schema)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def csrf_token(request):
-    csrf_token = get_token(request)
-    return JsonResponse({'csrf_token': csrf_token}, status=200)
+    if request.method == "GET":
+        csrf_token = get_token(request)
+        return JsonResponse({'csrf_token': csrf_token}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=405)
 
 
+@swagger_auto_schema(method='get', **session_schema)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def session(request):
-    session = request.session
-    return JsonResponse({'session': session.session_key != None }, status=200)
+    if request.method == "GET":
+        session = request.session
+        return JsonResponse({'session': session.session_key != None }, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=405)

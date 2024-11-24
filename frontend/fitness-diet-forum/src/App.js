@@ -8,6 +8,7 @@ import MealList from './pages/MealList';
 import Exercises from './pages/Exercises';
 import ExerciseProgramList from './pages/ExerciseProgramList';
 import Login from './pages/Login';
+import LeaderBoard from './pages/LeaderBoard';
 import Signup from './pages/Signup';
 import AuthenticatedLayout from './layouts/AuthenticatedLayout';
 import PublicLayout from './layouts/PublicLayout';
@@ -90,6 +91,16 @@ function App() {
         <PrivateRoute>
           <AuthenticatedLayout>
             <ProfilePage />
+          </AuthenticatedLayout>
+        </PrivateRoute>
+      }
+    />
+    <Route
+      path="/leaderboard"
+      element={
+        <PrivateRoute>
+          <AuthenticatedLayout>
+            <LeaderBoard />
           </AuthenticatedLayout>
         </PrivateRoute>
       }
