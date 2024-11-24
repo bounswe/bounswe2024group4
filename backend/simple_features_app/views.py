@@ -41,10 +41,11 @@ def get_meal_leaderboard(request):
 
 
 @swagger_auto_schema(method='post', **follow_schema)
-@api_view(['POST', 'GET'])
+@api_view(['POST'])
 def follow(request):
     if request.method == 'POST':
         follower = User.objects.get(username=request.POST.get('follower'))
+        # follower = User.objects.get(username=request.user.username)
         try:
             following = User.objects.get(username=request.POST.get('following'))
         except User.DoesNotExist:

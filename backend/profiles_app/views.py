@@ -9,8 +9,8 @@ from exercise_program_app.models import Workout
 from posts_app.models import Post
 
 
+@swagger_auto_schema(method='post', **edit_profile_schema)
 @api_view(['POST'])
-@swagger_auto_schema(**edit_profile_schema)
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
@@ -52,8 +52,9 @@ def edit_profile(request):
     # return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 
+
+@swagger_auto_schema(method='get', **view_profile_schema)
 @api_view(['GET'])
-@swagger_auto_schema(**view_profile_schema)
 #@login_required
 def view_profile(request):
     if request.method == 'GET':

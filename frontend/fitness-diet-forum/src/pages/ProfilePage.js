@@ -68,7 +68,7 @@ const ProfilePage = () => {
                 {[...Array(fullStars)].map((_, i) => (
                     <span key={i} className="text-yellow-400">★</span>
                 ))}
-                {halfStar === 1 && <span className="text-yellow-400">☆</span>}
+                {halfStar === 1 && <span className="text-yellow-400">★</span>} {/* Half star */}
                 {[...Array(emptyStars)].map((_, i) => (
                     <span key={i + fullStars + halfStar} className="text-gray-400">☆</span>
                 ))}

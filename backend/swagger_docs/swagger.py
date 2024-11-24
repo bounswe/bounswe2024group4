@@ -6,13 +6,13 @@ edit_profile_schema = {
     'request_body': openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            'username': openapi.Schema(type=openapi.TYPE_STRING),
-            'email': openapi.Schema(type=openapi.TYPE_STRING),
-            'bio': openapi.Schema(type=openapi.TYPE_STRING),
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='New username of the user'),
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description='New email of the user'),
+            'bio': openapi.Schema(type=openapi.TYPE_STRING, description='New bio of the user'),
             'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url', description='URL of the profile picture'),
-            'weight': openapi.Schema(type=openapi.TYPE_NUMBER),
-            'height': openapi.Schema(type=openapi.TYPE_NUMBER),
-            'password': openapi.Schema(type=openapi.TYPE_STRING),
+            'weight': openapi.Schema(type=openapi.TYPE_NUMBER, description='New weight of the user'),
+            'height': openapi.Schema(type=openapi.TYPE_NUMBER, description='New height of the user'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='New password of the user'),
         }
     ),
     'responses': {
@@ -128,7 +128,8 @@ get_leaderboard_schema = {
                         type=openapi.TYPE_OBJECT,
                         properties={
                             'username': openapi.Schema(type=openapi.TYPE_STRING),
-                            'score': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url'),
+                            'rating': openapi.Schema(type=openapi.TYPE_INTEGER),
                         }
                     )
                 )
@@ -151,6 +152,7 @@ get_workout_leaderboard_schema = {
                         type=openapi.TYPE_OBJECT,
                         properties={
                             'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url'),
                             'workout_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
                         }
                     )
@@ -174,6 +176,7 @@ get_meal_leaderboard_schema = {
                         type=openapi.TYPE_OBJECT,
                         properties={
                             'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'profile_picture': openapi.Schema(type=openapi.TYPE_STRING, format='url'),
                             'meal_rating': openapi.Schema(type=openapi.TYPE_NUMBER),
                         }
                     )
@@ -183,6 +186,39 @@ get_meal_leaderboard_schema = {
         401: openapi.Response('Unauthorized'),
     }
 }
+
+workout_program_schema = {
+    'operation_summary': 'Create Workout Programs',
+    'operation_description': 'Creates a workout programs',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'workout_name': openapi.Schema(type=openapi.TYPE_STRING),
+            'exercises': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'exercise_type': openapi.Schema(type=openapi.TYPE_STRING),
+                    'exercise_name': openapi.Schema(type=openapi.TYPE_STRING),
+                    'muscle': openapi.Schema(type=openapi.TYPE_STRING),
+                    'equipment': openapi.Schema(type=openapi.TYPE_STRING),
+                    'instruction': openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )),
+        },
+        required=['workout_name', 'exercises']
+    ),
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+    }
+}
+            
 
 get_exercises_schema = {
     'operation_summary': 'Get Exercises',
@@ -204,7 +240,6 @@ get_exercises_schema = {
         404: openapi.Response('Not Found'),
     }
 }
-
 
 user_programs_schema = {
     'operation_description': "Get all workout programs for the logged-in user",
@@ -363,114 +398,314 @@ log_workout_schema = {
     'tags': ['Workout Logs']
 }
 
-rate_workout_schema = {
-    'operation_description': "Rate a workout",
+feed_schema = {
+    'operation_summary': 'Feed',
+    'operation_description': 'Retrieve all posts',
+    'responses': {
+        200: openapi.Response('Posts retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT))
+            }
+        )),
+        405: 'Invalid request'
+    }
+}
+
+following_feed_schema = {
+    'operation_summary': 'Following Feed',
+    'operation_description': 'Retrieve posts from users that the authenticated user is following',
+    'responses': {
+        200: openapi.Response('Posts retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT))
+            }
+        )),
+        405: 'Invalid request'
+    }
+}
+
+post_schema = {
+    'operation_summary': 'Post',
+    'operation_description': 'Create a post',
     'request_body': openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            'workout_id': openapi.Schema(
-                type=openapi.TYPE_INTEGER,
-                description="ID of the workout to rate"
-            ),
-            'rating': openapi.Schema(
-                type=openapi.TYPE_NUMBER,
-                description="Rating value (0-5)",
-                example=4.5
-            )
+            'content': openapi.Schema(type=openapi.TYPE_STRING, description='Content of the post'),
+            'workoutId': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the workout'),
+            'mealId': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the meal')
         },
-        required=['workout_id', 'rating']
+        required=['content'],
+        example={
+            'content': 'This is a sample post content.',
+            'workoutId': 1,
+            'mealId': 2
+        }
     ),
     'responses': {
-        200: openapi.Response(
-            description="Success",
-            examples={
-                'application/json': {
-                    'message': 'Rating submitted successfully'
-                }
+        201: openapi.Response('Post created successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'post_id': openapi.Schema(type=openapi.TYPE_INTEGER)
             }
-        ),
+        )),
         400: 'Bad Request',
-        401: 'Unauthorized - User not logged in'
-    },
-    'tags': ['Workouts']
+        404: 'Workout not found',
+        405: 'Invalid request'
+    }
+}
+
+toggle_like_schema = {
+    'operation_summary': 'Toggle Like',
+    'operation_description': 'Toggle like on a post',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'postId': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the post')
+        },
+        required=['postId'],
+        example={
+            'postId': 1
+        }
+    ),
+    'responses': {
+        200: openapi.Response('Post liked/unliked successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        400: 'Bad Request',
+        404: 'Post not found',
+        405: 'Invalid request',
+        500: 'Internal Server Error'
+    }
+}
+
+comment_schema = {
+    'operation_summary': 'Comment',
+    'operation_description': 'Comment on a post',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'postId': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the post'),
+            'content': openapi.Schema(type=openapi.TYPE_STRING, description='Content of the comment')
+        },
+        required=['postId', 'content'],
+        example={
+            'postId': 1,
+            'content': 'This is a sample comment.'
+        }
+    ),
+    'responses': {
+        201: openapi.Response('Comment created successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'comment_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+            }
+        )),
+        400: 'Bad Request',
+        404: 'Post not found',
+        405: 'Invalid request'
+    }
+}
+
+toggle_bookmark_schema = {
+    'operation_summary': 'Toggle Bookmark',
+    'operation_description': 'Toggle bookmark on a post',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'postId': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the post')
+        },
+        required=['postId'],
+        example={
+            'postId': 1
+        }
+    ),
+    'responses': {
+        200: openapi.Response('Post bookmarked/unbookmarked successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        400: 'Bad Request',
+        404: 'Not Found',
+        405: 'Invalid request',
+        500: 'Internal Server Error'
+    }
+}
+
+liked_posts_schema = {
+    'operation_summary': 'Liked Posts',
+    'operation_description': 'Retrieve posts liked by the authenticated user',
+    'responses': {
+        200: openapi.Response('Posts retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT))
+            }
+        )),
+        405: 'Invalid request',
+    }
+}
+
+bookmarked_posts_schema = {
+    'operation_summary': 'Bookmarked Posts',
+    'operation_description': 'Retrieve posts bookmarked by the authenticated user',
+    'responses': {
+        200: openapi.Response('Posts retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'posts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT))
+            }
+        )),
+        405: 'Invalid request'
+    }
+}
+
+rate_workout_schema = {
+    'operation_summary': 'Rate Workout',
+    'operation_description': 'Rate a workout',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'workoutId': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the workout'),
+            'rating': openapi.Schema(type=openapi.TYPE_NUMBER, description='Rating of the workout')
+        },
+        required=['workoutId', 'rating'],
+        example={
+            'workoutId': 1,
+            'rating': 4.5
+        }
+    ),
+    'responses': {
+        200: openapi.Response('Workout rated successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        400: 'Bad Request',
+        404: 'Workout not found',
+        405: 'Invalid request'
+    }
 }
 
 get_workout_by_id_schema = {
-    'operation_description': "Get a specific workout by its ID",
-    'manual_parameters': [
-        openapi.Parameter(
-            'workout_id',
-            openapi.IN_PATH,
-            description="ID of the workout to retrieve",
-            type=openapi.TYPE_INTEGER
-        )
-    ],
+    'operation_summary': 'Get Workout by ID',
+    'operation_description': 'Retrieve a workout by ID',
     'responses': {
-        200: openapi.Response(
-            description="Success",
-            examples={
-                'application/json': {
-                    'id': 1,
-                    'workout_name': 'Upper Body Strength',
-                    'created_by': 'john_doe',
-                    'rating': 4.5,
-                    'rating_count': 10,
-                    'exercises': [
-                        {
-                            'type': 'strength',
-                            'name': 'Bench Press',
-                            'muscle': 'chest',
-                            'equipment': 'barbell',
-                            'instruction': 'Lie on the bench and press the barbell up.'
-                        }
-                    ]
-                }
+        200: openapi.Response('Workout retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'workout': openapi.Schema(type=openapi.TYPE_OBJECT)
             }
-        ),
-        400: 'Bad Request',
-        401: 'Unauthorized - User not logged in',
-        404: 'Not Found - Workout not found'
-    },
-    'tags': ['Workouts']
+        )),
+        404: 'Workout not found',
+        405: 'Invalid request'
+    }
 }
 
 get_workouts_by_user_id_schema = {
-    'operation_description': "Get workouts by user ID",
-    'manual_parameters': [
-        openapi.Parameter(
-            'user_id',
-            openapi.IN_PATH,
-            description="ID of the user whose workouts to retrieve",
-            type=openapi.TYPE_INTEGER
-        )
-    ],
+    'operation_summary': 'Get Workouts by User ID',
+    'operation_description': 'Retrieve workouts by user ID',
     'responses': {
-        200: openapi.Response(
-            description="Success",
-            examples={
-                'application/json': [
-                    {
-                        'id': 1,
-                        'workout_name': 'Upper Body Strength',
-                        'created_by': 'john_doe',
-                        'rating': 4.5,
-                        'rating_count': 10,
-                        'exercises': [
-                            {
-                                'type': 'strength',
-                                'name': 'Bench Press',
-                                'muscle': 'chest',
-                                'equipment': 'barbell',
-                                'instruction': 'Lie on the bench and press the barbell up.'
-                            }
-                        ]
-                    }
-                ]
+        200: openapi.Response('Workouts retrieved successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'workouts': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_OBJECT))
             }
-        ),
+        )),
+        404: 'User not found',
+        405: 'Invalid request'
+    }
+}
+
+sign_up_schema = {
+    'operation_summary': 'Sign Up',
+    'operation_description': 'Sign up a user',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'email': openapi.Schema(type=openapi.TYPE_STRING),
+            'password': openapi.Schema(type=openapi.TYPE_STRING),
+            'user_type': openapi.Schema(type=openapi.TYPE_STRING, description='Type of user (member/trainer)')
+        },
+        required=['username', 'email', 'password'],
+        example={
+            'username': 'john_doe',
+            'email': 'john@gmail.com',
+            'password': 'password',
+            'user_type': 'member'
+        }
+    ),
+    'responses': {
+        200: openapi.Response('User signed up successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        400: 'Bad Request'
+    }
+}
+
+log_in_schema = {
+    'operation_summary': 'Log In',
+    'operation_description': 'Log in a user',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING),
+            'password': openapi.Schema(type=openapi.TYPE_STRING)
+        },
+        required=['username', 'password'],
+        example={
+            'username': 'john_doe',
+            'password': 'password'
+        }
+    ),
+    'responses': {
+        200: openapi.Response('User logged in successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
         400: 'Bad Request',
-        401: 'Unauthorized - User not logged in',
-        404: 'Not Found - User not found'
-    },
-    'tags': ['Workouts']
+        401: 'Unauthorized'
+    }
+}
+
+log_out_schema = {
+    'operation_summary': 'Log Out',
+    'operation_description': 'Log out the authenticated user',
+    'responses': {
+        200: openapi.Response('User logged out successfully'),
+        405: 'Invalid request'
+    }
+}
+
+csrf_token_schema = {
+    'operation_summary': 'CSRF Token',
+    'operation_description': 'Get CSRF token',
+    'responses': {
+        200: openapi.Response('CSRF token retrieved successfully'),
+        405: 'Invalid request'
+    }
+}
+
+session_schema = {
+    'operation_summary': 'Session',
+    'operation_description': 'Get session information',
+    'responses': {
+        200: openapi.Response('Session information retrieved successfully'),
+        405: 'Invalid request'
+    }
 }

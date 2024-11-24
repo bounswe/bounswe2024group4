@@ -4,22 +4,36 @@ from user_auth_app.models import User
 from posts_app.models import Comment, Post
 from exercise_program_app.models import Workout
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from swagger_docs.swagger import post_schema, toggle_like_schema, comment_schema, liked_posts_schema, bookmarked_posts_schema
 
+@swagger_auto_schema(method='post', **post_schema)
+@api_view(['POST'])
 @csrf_exempt
 def post(request):
     if request.method == 'POST':
         user = request.user
-        content = request.POST.get('content')
-        workoutId = request.POST.get('workoutId')
-        mealId = request.POST.get('mealId')
+        content = request.data.get('content')
+        workoutId = request.data.get('workoutId')
+        mealId = request.data.get('mealId')
+        
+        post = Post.objects.create(user=user, content=content)
         
         if workoutId:
             try:
                 workout = Workout.objects.get(workout_id=workoutId)
+                post.workout = workout
             except Workout.DoesNotExist:
                 return JsonResponse({'error': 'Workout not found'}, status=404)
         
-        post = Post.objects.create(user=user, content=content, workout=workout, mealId=mealId)
+        if mealId:
+            try:
+                post.mealId = mealId
+            except ValueError:
+                return JsonResponse({'error': 'mealId must be an integer'}, status=400)
+            
+        post.save()
 
         return JsonResponse({'message': 'Post created successfully', 'post_id': post.id}, status=201)
     else:
@@ -27,11 +41,13 @@ def post(request):
         # return render(request, 'create_post.html')
 
 
+@swagger_auto_schema(method='post', **toggle_like_schema)
+@api_view(['POST'])
 @csrf_exempt
 def toggle_like(request):
     if request.method == 'POST':
         try:
-            postId = request.POST.get('postId')
+            postId = request.data.get('postId')
 
             if not postId:
                 return JsonResponse({'error': 'postId is required'}, status=400)
@@ -65,12 +81,14 @@ def toggle_like(request):
         # return render(request, 'toggle_like.html')
 
 
+@swagger_auto_schema(method='post', **comment_schema)
+@api_view(['POST'])
 @csrf_exempt
 def comment(request):
     if request.method == 'POST':
         try:
-            postId = request.POST.get('postId')
-            content = request.POST.get('content')
+            postId = request.data.get('postId')
+            content = request.data.get('content')
 
             if not postId:
                 return JsonResponse({'error': 'postId is required'}, status=400)
@@ -96,11 +114,13 @@ def comment(request):
         # return render(request, 'comment.html')
 
 
+@swagger_auto_schema(method='post', **toggle_like_schema)
+@api_view(['POST'])
 @csrf_exempt
 def toggle_bookmark(request):
     if request.method == 'POST':
         try:
-            postId = request.POST.get('postId')
+            postId = request.data.get('postId')
 
             if not postId:
                 return JsonResponse({'error': 'postId is required'}, status=400)
@@ -128,6 +148,8 @@ def toggle_bookmark(request):
         # return render(request, 'toggle_bookmark.html')
 
 
+@swagger_auto_schema(method='get', **liked_posts_schema)
+@api_view(['GET'])
 @csrf_exempt
 def liked_posts(request):
     if request.method == 'GET':
@@ -138,6 +160,8 @@ def liked_posts(request):
         return JsonResponse({'error': 'Invalid method'}, status=405)
     
 
+@swagger_auto_schema(method='get', **bookmarked_posts_schema)
+@api_view(['GET'])
 @csrf_exempt
 def bookmarked_posts(request):
     if request.method == 'GET':
