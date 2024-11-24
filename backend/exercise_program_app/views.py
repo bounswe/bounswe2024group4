@@ -139,12 +139,14 @@ def create_program(request):
 
 @csrf_exempt
 #@login_required
-def get_programs_by_user_id(request, user_id):
+# def get_programs_by_user_id(request, user_id):
+def get_programs_by_user_id(request):
     if request.method == 'GET':
         try:
             # Get all programs for this user
-            programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
-            
+            # programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
+            User = User.objects.filter(username=request.GET.get('username'))
+            programs = WeeklyProgram.objects.filter(created_by=User)
             # Format the response
             programs_data = []
             for program in programs:
