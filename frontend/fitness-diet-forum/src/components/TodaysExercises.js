@@ -12,7 +12,7 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
   };
 
   if (!day) {
-    return null; 
+    return null;
   }
 
   return (
@@ -21,18 +21,18 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
       {programs.length > 0 ? (
         programs.map((program) => (
           <div key={program.id} className="mb-4">
-            <h3 className="font-bold">{program.programName}</h3>
-            <ul className="ml-4">
+            <h3 className="font-bold text-lg">{program.workout_name}</h3>
+            <ul className="ml-4 list-disc">
               {program.exercises.map((exercise, index) => (
                 <li key={index} className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     className="form-checkbox text-green-600"
-                    checked={completedExercises.includes(exercise.exerciseName)}
-                    onChange={() => handleToggleExercise(exercise.exerciseName)}
+                    checked={completedExercises.includes(exercise.name)}
+                    onChange={() => handleToggleExercise(exercise.name)}
                   />
                   <span>
-                    {exercise.exerciseName} ({exercise.sets} sets of {exercise.reps})
+                    {exercise.name} ({exercise.sets} set of {exercise.reps} reps)
                   </span>
                 </li>
               ))}
@@ -53,3 +53,4 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
 };
 
 export default TodaysExercises;
+

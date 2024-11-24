@@ -48,7 +48,7 @@ const DayProgram = ({
             <ul className="ml-4 list-disc">
               {program.exercises.map((exercise, index) => (
                 <li key={index} className="mb-1">
-                  <strong>{exercise.name}</strong> - {exercise.sets} sets
+                  <strong>{exercise.name}</strong> - {exercise.sets} sets {exercise.reps} reps
                 </li>
               ))}
             </ul>
