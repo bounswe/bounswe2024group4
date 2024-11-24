@@ -249,6 +249,9 @@ const ProfilePage = () => {
                                         exercises={program.exercises}
                                         onDelete={() => handleDeleteProgram(program.id)}
                                         isOwn = {loggedInUser === username}
+                                        programId={program.id}
+                                        currentRating={program.rating}
+                                        ratingCount={program.rating_count}
                                     />
                                 ))
                             ) : (
