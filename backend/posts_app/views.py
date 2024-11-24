@@ -13,11 +13,11 @@ from swagger_docs.swagger import post_schema, toggle_like_schema, comment_schema
 @csrf_exempt
 def post(request):
     if request.method == 'POST':
-        user = request.user
-        content = request.data.get('content')
-        workoutId = request.data.get('workoutId')
-        mealId = request.data.get('mealId')
-        
+        # user = request.user
+        user = User.objects.get(username=request.POST.get('username'))
+        content = request.POST.get('content')
+        workoutId = request.POST.get('workoutId')
+        mealId = request.POST.get('mealId')
         post = Post.objects.create(user=user, content=content)
         
         if workoutId:
@@ -57,7 +57,8 @@ def toggle_like(request):
             except ValueError:
                 return JsonResponse({'error': 'postId must be an integer'}, status=400)
             
-            user = User.objects.get(username=request.user.username)
+            user = User.objects.get(username=request.POST.get('username'))
+            # user = User.objects.get(username=request.user.username)
             post = Post.objects.get(id=postId)
 
             if post in user.liked_posts.all():
@@ -100,7 +101,8 @@ def comment(request):
             except ValueError:
                 return JsonResponse({'error': 'postId must be an integer'}, status=400)
             
-            user = User.objects.get(username=request.user.username)
+            user = User.objects.get(username=request.POST.get('username'))
+            # user = User.objects.get(username=request.user.username)
             post = Post.objects.get(id=postId)
 
             comment = Comment.objects.create(user=user, post=post, content=content)
@@ -130,7 +132,8 @@ def toggle_bookmark(request):
             except ValueError:
                 return JsonResponse({'error': 'postId must be an integer'}, status=400)
             
-            user = User.objects.get(username=request.user.username)
+            user = User.objects.get(username=request.POST.get('username'))
+            # user = User.objects.get(username=request.user.username)
             post = Post.objects.get(id=postId)
 
             if post in user.bookmarked_posts.all():
@@ -153,7 +156,8 @@ def toggle_bookmark(request):
 @csrf_exempt
 def liked_posts(request):
     if request.method == 'GET':
-        user = User.objects.get(username=request.user.username)
+        user = User.objects.get(username=request.GET.get('username'))
+        # user = User.objects.get(username=request.user.username)
         liked_posts = user.liked_posts.all().values()
         return JsonResponse({'liked_posts': list(liked_posts)}, status=200)
     else:
@@ -165,7 +169,8 @@ def liked_posts(request):
 @csrf_exempt
 def bookmarked_posts(request):
     if request.method == 'GET':
-        user = User.objects.get(username=request.user.username)
+        user = User.objects.get(username=request.GET.get('username'))
+        # user = User.objects.get(username=request.user.username)
         bookmarked_posts = user.bookmarked_posts.all().values()
         return JsonResponse({'bookmarked_posts': list(bookmarked_posts)}, status=200)
     else:

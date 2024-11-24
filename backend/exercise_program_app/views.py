@@ -50,7 +50,8 @@ def workout_program(request):
 
             # Get the first user for testing (you should use authenticated user in production)
             # user = User.objects.first()
-            user = request.user
+            # user = request.user
+            user = User.objects.get(username=request.POST.get('username'))
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
 
@@ -138,12 +139,14 @@ def create_program(request):
 
 @csrf_exempt
 #@login_required
-def get_programs_by_user_id(request, user_id):
+# def get_programs_by_user_id(request, user_id):
+def get_programs_by_user_id(request):
     if request.method == 'GET':
         try:
             # Get all programs for this user
-            programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
-            
+            # programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
+            User = User.objects.filter(username=request.GET.get('username'))
+            programs = WeeklyProgram.objects.filter(created_by=User)
             # Format the response
             programs_data = []
             for program in programs:

@@ -4,7 +4,7 @@ import LottieView from 'lottie-react-native';
 import { useRouter } from "expo-router";
 
 const HomeScreen: React.FC = () => {
-  const router = useRouter();  
+  const router = useRouter();
 
   const handleLoginPress = () => {
     router.push("/login");
