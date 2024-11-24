@@ -294,7 +294,8 @@ const ExerciseProgramList = () => {
                                     key={program.id}  // Use `program.id` as the unique key
                                     programName={program.workout_name}
                                     exercises={program.exercises}
-                                    onDelete={() => handleDeleteProgram(program.id)} // Pass delete handler
+                                    onDelete={() => handleDeleteProgram(program.id)}
+                                    isOwn = {true}
                                 />
                             ))
                         )}

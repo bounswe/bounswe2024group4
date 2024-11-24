@@ -2,7 +2,7 @@ import React from 'react';
 import Exercise from './Exercise';
 import '../css/index.css';
 
-const ExerciseProgram = ({ programName, exercises, onDelete }) => {
+const ExerciseProgram = ({ programName, exercises, onDelete, isOwn }) => {
     return (
         <div className="exercise-program bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
             {/* Program Name */}
@@ -24,15 +24,16 @@ const ExerciseProgram = ({ programName, exercises, onDelete }) => {
                 ))}
             </div>
 
-            {/* Delete Program Button */}
-            <div className="flex justify-end mt-4">
-                <button
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300"
-                    onClick={onDelete}
-                >
-                    Delete Program
-                </button>
-            </div>
+            {isOwn && (
+                <div className="flex justify-end mt-4">
+                    <button
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300"
+                        onClick={onDelete}
+                    >
+                        Delete Program
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
