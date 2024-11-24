@@ -21,7 +21,7 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(baseURL + `/view_profile/?viewing_username=${username}&?viewed_username=${loggedInUser}`);
+                const response = await axios.get(baseURL + `/view_profile/?viewing_username=${loggedInUser}&viewed_username=${username}`);
                 if (response.status === 200) {
                     const data = response.data;
                     console.log(data)
