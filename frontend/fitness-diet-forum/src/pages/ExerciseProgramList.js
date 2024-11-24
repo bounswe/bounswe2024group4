@@ -33,7 +33,7 @@ const ExerciseProgramList = () => {
         };
 
         fetchUserPrograms();
-    }, [baseURL, csrf_token]);
+    }, [baseURL, isCreatingProgram]);
 
     const fetchExercises = async (muscles) => {
         try {
@@ -52,6 +52,10 @@ const ExerciseProgramList = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleDeleteProgram = (programId) => {
+        setPrograms(programs.filter(program => program.id !== programId));
     };
 
     const handleAddExercise = (exercise) => {
@@ -109,7 +113,6 @@ const ExerciseProgramList = () => {
             };
 
             const response = await axios.post(`${baseURL}/workout_program/`, body, config);
-            setPrograms([...programs, response.data]); // Update programs list with new program
             setSelectedExercises([]); // Clear selected exercises after saving
             setWorkoutName(""); // Clear the workout name input after saving
             setIsCreatingProgram(false); // Hide the program creation form after submitting
@@ -272,8 +275,13 @@ const ExerciseProgramList = () => {
                         {programs.length === 0 ? (
                             <p>No programs created yet.</p>
                         ) : (
-                            programs.map((program, index) => (
-                                <ExerciseProgram key={index} program={program} />
+                            programs.map((program) => (
+                                <ExerciseProgram
+                                    key={program.id}  // Use `program.id` as the unique key
+                                    programName={program.workout_name}
+                                    exercises={program.exercises}
+                                    onDelete={() => handleDeleteProgram(program.id)} // Pass delete handler
+                                />
                             ))
                         )}
                     </div>
