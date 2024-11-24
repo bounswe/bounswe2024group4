@@ -100,13 +100,13 @@ def create_program(request):
                 return error_response('No workouts provided')
 
             # Get the first user for testing
-            user = User.objects.first()
+            user = User.objects.get(username=data.get('username'))
             if not user:
                 return error_response('No user found')
 
             program = WeeklyProgram.objects.create(
                 days_per_week=len(data['workouts']),
-                created_by=user  # Use the test user
+                created_by=user
             )
             
             try:
