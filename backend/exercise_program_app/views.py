@@ -131,8 +131,9 @@ def rate_workout(request):
         try:
             workout_id = request.data.get('workout_id')
             rating = float(request.data.get('rating'))
-            username = request.GET.get('username')
-            user = User.objects.get(username=username)
+          # username = request.GET.get('username')
+            workout = Workout.objects.get(workout_id=workout_id)
+            user = workout.created_by
  
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
@@ -140,7 +141,7 @@ def rate_workout(request):
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
 
-            workout = Workout.objects.get(workout_id=workout_id)
+            
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
             workout.save()
