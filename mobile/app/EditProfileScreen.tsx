@@ -12,10 +12,10 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; 
+import { useRouter } from "expo-router";
 
 const EditProfileScreen = () => {
-  const router = useRouter(); 
+  const router = useRouter();
   const [userInfo, setUserInfo] = useState({
     username: "John Doe",
     email: "john.doe@example.com",
@@ -147,6 +147,7 @@ const EditProfileScreen = () => {
           <Text style={styles.label}>Username</Text>
           <TextInput
             style={styles.input}
+            placeholder="Username" // Placeholder eklendi
             value={userInfo.username}
             onChangeText={(text) => handleInputChange("username", text)}
           />
@@ -155,6 +156,7 @@ const EditProfileScreen = () => {
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
+            placeholder="Email" // Placeholder eklendi
             value={userInfo.email}
             keyboardType="email-address"
             onChangeText={(text) => handleInputChange("email", text)}
@@ -165,6 +167,7 @@ const EditProfileScreen = () => {
           <Text style={styles.label}>Bio</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
+            placeholder="Bio" // Placeholder eklendi
             value={userInfo.bio}
             multiline
             numberOfLines={3}
@@ -175,6 +178,7 @@ const EditProfileScreen = () => {
           <Text style={styles.label}>Weight (kg)</Text>
           <TextInput
             style={styles.input}
+            placeholder="Weight (kg)" // Placeholder eklendi
             value={userInfo.weight}
             keyboardType="numeric"
             onChangeText={(text) => handleInputChange("weight", text)}
@@ -185,6 +189,7 @@ const EditProfileScreen = () => {
           <Text style={styles.label}>Height (cm)</Text>
           <TextInput
             style={styles.input}
+            placeholder="Height (cm)" // Placeholder eklendi
             value={userInfo.height}
             keyboardType="numeric"
             onChangeText={(text) => handleInputChange("height", text)}
@@ -196,10 +201,10 @@ const EditProfileScreen = () => {
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
+              placeholder="Enter new password" // Placeholder eklendi
               value={userInfo.password}
               secureTextEntry={!showPassword}
               onChangeText={(text) => handleInputChange("password", text)}
-              placeholder="Enter new password"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Ionicons
@@ -216,10 +221,10 @@ const EditProfileScreen = () => {
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
+              placeholder="Confirm new password" // Placeholder eklendi
               value={userInfo.confirmPassword}
               secureTextEntry={!showConfirmPassword}
               onChangeText={(text) => handleInputChange("confirmPassword", text)}
-              placeholder="Confirm new password"
             />
             <TouchableOpacity
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
