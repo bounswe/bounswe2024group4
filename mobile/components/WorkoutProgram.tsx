@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import WorkoutEdit from './WorkoutEdit';
+import images from '../constants/image_map';
 
 interface Exercise {
   id: string;
-  image: any;
   name: string;
+  type: string;
+  muscle: string;
+  equipment: string;
+  instruction: string;
   sets: number;
   reps: number;
 }
@@ -14,9 +18,11 @@ interface Exercise {
 interface WorkoutProgramProps {
   workout: {
     id: string;
-    name: string;
+    workout_name: string;
+    created_by: string;
+    rating: number;
+    rating_count: number;
     exercises: Exercise[];
-    rating?: string;
   };
 }
 
@@ -25,7 +31,7 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleShare = () => {
-    console.log(`Sharing workout: ${currentWorkout.name}`);
+    console.log(`Sharing workout: ${currentWorkout.workout_name}`);
   };
 
   const handleEdit = () => {
@@ -44,12 +50,13 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
   return (
     <SafeAreaView style={styles.programContainer}>
       <SafeAreaView style={styles.headerContainer}>
-        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>{currentWorkout.name}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>{currentWorkout.workout_name}</Text>
         <SafeAreaView style={styles.iconRow}>
-          {workout.rating && (
+          {currentWorkout.rating !== undefined && (
             <SafeAreaView style={styles.ratingContainer}>
               <FontAwesome name="star" size={24} color="#FFD700" />
-              <Text style={styles.ratingNumber}>{workout.rating}</Text>
+              <Text style={styles.ratingNumber}>{currentWorkout.rating}</Text>
+              <Text style={styles.ratingCount}>({currentWorkout.rating_count} ratings)</Text>
             </SafeAreaView>
           )}
           <TouchableOpacity onPress={handleShare}>
@@ -64,9 +71,15 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout }) => {
       {currentWorkout.exercises.map((exercise, index) => (
         <React.Fragment key={exercise.id}>
           <SafeAreaView style={styles.exerciseRow}>
-            <Image source={exercise.image} style={styles.exerciseImage} />
+            {images[exercise.muscle] ? (
+              <Image source={images[exercise.muscle]} style={styles.exerciseImage} />
+            ) : (
+              <View style={styles.exerciseImage} />
+            )}
+
             <SafeAreaView style={styles.exerciseDetails}>
               <Text style={styles.exerciseName}>{exercise.name}</Text>
+              <Text style={styles.exerciseInstruction}>{exercise.instruction}</Text>
               <Text style={styles.exerciseSetsReps}>
                 {exercise.sets} sets x {exercise.reps} reps
               </Text>
@@ -130,6 +143,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 5,
   },
+  ratingCount: {
+    color: '#bbb',
+    fontSize: 12,
+    marginLeft: 5,
+  },
   exerciseRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -151,6 +169,10 @@ const styles = StyleSheet.create({
   exerciseSetsReps: {
     color: '#bbb',
     fontSize: 14,
+  },
+  exerciseInstruction: {
+    color: '#bbb',
+    fontSize: 12,
   },
   separatorLine: {
     height: 1,
