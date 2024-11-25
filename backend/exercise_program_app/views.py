@@ -131,9 +131,9 @@ def rate_workout(request):
         try:
             workout_id = request.data.get('workout_id')
             rating = float(request.data.get('rating'))
-            
-            # Get the first user for testing (remove this in production)
-            user = User.objects.first()
+            username = request.GET.get('username')
+            user = User.objects.get(username=username)
+ 
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
 
