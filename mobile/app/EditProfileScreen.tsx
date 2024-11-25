@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     width: "95%",
     elevation: 5,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
+    shadowColor: '#000', 
   },
   header: {
     fontSize: 26,
