@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema, rate_workout_schema, get_workout_by_id_schema
 from rest_framework.decorators import api_view
 from user_auth_app.models import User
 from datetime import datetime
@@ -50,7 +50,8 @@ def workout_program(request):
 
             # Get the first user for testing (you should use authenticated user in production)
             # user = User.objects.first()
-            user = request.user
+            # user = request.user
+            user = User.objects.get(username=data.get('username'))
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
 
@@ -67,7 +68,9 @@ def workout_program(request):
                     name=exercise_data['name'],
                     muscle=exercise_data['muscle'],
                     equipment=exercise_data['equipment'],
-                    instruction=exercise_data['instruction']
+                    instruction=exercise_data['instruction'],
+                    sets=exercise_data['sets'],
+                    reps=exercise_data['reps'],
                 )
                 exercise.save()
 
@@ -138,12 +141,14 @@ def create_program(request):
 
 @csrf_exempt
 #@login_required
-def get_programs_by_user_id(request, user_id):
+# def get_programs_by_user_id(request, user_id):
+def get_programs_by_user_id(request):
     if request.method == 'GET':
         try:
             # Get all programs for this user
-            programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
-            
+            # programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
+            User = User.objects.filter(username=request.GET.get('username'))
+            programs = WeeklyProgram.objects.filter(created_by=User)
             # Format the response
             programs_data = []
             for program in programs:
@@ -168,7 +173,9 @@ def get_programs_by_user_id(request, user_id):
                                 'type': exercise.type,
                                 'muscle': exercise.muscle,
                                 'equipment': exercise.equipment,
-                                'instruction': exercise.instruction
+                                'instruction': exercise.instruction,
+                                'sets': exercise.sets,
+                                'reps': exercise.reps
                             } for exercise in Exercise.objects.filter(workout=day.workout)]
                         }
                     } for day in workout_days]
@@ -207,6 +214,8 @@ def workout_log(request, workout_id):
                     'muscle': exercise.muscle,
                     'equipment': exercise.equipment,
                     'instruction': exercise.instruction,
+                    'sets': exercise.sets,
+                    'reps': exercise.reps,
                     'is_completed': exercise_log.is_completed
                 })
             return JsonResponse({
@@ -299,6 +308,8 @@ def get_workout_logs_by_user_id(request, user_id):
                         'muscle': ex_log.exercise.muscle,
                         'equipment': ex_log.exercise.equipment,
                         'instruction': ex_log.exercise.instruction,
+                        'sets': ex_log.exercise.sets,
+                        'reps': ex_log.exercise.reps,
                         'is_completed': ex_log.is_completed
                     } for ex_log in exercise_logs]
                 }
@@ -312,15 +323,14 @@ def get_workout_logs_by_user_id(request, user_id):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-
-
+@swagger_auto_schema(method='post', **rate_workout_schema)
+@api_view(['POST'])
 @csrf_exempt
-#@login_required        
 def rate_workout(request):
     if request.method == 'POST':
         try:
-            workout_id = request.POST.get('workout_id')
-            rating = float(request.POST.get('rating'))
+            workout_id = request.data.get('workout_id')
+            rating = float(request.data.get('rating'))
             
             # Get the first user for testing (remove this in production)
             user = User.objects.first()
@@ -330,7 +340,7 @@ def rate_workout(request):
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
 
-            workout = get_object_or_404(Workout, workout_id=workout_id)  # Changed from id to workout_id
+            workout = Workout.objects.get(workout_id=workout_id)
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
             workout.save()
@@ -345,19 +355,21 @@ def rate_workout(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+@swagger_auto_schema(method='get', **get_workout_by_id_schema)
+@api_view(['GET'])
 @csrf_exempt
-#@login_required
 def get_workout_by_id(request, workout_id):
     if request.method == 'GET':
         try:
-            workout = get_object_or_404(Workout, workout_id=workout_id)
+            workout = Workout.objects.get(workout_id=workout_id)
             workout_data = {
                 'id': workout.workout_id,
                 'workout_name': workout.workout_name,
                 'created_by': workout.created_by.username,  # This should work now
                 'rating': workout.rating,
                 'rating_count': workout.rating_count,
-                'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'exercise_id'))
+                'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps', 'exercise_id'))
             }
             return JsonResponse(workout_data, status=200)
         except Exception as e:
@@ -365,12 +377,15 @@ def get_workout_by_id(request, workout_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+@swagger_auto_schema(method='get', **get_workout_by_id_schema)
+@api_view(['GET'])
 @csrf_exempt
-#@login_required
-def get_workouts_by_user_id(request, user_id):
+def get_workouts_by_user_id(request):
     if request.method == 'GET':
         try:
-            workouts = Workout.objects.filter(created_by__user_id=user_id)
+            user = User.objects.get(username=request.GET.get('username'))
+            workouts = Workout.objects.filter(created_by=user)
             workouts_data = [
                 {
                     'id': workout.workout_id,
@@ -378,7 +393,7 @@ def get_workouts_by_user_id(request, user_id):
                     'created_by': workout.created_by.username,
                     'rating': workout.rating,
                     'rating_count': workout.rating_count,
-                    'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction'))
+                    'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps'))
                 }
                 for workout in workouts
             ]

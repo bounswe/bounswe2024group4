@@ -47,7 +47,7 @@ urlpatterns = [
     path('workout_program/', exercise_program_views.workout_program, name='workout_program'), # Create a workout programs with exercises
     path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'), #Get exercises from api
     path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'), #Get a workout by id
-    path('get-workouts/<int:user_id>/', exercise_program_views.get_workouts_by_user_id, name='get_workouts_by_user_id'), #Get workouts by user id
+    path('get-workouts/', exercise_program_views.get_workouts_by_user_id, name='get_workouts_by_user_id'), #Get workouts by user id
     path('workout-log/<int:workout_id>/', exercise_program_views.workout_log, name='workout_log'), #Log a workout and exercises inside it
     path('workout-logs/<int:user_id>/', exercise_program_views.get_workout_logs_by_user_id, name='get_workout_logs_by_user_id'), #Get workout logs by user id
     path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'), # Rate a workout
@@ -79,3 +79,6 @@ urlpatterns = [
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

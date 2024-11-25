@@ -1,25 +1,73 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import LottieView from 'lottie-react-native';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from "expo-router";
+import axios from 'axios';
 
 const LoginScreen = () => {
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); 
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
-  const handleLogin = () => {
-    console.log('Username:', username, 'Password:', password);
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert("Error", "Please fill in both username and password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const csrfResponse = await axios.get(`${baseURL}/csrf_token/`);
+      const csrfToken = csrfResponse.data.csrf_token;
+
+      const config = {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+      };
+
+      const response = await axios.post(`${baseURL}/log_in/`, { username, password }, config);
+
+      console.log("Login successful:", response.data);
+      Alert.alert("Success", "Login successful!");
+
+      await AsyncStorage.setItem('username', username);
+      await AsyncStorage.setItem('csrfToken', csrfResponse.data.csrf_token);
+
+      setLoading(false);
+      router.push("/(tabs)");
+    } catch (err) {
+      setLoading(false);
+      if (typeof err === "object" && err !== null && "response" in err) {
+        const errorResponse = (err as { response?: { status?: number } }).response;
+
+        Alert.alert(
+          "Error",
+          errorResponse?.status === 401
+            ? "Invalid credentials. Please try again."
+            : "An error occurred. Please try again."
+        );
+      } else {
+        Alert.alert("Error", "An unexpected error occurred.");
+      }
+    }
   };
 
   const handleForgotPassword = () => {
-    console.log('Forgot Password pressed');
+    Alert.alert("Info", "Forgot Password functionality is not implemented yet.");
   };
 
   return (
     <View style={styles.container}>
       <LottieView
-        source={require('../assets/Animation-dumbell.json')} 
+        source={require('../assets/Animation-dumbell.json')}
         autoPlay
         loop
         style={styles.lottie}
@@ -37,7 +85,6 @@ const LoginScreen = () => {
           />
         </View>
 
-        
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
@@ -45,7 +92,7 @@ const LoginScreen = () => {
             placeholderTextColor="#888"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry={!showPassword} 
+            secureTextEntry={!showPassword}
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Ionicons
@@ -56,8 +103,14 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Login</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.loginButtonText}>
+            {loading ? "Logging In..." : "Login"}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleForgotPassword}>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
