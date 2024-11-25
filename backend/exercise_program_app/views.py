@@ -132,8 +132,9 @@ def delete_workout_by_id(request, workout_id):
 def rate_workout(request):
     if request.method == 'POST':
         try:
-            workout_id = request.data.get('workout_id')
-            rating = float(request.data.get('rating'))
+            data = json.loads(request.body)
+            workout_id = data.get('workout_id')
+            rating = float(data.get('rating'))
           # username = request.GET.get('username')
             workout = Workout.objects.get(workout_id=workout_id)
             user = workout.created_by
