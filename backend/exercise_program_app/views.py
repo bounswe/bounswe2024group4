@@ -33,8 +33,8 @@ def get_exercises(request):
 
 
 
-#@swagger_auto_schema(method='post', **workout_program_schema)
-#@api_view(['POST'])
+@swagger_auto_schema(method='post', **workout_program_schema)
+@api_view(['POST'])
 @csrf_exempt
 def workout_program(request):
     if request.method == 'POST':
