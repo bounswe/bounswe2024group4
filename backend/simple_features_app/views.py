@@ -5,9 +5,11 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from swagger_docs.swagger import get_leaderboard_schema, follow_schema, unfollow_schema, get_workout_leaderboard_schema, get_meal_leaderboard_schema
 from django.db.models import F
+from rest_framework.permissions import AllowAny
 
 @swagger_auto_schema(method='get', **get_leaderboard_schema)
 @api_view(['GET'])
+# @permission_classes([AllowAny])
 def get_leaderboard(request):
     if request.method == 'GET':
         ordered_user_list = (
@@ -26,6 +28,7 @@ def get_leaderboard(request):
 
 @swagger_auto_schema(method='get', **get_workout_leaderboard_schema)
 @api_view(['GET'])
+# @permission_classes([AllowAny])
 def get_workout_leaderboard(request):
     if request.method == 'GET':
         ordered_user_list = User.objects.order_by('-workout_rating').values('username', 'profile_picture', 'workout_rating')
@@ -34,6 +37,7 @@ def get_workout_leaderboard(request):
 
 @swagger_auto_schema(method='get', **get_meal_leaderboard_schema)
 @api_view(['GET'])
+# @permission_classes([AllowAny])
 def get_meal_leaderboard(request):
     if request.method == 'GET':
         ordered_user_list = User.objects.order_by('-meal_rating').values('username', 'profile_picture', 'meal_rating')
@@ -42,6 +46,7 @@ def get_meal_leaderboard(request):
 
 @swagger_auto_schema(method='post', **follow_schema)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def follow(request):
     if request.method == 'POST':
         follower = User.objects.get(username=request.POST.get('follower'))
@@ -65,6 +70,7 @@ def follow(request):
 
 @swagger_auto_schema(method='post', **unfollow_schema)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def unfollow(request):
     if request.method == 'POST':
         follower = User.objects.get(username=request.POST.get('username'))
