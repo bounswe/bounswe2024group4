@@ -33,8 +33,8 @@ def get_exercises(request):
 
 
 
-@swagger_auto_schema(method='post', **workout_program_schema)
-@api_view(['POST'])
+#@swagger_auto_schema(method='post', **workout_program_schema)
+#@api_view(['POST'])
 @csrf_exempt
 def workout_program(request):
     if request.method == 'POST':
@@ -142,13 +142,15 @@ def create_program(request):
 @csrf_exempt
 #@login_required
 # def get_programs_by_user_id(request, user_id):
-def get_programs_by_user_id(request):
+def get_programs_by_username(request, username):
     if request.method == 'GET':
         try:
-            # Get all programs for this user
-            # programs = WeeklyProgram.objects.filter(created_by__user_id=user_id)
-            User = User.objects.filter(username=request.GET.get('username'))
-            programs = WeeklyProgram.objects.filter(created_by=User)
+            # Get the user by username
+            user = User.objects.get(username=username)
+            
+            # Get all programs created by this user
+            programs = WeeklyProgram.objects.filter(created_by=user)
+            
             # Format the response
             programs_data = []
             for program in programs:
@@ -184,10 +186,13 @@ def get_programs_by_user_id(request):
             
             return JsonResponse(programs_data, safe=False)
             
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
             
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 #Log a workout and exercises and their statuses inside it
 @csrf_exempt
@@ -281,11 +286,14 @@ def workout_log(request, workout_id):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-def get_workout_logs_by_user_id(request, user_id):
+def get_workout_logs_by_username(request, username):
     if request.method == 'GET':
         try:
+            # Get the user by username
+            user = User.objects.get(username=username)
+            
             # Get all workout logs for this user
-            workout_logs = WorkoutLog.objects.filter(user__user_id=user_id).order_by('-date')
+            workout_logs = WorkoutLog.objects.filter(user=user).order_by('-date')
             
             # Format the response
             logs_data = []
@@ -317,10 +325,13 @@ def get_workout_logs_by_user_id(request, user_id):
             
             return JsonResponse(logs_data, safe=False)
             
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
             
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 
 @swagger_auto_schema(method='post', **rate_workout_schema)
@@ -381,11 +392,16 @@ def get_workout_by_id(request, workout_id):
 @swagger_auto_schema(method='get', **get_workout_by_id_schema)
 @api_view(['GET'])
 @csrf_exempt
-def get_workouts_by_user_id(request):
+def get_workouts_by_username(request, username):
     if request.method == 'GET':
         try:
-            user = User.objects.get(username=request.GET.get('username'))
+            # Get the user by username
+            user = User.objects.get(username=username)
+            
+            # Get all workouts created by this user
             workouts = Workout.objects.filter(created_by=user)
+            
+            # Format the response
             workouts_data = [
                 {
                     'id': workout.workout_id,
@@ -393,16 +409,23 @@ def get_workouts_by_user_id(request):
                     'created_by': workout.created_by.username,
                     'rating': workout.rating,
                     'rating_count': workout.rating_count,
-                    'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps'))
+                    'exercises': list(workout.exercise_set.values(
+                        'type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps'
+                    ))
                 }
                 for workout in workouts
             ]
             return JsonResponse(workouts_data, safe=False, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
             print(f'Exception: {str(e)}')
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
 
 
 #Other functions
