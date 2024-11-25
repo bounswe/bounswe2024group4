@@ -23,7 +23,7 @@ const Leaderboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'combined' | 'workout' | 'meal'>('combined');
-  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000'
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
   const fetchLeaderboard = async (endpoint: string) => {
     try {
@@ -93,7 +93,7 @@ const Leaderboard: React.FC = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FFD700" />
+        <ActivityIndicator testID="ActivityIndicator" size="large" color="#FFD700" />
         <Text style={styles.loadingText}>Loading Leaderboard...</Text>
       </SafeAreaView>
     );
