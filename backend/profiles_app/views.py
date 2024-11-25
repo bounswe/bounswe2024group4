@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from swagger_docs.swagger import edit_profile_schema, view_profile_schema, user_programs_schema, user_workout_logs_schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from django.contrib.auth.decorators import login_required
 from exercise_program_app.models import Workout
 from posts_app.models import Post
@@ -11,7 +12,7 @@ from posts_app.models import Post
 
 @swagger_auto_schema(method='post', **edit_profile_schema)
 @api_view(['POST'])
-@login_required
+@permission_classes([AllowAny])
 def edit_profile(request):
     if request.method == 'POST':
         try:
