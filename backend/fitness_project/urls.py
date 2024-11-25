@@ -44,38 +44,43 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    #Workout related endpoints
     path('workout_program/', exercise_program_views.workout_program, name='workout_program'), # Create a workout programs with exercises
     path('workouts/delete/<int:workout_id>/', exercise_program_views.delete_workout_by_id, name='delete_workout_by_id'),
     path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'), #Get exercises from api
     path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'), #Get a workout by id
-    path('get-workouts/<str:username>/', exercise_program_views.get_workouts_by_username, name='get_workouts_by_user_id'), #Get workouts by user id
+    path('get-workouts/<str:username>/', exercise_program_views.get_workouts_by_username, name='get_workouts_by_user_id'), #Get workouts by username
     path('workout-log/<int:workout_id>/', exercise_program_views.workout_log, name='workout_log'), #Log a workout and exercises inside it
-    path('workout-logs/<str:username>/', exercise_program_views.get_workout_logs_by_username, name='get_workout_logs_by_user_id'), #Get workout logs by user id
+    path('workout-logs/<str:username>/', exercise_program_views.get_workout_logs_by_username, name='get_workout_logs_by_user_id'), #Get workout logs by username
     path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'), # Rate a workout
     path('create-program/', exercise_program_views.create_program, name='create_program'), # Create a weekly program
-    path('get-programs/<str:username>/', exercise_program_views.get_programs_by_username, name='get_programs_by_user_id'), # Get weekly programs by user id
-    path('workouts/toggle-bookmark/', exercise_program_views.toggle_bookmark_workout, name='toggle_bookmark_workout'),
-    path('workouts/bookmarked/<str:username>/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'),
+    path('get-programs/<str:username>/', exercise_program_views.get_programs_by_username, name='get_programs_by_user_id'), # Get weekly programs by username
+    path('workouts/toggle-bookmark/', exercise_program_views.toggle_bookmark_workout, name='toggle_bookmark_workout'), # Bookmark a workout
+    path('workouts/bookmarked/<str:username>/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'), # Get bookmarked workouts by username
+    #User auth related endpoints
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
     path('log_out/', auth_views.log_out, name='log_out'),
     path('csrf_token/', auth_views.csrf_token, name='csrf_token'),
     path('session/', auth_views.session, name='session'),
+    #Profile related endpoints
     path('edit_profile/', profile_views.edit_profile, name='edit_profile'),
     path('view_profile/', profile_views.view_profile, name='view_profile'),
+    path('liked_posts/', post_views.liked_posts, name='liked_posts'),
+    path('bookmarked_posts/', post_views.bookmarked_posts, name='bookmarked_posts'),
+    #Feed related endpoints
     path('get_leaderboard/', simple_features_views.get_leaderboard, name='get_leaderboard'),
     path('get_workout_leaderboard/', simple_features_views.get_workout_leaderboard, name='get_workout_leaderboard'),
     path('get_meal_leaderboard/', simple_features_views.get_meal_leaderboard, name='get_meal_leaderboard'),
-    path('follow/', simple_features_views.follow, name='follow'),
-    path('unfollow/', simple_features_views.unfollow, name='unfollow'),
     path('post/', post_views.post, name='post'),
     path('toggle_like/', post_views.toggle_like, name='toggle_like'),
     path('comment/', post_views.comment, name='comment'),
     path('toggle_bookmark/', post_views.toggle_bookmark, name='toggle_bookmark'),
     path('feed/', social_feed_views.feed, name='feed'),
     path('following_feed/', social_feed_views.following_feed, name='following_feed'),
-    path('liked_posts/', post_views.liked_posts, name='liked_posts'),
-    path('bookmarked_posts/', post_views.bookmarked_posts, name='bookmarked_posts'),
+    path('follow/', simple_features_views.follow, name='follow'),
+    path('unfollow/', simple_features_views.unfollow, name='unfollow'),
+    #Swagger endpoints
     # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
