@@ -34,16 +34,16 @@ def get_exercises(request):
 
 
 
-@swagger_auto_schema(method='post', **workout_program_schema)
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@csrf_exempt
+# @swagger_auto_schema(method='post', **workout_program_schema)
+# @api_view(['POST'])
+# @permission_classes([AllowAny])
+# @csrf_exempt
 def workout_program(request):
     if request.method == 'POST':
         try:
-            # data = json.loads(request.body)
-            workout_name = request.POST.get('workout_name')
-            exercises = request.POST.get('exercises', [])
+            data = json.loads(request.body)
+            workout_name = data.get('workout_name')
+            exercises = data.get('exercises', [])
 
             if not workout_name:
                 return JsonResponse({'error': 'workout_name is required'}, status=400)
