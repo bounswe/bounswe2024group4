@@ -181,15 +181,20 @@ def get_workout_by_id(request, workout_id):
 @swagger_auto_schema(method='get', **get_workout_by_id_schema)
 @api_view(['GET'])
 @csrf_exempt
-def get_workouts_by_username(request, username):
+def get_workouts_by_username(request):
     if request.method == 'GET':
         try:
+            # Get the username from query parameters
+            username = request.GET.get('username')
+            if not username:
+                return JsonResponse({'error': 'username query parameter is required'}, status=400)
+
             # Get the user by username
             user = User.objects.get(username=username)
-            
+
             # Get all workouts created by this user
             workouts = Workout.objects.filter(created_by=user)
-            
+
             # Format the response
             workouts_data = [
                 {
@@ -212,6 +217,7 @@ def get_workouts_by_username(request, username):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 
 
@@ -251,12 +257,21 @@ def toggle_bookmark_workout(request):
 
 
 
-def get_bookmarked_workouts(request, username):
+def get_bookmarked_workouts(request):
     if request.method == 'GET':
         try:
+            # Get the username from query parameters
+            username = request.GET.get('username')
+            if not username:
+                return JsonResponse({'error': 'username query parameter is required'}, status=400)
+
+            # Get the user by username
             user = User.objects.get(username=username)
+
+            # Get all bookmarked workouts for this user
             bookmarked_workouts = user.bookmarked_workouts.all()
 
+            # Format the response
             workouts_data = [
                 {
                     'id': workout.workout_id,
@@ -272,8 +287,6 @@ def get_bookmarked_workouts(request, username):
             return JsonResponse({'error': 'User not found'}, status=404)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
 
 
 
@@ -330,9 +343,14 @@ def create_program(request):
 @csrf_exempt
 #@login_required
 # def get_programs_by_user_id(request, user_id):
-def get_programs_by_username(request, username):
+def get_programs_by_username(request):
     if request.method == 'GET':
         try:
+            # Get the username from query parameters
+            username = request.GET.get('username')
+            if not username:
+                return JsonResponse({'error': 'username query parameter is required'}, status=400)
+
             # Get the user by username
             user = User.objects.get(username=username)
             
@@ -372,7 +390,7 @@ def get_programs_by_username(request, username):
                 }
                 programs_data.append(program_data)
             
-            return JsonResponse(programs_data, safe=False)
+            return JsonResponse(programs_data, safe=False, status=200)
             
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
@@ -474,9 +492,14 @@ def workout_log(request, workout_id):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-def get_workout_logs_by_username(request, username):
+def get_workout_logs_by_username(request):
     if request.method == 'GET':
         try:
+            # Get the username from query parameters
+            username = request.GET.get('username')
+            if not username:
+                return JsonResponse({'error': 'username query parameter is required'}, status=400)
+
             # Get the user by username
             user = User.objects.get(username=username)
             
@@ -511,7 +534,7 @@ def get_workout_logs_by_username(request, username):
                 }
                 logs_data.append(log_data)
             
-            return JsonResponse(logs_data, safe=False)
+            return JsonResponse(logs_data, safe=False, status=200)
             
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
@@ -519,7 +542,6 @@ def get_workout_logs_by_username(request, username):
             return JsonResponse({'error': str(e)}, status=400)
             
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 
 
