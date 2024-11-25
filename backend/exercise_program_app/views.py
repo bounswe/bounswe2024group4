@@ -41,9 +41,9 @@ def get_exercises(request):
 def workout_program(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            workout_name = data.get('workout_name')
-            exercises = data.get('exercises', [])
+            # data = json.loads(request.body)
+            workout_name = request.POST.get('workout_name')
+            exercises = request.POST.get('exercises', [])
 
             if not workout_name:
                 return JsonResponse({'error': 'workout_name is required'}, status=400)
