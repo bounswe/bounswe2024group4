@@ -1,56 +1,33 @@
-import React, { useEffect } from 'react';
-import { FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Link } from 'expo-router';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WorkoutProgram from '../../components/WorkoutProgram';
+import axios from 'axios';
 
-const workoutPrograms = [
-  {
-    id: '1',
-    name: 'Chest and Triceps',
-    rating: '4.5',
-    exercises: [
-      {
-        id: '1',
-        image: require('../../assets/images/chest.png'),
-        name: 'Bench Press',
-        sets: 4,
-        reps: 10,
-      },
-      {
-        id: '2',
-        image: require('../../assets/images/shoulder.png'),
-        name: 'Dumbbell Flyes',
-        sets: 3,
-        reps: 12,
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Back and Biceps',
-    rating: '4.8',
-    exercises: [
-      {
-        id: '1',
-        image: require('../../assets/images/biceps.png'),
-        name: 'Pull Ups',
-        sets: 4,
-        reps: 8,
-      },
-      {
-        id: '2',
-        image: require('../../assets/images/back.png'),
-        name: 'Deadlift',
-        sets: 3,
-        reps: 6,
-      },
-    ],
-  },
-];
+const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000'
+const username = 'user1'; // Replace with the appropriate username logic
 
 export default function Index() {
+  const [workoutPrograms, setWorkoutPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchWorkoutPrograms = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`);
+      setWorkoutPrograms(response.data);
+    } catch (error) {
+      console.error('Error fetching workout programs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkoutPrograms();
+  }, []);
+
   const clearAsyncStorage = async () => {
     try {
       await AsyncStorage.removeItem('existingExercises');
@@ -59,6 +36,14 @@ export default function Index() {
       console.error('Failed to clear AsyncStorage:', error);
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <ActivityIndicator size="large" color="#1B55AC" style={styles.loader} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -95,5 +80,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#1B55AC',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

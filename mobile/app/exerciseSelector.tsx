@@ -5,6 +5,7 @@ import { Link } from 'expo-router';
 import axios from 'axios';
 
 export default function ExerciseSelect() {
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000'
   const { muscleName } = useLocalSearchParams<{
     muscleName: string;
   }>();
@@ -14,7 +15,7 @@ export default function ExerciseSelect() {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const response = await axios.get(`http://68.183.213.92:8000/get_exercises/?muscle=${muscleName}`, {});
+        const response = await axios.get(`${baseURL}/get_exercises/?muscle=${muscleName}`, {});
         setExercises(response.data);
       } catch (error) {
         console.error(error);
