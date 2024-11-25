@@ -69,10 +69,10 @@ def follow(request):
 @api_view(['POST'])
 def unfollow(request):
     if request.method == 'POST':
-        follower = User.objects.get(username=request.POST.get('username'))
+        follower = User.objects.get(username=request.data.get('username'))
         # follower = User.objects.get(username=request.user.username)
         try:
-            following = User.objects.get(username=request.POST.get('following'))
+            following = User.objects.get(username=request.data.get('following'))
         except User.DoesNotExist:
             return JsonResponse({'message': 'User not found'}, status=404)
         
