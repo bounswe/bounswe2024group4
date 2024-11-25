@@ -89,6 +89,41 @@ def workout_program(request):
     else:
         return render(request, 'workout_program.html')
 
+
+@csrf_exempt
+def delete_workout_by_id(request, workout_id):
+    if request.method == 'DELETE':
+        try:
+            # Get the username from the request body (or headers if preferred)
+            data = json.loads(request.body)
+            username = data.get('username')
+
+            if not username:
+                return JsonResponse({'error': 'username is required'}, status=400)
+
+            user = User.objects.get(username=username)
+            workout = Workout.objects.get(workout_id=workout_id)
+
+            # Check if the user is the creator of the workout
+            if workout.created_by != user:
+                return JsonResponse({'error': 'You are not authorized to delete this workout'}, status=403)
+
+            # Delete the workout
+            workout.delete()
+            return JsonResponse({'message': 'Workout deleted successfully'}, status=200)
+
+        except Workout.DoesNotExist:
+            return JsonResponse({'error': 'Workout not found'}, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
 @csrf_exempt
 #@login_required
 def create_program(request):

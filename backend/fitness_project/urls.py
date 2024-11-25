@@ -45,6 +45,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('workout_program/', exercise_program_views.workout_program, name='workout_program'), # Create a workout programs with exercises
+    path('workouts/delete/<int:workout_id>/', exercise_program_views.delete_workout_by_id, name='delete_workout_by_id'),
     path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'), #Get exercises from api
     path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'), #Get a workout by id
     path('get-workouts/<str:username>/', exercise_program_views.get_workouts_by_username, name='get_workouts_by_user_id'), #Get workouts by user id
