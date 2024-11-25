@@ -27,6 +27,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
+from activity_streams import views as activity_streams_views
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -78,6 +79,8 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
+    path('get-activities/', activity_streams_views.get_activity_stream, name='get_activity_stream'),
+    path('log-activity/', activity_streams_views.log_activity, name='log_activity'),
 ]
 
 if settings.DEBUG:

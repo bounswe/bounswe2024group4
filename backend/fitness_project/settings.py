@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'social_feed_app',
     'user_auth_app',
     'simple_features_app',
+    'activity_streams',
 
     'rest_framework',
     'drf_yasg',
