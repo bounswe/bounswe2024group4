@@ -71,8 +71,8 @@ def workout_program(request):
                     muscle=exercise_data['muscle'],
                     equipment=exercise_data['equipment'],
                     instruction=exercise_data['instruction'],
-                    sets=exercise_data['sets'],
-                    reps=exercise_data['reps'],
+                    sets=int(exercise_data['sets']),
+                    reps=int(exercise_data['reps']),
                 )
                 exercise.save()
 
