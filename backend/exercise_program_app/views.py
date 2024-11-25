@@ -9,7 +9,8 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
 from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema, rate_workout_schema, get_workout_by_id_schema
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from user_auth_app.models import User
 from datetime import datetime
 from django.utils import timezone
@@ -35,6 +36,7 @@ def get_exercises(request):
 
 @swagger_auto_schema(method='post', **workout_program_schema)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def workout_program(request):
     if request.method == 'POST':
@@ -125,6 +127,7 @@ def delete_workout_by_id(request, workout_id):
 
 @swagger_auto_schema(method='post', **rate_workout_schema)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def rate_workout(request):
     if request.method == 'POST':
@@ -221,7 +224,7 @@ def get_workouts_by_username(request):
 
 
 
-
+@permission_classes([AllowAny])
 @csrf_exempt
 def toggle_bookmark_workout(request):
     if request.method == 'POST':
@@ -290,7 +293,7 @@ def get_bookmarked_workouts(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-
+@permission_classes([AllowAny])
 @csrf_exempt
 #@login_required
 def create_program(request):
