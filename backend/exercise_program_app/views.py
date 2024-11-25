@@ -404,6 +404,7 @@ def get_programs_by_username(request):
 @csrf_exempt
 #@login_required
 def workout_log(request, workout_id):
+    #Get method is unnecessary, but it's here for testing purposes
     if request.method == 'GET':
         try:
             user = User.objects.first()
