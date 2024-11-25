@@ -1,100 +1,122 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, Image, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, Image, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { TabView, TabBar } from 'react-native-tab-view';
 import { Rating } from 'react-native-ratings';
 import PostsScreen from './index';
 import WorkoutsScreen from '../../components/WorkoutsScreen';
 import MealsScreen from '../../components/MealsScreen';
-import { useRouter } from 'expo-router';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
 import axios from 'axios';
 
-// Define route type
 interface Route {
   key: 'posts' | 'workouts' | 'meals';
   title: string;
 }
 
-// Define renderScene mapping
 const renderScene: Record<Route['key'], React.ComponentType> = {
   posts: PostsScreen,
   workouts: WorkoutsScreen,
   meals: MealsScreen,
 };
 
-// Mock user data structure based on your backend
-const mockUser = {
-  username: 'John Doe',
-  bio: 'Fitness enthusiast, meal prep lover, and personal trainer. Let’s stay active!',
-  profilePicture: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/%E9%98%BF%E7%88%BE%E9%81%94%C2%B7%E5%B1%85%E5%8B%92%E7%88%BE2024%E6%AD%90%E6%B4%B2%E7%9B%83%E9%A6%96%E5%A0%B4%E5%B0%8F%E7%B5%84%E8%B3%BD%E9%A6%96%E7%99%BC-2024.jpg/400px-%E9%98%BF%E7%88%BE%E9%81%94%C2%B7%E5%B1%85%E5%8B%92%E7%88%BE2024%E6%AD%90%E6%B4%B2%E7%9B%83%E9%A6%96%E5%A0%B4%E5%B0%8F%E7%B5%84%E8%B3%BD%E9%A6%96%E7%99%BC-2024.jpg',
-  score: 4.2, 
-  height: 175, 
-  weightHistory: [
-    { weight: 70, date: '2024-01-01' }, 
-    { weight: 72, date: '2024-02-01' },
-    { weight: 68, date: '2024-03-01' },
-  ],
-  followers: 1200,
-  following: 300,
-  posts: 45,
-};
-
 interface ProfileScreenProps {
-  isOwnProfile?: boolean; // Optional prop with default value
+  isOwnProfile?: boolean;
 }
 
-function ProfileScreen({ isOwnProfile = true }: ProfileScreenProps) {
+function ProfileScreen() {
   const router = useRouter();
+  const { viewingUser, viewedUser } = useGlobalSearchParams();
   const [index, setIndex] = useState(0);
   const [routes] = useState<Route[]>([
     { key: 'posts', title: 'Posts' },
     { key: 'workouts', title: 'Workouts' },
     { key: 'meals', title: 'Meals' },
   ]);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [isFollowing, setIsFollowing] = useState(false); // State for follow/unfollow
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
-  const handleFollowToggle = () => {
-    setIsFollowing(!isFollowing); // Toggle follow/unfollow state
+  const isOwnProfile = viewingUser === viewedUser;
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get(
+          `${baseURL}/view_profile/?viewing_username=${viewingUser}&viewed_username=${viewedUser}`
+        );
+        setUserData(response.data);
+        setIsFollowing(response.data.is_following);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [viewingUser, viewedUser]);
+
+  const handleFollowToggle = async () => {
+    try {
+      const action = isFollowing ? 'unfollow' : 'follow';
+      await axios.post(`${baseURL}/${action}/`, {
+        viewing_username: viewingUser,
+        viewed_username: viewedUser,
+      });
+      setIsFollowing(!isFollowing);
+    } catch (error) {
+      console.error('Error toggling follow state:', error);
+    }
   };
 
-  // Extract the most recent weight
-  const recentWeight =
-    mockUser.weightHistory.length > 0
-      ? mockUser.weightHistory[mockUser.weightHistory.length - 1].weight
-      : null;
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#FFFFFF" />
+      </View>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: '#FFFFFF' }}>Failed to load profile.</Text>
+      </View>
+    );
+  }
+
+  const { bio, profile_picture, score, height, weight_history, followers_count, following_count, posts } = userData;
+  const profilePictureUri = profile_picture && profile_picture.trim() !== '' ? profile_picture : 'https://via.placeholder.com/150';
+  const recentWeight = weight_history.length > 0 ? weight_history[weight_history.length - 1].weight : null;
 
   return (
     <View style={styles.container}>
       {/* User Info Section */}
       <View style={styles.userInfo}>
-        <Image source={{ uri: mockUser.profilePicture }} style={styles.profilePicture} />
+        <Image source={{ uri: profilePictureUri }} style={styles.profilePicture} />
         <View style={styles.statsContainer}>
           {/* Score Section */}
           <View style={styles.stat}>
-          <Text style={[styles.statLabel, styles.boldText]}>Score</Text>
+            <Text style={[styles.statLabel, styles.boldText]}>Score</Text>
             <View style={styles.ratingContainer}>
-              <Rating
-                type="star"
-                startingValue={mockUser.score}
-                readonly
-                imageSize={18}
-                tintColor="#1B55AC"
-              />
-              <Text style={styles.ratingText}>{mockUser.score} / 5</Text>
+              <Rating type="star" startingValue={score} readonly imageSize={18} tintColor="#1B55AC" />
+              <Text style={styles.ratingText}>{score.toFixed(1)} / 5</Text>
             </View>
           </View>
           {/* Stats Section */}
           <View style={styles.rowStats}>
             <View style={styles.stat}>
-              <Text style={styles.statNumber}>{mockUser.posts}</Text>
+              <Text style={styles.statNumber}>{posts}</Text>
               <Text style={styles.statLabel}>Posts</Text>
             </View>
             <View style={styles.stat}>
-              <Text style={styles.statNumber}>{mockUser.followers}</Text>
+              <Text style={styles.statNumber}>{followers_count}</Text>
               <Text style={styles.statLabel}>Followers</Text>
             </View>
             <View style={styles.stat}>
-              <Text style={styles.statNumber}>{mockUser.following}</Text>
+              <Text style={styles.statNumber}>{following_count}</Text>
               <Text style={styles.statLabel}>Following</Text>
             </View>
           </View>
@@ -103,11 +125,11 @@ function ProfileScreen({ isOwnProfile = true }: ProfileScreenProps) {
 
       {/* User Bio Section */}
       <View style={styles.userBioContainer}>
-        <Text style={styles.userName}>{mockUser.username}</Text>
-        <Text style={styles.userBio}>{mockUser.bio}</Text>
+        <Text style={styles.userName}>{viewedUser}</Text>
+        <Text style={styles.userBio}>{bio}</Text>
         {/* Height & Weight Section */}
         <View style={styles.heightWeightContainer}>
-          <Text style={styles.heightWeightText}>Height: {mockUser.height} cm</Text>
+          <Text style={styles.heightWeightText}>Height: {height} cm</Text>
           {recentWeight && <Text style={styles.heightWeightText}>Weight: {recentWeight} kg</Text>}
         </View>
       </View>
@@ -117,7 +139,18 @@ function ProfileScreen({ isOwnProfile = true }: ProfileScreenProps) {
         {isOwnProfile ? (
           <TouchableOpacity
             style={styles.editProfileButton}
-            onPress={() => router.push('/EditProfileScreen')} // Route change
+            onPress={() => router.push({
+              pathname: '/EditProfileScreen',
+              params: {
+                username: viewedUser,
+                bio,
+                profilePicture: profile_picture,
+                height,
+                recentWeight,
+                viewingUser,
+                viewedUser,
+              },
+            })}
           >
             <Text style={styles.buttonText}>Edit Profile</Text>
           </TouchableOpacity>
@@ -126,9 +159,7 @@ function ProfileScreen({ isOwnProfile = true }: ProfileScreenProps) {
             style={[styles.followButton, isFollowing ? styles.unfollowButton : {}]}
             onPress={handleFollowToggle}
           >
-            <Text style={styles.buttonText}>
-              {isFollowing ? 'Unfollow' : 'Follow'}
-            </Text>
+            <Text style={styles.buttonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
           </TouchableOpacity>
         )}
       </View>
