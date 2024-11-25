@@ -23,7 +23,8 @@ def edit_profile(request):
             new_height = request.POST.get('height')
             new_password = request.POST.get('password')
 
-            user = request.user
+            # user = request.user
+            user = User.objects.get(username=request.POST.get('username'))
 
             if new_username:
                 user.username = new_username
@@ -55,42 +56,50 @@ def edit_profile(request):
 
 @swagger_auto_schema(method='get', **view_profile_schema)
 @api_view(['GET'])
-@login_required
+#@login_required
 def view_profile(request):
     if request.method == 'GET':
         print(request.GET)
-        username = request.GET.get('username')
+        viewing_username = request.GET.get('viewing_username')
+        viewing_user = User.objects.get(username=viewing_username)
+        viewed_username = request.GET.get('viewed_username')
         try:
-            user = User.objects.get(username=username)
+            viewed_user = User.objects.get(username=viewed_username)
         except:
             return JsonResponse({'message': 'User not found'}, status=404)
-        bio = user.bio
-        profile_picture = user.profile_picture.url if user.profile_picture else ''
+        bio = viewed_user.bio
+        profile_picture = viewed_user.profile_picture.url if viewed_user.profile_picture else ''
         # score = user.score
-        workout_rating = user.workout_rating
-        meal_rating = user.meal_rating
-        workout_rating_count = user.workout_rating_count
-        meal_rating_count = user.meal_rating_count
-        following_count = Follow.objects.filter(follower=user).count()
-        followers_count = Follow.objects.filter(following=user).count()
+        workout_rating = viewed_user.workout_rating
+        meal_rating = viewed_user.meal_rating
+        workout_rating_count = viewed_user.workout_rating_count
+        meal_rating_count = viewed_user.meal_rating_count
+        following_count = Follow.objects.filter(follower=viewed_user).count()
+        followers_count = Follow.objects.filter(following=viewed_user).count()
 
-        if request.user == user: # If user is viewing their own profile
-            is_following = None
-            email = user.email
-            weight_history = Weight.objects.filter(user=user)
-            height = user.height
-        else:
-            is_following = user.followers.filter(username=request.user.username).exists()
-            email = None
-            weight_history = []
-            height = None
+        # if request.user == user: # If user is viewing their own profile
+        #     is_following = None
+        #     email = user.email
+        #     weight_history = Weight.objects.filter(user=user)
+        #     height = user.height
+        # else:
+        #     is_following = user.followers.filter(username=request.user.username).exists()
+        #     email = None
+        #     weight_history = []
+        #     height = None
 
-        posts = Post.objects.filter(user=user)
-        workouts = Workout.objects.filter(created_by=user)
+        # is_following = user.following.filter(username=user.username).exists()
+        is_following = Follow.objects.filter(follower=viewing_user, following=viewed_user).exists()
+        email = viewed_user.email
+        weight_history = Weight.objects.filter(user=viewed_user)
+        height = viewed_user.height
+
+        posts = Post.objects.filter(user=viewed_user)
+        workouts = Workout.objects.filter(created_by=viewed_user)
         # meals = Diet.objects.filter(user=user)
 
         context = {
-            'username': username,
+            'username': viewed_username,
             'email': email,
             'bio': bio,
             'profile_picture': profile_picture,

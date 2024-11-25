@@ -54,14 +54,14 @@ class PostViewTestCase(TestCase):
         # Simulate a GET request to the post endpoint
         url = reverse('post')
         response = self.client.get(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "GET" not allowed.')
 
 
 class ToggleLikeViewTestCase(TestCase):
@@ -151,14 +151,14 @@ class ToggleLikeViewTestCase(TestCase):
         # Simulate a GET request to the toggle_like endpoint
         url = reverse('toggle_like')
         response = self.client.get(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "GET" not allowed.')
 
 
 class CommentViewTestCase(TestCase):
@@ -258,14 +258,14 @@ class CommentViewTestCase(TestCase):
         # Simulate a GET request to the comment endpoint
         url = reverse('comment')
         response = self.client.get(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "GET" not allowed.')
 
 
 class ToggleBookmarkViewTestCase(TestCase):
@@ -347,18 +347,18 @@ class ToggleBookmarkViewTestCase(TestCase):
         self.assertIn('error', json_data)
         self.assertEqual(json_data['error'], 'postId is required')
 
-    def test_toggle_bookmark_invalid_method(self):
-        # Simulate a GET request to the toggle_bookmark endpoint
-        url = reverse('toggle_bookmark')
-        response = self.client.get(url)
-
+    def test_bookmarked_posts_invalid_method(self):
+        # Simulate a POST request to the bookmarked_posts endpoint
+        url = reverse('bookmarked_posts')
+        response = self.client.post(url)
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
 class LikedPostsViewTestCase(TestCase):
@@ -389,14 +389,14 @@ class LikedPostsViewTestCase(TestCase):
         # Simulate a POST request to the liked_posts endpoint
         url = reverse('liked_posts')
         response = self.client.post(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
 class BookmarkedPostsViewTestCase(TestCase):
@@ -427,11 +427,11 @@ class BookmarkedPostsViewTestCase(TestCase):
         # Simulate a POST request to the bookmarked_posts endpoint
         url = reverse('bookmarked_posts')
         response = self.client.post(url)
-
+    
         # Check that the response status code is 405 Method Not Allowed
         self.assertEqual(response.status_code, 405)
-
+    
         # Check the JSON response data for the error message
         json_data = response.json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], 'Invalid method')
+        self.assertIn('detail', json_data)
+        self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
