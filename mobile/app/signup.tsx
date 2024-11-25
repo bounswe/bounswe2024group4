@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 import { Ionicons } from '@expo/vector-icons'; 
+import axios from 'axios';
 
 const SignupScreen = () => {
   const [username, setUsername] = useState<string>('');
@@ -17,6 +19,7 @@ const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [successModalVisible, setSuccessModalVisible] = useState<boolean>(false);
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
   // Validation functions remain unchanged
   const validateUsername = (username: string): string => {
@@ -42,7 +45,7 @@ const SignupScreen = () => {
     return '';
   };
 
-  const handleSignup = (): void => {
+  const handleSignup = async (): Promise<void> => {
     const newErrors = {
       username: validateUsername(username),
       email: validateEmail(email),
@@ -53,7 +56,39 @@ const SignupScreen = () => {
     setErrors(newErrors);
 
     if (!newErrors.username && !newErrors.email && !newErrors.password && !newErrors.confirmPassword) {
-      setSuccessModalVisible(true);
+      try {
+        // Fetch CSRF Token (if applicable)
+        const csrfResponse = await axios.get(`${baseURL}/csrf_token/`, { withCredentials: true });
+        const csrfToken = csrfResponse.data.csrf_token;
+
+        // Configure request headers
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          withCredentials: true,
+        };
+
+        // Post sign-up data
+        const response = await axios.post(
+          `${baseURL}/sign_up/`,
+          {
+            username,
+            email,
+            password,
+            user_type: 'member', // Optional user_type field
+          },
+          config
+        );
+
+        await AsyncStorage.setItem('csrfToken', csrfResponse.data.csrf_token);
+        console.log('Signup successful:', response.data);
+        setSuccessModalVisible(true);
+      } catch (err: any) {
+        console.error('Signup failed:', err.response?.data || err.message);
+        Alert.alert('Signup Error', err.response?.data?.message || 'Signup failed. Please try again.');
+      }
     }
   };
 
