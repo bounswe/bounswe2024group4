@@ -44,7 +44,7 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
       )}
       <button
         className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-        onClick={onEndExercise}
+        onClick={() => onEndExercise(completedExercises)}
       >
         End Exercise
       </button>
@@ -53,4 +53,3 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
 };
 
 export default TodaysExercises;
-
