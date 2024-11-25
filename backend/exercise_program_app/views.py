@@ -125,10 +125,10 @@ def delete_workout_by_id(request, workout_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-@swagger_auto_schema(method='post', **rate_workout_schema)
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@csrf_exempt
+# @swagger_auto_schema(method='post', **rate_workout_schema)
+# @api_view(['POST'])
+# @permission_classes([AllowAny])
+# @csrf_exempt
 def rate_workout(request):
     if request.method == 'POST':
         try:
