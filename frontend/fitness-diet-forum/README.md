@@ -11,7 +11,7 @@ After running the server as mentioned in [README of backend](https://github.com/
 3. Put the following `.env` inside `frontend` directory:
 
 ```
-REACT_APP_DEPLOY_MACHINE_IP=127.0.0.1
+REACT_APP_API_URL=127.0.0.1
 ```
 
 3. Then you can run the website with the command:
