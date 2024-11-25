@@ -44,6 +44,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     liked_posts = models.ManyToManyField('posts_app.Post', related_name='liked_by', blank=True)
     bookmarked_posts = models.ManyToManyField('posts_app.Post', related_name='bookmarked_by', blank=True)
     following = models.ManyToManyField('self', symmetrical=False, through='Follow', related_name='followers')
+    bookmarked_workouts = models.ManyToManyField('exercise_program_app.Workout', related_name='bookmarked_by_users', blank=True)
+
     
     # Adding related_name to avoid clashes with Django's built-in auth.User
     groups = models.ManyToManyField(
