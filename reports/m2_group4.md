@@ -66,6 +66,11 @@
 | 1.2.6.1 Each member shall have a profile page. | :large_blue_circle: | :large_blue_circle: | :large_blue_circle: |
 | 1.2.6.2 Each member shall be able to view other members’ profile pages as well as his/her own including their profile information: that member's profile photo, biography, number of followers, rating, previous posts, workout, and diet programs. | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |
 
+# UX Design
+- We decided to take action to create similar user experience in mobile and web applications.
+- We decided to make 3 leaderboards instead of 1. Three leaderboards include one for only meal ratings, one for only exercise ratings and one for both to improve user experience and enable people to choose the best in each area.
+- We added weekly exercise tracking system.
+
 ### Description of the Standard Being Utilized
 This is documented [here](https://github.com/bounswe/bounswe2024group4/wiki/W3C-Standard-Selection-%E2%80%90-Activity-Streams)
 
@@ -1296,5 +1301,4 @@ const fetchLeaderboard = async (endpoint: string) => {
 #### Additional information:
 Attended all labs, worked hard, implemented lots of codes and contributed to our strong teamwork. Also reviewed and gave feedback nearly all pull requests developed by mobile team.
 </details>
-
 
