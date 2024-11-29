@@ -1,0 +1,36 @@
+[31m[1mERROR   [0m django.request:log.py:241 Internal Server Error: /view_profile/
+Traceback (most recent call last):
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/profiles_app/views.py", line 65, in view_profile
+    viewing_user = User.objects.get(username=viewing_username)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kaanguneyli/Desktop/cmpe451/bounswe2024group4/backend/venv/lib/python3.11/site-packages/django/db/models/query.py", line 637, in get
+    raise self.model.DoesNotExist(
+user_auth_app.models.User.DoesNotExist: User matching query does not exist.

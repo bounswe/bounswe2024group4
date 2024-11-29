@@ -1,0 +1,1 @@
+[33mWARNING [0m django.request:log.py:241 Bad Request: /toggle_bookmark/

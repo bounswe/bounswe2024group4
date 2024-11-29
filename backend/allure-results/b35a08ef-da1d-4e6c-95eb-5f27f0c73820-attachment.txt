@@ -1,0 +1,1 @@
+[31m[1mERROR   [0m django.request:log.py:241 Internal Server Error: /comment/
