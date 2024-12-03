@@ -38,9 +38,14 @@
 * Users rate content with a score. Ratings are aggregated, and displayed dynamically, using a scoring algorithm.
 
 ### API and its Documentation
+- [ ] API of the platform should be documented using Swagger
+- [ ] Each endpoint should be included
+- [ ] Each endpoints should include explanations
+- [ ] Each endpoints should include examples
+- [ ] Every possible response for endpoints should be covered
 
 ### Standart Being Followed
-We will follow the Activity Streams standard of W3C.
+Follow the Activity Streams standard of W3C.
 - [ ] Find a NoSQL database to hold the information
 - [ ] Data format should be JSON
 - [ ] Log the profile views from view_profile endpoint
