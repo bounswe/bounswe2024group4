@@ -37,5 +37,9 @@ _**Notes by:**_ Zeynep Buse Aydın & Bilge Kaan Güneyli \
 | Implement profile and profile related features | Nurullah Uçan | 10.12.2024 |
 | Implement posts and post related features | Berat Yılmaz | 10.12.2024 |
 | Implement exercise and exercise related features | Ceyhun Sonyürek | 10.12.2024 |
-| Implement  | Zeynep Buse Aydın | 10.12.2024 |
-| Implement  | Ahmet BAtuhan Canlı | 10.12.2024 |
+| Implement liking  | Zeynep Buse Aydın | 10.12.2024 |
+| Connect feed to backend  | Zeynep Buse Aydın | 10.12.2024 |
+| Implement creating a post  | Zeynep Buse Aydın | 10.12.2024 |
+| Implement edit profile  | Zeynep Buse Aydın | 10.12.2024 |
+| Implement bookmarking UI and functionality  | Ahmet Batuhan Canlı | 10.12.2024 |
+| Finalize workout logging and display history  | Ahmet Batuhan Canlı | 10.12.2024 |
