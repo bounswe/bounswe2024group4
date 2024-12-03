@@ -3,15 +3,15 @@
 ### Features to be Finalized for Final Milestone
 - [ ] Post and Feed
 - [ ] Meal
-- [ ] Exercise
+- [x] Exercise
 - [ ] Advanced Search
-- [ ] Workout logs
+- [x] Workout logs
 
 ### Primary Features
 - [ ] Advanced Search
 - [ ] Feed and Posts
-- [ ] Follow/unfollow
-- [ ] Login/logout
+- [x] Follow/unfollow
+- [x] Login/logout
 - [ ] Bookmarking
 - [ ] Comment
 - [ ] Like
@@ -25,7 +25,7 @@
 * Exercise tracking is crucial for monitoring progress and maintaining accountability, which are central to fitness-focused applications.
 * The app logs workouts, including number of repetitions, sets, and weight, using user inputs. This data is available to users for them to see their progress.
 
-- [ ] Leaderboard
+- [x] Leaderboard
 * Leaderboards promote community engagement and motivate users through gamification, leveraging friendly competition to encourage consistency in workouts and diet.
 * User exercise and meal programs are rated by other users. Scores are aggregated and ranked in real time using a leaderboard algorithm, with data stored in MySQL database.
 
@@ -33,20 +33,20 @@
 * This feature distinguishes super users (e.g., trainers or coaches) from regular users, enabling tailored functionalities like creating exercise for others.
 * The user roles are determined based on user ratings. Super-users access more functionalities, while regular users have standard functionality.
 
-- [ ] Rating System
+- [x] Rating System
 * A rating system allows users to provide feedback on workouts, meals, fostering user-driven content improvement and enhancing community trust.
 * Users rate content with a score. Ratings are aggregated, and displayed dynamically, using a scoring algorithm.
 
 ### API and its Documentation
-- [ ] API of the platform should be documented using Swagger
-- [ ] Each endpoint should be included
-- [ ] Each endpoints should include explanations
+- [x] API of the platform should be documented using Swagger
+- [x] Each endpoint should be included
+- [x] Each endpoints should include explanations
 - [ ] Each endpoints should include examples
 - [ ] Every possible response for endpoints should be covered
 
 ### Standart Being Followed
 Follow the Activity Streams standard of W3C.
-- [ ] Find a NoSQL database to hold the information
+- [x] Find a NoSQL database to hold the information
 - [ ] Data format should be JSON
 - [ ] Log the profile views from view_profile endpoint
 - [ ] Log the post deletions from delete_post endpoint
