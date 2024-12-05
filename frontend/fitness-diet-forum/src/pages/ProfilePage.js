@@ -147,7 +147,11 @@ const ProfilePage = () => {
                 {/* Profile Picture */}
                 <div className="flex justify-start mb-6">
                     <img
-                        src={userData.profile_picture}
+                        src={
+                            userData.profile_picture 
+                            ? userData.profile_picture 
+                            : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                        }
                         alt="Profile"
                         className="profile-picture w-32 h-32 rounded-full border-4 border-gray-600"
                     />
