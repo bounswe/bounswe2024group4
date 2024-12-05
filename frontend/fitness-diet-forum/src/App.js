@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './css/index.css';
-import PostPage from "./pages/PostPage";
+import Feed from "./pages/Feed";
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar'; 
 import MealList from './pages/MealList';
@@ -60,7 +60,7 @@ function App() {
       element={
         <PrivateRoute>
           <AuthenticatedLayout>
-            <PostPage />
+            <Feed />
           </AuthenticatedLayout>
         </PrivateRoute>
       }
