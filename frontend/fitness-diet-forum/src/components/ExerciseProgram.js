@@ -38,7 +38,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
     };
 
     return (
-        <div className="exercise-program bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
+        <div className="w-full bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
             {/* Program Name */}
             <div className="mb-4">
                 <h2 className="text-2xl font-semibold">{programName}</h2>

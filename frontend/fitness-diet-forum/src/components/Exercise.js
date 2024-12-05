@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import '../css/index.css'; // Adjust this path if necessary
 
 const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
-    const [showFullInstruction, setShowFullInstruction] = useState(false);
+    const [showInstruction, setShowInstruction] = useState(false);
 
-    const toggleInstruction = () => {
-        setShowFullInstruction(!showFullInstruction);
+    const toggleVisibility = () => {
+        setShowInstruction(!showInstruction); // Toggle visibility of the instruction
     };
 
     const formatString = (input) => {
@@ -15,37 +15,20 @@ const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg text-white p-6 shadow-xl space-y-4">
+        <div className="w-full min-w-2xl mx-auto bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg text-white p-6 shadow-xl space-y-4">
             {/* Exercise Header */}
             <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold">{exerciseName}</h2>
-                <div className="text-right">
-                    <p className="text-lg">
-                        <span className="font-semibold">Sets:</span> {sets}
-                    </p>
-                    <p className="text-lg">
-                        <span className="font-semibold">Reps:</span> {reps}
-                    </p>
-                </div>
             </div>
 
-            {/* Instruction Section */}
-            {instruction && (
-                <div className="bg-white text-gray-800 rounded-lg p-4 shadow-inner">
-                    <h3 className="text-xl font-semibold mb-2 text-blue-700">Instruction</h3>
-                    <p className="text-lg leading-relaxed">
-                        {showFullInstruction
-                            ? instruction
-                            : `${instruction.slice(0, 100)}...`}
+            <div>
+                    <p className="text-lg">
+                        <span className="text-lg font-semibold text-blue-300">Sets:</span> {sets}
                     </p>
-                    <button
-                        onClick={toggleInstruction}
-                        className="mt-3 px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
-                    >
-                        {showFullInstruction ? 'Show less' : 'Get more'}
-                    </button>
-                </div>
-            )}
+                    <p className="text-lg">
+                        <span className="text-lg font-semibold text-blue-300">Reps:</span> {reps}
+                    </p>
+            </div>
 
             {/* Equipment Section */}
             {equipment && (
@@ -54,6 +37,34 @@ const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
                     <p className="text-lg">{formatString(equipment)}</p>
                 </div>
             )}
+
+            {/* Instruction Section */}
+            {instruction && (
+                <>
+                    <h3 
+                        onClick={toggleVisibility} // Make the header clickable to toggle the instruction section visibility
+                        className="text-lg text-blue-300 cursor-pointer"
+                    >
+                        {showInstruction ? '' : 'Click here for instructions'}
+                    </h3>
+                    
+                    {showInstruction && (
+                        <div className="bg-white text-gray-800 rounded-lg p-4 shadow-inner">
+                            <p className="text-lg leading-relaxed">
+                                {instruction}
+     
+                            </p>
+                            <button
+                                onClick={toggleVisibility}
+                                className="mt-3 px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    )}
+                </>
+            )}
+
         </div>
     );
 };
