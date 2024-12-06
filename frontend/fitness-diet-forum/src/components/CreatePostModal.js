@@ -108,20 +108,37 @@ const CreatePostModal = ({
           {/* Display Added Workouts */}
           {selectedWorkouts.length > 0 && (
             <div className="mb-4">
-              <h3 className="font-semibold text-lightText">Added Workouts</h3>
-              <div className="flex gap-2 flex-wrap">
+              <h3 className="font-semibold text-lightText mb-2">Added Workouts</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {selectedWorkouts.map((workout) => (
-                  <button
+                  <div
                     key={workout.id}
-                    className="bg-gray-300 text-black p-2 rounded m-2 hover:bg-gray-400"
-                    onClick={() => toggleExerciseProgram(workout.id)}
+                    className="bg-gray-700 text-white p-4 rounded shadow-md flex flex-col items-start"
                   >
-                    {workout.workout_name}
-                  </button>
+                    <h4 className="text-lg font-semibold mb-2">{workout.workout_name}</h4>
+                    <p className="text-sm text-gray-400 mb-4">
+                      {workout.exercises.length} exercises
+                    </p>
+                    <div className="mt-auto flex gap-2">
+                      <button
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                        onClick={() => toggleExerciseProgram(workout.id)}
+                      >
+                        Details
+                      </button>
+                      <button
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                        onClick={() => handleRemoveSelected(workout.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
           )}
+
 
           {/* Display the Exercise Program if selected */}
           {visibleWorkout && (
