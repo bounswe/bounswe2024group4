@@ -1,7 +1,7 @@
 import React from "react";
 import Post from "../components/Post"; // Import your Post component
 
-const PostPage = () => {
+const Feed = () => {
     // Sample user data for each post
     const users = [
         {
@@ -435,7 +435,7 @@ const PostPage = () => {
 
     return (
         <div className="bg-gray-800 min-h-screen p-6">
-            <h1 className="text-3xl font-bold text-white mb-6">My Posts</h1>
+            <h1 className="text-3xl font-bold text-white mb-6">Feed</h1>
             <div className="space-y-6">
                 {postsData.map((post, index) => (
                     <Post
@@ -451,4 +451,4 @@ const PostPage = () => {
     );
 };
 
-export default PostPage;
+export default Feed;

@@ -299,6 +299,7 @@ const ExerciseProgramList = () => {
                                     programId={program.id}
                                     currentRating={program.rating}
                                     ratingCount={program.rating_count}
+                                    showRating={false}
                                 />
                             ))
                         )}
