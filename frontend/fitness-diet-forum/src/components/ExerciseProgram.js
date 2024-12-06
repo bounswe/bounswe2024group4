@@ -4,7 +4,7 @@ import axios from "axios";
 import "../css/index.css";
 import { Context } from "../globalContext/globalContext.js";
 
-const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, currentRating, ratingCount }) => {
+const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, currentRating, ratingCount, showRating }) => {
     const [rating, setRating] = useState(0); // User's selected rating
     const [hoveredRating, setHoveredRating] = useState(0); // Highlighted stars on hover
     const [message, setMessage] = useState(null); // Feedback message after submission
@@ -65,7 +65,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
             </div>
 
             {/* Star Rating */}
-            {!isOwn && (
+            {showRating && (
                 <div className="rating mt-4">
                     <h3 className="text-xl font-semibold mb-2">Rate this program:</h3>
                     <div className="stars flex items-center">

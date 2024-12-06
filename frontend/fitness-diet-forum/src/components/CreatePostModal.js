@@ -134,6 +134,7 @@ const CreatePostModal = ({
                     isOwn={true}
                     currentRating={workout.rating}
                     ratingCount={workout.rating_count}
+                    showRating={false}
                   />
                 ))}
             </div>
