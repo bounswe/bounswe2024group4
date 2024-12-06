@@ -13,11 +13,12 @@ from swagger_docs.swagger import post_schema, toggle_like_schema, comment_schema
 @csrf_exempt
 def post(request):
     if request.method == 'POST':
-        user = request.user
-        # user = User.objects.get(username=request.POST.get('username'))
-        content = request.data.get('content')
-        workoutId = request.data.get('workoutId')
-        mealId = request.data.get('mealId')
+        #user = request.user
+        data = request.data
+        user = User.objects.get(username=data.get('username'))
+        content = data.get('content')
+        workoutId = data.get('workoutId')
+        mealId = data.get('mealId')
         post = Post.objects.create(user=user, content=content)
         
         if workoutId:
