@@ -2,7 +2,6 @@ import React, { useState, useContext } from "react";
 import { FaSearch } from 'react-icons/fa';
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
-import { setLoggedIn } from "../components/Auth.js";
 import { useNavigate } from "react-router-dom";
 import CreatePostModal from "./CreatePostModal"; // Import CreatePostModal
 
@@ -20,7 +19,7 @@ const Topbar = ({ }) => {
   const handleLogout = async () => {
     try {
       await axios.post(baseURL + "/log_out/");
-      setLoggedIn("false");
+      localStorage.setItem("LoggedIn", "false")
       navigate("/");
     } catch (error) {
       console.log(error.message);
