@@ -103,7 +103,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
                         className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300"
                         onClick={onDelete}
                     >
-                        Delete Program
+                        Remove Program
                     </button>
                 </div>
             )}
