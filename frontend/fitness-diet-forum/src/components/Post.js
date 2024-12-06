@@ -5,7 +5,7 @@ import ExerciseProgram from "./ExerciseProgram";
 import Meal from "./Meal";
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
-
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 const Post = ({ user, content, mealId, workoutId }) => {
     const globalContext = useContext(Context);
@@ -26,15 +26,15 @@ const Post = ({ user, content, mealId, workoutId }) => {
     useEffect(() => {
         const fetchPostData = async () => {
             try {
-                if(mealId){
+                if (mealId) {
                     // TO DO get meal with meal ID
                 }
-                if(workoutId){
+                if (workoutId) {
                     const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`);
                     console.log(workoutResponse);
                     if (workoutResponse.status === 200) {
                         const data = workoutResponse.data;
-                        console.log(data)
+                        console.log(data);
                         setWorkout(data);
                     } else {
                         setError('Workout not found');
@@ -45,7 +45,7 @@ const Post = ({ user, content, mealId, workoutId }) => {
             }
         };
         fetchPostData();
-    }, [mealId, workoutId]);;
+    }, [mealId, workoutId]);
 
     // Handle like button click
     const handleLikeClick = () => {
@@ -67,20 +67,23 @@ const Post = ({ user, content, mealId, workoutId }) => {
         <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
             {/* Header */}
             <div className="flex items-center mb-4">
-                <img
-                    src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} // Dynamically loads profile picture
-                    alt="Profile"
-                    className="w-12 h-12 rounded-full mr-4"
-                />
-                <div>
-                    <h3 className="text-xl font-semibold">@{user.username}</h3>
-                    <div className="flex items-center text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                            <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
-                        ))}
-                        <span className="text-gray-300 ml-2">{user.score}</span>
+                {/* Wrap profile picture and username in Link */}
+                <Link to={`/profile/${user.username}`} className="flex items-center">
+                    <img
+                        src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} // Dynamically loads profile picture
+                        alt="Profile"
+                        className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                        <h3 className="text-xl font-semibold">@{user.username}</h3>
+                        <div className="flex items-center text-yellow-400">
+                            {[...Array(5)].map((_, i) => (
+                                <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
+                            ))}
+                            <span className="text-gray-300 ml-2">{user.score}</span>
+                        </div>
                     </div>
-                </div>
+                </Link>
             </div>
 
             {/* Post Content */}
@@ -100,7 +103,6 @@ const Post = ({ user, content, mealId, workoutId }) => {
             )}
 
             {/* ExerciseProgram */}
-            
             {workout && (
                 <div className="h-96 overflow-y-scroll mb-4">
                     <ExerciseProgram
@@ -111,7 +113,7 @@ const Post = ({ user, content, mealId, workoutId }) => {
                         programId={workout.id}
                         currentRating={workout.rating}
                         ratingCount={workout.rating_count}
-                        showRating={false}
+                        showRating={true}
                     />
                 </div>
             )}
