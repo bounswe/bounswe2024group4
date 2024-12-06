@@ -1,17 +1,50 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { FaHeart, FaComment } from "react-icons/fa";
 import { IoIosStar } from "react-icons/io";
-import Food from "../components/Food"; // Import the Food component
+import ExerciseProgram from "./ExerciseProgram";
+import Meal from "./Meal";
+import { Context } from "../globalContext/globalContext.js";
+import axios from 'axios';
 
-const Post = ({ user, title, bodyContent, meals }) => {
-    // State for like functionality
+
+const Post = ({ user, content, mealId, workoutId }) => {
+    const globalContext = useContext(Context);
+    const { baseURL } = globalContext;
+    const loggedInUser = localStorage.getItem("username");
+    const csrf_token = localStorage.getItem("csrfToken");
+    const [error, setError] = useState(null);
+
+    const [workout, setWorkout] = useState(null);
+    const [meal, setMeal] = useState(null);
+
     const [liked, setLiked] = useState(false); // Initially not liked
     const [likeCount, setLikeCount] = useState(0); // Initial like count
-
-    // State for comments
     const [showCommentBox, setShowCommentBox] = useState(false); // Hide comment box initially
     const [newComment, setNewComment] = useState(""); // Track new comment input
     const [comments, setComments] = useState([]); // List of comments
+
+    useEffect(() => {
+        const fetchPostData = async () => {
+            try {
+                if(mealId){
+                    // TO DO get meal with meal ID
+                }
+                if(workoutId){
+                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`);
+                    if (workoutResponse.status === 200) {
+                        const data = workoutResponse.data;
+                        console.log(data)
+                        setWorkout(data);
+                    } else {
+                        setError('Workout not found');
+                    }
+                }
+            } catch (error) {
+                setError('Something went wrong');
+            }
+        };
+        fetchPostData();
+    }, [loggedInUser]);;
 
     // Handle like button click
     const handleLikeClick = () => {
@@ -34,7 +67,7 @@ const Post = ({ user, title, bodyContent, meals }) => {
             {/* Header */}
             <div className="flex items-center mb-4">
                 <img
-                    src={user.profilePic} // Dynamically loads profile picture
+                    src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} // Dynamically loads profile picture
                     alt="Profile"
                     className="w-12 h-12 rounded-full mr-4"
                 />
@@ -50,25 +83,30 @@ const Post = ({ user, title, bodyContent, meals }) => {
             </div>
 
             {/* Post Content */}
-            <h2 className="text-lg font-bold mb-2">{title}</h2>
-            <div className="mb-4">{bodyContent}</div> {/* Body content can be text or an image */}
+            <div className="mb-4">{content}</div> {/* Body content can be text or an image */}
 
-            {/* Scrollable List of Food Components (Meals) */}
+            {/* Meal */}
             <div className="h-96 overflow-y-scroll mb-4">
-                {meals.map((meal, index) => (
-                    <Food
-                        key={index}
-                        foodName={meal.foodName}
-                        calories={meal.calories}
-                        protein={meal.protein}
-                        carbs={meal.carbs}
-                        fat={meal.fat}
-                        ingredients={meal.ingredients}
-                        ingredientAmounts={meal.ingredientAmounts}
-                        imageUrl={meal.imageUrl}
-                        recipeUrl={meal.recipeUrl}
-                    />
-                ))}
+                <Meal
+                    mealName={""}
+                    foods={[]}
+                    onDelete={() => {}}
+                    key={1}
+                    isOwn={false}
+                />
+            </div>
+
+            {/* ExerciseProgram */}
+            <div className="h-96 overflow-y-scroll mb-4">
+                <ExerciseProgram
+                    programName={workout.workout_name}
+                    exercises={workout.exercises}
+                    onDelete={() => {}}
+                    isOwn={false}
+                    programId={workout.id}
+                    currentRating={workout.rating}
+                    ratingCount={workout.rating_count}
+                />
             </div>
 
             {/* Actions: Like & Comment */}
