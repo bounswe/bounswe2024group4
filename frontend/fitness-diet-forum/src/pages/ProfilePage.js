@@ -217,10 +217,10 @@ const ProfilePage = () => {
                                 userData.posts.map((post, index) => (
                                     <Post
                                         key={index}
-                                        user={post.user}
-                                        title={post.title}
-                                        bodyContent={post.bodyContent}
-                                        meals={post.meals}
+                                        user={userData}
+                                        content={post.content}
+                                        mealId={post.meal_id}
+                                        workoutId={post.workout_id}
                                     />
                                 ))
                             ) : (
@@ -257,6 +257,7 @@ const ProfilePage = () => {
                                         programId={program.id}
                                         currentRating={program.rating}
                                         ratingCount={program.rating_count}
+                                        showRating = {!loggedInUser === username}
                                     />
                                 ))
                             ) : (

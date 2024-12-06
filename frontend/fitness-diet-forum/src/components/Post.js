@@ -31,6 +31,7 @@ const Post = ({ user, content, mealId, workoutId }) => {
                 }
                 if(workoutId){
                     const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`);
+                    console.log(workoutResponse);
                     if (workoutResponse.status === 200) {
                         const data = workoutResponse.data;
                         console.log(data)
@@ -44,7 +45,7 @@ const Post = ({ user, content, mealId, workoutId }) => {
             }
         };
         fetchPostData();
-    }, [loggedInUser]);;
+    }, [mealId, workoutId]);;
 
     // Handle like button click
     const handleLikeClick = () => {
@@ -72,12 +73,12 @@ const Post = ({ user, content, mealId, workoutId }) => {
                     className="w-12 h-12 rounded-full mr-4"
                 />
                 <div>
-                    <h3 className="text-xl font-semibold">{user.name} {user.surname} @{user.username}</h3>
+                    <h3 className="text-xl font-semibold">@{user.username}</h3>
                     <div className="flex items-center text-yellow-400">
                         {[...Array(5)].map((_, i) => (
-                            <IoIosStar key={i} className={i < user.rating ? "text-yellow-400" : "text-gray-500"} />
+                            <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
                         ))}
-                        <span className="text-gray-300 ml-2">{user.rating}</span>
+                        <span className="text-gray-300 ml-2">{user.score}</span>
                     </div>
                 </div>
             </div>
@@ -86,28 +87,34 @@ const Post = ({ user, content, mealId, workoutId }) => {
             <div className="mb-4">{content}</div> {/* Body content can be text or an image */}
 
             {/* Meal */}
-            <div className="h-96 overflow-y-scroll mb-4">
-                <Meal
-                    mealName={""}
-                    foods={[]}
-                    onDelete={() => {}}
-                    key={1}
-                    isOwn={false}
-                />
-            </div>
+            {meal && (
+                <div className="h-96 overflow-y-scroll mb-4">
+                    <Meal
+                        mealName={""}
+                        foods={[]}
+                        onDelete={() => {}}
+                        key={1}
+                        isOwn={false}
+                    />
+                </div>
+            )}
 
             {/* ExerciseProgram */}
-            <div className="h-96 overflow-y-scroll mb-4">
-                <ExerciseProgram
-                    programName={workout.workout_name}
-                    exercises={workout.exercises}
-                    onDelete={() => {}}
-                    isOwn={false}
-                    programId={workout.id}
-                    currentRating={workout.rating}
-                    ratingCount={workout.rating_count}
-                />
-            </div>
+            
+            {workout && (
+                <div className="h-96 overflow-y-scroll mb-4">
+                    <ExerciseProgram
+                        programName={workout.workout_name}
+                        exercises={workout.exercises}
+                        onDelete={() => {}}
+                        isOwn={false}
+                        programId={workout.id}
+                        currentRating={workout.rating}
+                        ratingCount={workout.rating_count}
+                        showRating={false}
+                    />
+                </div>
+            )}
 
             {/* Actions: Like & Comment */}
             <div className="flex justify-between mt-4 text-gray-400">
