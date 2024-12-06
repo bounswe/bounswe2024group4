@@ -9,13 +9,13 @@ const CreatePostModal = ({
 }) => {
   const [newWorkout, setNewWorkout] = useState("");
   const [workouts, setWorkouts] = useState([]);
-  const [selectedWorkouts, setSelectedWorkouts] = useState([]);
   const [postContent, setPostContent] = useState("");
   const [visibleWorkout, setVisibleWorkout] = useState(null);
 
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
-  const username = localStorage.getItem('username')
+  const username = localStorage.getItem('username');
+  const csrf_token = localStorage.getItem("csrfToken");
 
   useEffect(() => {
     if (isModalOpen) {
@@ -31,38 +31,53 @@ const CreatePostModal = ({
   }, [isModalOpen, baseURL]);
 
   const handleAddWorkout = () => {
-    const selectedWorkout = workouts.find(workout => workout.id === parseInt(newWorkout));
-    if (selectedWorkout && !selectedWorkouts.some(workout => workout.id === selectedWorkout.id)) {
-      setSelectedWorkouts([...selectedWorkouts, selectedWorkout]);
+    if (newWorkout) {
+      setVisibleWorkout(parseInt(newWorkout)); // Show details for the selected workout
     }
   };
 
-  const handleRemoveSelected = (workoutId) => {
-    setSelectedWorkouts(selectedWorkouts.filter(workout => workout.id !== workoutId));
-    if (visibleWorkout === workoutId) {
-      setVisibleWorkout(null);
-    }
-  };
-
-  const toggleExerciseProgram = (workoutId) => {
-    setVisibleWorkout(visibleWorkout === workoutId ? null : workoutId);
-  };
-
-  const handleSubmitPost = () => {
-    console.log("Post submitted:", { postContent, selectedWorkouts });
-    closeModal();
+  const handleRemoveWorkout = () => {
     setNewWorkout("");
-    setWorkouts([]);
-    setSelectedWorkouts([]);
-    setPostContent("");
     setVisibleWorkout(null);
+  };
+
+  const handleCreatePost = async () => {
+    if (!newWorkout && !postContent) {
+      alert("Please provide content for the post and select a workout.");
+      return;
+    }
+
+    try {
+      const config = {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrf_token,
+        },
+      };
+
+      const body = {
+        content: postContent,
+        workoutId: parseInt(newWorkout),
+        username: username
+      };
+      console.log(body);
+      await axios.post(`${baseURL}/post/`, body, config);
+
+      closeModal();
+      setNewWorkout("");
+      setWorkouts([]);
+      setPostContent("");
+      setVisibleWorkout(null);
+    } catch (error) {
+      console.error("Failed to create post:", error);
+    }
   };
 
   const handleCancel = () => {
     closeModal();
     setNewWorkout("");
     setWorkouts([]);
-    setSelectedWorkouts([]);
     setPostContent("");
     setVisibleWorkout(null);
   };
@@ -85,12 +100,11 @@ const CreatePostModal = ({
             <select
               value={newWorkout}
               onChange={(e) => setNewWorkout(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600" // Adjust background color
+              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
             >
               <option value="" disabled>
                 Select a workout program
               </option>
-              <option value="">{newWorkout ? workouts.find(workout => workout.id === parseInt(newWorkout))?.workout_name : 'Workouts'}</option>
               {workouts.map((workout) => (
                 <option key={workout.id} value={workout.id}>
                   {workout.workout_name}
@@ -100,57 +114,23 @@ const CreatePostModal = ({
             <button
               className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
               onClick={handleAddWorkout}
+              disabled={!newWorkout}
             >
               Add Workout
             </button>
           </div>
 
-          {/* Display Added Workouts */}
-          {selectedWorkouts.length > 0 && (
-            <div className="mb-4">
-              <h3 className="font-semibold text-lightText mb-2">Added Workouts</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {selectedWorkouts.map((workout) => (
-                  <div
-                    key={workout.id}
-                    className="bg-gray-700 text-white p-4 rounded shadow-md flex flex-col items-start"
-                  >
-                    <h4 className="text-lg font-semibold mb-2">{workout.workout_name}</h4>
-                    <p className="text-sm text-gray-400 mb-4">
-                      {workout.exercises.length} exercises
-                    </p>
-                    <div className="mt-auto flex gap-2">
-                      <button
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-                        onClick={() => toggleExerciseProgram(workout.id)}
-                      >
-                        Details
-                      </button>
-                      <button
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                        onClick={() => handleRemoveSelected(workout.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-
-          {/* Display the Exercise Program if selected */}
+          {/* Display Selected Workout */}
           {visibleWorkout && (
             <div className="mt-4 mb-6">
-              {selectedWorkouts
-                .filter(workout => workout.id === visibleWorkout)
+              {workouts
+                .filter((workout) => workout.id === visibleWorkout)
                 .map((workout) => (
                   <ExerciseProgram
                     key={workout.id}
                     programName={workout.workout_name}
                     exercises={workout.exercises}
-                    onDelete={() => handleRemoveSelected(workout.id)}
+                    onDelete={handleRemoveWorkout}
                     isOwn={true}
                     currentRating={workout.rating}
                     ratingCount={workout.rating_count}
@@ -167,8 +147,9 @@ const CreatePostModal = ({
               Cancel
             </button>
             <button
-              onClick={handleSubmitPost}
+              onClick={handleCreatePost}
               className="bg-blue-500 text-white px-4 py-2 rounded"
+              disabled={!newWorkout && !postContent}
             >
               Submit
             </button>
