@@ -7,7 +7,7 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
 
 
-const Post = ({ user, content, mealId, workoutId }) => {
+const Post = ({ postId, user, content, mealId, workoutId }) => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
@@ -47,11 +47,31 @@ const Post = ({ user, content, mealId, workoutId }) => {
         fetchPostData();
     }, [mealId, workoutId]);;
 
-    // Handle like button click
-    const handleLikeClick = () => {
-        setLiked(!liked); // Toggle like state
-        setLikeCount(likeCount + (liked ? -1 : 1)); // Increase or decrease like count
+    const handleLikeClick = async () => {
+        try {
+            // Optimistically update UI
+            setLiked(!liked);
+            setLikeCount(likeCount + (liked ? -1 : 1));
+    
+            // Send a request to toggle like
+            const response = await axios.post(
+                `${baseURL}/toggle_like/`, 
+                { postId: postId }, // Assuming postId corresponds to workoutId or mealId
+            );
+    
+            if (response.status === 200) {
+                console.log(response.data.message); // Post liked/unliked successfully
+            } else {
+                throw new Error('Unexpected response status');
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+            // Revert UI state if request fails
+            setLiked(!liked);
+            setLikeCount(likeCount - (liked ? -1 : 1));
+        }
     };
+    
 
     // Handle comment submit
     const handleCommentSubmit = (e) => {
@@ -100,7 +120,6 @@ const Post = ({ user, content, mealId, workoutId }) => {
             )}
 
             {/* ExerciseProgram */}
-            
             {workout && (
                 <div className="h-96 overflow-y-scroll mb-4">
                     <ExerciseProgram

@@ -217,6 +217,7 @@ const ProfilePage = () => {
                                 userData.posts.map((post, index) => (
                                     <Post
                                         key={index}
+                                        postId={post.id}
                                         user={userData}
                                         content={post.content}
                                         mealId={post.meal_id}
