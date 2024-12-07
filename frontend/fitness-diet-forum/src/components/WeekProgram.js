@@ -5,7 +5,7 @@ import axios from 'axios';
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
 
-const WeekProgram = ({ programs }) => {
+const WeekProgram = ({ programs , bookmarkedPrograms}) => {
   const [weekPrograms, setWeekPrograms] = useState([]);
   const [currentDay, setCurrentDay] = useState(null);
   const [currentDayPrograms, setCurrentDayPrograms] = useState([]);
@@ -122,6 +122,13 @@ const WeekProgram = ({ programs }) => {
     return programs.filter((program) => !addedProgramIds.includes(program.id));
   };
 
+  const getBookmarkedPrograms = (day) => {
+    const addedProgramIds = weekPrograms
+      .filter((program) => program.day === day)
+      .map((program) => program.id);
+    return bookmarkedPrograms.filter((program) => !addedProgramIds.includes(program.id));
+  };
+
   return (
     <div>
       <div className="overflow-x-auto">
@@ -143,6 +150,7 @@ const WeekProgram = ({ programs }) => {
                     day={day}
                     programs={weekPrograms.filter((p) => p.day === day)}
                     availablePrograms={getAvailablePrograms(day)}
+                    bookmarkedPrograms={getBookmarkedPrograms(day)}
                     onAddProgram={handleAddProgram}
                     onRemoveProgram={handleRemoveProgram}
                     onStartExercise={handleStartExercise}
