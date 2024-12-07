@@ -56,7 +56,7 @@ function App() {
       }
     />
     <Route
-      path="/posts"
+      path="/feed"
       element={
         <PrivateRoute>
           <AuthenticatedLayout>
