@@ -103,7 +103,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count }) => {
                             {[...Array(5)].map((_, i) => (
                                 <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
                             ))}
-                            <span className="text-gray-300 ml-2">{user.score}</span>
+                            <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
                         </div>
                     </div>
                 </Link>
