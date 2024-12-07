@@ -84,16 +84,16 @@ const Exercises = () => {
       <div className="w-full">
         {view === "weekly" ? (
           <div className="p-8 bg-gray-800 text-white min-h-screen">
-            <h1 className="text-4xl font-bold mb-6">Weekly Exercise Program</h1>
-            <WeekProgram programs={programs} />
-          </div>
+          <h1 className="text-4xl font-bold mb-6">Weekly Exercise Program</h1>
+          <WeekProgram programs={programs} bookmarkedPrograms={bookmarkedPrograms} />
+        </div>
         ) : view === "myExercises" ? (
           <ExerciseProgramList />
         ) : (
           <div className="p-8 bg-gray-800 text-white min-h-screen">
             <h1 className="text-4xl font-bold mb-6">Bookmarked Workouts</h1>
             {bookmarkedPrograms.length > 0 ? (
-              <div className="h-96 overflow-y-scroll mb-4">
+              <div className="flex flex-wrap gap-8">
                 {bookmarkedPrograms.map((workout) => (
                   <div key={workout.id} className="mb-4">
                     <ExerciseProgram
