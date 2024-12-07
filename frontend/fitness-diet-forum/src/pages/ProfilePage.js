@@ -217,11 +217,12 @@ const ProfilePage = () => {
                                 userData.posts.map((post, index) => (
                                     <Post
                                         key={index}
-                                        postId={post.id}
+                                        postId={post.post_id}
                                         user={userData}
                                         content={post.content}
                                         mealId={post.meal_id}
                                         workoutId={post.workout_id}
+                                        like_count={post.like_count}
                                     />
                                 ))
                             ) : (

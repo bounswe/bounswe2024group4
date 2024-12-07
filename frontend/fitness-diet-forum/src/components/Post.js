@@ -7,7 +7,7 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
-const Post = ({ postId, user, content, mealId, workoutId }) => {
+const Post = ({ postId, user, content, mealId, workoutId, like_count }) => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
@@ -18,7 +18,7 @@ const Post = ({ postId, user, content, mealId, workoutId }) => {
     const [meal, setMeal] = useState(null);
 
     const [liked, setLiked] = useState(false); // Initially not liked
-    const [likeCount, setLikeCount] = useState(0); // Initial like count
+    const [likeCount, setLikeCount] = useState(like_count); // Initial like count
     const [showCommentBox, setShowCommentBox] = useState(false); // Hide comment box initially
     const [newComment, setNewComment] = useState(""); // Track new comment input
     const [comments, setComments] = useState([]); // List of comments
@@ -52,11 +52,14 @@ const Post = ({ postId, user, content, mealId, workoutId }) => {
             // Optimistically update UI
             setLiked(!liked);
             setLikeCount(likeCount + (liked ? -1 : 1));
-    
+            console.log('Post ID: ' + postId);
             // Send a request to toggle like
             const response = await axios.post(
                 `${baseURL}/toggle_like/`, 
-                { postId: postId }, // Assuming postId corresponds to workoutId or mealId
+                {
+                    postId: postId,
+                    username: loggedInUser
+                },
             );
     
             if (response.status === 200) {

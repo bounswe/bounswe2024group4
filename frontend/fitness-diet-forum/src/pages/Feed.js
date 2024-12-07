@@ -48,10 +48,12 @@ const Feed = () => {
         posts.map((post) => (
           <Post
             key={post.id}
-            user={post.user} // Assuming each post has a user object
+            postId={post.post_id}
+            user={post.user}
             content={post.content}
-            mealId={post.meal_id} // Assuming mealId is part of the post
-            workoutId={post.workout_id} // Assuming workoutId is part of the post
+            mealId={post.meal_id}
+            workoutId={post.workout_id}
+            like_count={post.like_count}
           />
         ))
       ) : (
