@@ -257,7 +257,7 @@ const ProfilePage = () => {
                                         programId={program.id}
                                         currentRating={program.rating}
                                         ratingCount={program.rating_count}
-                                        showRating = {!loggedInUser === username}
+                                        showRating = {loggedInUser != username}
                                     />
                                 ))
                             ) : (
