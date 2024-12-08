@@ -2,25 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, Image, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { TabView, TabBar } from 'react-native-tab-view';
 import { Rating } from 'react-native-ratings';
+import axios from 'axios';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
 import PostsScreen from './index';
 import WorkoutsScreen from '../../components/WorkoutsScreen';
 import MealsScreen from '../../components/MealsScreen';
-import { useRouter, useGlobalSearchParams } from 'expo-router';
-import axios from 'axios';
 
 interface Route {
   key: 'posts' | 'workouts' | 'meals';
   title: string;
-}
-
-const renderScene: Record<Route['key'], React.ComponentType> = {
-  posts: PostsScreen,
-  workouts: WorkoutsScreen,
-  meals: MealsScreen,
-};
-
-interface ProfileScreenProps {
-  isOwnProfile?: boolean;
 }
 
 function ProfileScreen() {
@@ -34,28 +24,32 @@ function ProfileScreen() {
   ]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
-
   const isOwnProfile = viewingUser === viewedUser;
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchProfileData = async () => {
       try {
-        const response = await axios.get(
+        const profileResponse = await axios.get(
           `${baseURL}/view_profile/?viewing_username=${viewingUser}&viewed_username=${viewedUser}`
         );
-        setUserData(response.data);
-        setIsFollowing(response.data.is_following);
+        console.log('log',profileResponse.data)
+        setUserData(profileResponse.data);
+        setIsFollowing(profileResponse.data.is_following);
+
+        const programsResponse = await axios.get(`${baseURL}/get-workouts/?username=${viewedUser}`);
+        setPrograms(programsResponse.data);
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error fetching profile or workouts:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserProfile();
+    fetchProfileData();
   }, [viewingUser, viewedUser]);
 
   const handleFollowToggle = async () => {
@@ -87,17 +81,38 @@ function ProfileScreen() {
     );
   }
 
-  const { bio, profile_picture, score, height, weight_history, followers_count, following_count, posts } = userData;
-  const profilePictureUri = profile_picture && profile_picture.trim() !== '' ? profile_picture : 'https://via.placeholder.com/150';
-  const recentWeight = weight_history.length > 0 ? weight_history[weight_history.length - 1].weight : null;
+  const {
+    bio,
+    profile_picture,
+    score,
+    followers_count,
+    following_count,
+    posts,
+    height,
+    weight_history,
+  } = userData;
+
+  const profilePictureUri = profile_picture?.trim() !== '' ? profile_picture : 'https://via.placeholder.com/150';
+  const recentWeight = weight_history?.length > 0 ? weight_history[weight_history.length - 1] : null;
+
+  const renderScene = ({ route }: { route: Route }) => {
+    switch (route.key) {
+      case 'workouts':
+        return <WorkoutsScreen workoutPrograms={programs} isOwnProfile={isOwnProfile} />;
+      case 'posts':
+        return <PostsScreen />;
+      case 'meals':
+        return <MealsScreen />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* User Info Section */}
       <View style={styles.userInfo}>
         <Image source={{ uri: profilePictureUri }} style={styles.profilePicture} />
         <View style={styles.statsContainer}>
-          {/* Score Section */}
           <View style={styles.stat}>
             <Text style={[styles.statLabel, styles.boldText]}>Score</Text>
             <View style={styles.ratingContainer}>
@@ -105,10 +120,9 @@ function ProfileScreen() {
               <Text style={styles.ratingText}>{score.toFixed(1)} / 5</Text>
             </View>
           </View>
-          {/* Stats Section */}
           <View style={styles.rowStats}>
             <View style={styles.stat}>
-              <Text style={styles.statNumber}>{posts}</Text>
+              <Text style={styles.statNumber}>{posts.length}</Text>
               <Text style={styles.statLabel}>Posts</Text>
             </View>
             <View style={styles.stat}>
@@ -123,34 +137,27 @@ function ProfileScreen() {
         </View>
       </View>
 
-      {/* User Bio Section */}
       <View style={styles.userBioContainer}>
         <Text style={styles.userName}>{viewedUser}</Text>
         <Text style={styles.userBio}>{bio}</Text>
-        {/* Height & Weight Section */}
-        <View style={styles.heightWeightContainer}>
-          <Text style={styles.heightWeightText}>Height: {height} cm</Text>
-          {recentWeight && <Text style={styles.heightWeightText}>Weight: {recentWeight} kg</Text>}
+        <View style={styles.additionalInfo}>
+          <Text style={styles.additionalInfoText}>Height: {height} cm</Text>
+          <Text style={styles.additionalInfoText}>
+            Recent Weight: {recentWeight ? `${recentWeight.weight} kg` : 'N/A'}
+          </Text>
         </View>
       </View>
 
-      {/* Action Button */}
       <View style={styles.actionButtonContainer}>
         {isOwnProfile ? (
           <TouchableOpacity
             style={styles.editProfileButton}
-            onPress={() => router.push({
-              pathname: '/EditProfileScreen',
-              params: {
-                username: viewedUser,
-                bio,
-                profilePicture: profile_picture,
-                height,
-                recentWeight,
-                viewingUser,
-                viewedUser,
-              },
-            })}
+            onPress={() =>
+              router.push({
+                pathname: '/EditProfileScreen',
+                params: { username: viewedUser, bio, profilePicture: profile_picture, height, recentWeight },
+              })
+            }
           >
             <Text style={styles.buttonText}>Edit Profile</Text>
           </TouchableOpacity>
@@ -164,13 +171,9 @@ function ProfileScreen() {
         )}
       </View>
 
-      {/* Tab View Section */}
       <TabView
         navigationState={{ index, routes }}
-        renderScene={({ route }) => {
-          const SceneComponent = renderScene[route.key];
-          return <SceneComponent />;
-        }}
+        renderScene={renderScene}
         onIndexChange={setIndex}
         initialLayout={{ width: Dimensions.get('window').width }}
         renderTabBar={(props) => (
@@ -228,8 +231,8 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontSize: 16,
-    fontWeight: 'bold', 
-    color:'#fff',
+    fontWeight: 'bold',
+    color: '#fff',
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -249,7 +252,6 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: -20,
     color: '#fff',
   },
   userBio: {
@@ -257,10 +259,10 @@ const styles = StyleSheet.create({
     color: '#dcdcdc',
     marginTop: 10,
   },
-  heightWeightContainer: {
+  additionalInfo: {
     marginTop: 10,
   },
-  heightWeightText: {
+  additionalInfoText: {
     fontSize: 14,
     color: '#fff',
     marginBottom: 5,
@@ -274,7 +276,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 70,
     borderRadius: 25,
-    marginTop: -15,
   },
   followButton: {
     backgroundColor: '#609FFF',
@@ -283,7 +284,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   unfollowButton: {
-    backgroundColor: '#609FFF',
+    backgroundColor: '#FF0000',
   },
   buttonText: {
     color: '#fff',
