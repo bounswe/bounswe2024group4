@@ -144,7 +144,6 @@ def rate_workout(request):
 
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
-
             
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
@@ -152,6 +151,10 @@ def rate_workout(request):
 
             user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
             user.workout_rating_count += 1
+
+            user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+            if user.score > 4.5 and (user.meal_rating_count + user.workout_rating_count) > 3:
+                user.is_superuser = True
             user.save()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)

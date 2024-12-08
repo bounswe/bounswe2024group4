@@ -4,3 +4,5 @@ DB_PASSWORD=******
 DB_HOST=localhost
 DB_PORT=3306
 EXERCISES_API_KEY=*****
+EDAMAM_APP_ID=*****
+EDAMAM_APP_KEY=*****
