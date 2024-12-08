@@ -22,27 +22,17 @@ const Login = () => {
     setError("");  
 
     try {
-      const csrfTokenResp = await axios.get(baseURL + "/csrf_token/");
-      console.log(csrfTokenResp.data.csrf_token);
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRFToken": csrfTokenResp.data.csrf_token,
-        },
-      };
       const response = await axios.post(baseURL + "/log_in/", {
         username,
         password,
-      }, config);
-      localStorage.setItem("csrfToken", csrfTokenResp.data.csrf_token);
-
+      });
+      console.log(response);
+      localStorage.setItem("token", response.data.token);
       localStorage.setItem("username", username);
+      localStorage.setItem("LoggedIn", "true");
+
       console.log("Login successful", response.data);
-      setLoggedIn("true");
-      
       navigate("/meals");  
-      console.log("username:",localStorage.getItem("username"))
     } catch (err) {
       setLoading(false);
       if (err.response && err.response.status === 401) {
