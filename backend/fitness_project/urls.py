@@ -62,7 +62,6 @@ urlpatterns = [
     path('log_in/', auth_views.log_in, name='log_in'),
     path('log_out/', auth_views.log_out, name='log_out'),
     path('csrf_token/', auth_views.csrf_token, name='csrf_token'),
-    path('session/', auth_views.session, name='session'),
     #Profile related endpoints
     path('edit_profile/', profile_views.edit_profile, name='edit_profile'),
     path('view_profile/', profile_views.view_profile, name='view_profile'),
