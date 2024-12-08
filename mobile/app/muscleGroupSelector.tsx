@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { Link, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import images from '../constants/image_map';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
 
 export default function Exercises() {
   const [selectedImage, setSelectedImage] = useState(0);
+  const { viewingUser, viewedUser } = useGlobalSearchParams();
+  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -18,17 +21,24 @@ export default function Exercises() {
               style={[styles.card, selectedImage === index ? styles.selectedCard : null]}
               onPress={() => setSelectedImage(index)}
             >
-              <Image source={images[muscleName]} style={styles.cardImage} />
+              <Image 
+                source={images[muscleName as keyof typeof images]}
+                style={styles.cardImage} 
+              />
             </TouchableOpacity>
           ))}
         </View>
-        <Link href={{pathname: "../exerciseSelector", params: {muscleName: Object.keys(images)[selectedImage]}}} asChild>
-          <TouchableOpacity
-            style={styles.proceedButton}
-          >
-            <Text style={styles.proceedButtonText}>Proceed</Text>
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity
+          style={styles.proceedButton}
+          onPress={() => {
+            router.push({
+              pathname: '../exerciseSelector',
+              params: { muscleName: Object.keys(images)[selectedImage], viewingUser, viewedUser },
+            });
+          }}
+        >
+          <Text style={styles.proceedButtonText}>Proceed</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -51,7 +61,7 @@ const styles = StyleSheet.create({
     textAlign: 'justify',
     marginTop: 10,
     marginBottom: 15,
-    marginLeft: 35
+    marginLeft: 35,
   },
   cardContainer: {
     flexDirection: 'row',
