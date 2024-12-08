@@ -22,6 +22,9 @@ def post(request):
         workoutId = request.data.get('workoutId')
         mealId = request.data.get('mealId')
         post = Post.objects.create(user=user, content=content)
+
+        if not content:
+            return JsonResponse({'error': 'Content is required'}, status=400)
         
         if workoutId:
             try:
