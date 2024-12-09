@@ -147,7 +147,11 @@ const ProfilePage = () => {
                 {/* Profile Picture */}
                 <div className="flex justify-start mb-6">
                     <img
-                        src={userData.profile_picture}
+                        src={
+                            userData.profile_picture 
+                            ? userData.profile_picture 
+                            : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                        }
                         alt="Profile"
                         className="profile-picture w-32 h-32 rounded-full border-4 border-gray-600"
                     />
@@ -213,10 +217,10 @@ const ProfilePage = () => {
                                 userData.posts.map((post, index) => (
                                     <Post
                                         key={index}
-                                        user={post.user}
-                                        title={post.title}
-                                        bodyContent={post.bodyContent}
-                                        meals={post.meals}
+                                        user={userData}
+                                        content={post.content}
+                                        mealId={post.meal_id}
+                                        workoutId={post.workout_id}
                                     />
                                 ))
                             ) : (
@@ -253,6 +257,7 @@ const ProfilePage = () => {
                                         programId={program.id}
                                         currentRating={program.rating}
                                         ratingCount={program.rating_count}
+                                        showRating = {loggedInUser != username}
                                     />
                                 ))
                             ) : (

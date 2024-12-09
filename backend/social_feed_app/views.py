@@ -30,7 +30,20 @@ def following_feed(request):
     if request.method == 'GET':
         user = request.user
         following = user.following.all()
-        posts = Post.objects.filter(user__in=following).values()
-        return JsonResponse({'posts': list(posts)}, status=200)
+        posts = Post.objects.filter(user__in=following)
+        
+        return JsonResponse({'posts': list(reversed([{
+                'post_id': post.id,
+                'content': post.content,
+                'workout_id': post.workout.workout_id if post.workout else None,
+                'meal_id': post.mealId,
+                'like_count': post.likeCount,
+                'created_at': post.created_at,
+                'user': {
+                    'username': post.user.username,
+                    'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None,
+                    'score': post.user.score
+                }
+                } for post in posts]))}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request'}, status=405)

@@ -107,7 +107,15 @@ def view_profile(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'is_following': is_following,
-            'posts': list(reversed([{'post_id': post.id} for post in posts])),
+            'posts': list(reversed([{
+                'post_id': post.id,
+                'user': post.user.username,
+                'content': post.content,
+                'workout_id': post.workout.workout_id if post.workout else None,
+                'meal_id': post.mealId,
+                'like_count': post.likeCount,
+                'created_at': post.created_at,
+                } for post in posts])),
             'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
             # 'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
         }

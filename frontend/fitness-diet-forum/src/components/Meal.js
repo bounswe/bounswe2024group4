@@ -2,7 +2,7 @@ import React from 'react';
 import Food from './Food';
 import '../css/index.css';
 
-const Meal = ({ mealName, foods, onDelete }) => {
+const Meal = ({ mealName, foods, onDelete, isOwn }) => {
   return (
     <div className="meal bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
       <div className="mb-4">
@@ -26,15 +26,17 @@ const Meal = ({ mealName, foods, onDelete }) => {
         ))}
       </div>
 
-      {/* Add margin above the delete button */}
-      <div className="flex justify-end mt-4">
-        <button 
-          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300"
-          onClick={onDelete}
-        >
-          Delete Meal
-        </button>
-      </div>
+      {/* Delete Button (if the program is owned by the user) */}
+      {isOwn && (
+        <div className="flex justify-end mt-4">
+            <button
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300"
+                onClick={onDelete}
+            >
+                Remove Meal
+            </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import axios from "axios";
 import "../css/index.css";
 import { Context } from "../globalContext/globalContext.js";
 
-const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, currentRating, ratingCount }) => {
+const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, currentRating, ratingCount, showRating }) => {
     const [rating, setRating] = useState(0); // User's selected rating
     const [hoveredRating, setHoveredRating] = useState(0); // Highlighted stars on hover
     const [message, setMessage] = useState(null); // Feedback message after submission
@@ -38,7 +38,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
     };
 
     return (
-        <div className="exercise-program bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
+        <div className="w-full bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
             {/* Program Name */}
             <div className="mb-4">
                 <h2 className="text-2xl font-semibold">{programName}</h2>
@@ -65,7 +65,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
             </div>
 
             {/* Star Rating */}
-            {!isOwn && (
+            {showRating && (
                 <div className="rating mt-4">
                     <h3 className="text-xl font-semibold mb-2">Rate this program:</h3>
                     <div className="stars flex items-center">
@@ -103,7 +103,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
                         className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300"
                         onClick={onDelete}
                     >
-                        Delete Program
+                        Remove Program
                     </button>
                 </div>
             )}
