@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Link } from 'expo-router';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WorkoutProgram from '../../components/WorkoutProgram';
@@ -10,24 +9,24 @@ import { useRouter, useGlobalSearchParams } from 'expo-router';
 const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
 const allowedMuscles = [
-  "Chest",
-  "Biceps",
-  "Shoulders",
-  "Triceps",
-  "Middle_back",
-  "Lower_back",
-  "Traps",
-  "Abdominals",
-  "Quadriceps",
-  "Hamstrings",
-  "Glutes",
-  "Calves",
+  "chest",
+  "biceps",
+  "shoulders",
+  "triceps",
+  "middle_back",
+  "lower_back",
+  "traps",
+  "abdominals",
+  "quadriceps",
+  "hamstrings",
+  "glutes",
+  "calves",
 ] as const;
 
 function mapMuscleToEnum(muscle: string): typeof allowedMuscles[number] {
   return allowedMuscles.includes(muscle as typeof allowedMuscles[number])
     ? (muscle as typeof allowedMuscles[number])
-    : "Chest"; // Default to "Chest" if not in the allowed list
+    : "chest"; // Default to "Chest" if not in the allowed list
 }
 
 interface Exercise {
@@ -37,7 +36,7 @@ interface Exercise {
   type: string;
   muscle: string;
   equipment: string;
-  instruction: string;
+  instructions: string;
   sets: number;
   reps: number;
 }
@@ -104,6 +103,7 @@ export default function Index() {
               exercises: item.exercises.map((exercise) => ({
                 ...exercise,
                 muscle: mapMuscleToEnum(exercise.muscle),
+                instruction: exercise.instructions,
               })),
             }}
             onUpdate={(updatedWorkout) => {

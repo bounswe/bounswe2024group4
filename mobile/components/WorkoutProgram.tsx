@@ -57,8 +57,8 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
       {currentWorkout.exercises.map((exercise, index) => (
         <React.Fragment key={`${exercise.id}-${index}`}>
           <SafeAreaView style={styles.exerciseRow}>
-            {exercise.image ? (
-              <Image source={exercise.image} style={styles.exerciseImage} />
+            {exercise.muscle ? (
+              <Image source={images[exercise.muscle as keyof typeof images]} style={styles.exerciseImage} />
             ) : (
               <View style={styles.exerciseImagePlaceholder} />
             )}

@@ -5,6 +5,7 @@ export interface Exercise {
     type: string;
     muscle: string;
     equipment: string;
+    instructions: string;
     instruction: string;
     sets: number;
     reps: number;

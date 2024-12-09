@@ -24,30 +24,29 @@ export default function ExerciseCreate() {
         const existingExercisesString = await AsyncStorage.getItem("existingExercises");
         const existingExercisesArray: Exercise[] = existingExercisesString ? JSON.parse(existingExercisesString) : [];
 
-        const newExercises = exercisesArray.map((exercise, index) => ({
+        const newExercises = exercisesArray.map((exercise: Exercise, index) => ({
           id: String(existingExercisesArray.length + index + 1),
           image: images[muscleName],
-          name: exercise.name,
+          name: exercise.name || "",
           sets: exercise.sets || 0,
           reps: exercise.reps || 0,
           type: exercise.type || "",
           muscle: exercise.muscle || muscleName,
           equipment: exercise.equipment || "",
-          instruction: exercise.instruction || "",
+          instructions: exercise.instructions || "",
         }));
-
+    
         const combinedExercisesArray = Array.from(new Set([...existingExercisesArray, ...newExercises]));
-
+    
         const newWorkoutProgram: Workout = {
           id: "1",
           name: "Draft",
-          created_by: await AsyncStorage.getItem("username") || "unknown",
+          created_by: (await AsyncStorage.getItem("username")) || "unknown",
           exercises: combinedExercisesArray as Exercise[],
           rating: 0,
           rating_count: 0,
         };
-        
-
+    
         await AsyncStorage.setItem("existingExercises", JSON.stringify(combinedExercisesArray));
         setWorkoutProgram(newWorkoutProgram);
       } catch (error) {
@@ -56,6 +55,7 @@ export default function ExerciseCreate() {
         setLoading(false);
       }
     };
+    
 
     fetchExercises();
   }, [selectedExercises, muscleName]);
@@ -74,11 +74,10 @@ export default function ExerciseCreate() {
         name: exercise.name,
         muscle: exercise.muscle,
         equipment: exercise.equipment,
-        instruction: exercise.instruction,
+        instruction: exercise.instructions,
         sets: exercise.sets,
         reps: exercise.reps,
       }));
-      
 
       const body = {
         workout_name: workoutProgram.name,
@@ -94,7 +93,6 @@ export default function ExerciseCreate() {
         },
       };
 
-      console.log("Request body: ", body);
       const response = await axios.post(`${baseURL}/workout_program/`, body, config);
 
       Alert.alert("Success", "Workout program saved successfully!");
