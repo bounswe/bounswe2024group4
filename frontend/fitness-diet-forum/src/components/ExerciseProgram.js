@@ -18,6 +18,12 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
     const [username, setUsername] = useState(""); // Username state
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
+    const token = localStorage.getItem("token");
+    const config = {
+        headers: {
+            'Authorization': 'Token ' + token
+        },
+    }
 
     // Fetch username and bookmark status
     useEffect(() => {
@@ -28,9 +34,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
             // Fetch all bookmarked workouts
             const fetchBookmarkedWorkouts = async () => {
                 try {
-                    const response = await axios.get(`${baseURL}/get-bookmarked-workouts/`, {
-                        params: { username: storedUsername },
-                    });
+                    const response = await axios.get(`${baseURL}/get-bookmarked-workouts/`, config);
 
                     if (response.status === 200) {
                         // Check if the current workout is bookmarked
@@ -57,9 +61,8 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
 
         try {
             const response = await axios.post(baseURL + "/workouts/toggle-bookmark/", {
-                username: username,
                 workout_id: programId,
-            });
+            }, config);
 
             if (response.status === 200) {
                 const { message } = response.data;
@@ -79,7 +82,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
             const response = await axios.post(baseURL + "/rate-workout/", {
                 workout_id: programId,
                 rating: rating,
-            });
+            }, config);
 
             if (response.status === 200) {
                 setMessage("Rating submitted successfully!");

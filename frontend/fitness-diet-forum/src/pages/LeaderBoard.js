@@ -11,14 +11,20 @@ const LeaderBoard = () => {
     const [error, setError] = useState(null);
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        'Authorization': 'Token ' + token
+      }
+    }
 
     useEffect(() => {
         const fetchLeaderboards = async () => {
             try {
                 const leaderboardResponses = await Promise.all([
-                    axios.get(baseURL + "/get_leaderboard/"),
-                    axios.get(baseURL + "/get_workout_leaderboard/"),
-                    axios.get(baseURL + "/get_meal_leaderboard/"),
+                    axios.get(baseURL + "/get_leaderboard/", config),
+                    axios.get(baseURL + "/get_workout_leaderboard/", config),
+                    axios.get(baseURL + "/get_meal_leaderboard/", config),
                 ]);
 
                 const [mainLeaderboard, workoutLeaderboard, mealLeaderboard] = leaderboardResponses;
