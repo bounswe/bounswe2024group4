@@ -7,9 +7,9 @@ import { Context } from "../globalContext/globalContext.js";
 
 const Exercises = () => {
   const [programs, setPrograms] = useState([]);
-  const [bookmarkedPrograms, setBookmarkedPrograms] = useState([]); // State for full bookmarked programs
+  const [bookmarkedPrograms, setBookmarkedPrograms] = useState([]);
   const [error, setError] = useState(null);
-  const [view, setView] = useState("weekly"); // State to track the selected view
+  const [view, setView] = useState("weekly");
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
   const username = localStorage.getItem("username");
@@ -19,6 +19,7 @@ const Exercises = () => {
       try {
         const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`);
         setPrograms(response.data);
+        setError(null); // Clear previous errors
       } catch (error) {
         console.error("Error fetching user programs:", error);
         setError(error);
@@ -27,13 +28,11 @@ const Exercises = () => {
 
     const fetchBookmarkedPrograms = async () => {
       try {
-        // Get bookmarked program IDs
         const response = await axios.get(`${baseURL}/get-bookmarked-workouts/`, {
           params: { username },
         });
         const bookmarkedIds = response.data.map((program) => program.id);
 
-        // Fetch full details for each bookmarked program
         const bookmarkedDetails = await Promise.all(
           bookmarkedIds.map(async (id) => {
             const detailResponse = await axios.get(`${baseURL}/get-workout/${id}/`);
@@ -42,15 +41,21 @@ const Exercises = () => {
         );
 
         setBookmarkedPrograms(bookmarkedDetails);
+        setError(null); // Clear previous errors
       } catch (error) {
         console.error("Error fetching bookmarked programs:", error);
         setError(error);
       }
     };
 
-    fetchPrograms();
-    fetchBookmarkedPrograms();
-  }, [baseURL, username]);
+    // Fetch data based on the current view
+    if (view === "weekly") {
+      fetchPrograms();
+      fetchBookmarkedPrograms();
+    } else if (view === "bookmarked") {
+      fetchBookmarkedPrograms();
+    }
+  }, [view, baseURL, username]);
 
   if (error) {
     return <div className="text-red-500">Error: {error.message}</div>;
@@ -60,20 +65,20 @@ const Exercises = () => {
     <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center p-8">
       {/* Navigation Buttons */}
       <div className="w-full flex justify-center mb-6">
-        <button 
-          className={`px-4 py-2 mx-2 ${view === "weekly" ? "bg-blue-500" : "bg-gray-600"}`} 
+        <button
+          className={`px-4 py-2 mx-2 ${view === "weekly" ? "bg-blue-500" : "bg-gray-600"}`}
           onClick={() => setView("weekly")}
         >
           Weekly Program
         </button>
-        <button 
-          className={`px-4 py-2 mx-2 ${view === "myExercises" ? "bg-blue-500" : "bg-gray-600"}`} 
+        <button
+          className={`px-4 py-2 mx-2 ${view === "myExercises" ? "bg-blue-500" : "bg-gray-600"}`}
           onClick={() => setView("myExercises")}
         >
           My Exercises
         </button>
-        <button 
-          className={`px-4 py-2 mx-2 ${view === "bookmarked" ? "bg-blue-500" : "bg-gray-600"}`} 
+        <button
+          className={`px-4 py-2 mx-2 ${view === "bookmarked" ? "bg-blue-500" : "bg-gray-600"}`}
           onClick={() => setView("bookmarked")}
         >
           Bookmarked Workouts
@@ -84,9 +89,9 @@ const Exercises = () => {
       <div className="w-full">
         {view === "weekly" ? (
           <div className="p-8 bg-gray-800 text-white min-h-screen">
-          <h1 className="text-4xl font-bold mb-6">Weekly Exercise Program</h1>
-          <WeekProgram programs={programs} bookmarkedPrograms={bookmarkedPrograms} />
-        </div>
+            <h1 className="text-4xl font-bold mb-6">Weekly Exercise Program</h1>
+            <WeekProgram programs={programs} bookmarkedPrograms={bookmarkedPrograms} />
+          </div>
         ) : view === "myExercises" ? (
           <ExerciseProgramList />
         ) : (
@@ -120,6 +125,7 @@ const Exercises = () => {
 };
 
 export default Exercises;
+
 
 
 
