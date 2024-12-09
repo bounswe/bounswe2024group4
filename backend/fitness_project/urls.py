@@ -49,12 +49,12 @@ urlpatterns = [
     path('workouts/delete/<int:workout_id>/', exercise_program_views.delete_workout_by_id, name='delete_workout_by_id'),
     path('get_exercises/', exercise_program_views.get_exercises, name='get_exercises'), #Get exercises from api
     path('get-workout/<int:workout_id>/', exercise_program_views.get_workout_by_id, name='get_workout_by_id'), #Get a workout by id
-    path('get-workouts/', exercise_program_views.get_workouts_by_username, name='get_workouts_by_username'),
+    path('get-workouts/', exercise_program_views.get_workouts, name='get_workouts'),
     path('workout-log/<int:workout_id>/', exercise_program_views.workout_log, name='workout_log'), #Log a workout and exercises inside it
-    path('workout-logs/', exercise_program_views.get_workout_logs_by_username, name='get_workout_logs_by_user_id'), #Get workout logs by username
+    path('workout-logs/', exercise_program_views.get_workout_logs, name='get_workout_logs'), #Get workout logs by username
     path('rate-workout/', exercise_program_views.rate_workout, name='rate_workout'), # Rate a workout
     path('create-program/', exercise_program_views.create_program, name='create_program'), # Create a weekly program
-    path('get-programs/', exercise_program_views.get_programs_by_username, name='get_programs_by_user_id'), # Get weekly programs by username
+    path('get-programs/', exercise_program_views.get_programs, name='get_programs'), # Get weekly programs by username
     path('workouts/toggle-bookmark/', exercise_program_views.toggle_bookmark_workout, name='toggle_bookmark_workout'), # Bookmark a workout
     path('get-bookmarked-workouts/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'), # Get bookmarked workouts by username
     #User auth related endpoints
@@ -62,7 +62,6 @@ urlpatterns = [
     path('log_in/', auth_views.log_in, name='log_in'),
     path('log_out/', auth_views.log_out, name='log_out'),
     path('csrf_token/', auth_views.csrf_token, name='csrf_token'),
-    path('session/', auth_views.session, name='session'),
     #Profile related endpoints
     path('edit_profile/', profile_views.edit_profile, name='edit_profile'),
     path('view_profile/', profile_views.view_profile, name='view_profile'),
