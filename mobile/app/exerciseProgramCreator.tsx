@@ -11,11 +11,11 @@ import { Exercise, Workout } from "../constants/types";
 export default function ExerciseCreate() {
   const baseURL = "http://" + process.env.EXPO_PUBLIC_API_URL + ":8000";
   const { selectedExercises, muscleName } = useLocalSearchParams<{ selectedExercises: string; muscleName: string }>();
+  const { viewingUser, viewedUser } = useGlobalSearchParams();
+  const router = useRouter();
 
   const [workoutProgram, setWorkoutProgram] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
-  const { viewingUser, viewedUser } = useGlobalSearchParams();
-  const router = useRouter();
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -35,9 +35,9 @@ export default function ExerciseCreate() {
           equipment: exercise.equipment || "",
           instructions: exercise.instructions || "",
         }));
-    
+
         const combinedExercisesArray = Array.from(new Set([...existingExercisesArray, ...newExercises]));
-    
+
         const newWorkoutProgram: Workout = {
           id: "1",
           name: "Draft",
@@ -46,7 +46,7 @@ export default function ExerciseCreate() {
           rating: 0,
           rating_count: 0,
         };
-    
+
         await AsyncStorage.setItem("existingExercises", JSON.stringify(combinedExercisesArray));
         setWorkoutProgram(newWorkoutProgram);
       } catch (error) {
@@ -55,7 +55,6 @@ export default function ExerciseCreate() {
         setLoading(false);
       }
     };
-    
 
     fetchExercises();
   }, [selectedExercises, muscleName]);
@@ -93,7 +92,7 @@ export default function ExerciseCreate() {
         },
       };
 
-      const response = await axios.post(`${baseURL}/workout_program/`, body, config);
+      await axios.post(`${baseURL}/workout_program/`, body, config);
 
       Alert.alert("Success", "Workout program saved successfully!");
       router.push({
@@ -103,6 +102,23 @@ export default function ExerciseCreate() {
     } catch (error) {
       console.error("Failed to save workout program:", error);
       Alert.alert("Error", "Failed to save workout program. Please try again.");
+    }
+  };
+
+  const handleCancel = async () => {
+    await clearAsyncStorage();
+    router.push({
+      pathname: "../exercises",
+      params: { viewingUser, viewedUser },
+    });
+  };
+
+  const clearAsyncStorage = async () => {
+    try {
+      await AsyncStorage.removeItem("existingExercises");
+      console.log("AsyncStorage cleared!");
+    } catch (error) {
+      console.error("Failed to clear AsyncStorage:", error);
     }
   };
 
@@ -133,20 +149,14 @@ export default function ExerciseCreate() {
         {workoutProgram && (
           <WorkoutProgram workout={workoutProgram} onUpdate={handleWorkoutUpdate} />
         )}
-        <TouchableOpacity
-          onPress={() => {
-            router.push({
-              pathname: "../muscleGroupSelector",
-              params: { viewingUser, viewedUser },
-            });
-          }}
-          style={styles.addButton}
-        >
-          <FontAwesome5 name="plus" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleSave} style={styles.proceedButton}>
-          <Text style={styles.proceedButtonText}>Save</Text>
-        </TouchableOpacity>
+        <SafeAreaView style={styles.buttonRow}>
+          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSave} style={styles.proceedButton}>
+            <Text style={styles.proceedButtonText}>Save</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -169,30 +179,33 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
-  addButton: {
-    position: "relative",
-    top: 10,
-    left: 175,
-    width: 50,
-    height: 50,
-    borderRadius: 50 / 2,
-    backgroundColor: "#1B55AC",
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  cancelButton: {
+    width: 100,
+    backgroundColor: '#FF4C4C',
+    borderRadius: 10,
+    padding: 15,
     alignItems: "center",
-    justifyContent: "center",
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "white",
   },
   proceedButton: {
-    position: "absolute",
-    bottom: 20,
-    left: 280,
-    width: 75,
+    width: 100,
     backgroundColor: "#1B55AC",
     borderRadius: 10,
-    padding: 20,
+    padding: 15,
+    alignItems: "center",
   },
   proceedButtonText: {
     fontSize: 14,
     fontWeight: "bold",
     color: "white",
-    textAlign: "justify",
   },
 });

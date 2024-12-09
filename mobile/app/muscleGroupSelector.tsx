@@ -28,17 +28,30 @@ export default function Exercises() {
             </TouchableOpacity>
           ))}
         </View>
-        <TouchableOpacity
-          style={styles.proceedButton}
-          onPress={() => {
-            router.push({
-              pathname: '../exerciseSelector',
-              params: { muscleName: Object.keys(images)[selectedImage], viewingUser, viewedUser },
-            });
-          }}
-        >
-          <Text style={styles.proceedButtonText}>Proceed</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => {
+              router.push({
+                pathname: '../exercises',
+                params: { viewingUser, viewedUser },
+              });
+            }}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.proceedButton}
+            onPress={() => {
+              router.push({
+                pathname: '../exerciseSelector',
+                params: { muscleName: Object.keys(images)[selectedImage], viewingUser, viewedUser },
+              });
+            }}
+          >
+            <Text style={styles.proceedButtonText}>Proceed</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -88,19 +101,36 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#1B55AC',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  cancelButton: {
+    width: 100,
+    backgroundColor: '#FF4C4C',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+  },
   proceedButton: {
-    position: 'relative',
-    top: 20,
-    left: 255,
     width: 100,
     backgroundColor: '#1B55AC',
     borderRadius: 10,
-    padding: 20,
+    padding: 15,
+    alignItems: 'center',
   },
   proceedButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: 'white',
-    textAlign: 'justify',
+    textAlign: 'center',
   },
 });

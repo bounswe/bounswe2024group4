@@ -55,10 +55,11 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
 
       {currentWorkout.exercises.map((exercise, index) => {
         const [showFullInstruction, setShowFullInstruction] = useState(false);
+        const instructionText = exercise.instruction ?? exercise.instructions;
         const truncatedInstruction =
-          exercise.instruction.length > 100
-            ? `${exercise.instruction.substring(0, 100)}...`
-            : exercise.instruction;
+          instructionText.length > 100
+            ? `${instructionText.substring(0, 100)}...`
+            : instructionText;
 
         return (
           <React.Fragment key={`${exercise.id}-${index}`}>
@@ -71,7 +72,7 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
               <SafeAreaView style={styles.exerciseDetails}>
                 <Text style={styles.exerciseName}>{exercise.name}</Text>
                 <Text style={styles.exerciseInstruction}>
-                  {showFullInstruction ? exercise.instruction : truncatedInstruction}
+                  {showFullInstruction ? instructionText : truncatedInstruction}
                 </Text>
                 <TouchableOpacity onPress={() => setShowFullInstruction(!showFullInstruction)}>
                   <Text style={styles.showMoreButton}>
@@ -89,6 +90,7 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
           </React.Fragment>
         );
       })}
+
 
       {isModalVisible && (
         <WorkoutEdit

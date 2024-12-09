@@ -2,7 +2,17 @@ import { Text, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from 'react';
 import { Stack, useLocalSearchParams, useGlobalSearchParams, useRouter } from "expo-router";
 import axios from 'axios';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Exercise } from '../constants/types';
+
+const clearAsyncStorage = async () => {
+  try {
+    await AsyncStorage.removeItem('existingExercises');
+    console.log('AsyncStorage cleared!');
+  } catch (error) {
+    console.error('Failed to clear AsyncStorage:', error);
+  }
+};
 
 export default function ExerciseSelect() {
   const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
@@ -18,15 +28,19 @@ export default function ExerciseSelect() {
     const fetchExercises = async () => {
       try {
         const response = await axios.get(`${baseURL}/get_exercises/?muscle=${muscleName}`, {});
-        setExercises(response.data);
+        const uniqueExercises = response.data.filter(
+          (exercise: Exercise, index: number, self: Exercise[]) =>
+            index === self.findIndex((e) => e.name === exercise.name)
+        );
+        setExercises(uniqueExercises);
       } catch (error) {
         console.error(error);
       }
     };
-
+  
     fetchExercises();
   }, [muscleName]);
-
+  
   const handleSelectExercise = (exercise: Exercise) => {
     const isAlreadySelected = selectedExercises.some(selected => selected.name === exercise.name);
 
@@ -49,6 +63,14 @@ export default function ExerciseSelect() {
     });
   };
 
+  const handleBackButtonPress = async () => {
+    await clearAsyncStorage();
+    router.push({
+      pathname: "../muscleGroupSelector",
+      params: { viewingUser, viewedUser },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -63,9 +85,14 @@ export default function ExerciseSelect() {
             <Text style={styles.exerciseText}>{exercise.name}</Text>
           </TouchableOpacity>
         ))}
-        <TouchableOpacity style={styles.addButton} onPress={handleAddButtonPress}>
-          <Text style={styles.addButtonText}>Add</Text>
-        </TouchableOpacity>
+        <SafeAreaView style={styles.buttonRow}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackButtonPress}>
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddButtonPress}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -105,12 +132,27 @@ const styles = StyleSheet.create({
   selected: {
     backgroundColor: '#1B55AC',
   },
-  addButton: {
-    position: 'relative',
-    top: 20,
-    left: 260,
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 35,
+    marginTop: 20,
+  },
+  backButton: {
     width: 75,
-    backgroundColor: '#1B55AC',
+    backgroundColor: '#FF4C4C',
+    borderRadius: 10,
+    padding: 10,
+  },
+  backButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+  },
+  addButton: {
+    width: 75,
+    backgroundColor: "#1B55AC",
     borderRadius: 10,
     padding: 10,
   },
@@ -119,5 +161,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
-  }
+  },
 });
