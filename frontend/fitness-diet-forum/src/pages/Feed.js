@@ -54,6 +54,7 @@ const Feed = () => {
             mealId={post.meal_id}
             workoutId={post.workout_id}
             like_count={post.like_count}
+            liked={post.liked}
           />
         ))
       ) : (
