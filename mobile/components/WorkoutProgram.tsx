@@ -5,7 +5,6 @@ import WorkoutEdit from './WorkoutEdit';
 import images from '../constants/image_map';
 import { Workout } from '../constants/types';
 
-
 interface WorkoutProgramProps {
   workout: Workout;
   onUpdate: (updatedWorkout: Workout) => void;
@@ -54,27 +53,42 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
         </SafeAreaView>
       </SafeAreaView>
 
-      {currentWorkout.exercises.map((exercise, index) => (
-        <React.Fragment key={`${exercise.id}-${index}`}>
-          <SafeAreaView style={styles.exerciseRow}>
-            {exercise.muscle ? (
-              <Image source={images[exercise.muscle as keyof typeof images]} style={styles.exerciseImage} />
-            ) : (
-              <View style={styles.exerciseImagePlaceholder} />
-            )}
-            <SafeAreaView style={styles.exerciseDetails}>
-              <Text style={styles.exerciseName}>{exercise.name}</Text>
-              <Text style={styles.exerciseInstruction}>{exercise.instruction}</Text>
-              <Text style={styles.exerciseSetsReps}>
-                {exercise.sets} sets x {exercise.reps} reps
-              </Text>
+      {currentWorkout.exercises.map((exercise, index) => {
+        const [showFullInstruction, setShowFullInstruction] = useState(false);
+        const truncatedInstruction =
+          exercise.instruction.length > 100
+            ? `${exercise.instruction.substring(0, 100)}...`
+            : exercise.instruction;
+
+        return (
+          <React.Fragment key={`${exercise.id}-${index}`}>
+            <SafeAreaView style={styles.exerciseRow}>
+              {exercise.muscle ? (
+                <Image source={images[exercise.muscle as keyof typeof images]} style={styles.exerciseImage} />
+              ) : (
+                <View style={styles.exerciseImagePlaceholder} />
+              )}
+              <SafeAreaView style={styles.exerciseDetails}>
+                <Text style={styles.exerciseName}>{exercise.name}</Text>
+                <Text style={styles.exerciseInstruction}>
+                  {showFullInstruction ? exercise.instruction : truncatedInstruction}
+                </Text>
+                <TouchableOpacity onPress={() => setShowFullInstruction(!showFullInstruction)}>
+                  <Text style={styles.showMoreButton}>
+                    {showFullInstruction ? 'Show Less' : 'Show More'}
+                  </Text>
+                </TouchableOpacity>
+                <Text style={styles.exerciseSetsReps}>
+                  {exercise.sets} sets x {exercise.reps} reps
+                </Text>
+              </SafeAreaView>
             </SafeAreaView>
-          </SafeAreaView>
-          {index < currentWorkout.exercises.length - 1 && (
-            <View style={styles.separatorLine} />
-          )}
-        </React.Fragment>
-      ))}
+            {index < currentWorkout.exercises.length - 1 && (
+              <View style={styles.separatorLine} />
+            )}
+          </React.Fragment>
+        );
+      })}
 
       {isModalVisible && (
         <WorkoutEdit
@@ -105,7 +119,7 @@ const styles = StyleSheet.create({
   },
   programTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     flexShrink: 1,
     marginRight: 10,
@@ -156,15 +170,21 @@ const styles = StyleSheet.create({
   },
   exerciseName: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
   },
   exerciseInstruction: {
     color: '#bbb',
+    fontSize: 13,
+  },
+  showMoreButton: {
+    color: '#5C90E0',
     fontSize: 12,
+    marginTop: 5,
+    textDecorationLine: 'underline',
   },
   exerciseSetsReps: {
     color: '#bbb',
-    fontSize: 14,
+    fontSize: 16,
   },
   separatorLine: {
     height: 1,

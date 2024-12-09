@@ -37,6 +37,7 @@ interface Exercise {
   muscle: string;
   equipment: string;
   instructions: string;
+  instruction: string;
   sets: number;
   reps: number;
 }
@@ -103,7 +104,6 @@ export default function Index() {
               exercises: item.exercises.map((exercise) => ({
                 ...exercise,
                 muscle: mapMuscleToEnum(exercise.muscle),
-                instruction: exercise.instructions,
               })),
             }}
             onUpdate={(updatedWorkout) => {
