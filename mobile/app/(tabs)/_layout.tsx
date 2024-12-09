@@ -93,6 +93,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="WeekProgram"
+        options={{
+          title: 'Week Program',
+          tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="calendar-week" color={color} />,
+        }}
+        initialParams={{
+          viewingUser: currentUser,
+          viewedUser: currentUser,
+        }}
+      />
+      <Tabs.Screen
         name="leaderboard"
         options={{
           title: 'Leaderboard',
@@ -105,5 +116,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    
   );
 }
