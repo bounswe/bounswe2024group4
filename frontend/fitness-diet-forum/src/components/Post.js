@@ -22,6 +22,11 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
     const [showCommentBox, setShowCommentBox] = useState(false); // Hide comment box initially
     const [newComment, setNewComment] = useState(""); // Track new comment input
     const [comments, setComments] = useState([]); // List of comments
+    const config = {
+        headers: {
+            'Authorization': 'Token ' + token,
+        },
+    }
 
     useEffect(() => {
         const fetchPostData = async () => {
@@ -30,11 +35,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
                     // TO DO get meal with meal ID
                 }
                 if (workoutId) {
-                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, {
-                        headers: {
-                          'Authorization': 'Token ' + token
-                        }
-                      });
+                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, config);
                     console.log(workoutResponse);
                     if (workoutResponse.status === 200) {
                         const data = workoutResponse.data;
@@ -64,11 +65,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
             const response = await axios.post(
                 `${baseURL}/toggle_like/`, 
                 { postId }, // Pass postId in the request body
-                {
-                    headers: {
-                        'Authorization': 'Token ' + token,
-                    },
-                }
+                config
             );
     
             if (response.status === 200) {

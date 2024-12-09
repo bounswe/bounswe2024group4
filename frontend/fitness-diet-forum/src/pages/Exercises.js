@@ -13,11 +13,16 @@ const Exercises = () => {
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
   const username = localStorage.getItem("username");
+  const token = localStorage.getItem("token");
+  const headers = {
+    'Authorization': 'Token ' + token
+  }
+  
 
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
-        const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`);
+        const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`, {headers: headers});
         setPrograms(response.data);
         setError(null); // Clear previous errors
       } catch (error) {
@@ -30,12 +35,13 @@ const Exercises = () => {
       try {
         const response = await axios.get(`${baseURL}/get-bookmarked-workouts/`, {
           params: { username },
+          headers: headers,
         });
         const bookmarkedIds = response.data.map((program) => program.id);
 
         const bookmarkedDetails = await Promise.all(
           bookmarkedIds.map(async (id) => {
-            const detailResponse = await axios.get(`${baseURL}/get-workout/${id}/`);
+            const detailResponse = await axios.get(`${baseURL}/get-workout/${id}/`, {headers: headers});
             return detailResponse.data;
           })
         );

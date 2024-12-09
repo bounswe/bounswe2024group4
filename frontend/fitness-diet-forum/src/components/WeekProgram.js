@@ -11,8 +11,13 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
   const [currentDayPrograms, setCurrentDayPrograms] = useState([]);
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
-  const csrf_token = localStorage.getItem("csrfToken");
   const username = localStorage.getItem("username");
+  const token = localStorage.getItem("token");
+  const config = {
+    headers: {
+      'Authorization': 'Token ' + token
+    }
+  }
 
   const daysOfWeek = [
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
@@ -54,14 +59,6 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
       })),
     }));
 
-    const config = {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrf_token,
-      },
-    };
-
     const body = {
       exercises: updatedExercises,
     };
@@ -90,14 +87,6 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
     weekPrograms.forEach((program) => {
       workoutsData[daysOfWeek.indexOf(program.day) + 1] = program.id;
     });
-  
-    const config = {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrf_token,
-      },
-    };
   
     try {
       // Send the data to the backend for program creation

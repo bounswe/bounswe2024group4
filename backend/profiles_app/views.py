@@ -115,6 +115,7 @@ def view_profile(request):
                 'meal_id': post.mealId,
                 'like_count': post.likeCount,
                 'created_at': post.created_at,
+                'liked': viewing_user in post.liked_by.all(),
                 } for post in posts])),
             'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
             # 'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
