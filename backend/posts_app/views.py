@@ -21,7 +21,6 @@ def post(request):
         content = request.data.get('content')
         workoutId = request.data.get('workoutId')
         mealId = request.data.get('mealId')
-        post = Post.objects.create(user=user, content=content)
 
         if not content:
             return JsonResponse({'error': 'Content is required'}, status=400)
@@ -38,7 +37,8 @@ def post(request):
                 post.mealId = mealId
             except ValueError:
                 return JsonResponse({'error': 'mealId must be an integer'}, status=400)
-            
+                
+        post = Post.objects.create(user=user, content=content)
         post.save()
 
         return JsonResponse({'message': 'Post created successfully', 'post_id': post.id}, status=201)
