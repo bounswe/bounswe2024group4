@@ -7,18 +7,18 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
-const Post = ({ user, content, mealId, workoutId }) => {
+const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
-    const csrf_token = localStorage.getItem("csrfToken");
+    const token = localStorage.getItem("token");
     const [error, setError] = useState(null);
 
     const [workout, setWorkout] = useState(null);
     const [meal, setMeal] = useState(null);
 
-    const [liked, setLiked] = useState(false); // Initially not liked
-    const [likeCount, setLikeCount] = useState(0); // Initial like count
+    const [hasLiked, setHasLiked] = useState(liked); // Initially not liked
+    const [likeCount, setLikeCount] = useState(like_count); // Initial like count
     const [showCommentBox, setShowCommentBox] = useState(false); // Hide comment box initially
     const [newComment, setNewComment] = useState(""); // Track new comment input
     const [comments, setComments] = useState([]); // List of comments
@@ -30,7 +30,11 @@ const Post = ({ user, content, mealId, workoutId }) => {
                     // TO DO get meal with meal ID
                 }
                 if (workoutId) {
-                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`);
+                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, {
+                        headers: {
+                          'Authorization': 'Token ' + token
+                        }
+                      });
                     console.log(workoutResponse);
                     if (workoutResponse.status === 200) {
                         const data = workoutResponse.data;
@@ -47,11 +51,42 @@ const Post = ({ user, content, mealId, workoutId }) => {
         fetchPostData();
     }, [mealId, workoutId]);
 
-    // Handle like button click
-    const handleLikeClick = () => {
-        setLiked(!liked); // Toggle like state
-        setLikeCount(likeCount + (liked ? -1 : 1)); // Increase or decrease like count
+    const handleLikeClick = async () => {
+        try {
+            // Optimistically update UI
+            const updatedHasLiked = !hasLiked;
+            const updatedLikeCount = likeCount + (hasLiked ? -1 : 1);
+    
+            setHasLiked(updatedHasLiked);
+            setLikeCount(updatedLikeCount);
+    
+            // Send a request to toggle like
+            const response = await axios.post(
+                `${baseURL}/toggle_like/`, 
+                { postId }, // Pass postId in the request body
+                {
+                    headers: {
+                        'Authorization': 'Token ' + token,
+                    },
+                }
+            );
+    
+            if (response.status === 200) {
+                // Optionally log the server's response
+                console.log(response.data.message); // Example: "Post liked/unliked successfully"
+            } else {
+                throw new Error('Unexpected response status');
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+    
+            // Revert UI state if the request fails
+            setHasLiked(!hasLiked); // Revert the hasLiked state
+            setLikeCount(likeCount + (hasLiked ? 1 : -1)); // Adjust the like count accordingly
+        }
     };
+    
+    
 
     // Handle comment submit
     const handleCommentSubmit = (e) => {
@@ -80,7 +115,7 @@ const Post = ({ user, content, mealId, workoutId }) => {
                             {[...Array(5)].map((_, i) => (
                                 <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
                             ))}
-                            <span className="text-gray-300 ml-2">{user.score}</span>
+                            <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
                         </div>
                     </div>
                 </Link>
@@ -121,7 +156,7 @@ const Post = ({ user, content, mealId, workoutId }) => {
             {/* Actions: Like & Comment */}
             <div className="flex justify-between mt-4 text-gray-400">
                 <button className="flex items-center" onClick={handleLikeClick}>
-                    <FaHeart className={`mr-2 ${liked ? "text-red-500" : ""}`} /> {likeCount} Like
+                    <FaHeart className={`mr-2 ${hasLiked ? "text-red-500" : ""}`} /> {likeCount} Like
                 </button>
                 <button className="flex items-center" onClick={() => setShowCommentBox(!showCommentBox)}>
                     <FaComment className="mr-2" /> Comment

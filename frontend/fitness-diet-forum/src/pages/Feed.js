@@ -7,7 +7,7 @@ const Feed = () => {
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
   const loggedInUser = localStorage.getItem("username"); // Get logged-in user
-  const csrf_token = localStorage.getItem("csrfToken"); // Get CSRF token if needed
+  const token = localStorage.getItem("token"); // Get CSRF token if needed
 
   const [posts, setPosts] = useState([]); // State to hold the posts
   const [error, setError] = useState(null); // State to hold errors
@@ -19,7 +19,7 @@ const Feed = () => {
         const response = await axios.get(`${baseURL}/following_feed`, {
           params: { username: loggedInUser },
           headers: {
-            "Authorization": `Bearer ${csrf_token}` // If token is needed in headers
+            "Authorization": `Token ${token}` // If token is needed in headers
           }
         });
 
@@ -35,7 +35,7 @@ const Feed = () => {
     };
 
     fetchFeed();
-  }, [baseURL, loggedInUser, csrf_token]);
+  }, [baseURL, loggedInUser, token]);
 
   return (
     <div className="feed-container">
@@ -48,10 +48,13 @@ const Feed = () => {
         posts.map((post) => (
           <Post
             key={post.id}
-            user={post.user} // Assuming each post has a user object
+            postId={post.post_id}
+            user={post.user}
             content={post.content}
-            mealId={post.meal_id} // Assuming mealId is part of the post
-            workoutId={post.workout_id} // Assuming workoutId is part of the post
+            mealId={post.meal_id}
+            workoutId={post.workout_id}
+            like_count={post.like_count}
+            liked={post.liked}
           />
         ))
       ) : (

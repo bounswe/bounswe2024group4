@@ -39,6 +39,7 @@ def following_feed(request):
                 'meal_id': post.mealId,
                 'like_count': post.likeCount,
                 'created_at': post.created_at,
+                'liked': user in post.liked_by.all(),
                 'user': {
                     'username': post.user.username,
                     'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None,
