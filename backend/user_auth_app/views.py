@@ -1,15 +1,16 @@
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
-from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
+from django.contrib.auth import authenticate
 from .models import User
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
-from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from swagger_docs.swagger import sign_up_schema, log_in_schema, log_out_schema, csrf_token_schema, session_schema
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 
+@csrf_exempt
 @swagger_auto_schema(method='post', **sign_up_schema)
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -20,53 +21,75 @@ def sign_up(request):
         password = request.data.get("password")
         user_type = request.data.get("user_type", "member")
 
+        # Validate required fields
+        if not all([username, email, password]):
+            return JsonResponse({
+                "error": "Missing required fields",
+                "details": {
+                    "username": "Required" if not username else None,
+                    "email": "Required" if not email else None,
+                    "password": "Required" if not password else None
+                }
+            }, status=400)
+
         if User.objects.filter(email=email).exists():
-            return HttpResponse("Email already taken.", status=400)
+            return JsonResponse({"error": "Email already taken"}, status=400)
         if User.objects.filter(username=username).exists():
-            return HttpResponse("Username already taken.", status=400)
+            return JsonResponse({"error": "Username already taken"}, status=400)
 
         user = User.objects.create_user(username=username, email=email, password=password)
         user.user_type = user_type
         user.save()
 
-        login(request, user)
-        return JsonResponse({'username': username, 'csrf_token': get_token(request)}, status=201)
-    else:
-        return JsonResponse({'error': 'Invalid request'}, status=405)
-        # return render(request, 'sign_up.html')
+        # Create auth token
+        token, _ = Token.objects.get_or_create(user=user)
+        
+        return JsonResponse({
+            'user': {
+                'username': username,
+                'email': email,
+                'user_type': user_type,
+                'id': user.pk
+            },
+            'token': token.key
+        }, status=201)
 
-
+@csrf_exempt
 @swagger_auto_schema(method='post', **log_in_schema)
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@csrf_exempt
-def log_in(request):
+def log_in(request):    
     if request.method == "POST":
         username = request.data.get("username")
         password = request.data.get("password")
-        print(password)
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(username=username, password=password)
+        
         if user is None:
-            return HttpResponse("Invalid credentials", status=401)
+            return JsonResponse({"error": "Invalid credentials"}, status=401)
 
-        login(request, user)
-        return JsonResponse({'username': username, 'csrf_token': get_token(request)}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request'}, status=405)
-        # return render(request, 'log_in.html')
+        # Create or get auth token
+        token, _ = Token.objects.get_or_create(user=user)
+        
+        return JsonResponse({
+            'user': {
+                'username': user.username,
+                'email': user.email,
+                'user_type': user.user_type,
+                'id': user.pk
+            },
+            'token': token.key
+        }, status=200)
 
-
+@csrf_exempt
 @swagger_auto_schema(method='post', **log_out_schema)
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def log_out(request):
     if request.method == "POST":
-        logout(request)
-        request.session.flush()
-        return HttpResponse("Logged out successfully", status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request'}, status=405)
-    
+        # Delete the auth token
+        if hasattr(request.user, 'auth_token'):
+            request.user.auth_token.delete()
+        return JsonResponse({"message": "Logged out successfully"}, status=200)
 
 @swagger_auto_schema(method='get', **csrf_token_schema)
 @api_view(['GET'])
@@ -75,16 +98,34 @@ def csrf_token(request):
     if request.method == "GET":
         csrf_token = get_token(request)
         return JsonResponse({'csrf_token': csrf_token}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request'}, status=405)
 
-
-@swagger_auto_schema(method='get', **session_schema)
-@api_view(['GET'])
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def session(request):
-    if request.method == "GET":
-        session = request.session
-        return JsonResponse({'session': session.session_key != None }, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid request'}, status=405)
+def toggle_like(request):
+    try:
+        post_id = request.data.get('postId')
+        user = request.user  # This will now be properly populated from the token
+        
+        if not post_id:
+            return JsonResponse({"error": "Post ID is required"}, status=400)
+            
+        post = Post.objects.get(id=post_id)
+        
+        if post.likes.filter(id=user.id).exists():
+            post.likes.remove(user)
+            liked = False
+        else:
+            post.likes.add(user)
+            liked = True
+            
+        return JsonResponse({
+            "liked": liked,
+            "likes_count": post.likes.count()
+        }, status=200)
+        
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
