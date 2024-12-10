@@ -86,8 +86,10 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
-    path('get-activities/', activity_streams_views.get_activity_stream, name='get_activity_stream'),
+    path('get-activities/', activity_streams_views.get_activities, name='get_activity_stream'),
     path('log-activity/', activity_streams_views.log_activity, name='log_activity'),
+    path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
+
 ]
 
 if settings.DEBUG:

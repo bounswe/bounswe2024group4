@@ -391,6 +391,7 @@ def get_programs(request):
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def workout_log(request, workout_id):
+    #This GET part is useless
     if request.method == 'GET':
         try:
             user = request.user  # Get user from token authentication
