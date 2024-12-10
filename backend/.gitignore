@@ -21,4 +21,4 @@ swagger_docs/__pycache__
 simple_features_app/__pycache__
 simple_features_app/migrations/__pycache__
 .pytest_cache
-backend/secrets/serviceAccountKey.json
+/secrets/serviceAccountKey.json
