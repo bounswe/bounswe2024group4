@@ -21,7 +21,7 @@ def edit_profile(request):
             new_username = request.POST.get('username')
             new_email = request.POST.get('email')
             new_bio = request.POST.get('bio')
-            new_profile_picture = request.POST.get('profile_picture')
+            new_profile_picture = request.FILES.get('profile_picture')
             new_weight = request.POST.get('weight')
             new_height = request.POST.get('height')
             new_password = request.POST.get('password')

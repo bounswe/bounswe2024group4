@@ -3,7 +3,6 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import animationData from "../assets/Animation1.json"; 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";  
-import { setLoggedIn } from "../components/Auth.js";
 import { Context } from "../globalContext/globalContext.js";
 
 
@@ -32,7 +31,7 @@ const Login = () => {
       localStorage.setItem("LoggedIn", "true");
 
       console.log("Login successful", response.data);
-      navigate("/meals");  
+      navigate("/feed");  
     } catch (err) {
       setLoading(false);
       if (err.response && err.response.status === 401) {
