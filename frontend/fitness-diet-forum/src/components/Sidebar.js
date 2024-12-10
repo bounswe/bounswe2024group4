@@ -12,7 +12,7 @@ const Sidebar = () => {
       </h1>
       <nav className="flex flex-col space-y-2 mt-6">
         <NavLink 
-          to="/posts" 
+          to="/feed" 
           className={({ isActive }) => isActive ? 'bg-blue-700 p-2 rounded flex items-center space-x-2' : 'hover:bg-blue-700 p-2 rounded flex items-center space-x-2'}
         >
           <FaHome /> <span>Home</span>

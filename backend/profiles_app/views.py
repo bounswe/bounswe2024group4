@@ -3,15 +3,18 @@ from user_auth_app.models import User, Weight, Follow
 from django.http import JsonResponse, HttpResponse
 from swagger_docs.swagger import edit_profile_schema, view_profile_schema, user_programs_schema, user_workout_logs_schema
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.decorators import login_required
 from exercise_program_app.models import Workout
 from posts_app.models import Post
+from rest_framework.authentication import TokenAuthentication
 
 
 @swagger_auto_schema(method='post', **edit_profile_schema)
 @api_view(['POST'])
-@login_required
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def edit_profile(request):
     if request.method == 'POST':
         try:
@@ -23,8 +26,7 @@ def edit_profile(request):
             new_height = request.POST.get('height')
             new_password = request.POST.get('password')
 
-            # user = request.user
-            user = User.objects.get(username=request.POST.get('username'))
+            user = request.user  # Get user from token authentication
 
             if new_username:
                 user.username = new_username
@@ -33,11 +35,9 @@ def edit_profile(request):
             if new_bio:
                 user.bio = new_bio
             if new_profile_picture:
-                # customla aynı değilse ögeyi silmeyi ekle
                 user.profile_picture = new_profile_picture
             if new_weight:
                 user.weight = new_weight
-                print(user.weight)
                 Weight.objects.create(user=user, weight=new_weight)
             if new_height:
                 user.height = new_height
@@ -45,23 +45,21 @@ def edit_profile(request):
                 user.set_password(new_password)
 
             user.save()
-            # return render(request, 'edit_profile.html')
             return JsonResponse({'message': 'Profile updated successfully'}, status=200)
         except Exception as e:
             return JsonResponse({'message': str(e)}, status=400)
-    return render(request, 'edit_profile.html')    
-    # return JsonResponse({'message': 'Invalid request method'}, status=405)
+    return JsonResponse({'message': 'Invalid request method'}, status=405)
 
 
 
 @swagger_auto_schema(method='get', **view_profile_schema)
 @api_view(['GET'])
-#@login_required
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def view_profile(request):
     if request.method == 'GET':
         print(request.GET)
-        viewing_username = request.GET.get('viewing_username')
-        viewing_user = User.objects.get(username=viewing_username)
+        viewing_user = request.user  # Get viewing user from token authentication
         viewed_username = request.GET.get('viewed_username')
         try:
             viewed_user = User.objects.get(username=viewed_username)
@@ -109,12 +107,21 @@ def view_profile(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'is_following': is_following,
-            'posts': list(reversed([{'post_id': post.id} for post in posts])),
+            'posts': list(reversed([{
+                'post_id': post.id,
+                'user': post.user.username,
+                'content': post.content,
+                'workout_id': post.workout.workout_id if post.workout else None,
+                'meal_id': post.mealId,
+                'like_count': post.likeCount,
+                'created_at': post.created_at,
+                'liked': viewing_user in post.liked_by.all(),
+                } for post in posts])),
             'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
             # 'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
         }
 
-    return JsonResponse(context, status=200)
+        return JsonResponse(context, status=200)
 
 
 

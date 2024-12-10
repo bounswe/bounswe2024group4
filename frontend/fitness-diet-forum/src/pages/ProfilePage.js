@@ -16,17 +16,22 @@ const ProfilePage = () => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
-    const csrf_token = localStorage.getItem("csrfToken");
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        'Authorization': 'Token ' + token
+      }
+    }
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(baseURL + `/view_profile/?viewing_username=${loggedInUser}&viewed_username=${username}`);
+                const response = await axios.get(baseURL + `/view_profile/?viewed_username=${username}`, config);
                 if (response.status === 200) {
                     const data = response.data;
                     console.log(data)
                     setUserData(data);
-                    fetchUserPrograms(data.username);
+                    fetchExercisePrograms(data.workouts);
                 } else {
                     setError('User not found');
                 }
@@ -38,12 +43,25 @@ const ProfilePage = () => {
         fetchUserData();
     }, [username]);
 
-    const fetchUserPrograms = async (username) => {
+    const fetchExercisePrograms = async (workouts) => {
         try {
             setActiveSection('exercises');
-            const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`);
-            console.log('get workout response', response);
-            setPrograms(response.data);
+    
+            const workoutDetailsPromises = workouts.map(async (workout) => {
+                try {
+                    const response = await axios.get(`${baseURL}/get-workout/${workout.workout_id}/`, config);
+                    return response.data; // Extract workout data from the response
+                } catch (error) {
+                    console.error(`Error fetching details for workoutID ${workout.workout_id}:`, error);
+                    return null; // Handle errors gracefully by returning null
+                }
+            });
+    
+            // Wait for all requests to resolve
+            const workoutDetails = await Promise.all(workoutDetailsPromises);
+    
+            // Filter out any null results and update the programs state
+            setPrograms(workoutDetails.filter((workout) => workout !== null));
         } catch (error) {
             console.error("Error fetching user programs:", error);
         }
@@ -102,14 +120,6 @@ const ProfilePage = () => {
             console.log(userData.is_following);
             const action = userData.is_following ? 'unfollow' : 'follow';
             const body = userData.is_following ? { username: loggedInUser, following: username} : { follower: loggedInUser, following: username }
-            const config = {
-                withCredentials: true,
-                headers: {
-                  "Content-Type": "multipart/form-data",
-                  "X-CSRFToken": csrf_token,
-                },
-              };
-            console.log(csrf_token);
             const response = await axios.post(baseURL + `/${action}/`, body, config);
             if (response.status === 200) {
                 // Toggle the is_following status
@@ -147,7 +157,11 @@ const ProfilePage = () => {
                 {/* Profile Picture */}
                 <div className="flex justify-start mb-6">
                     <img
-                        src={userData.profile_picture}
+                        src={
+                            userData.profile_picture 
+                            ? userData.profile_picture 
+                            : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                        }
                         alt="Profile"
                         className="profile-picture w-32 h-32 rounded-full border-4 border-gray-600"
                     />
@@ -199,7 +213,7 @@ const ProfilePage = () => {
                     </button>
                     <button
                         className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'exercises' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
-                        onClick={() => fetchUserPrograms(userData.username) }
+                        onClick={() => fetchExercisePrograms(userData.workouts) }
                     >
                         Exercises
                     </button>
@@ -213,10 +227,13 @@ const ProfilePage = () => {
                                 userData.posts.map((post, index) => (
                                     <Post
                                         key={index}
-                                        user={post.user}
-                                        title={post.title}
-                                        bodyContent={post.bodyContent}
-                                        meals={post.meals}
+                                        postId={post.post_id}
+                                        user={userData}
+                                        content={post.content}
+                                        mealId={post.meal_id}
+                                        workoutId={post.workout_id}
+                                        like_count={post.like_count}
+                                        liked={post.liked}
                                     />
                                 ))
                             ) : (
@@ -253,6 +270,7 @@ const ProfilePage = () => {
                                         programId={program.id}
                                         currentRating={program.rating}
                                         ratingCount={program.rating_count}
+                                        showRating = {loggedInUser != username}
                                     />
                                 ))
                             ) : (

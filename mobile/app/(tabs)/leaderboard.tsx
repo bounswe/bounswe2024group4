@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
 
 interface LeaderboardEntry {
   username: string;
@@ -23,7 +24,9 @@ const Leaderboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'combined' | 'workout' | 'meal'>('combined');
-  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000'
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
+  const { viewingUser, viewedUser } = useGlobalSearchParams();
+  const router = useRouter();
 
   const fetchLeaderboard = async (endpoint: string) => {
     try {
@@ -57,10 +60,20 @@ const Leaderboard: React.FC = () => {
     fetchLeaderboard(endpoints[activeTab]);
   }, [activeTab]);
 
+  const handleUsernameClick = (viewedUser: string) => {
+    router.push({
+      pathname: '/profile',
+      params: {
+      viewingUser,
+      viewedUser,
+      }
+    });
+  };
+
   const renderItem = ({ item, index }: { item: LeaderboardEntry; index: number }) => {
     let entryStyle = styles.entryContainer;
     let rankStyle = styles.rank;
-
+  
     if (index === 0) {
       entryStyle = { ...entryStyle, ...styles.firstPlace };
     } else if (index === 1) {
@@ -68,19 +81,19 @@ const Leaderboard: React.FC = () => {
     } else if (index === 2) {
       entryStyle = { ...entryStyle, ...styles.thirdPlace };
     }
-
+  
     return (
       <SafeAreaView style={entryStyle}>
-        <Text style={rankStyle}>
-          #{index + 1}
-        </Text>
+        <Text style={rankStyle}>#{index + 1}</Text>
         <Image
           source={{
             uri: item.profile_picture || 'https://via.placeholder.com/50',
           }}
           style={styles.profileImage}
         />
-        <Text style={styles.username}>{item.username}</Text>
+        <TouchableOpacity onPress={() => handleUsernameClick(item.username)} style={styles.usernameContainer}>
+          <Text style={styles.username}>{item.username}</Text>
+        </TouchableOpacity>
         <Text style={styles.score}>
           {activeTab === 'combined' && item.rating?.toFixed(1)}
           {activeTab === 'workout' && item.workout_rating?.toFixed(1)}
@@ -93,7 +106,7 @@ const Leaderboard: React.FC = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FFD700" />
+        <ActivityIndicator testID="ActivityIndicator" size="large" color="#FFD700" />
         <Text style={styles.loadingText}>Loading Leaderboard...</Text>
       </SafeAreaView>
     );
@@ -150,11 +163,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1e1e1e',
   },
-  title: {
-    fontSize: 28,
+  loadingText: {
     color: '#FFD700',
-    fontWeight: 'bold',
-    marginBottom: 15,
+    fontSize: 18,
     textAlign: 'center',
   },
   tabsContainer: {
@@ -177,44 +188,46 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  loadingText: {
-    color: '#FFD700',
-    fontSize: 18,
-    textAlign: 'center',
-  },
   entryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#333333',
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 10,
     borderWidth: 2,
     borderColor: '#FFD700',
+    justifyContent: 'space-between',
   },
   rank: {
     color: '#FFD700',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginRight: 10,
+    textAlign: 'center',
+    width: '10%',
   },
   profileImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 10,
     borderWidth: 1,
     borderColor: '#FFD700',
+    marginHorizontal: 10,
+  },
+  usernameContainer: {
+    flex: 1,
   },
   username: {
     color: '#fff',
     fontSize: 16,
-    flex: 1,
+    textAlign: 'left',
   },
   score: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'right',
+    width: '15%',
   },
   firstPlace: {
     backgroundColor: '#B08E2E',
@@ -226,6 +239,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#8B4513',
   },
 });
-
 
 export default Leaderboard;

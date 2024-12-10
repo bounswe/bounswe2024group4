@@ -11,14 +11,20 @@ const LeaderBoard = () => {
     const [error, setError] = useState(null);
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        'Authorization': 'Token ' + token
+      }
+    }
 
     useEffect(() => {
         const fetchLeaderboards = async () => {
             try {
                 const leaderboardResponses = await Promise.all([
-                    axios.get(baseURL + "/get_leaderboard/"),
-                    axios.get(baseURL + "/get_workout_leaderboard/"),
-                    axios.get(baseURL + "/get_meal_leaderboard/"),
+                    axios.get(baseURL + "/get_leaderboard/", config),
+                    axios.get(baseURL + "/get_workout_leaderboard/", config),
+                    axios.get(baseURL + "/get_meal_leaderboard/", config),
                 ]);
 
                 const [mainLeaderboard, workoutLeaderboard, mealLeaderboard] = leaderboardResponses;
@@ -80,7 +86,7 @@ const LeaderBoard = () => {
                             className="text-lg font-bold text-blue-400 hover:underline"
                         >
                             <img
-                                src={user.profile_picture || "/default-avatar.png"}
+                                src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
                                 alt={`${user.username}'s profile`}
                                 className="w-16 h-16 rounded-full border-2 border-gray-600"
                             />

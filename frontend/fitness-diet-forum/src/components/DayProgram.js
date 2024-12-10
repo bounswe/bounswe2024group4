@@ -6,12 +6,14 @@ const DayProgram = ({
   day,
   programs,
   availablePrograms,
+  bookmarkedPrograms,
   onAddProgram,
   onRemoveProgram,
   onStartExercise,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
+  const [currentTab, setCurrentTab] = useState("myPrograms"); // Track which tab is selected
 
   const handleAddClick = () => {
     setIsModalOpen(true);
@@ -20,11 +22,15 @@ const DayProgram = ({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProgram(null);
+    setCurrentTab("myPrograms");
   };
 
   const handleProgramSelect = (event) => {
     const programId = parseInt(event.target.value, 10);
-    const selected = availablePrograms.find((program) => program.id === programId);
+    const selected =
+      currentTab === "myPrograms"
+        ? availablePrograms.find((program) => program.id === programId)
+        : bookmarkedPrograms.find((program) => program.id === programId);
     setSelectedProgram(selected);
   };
 
@@ -35,9 +41,8 @@ const DayProgram = ({
     }
   };
 
-  const handleRemove = (programId) => {
-    onRemoveProgram(day, programId);
-  };
+  const programsToShow =
+    currentTab === "myPrograms" ? availablePrograms : bookmarkedPrograms;
 
   return (
     <div>
@@ -48,13 +53,14 @@ const DayProgram = ({
             <ul className="ml-4 list-disc">
               {program.exercises.map((exercise, index) => (
                 <li key={index} className="mb-1">
-                  <strong>{exercise.name}</strong> - {exercise.sets} sets {exercise.reps} reps
+                  <strong>{exercise.name}</strong> - {exercise.sets} sets{" "}
+                  {exercise.reps} reps
                 </li>
               ))}
             </ul>
             <button
               className="mt-2 text-red-500 hover:text-red-700"
-              onClick={() => handleRemove(program.id)}
+              onClick={() => onRemoveProgram(program.id)}
               title="Remove program"
             >
               <FontAwesomeIcon icon={faTimes} size="lg" />
@@ -79,6 +85,30 @@ const DayProgram = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-6 rounded shadow-lg w-96">
             <h3 className="text-xl font-bold text-white mb-4">Select a Program</h3>
+            {/* Tabs */}
+            <div className="flex justify-between mb-4">
+              <button
+                className={`px-4 py-2 ${
+                  currentTab === "myPrograms"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-700 text-gray-300"
+                } rounded`}
+                onClick={() => setCurrentTab("myPrograms")}
+              >
+                My Programs
+              </button>
+              <button
+                className={`px-4 py-2 ${
+                  currentTab === "bookmarkedPrograms"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-700 text-gray-300"
+                } rounded`}
+                onClick={() => setCurrentTab("bookmarkedPrograms")}
+              >
+                Bookmarked Programs
+              </button>
+            </div>
+            {/* Dropdown */}
             <select
               onChange={handleProgramSelect}
               value={selectedProgram?.id || ""}
@@ -87,7 +117,7 @@ const DayProgram = ({
               <option value="" disabled>
                 -- Choose a program --
               </option>
-              {availablePrograms.map((program) => (
+              {programsToShow.map((program) => (
                 <option key={program.id} value={program.id}>
                   {program.workout_name}
                 </option>
@@ -124,6 +154,7 @@ const DayProgram = ({
 };
 
 export default DayProgram;
+
 
 
 

@@ -20,6 +20,7 @@ test("renders ExerciseProgram component and submits rating", async () => {
     programId: 1,
     currentRating: 4.5,
     ratingCount: 10,
+    showRating: true,
   };
 
   render(

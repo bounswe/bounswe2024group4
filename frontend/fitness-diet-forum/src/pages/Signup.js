@@ -25,27 +25,15 @@ const Signup = () => {
     }
 
     try {
-      const csrfTokenResp = await axios.get(baseURL + "/csrf_token/");
-      console.log(csrfTokenResp.data.csrf_token);
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRFToken": csrfTokenResp.data.csrf_token,
-        },
-      };
       const response = await axios.post(baseURL + "/sign_up/", {
         username,
         email,
         password,
         user_type: "member",
-      },config);
-      localStorage.setItem("csrfToken", csrfTokenResp.data.csrf_token);
-
+      });
       console.log("Signup Successful", response.data);
       setSuccess("Signup successful! Redirecting to login...");
       setError("");
-
       
       setTimeout(() => {
         navigate("/login"); 

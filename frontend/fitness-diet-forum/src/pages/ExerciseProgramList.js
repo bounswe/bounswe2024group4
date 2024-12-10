@@ -17,14 +17,19 @@ const ExerciseProgramList = () => {
     const [activeExerciseIndex, setActiveExerciseIndex] = useState(null); // Track active exercise for input fields
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
-    const csrf_token = localStorage.getItem("csrfToken");
     const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        'Authorization': 'Token ' + token
+      }
+    }
 
     // Fetch user programs on component mount
     useEffect(() => {
         const fetchUserPrograms = async () => {
             try {
-                const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`);
+                const response = await axios.get(`${baseURL}/get-workouts/?username=${username}`, config);
                 console.log('get workout response', response);
                 setPrograms(response.data);
             } catch (error) {
@@ -40,7 +45,7 @@ const ExerciseProgramList = () => {
             setIsLoading(true);
             // Create an array of promises for each muscle group
             const promises = muscles.map((muscle) =>
-                axios.get(`${baseURL}/get_exercises/?muscle=${muscle}`)
+                axios.get(`${baseURL}/get_exercises/?muscle=${muscle}`, config)
             );
             // Use Promise.all to execute all requests concurrently and get all responses
             const responses = await Promise.all(promises);
@@ -91,14 +96,6 @@ const ExerciseProgramList = () => {
         }
 
         try {
-            const config = {
-                withCredentials: true,
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrf_token,
-                },
-            };
-
             const workoutData = selectedExercises.map(exercise => ({
                 type: exercise.type,
                 name: exercise.name,
@@ -299,6 +296,7 @@ const ExerciseProgramList = () => {
                                     programId={program.id}
                                     currentRating={program.rating}
                                     ratingCount={program.rating_count}
+                                    showRating={false}
                                 />
                             ))
                         )}

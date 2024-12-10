@@ -1,23 +1,89 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { FaHeart, FaComment } from "react-icons/fa";
 import { IoIosStar } from "react-icons/io";
-import Food from "../components/Food"; // Import the Food component
+import ExerciseProgram from "./ExerciseProgram";
+import Meal from "./Meal";
+import { Context } from "../globalContext/globalContext.js";
+import axios from 'axios';
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
-const Post = ({ user, title, bodyContent, meals }) => {
-    // State for like functionality
-    const [liked, setLiked] = useState(false); // Initially not liked
-    const [likeCount, setLikeCount] = useState(0); // Initial like count
+const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) => {
+    const globalContext = useContext(Context);
+    const { baseURL } = globalContext;
+    const loggedInUser = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+    const [error, setError] = useState(null);
 
-    // State for comments
+    const [workout, setWorkout] = useState(null);
+    const [meal, setMeal] = useState(null);
+
+    const [hasLiked, setHasLiked] = useState(liked); // Initially not liked
+    const [likeCount, setLikeCount] = useState(like_count); // Initial like count
     const [showCommentBox, setShowCommentBox] = useState(false); // Hide comment box initially
     const [newComment, setNewComment] = useState(""); // Track new comment input
     const [comments, setComments] = useState([]); // List of comments
+    const config = {
+        headers: {
+            'Authorization': 'Token ' + token,
+        },
+    }
 
-    // Handle like button click
-    const handleLikeClick = () => {
-        setLiked(!liked); // Toggle like state
-        setLikeCount(likeCount + (liked ? -1 : 1)); // Increase or decrease like count
+    useEffect(() => {
+        const fetchPostData = async () => {
+            try {
+                if (mealId) {
+                    // TO DO get meal with meal ID
+                }
+                if (workoutId) {
+                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, config);
+                    console.log(workoutResponse);
+                    if (workoutResponse.status === 200) {
+                        const data = workoutResponse.data;
+                        console.log(data);
+                        setWorkout(data);
+                    } else {
+                        setError('Workout not found');
+                    }
+                }
+            } catch (error) {
+                setError('Something went wrong');
+            }
+        };
+        fetchPostData();
+    }, [mealId, workoutId]);
+
+    const handleLikeClick = async () => {
+        try {
+            // Optimistically update UI
+            const updatedHasLiked = !hasLiked;
+            const updatedLikeCount = likeCount + (hasLiked ? -1 : 1);
+    
+            setHasLiked(updatedHasLiked);
+            setLikeCount(updatedLikeCount);
+    
+            // Send a request to toggle like
+            const response = await axios.post(
+                `${baseURL}/toggle_like/`, 
+                { postId }, // Pass postId in the request body
+                config
+            );
+    
+            if (response.status === 200) {
+                // Optionally log the server's response
+                console.log(response.data.message); // Example: "Post liked/unliked successfully"
+            } else {
+                throw new Error('Unexpected response status');
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+    
+            // Revert UI state if the request fails
+            setHasLiked(!hasLiked); // Revert the hasLiked state
+            setLikeCount(likeCount + (hasLiked ? 1 : -1)); // Adjust the like count accordingly
+        }
     };
+    
+    
 
     // Handle comment submit
     const handleCommentSubmit = (e) => {
@@ -33,48 +99,61 @@ const Post = ({ user, title, bodyContent, meals }) => {
         <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
             {/* Header */}
             <div className="flex items-center mb-4">
-                <img
-                    src={user.profilePic} // Dynamically loads profile picture
-                    alt="Profile"
-                    className="w-12 h-12 rounded-full mr-4"
-                />
-                <div>
-                    <h3 className="text-xl font-semibold">{user.name} {user.surname} @{user.username}</h3>
-                    <div className="flex items-center text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                            <IoIosStar key={i} className={i < user.rating ? "text-yellow-400" : "text-gray-500"} />
-                        ))}
-                        <span className="text-gray-300 ml-2">{user.rating}</span>
+                {/* Wrap profile picture and username in Link */}
+                <Link to={`/profile/${user.username}`} className="flex items-center">
+                    <img
+                        src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} // Dynamically loads profile picture
+                        alt="Profile"
+                        className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                        <h3 className="text-xl font-semibold">@{user.username}</h3>
+                        <div className="flex items-center text-yellow-400">
+                            {[...Array(5)].map((_, i) => (
+                                <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
+                            ))}
+                            <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
+                        </div>
                     </div>
-                </div>
+                </Link>
             </div>
 
             {/* Post Content */}
-            <h2 className="text-lg font-bold mb-2">{title}</h2>
-            <div className="mb-4">{bodyContent}</div> {/* Body content can be text or an image */}
+            <div className="mb-4">{content}</div> {/* Body content can be text or an image */}
 
-            {/* Scrollable List of Food Components (Meals) */}
-            <div className="h-96 overflow-y-scroll mb-4">
-                {meals.map((meal, index) => (
-                    <Food
-                        key={index}
-                        foodName={meal.foodName}
-                        calories={meal.calories}
-                        protein={meal.protein}
-                        carbs={meal.carbs}
-                        fat={meal.fat}
-                        ingredients={meal.ingredients}
-                        ingredientAmounts={meal.ingredientAmounts}
-                        imageUrl={meal.imageUrl}
-                        recipeUrl={meal.recipeUrl}
+            {/* Meal */}
+            {meal && (
+                <div className="h-96 overflow-y-scroll mb-4">
+                    <Meal
+                        mealName={""}
+                        foods={[]}
+                        onDelete={() => {}}
+                        key={1}
+                        isOwn={false}
                     />
-                ))}
-            </div>
+                </div>
+            )}
+
+            {/* ExerciseProgram */}
+            {workout && (
+                <div className="h-96 overflow-y-scroll mb-4">
+                    <ExerciseProgram
+                        programName={workout.workout_name}
+                        exercises={workout.exercises}
+                        onDelete={() => {}}
+                        isOwn={false}
+                        programId={workout.id}
+                        currentRating={workout.rating}
+                        ratingCount={workout.rating_count}
+                        showRating={true}
+                    />
+                </div>
+            )}
 
             {/* Actions: Like & Comment */}
             <div className="flex justify-between mt-4 text-gray-400">
                 <button className="flex items-center" onClick={handleLikeClick}>
-                    <FaHeart className={`mr-2 ${liked ? "text-red-500" : ""}`} /> {likeCount} Like
+                    <FaHeart className={`mr-2 ${hasLiked ? "text-red-500" : ""}`} /> {likeCount} Like
                 </button>
                 <button className="flex items-center" onClick={() => setShowCommentBox(!showCommentBox)}>
                     <FaComment className="mr-2" /> Comment

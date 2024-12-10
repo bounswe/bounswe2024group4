@@ -38,7 +38,10 @@ DEBUG = True
 REST_FRAMEWORK = {
     'DEFAULT_GENERATOR_CLASS': 'drf_yasg.generators.OpenAPISchemaGenerator',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
 
 
@@ -66,6 +69,7 @@ INSTALLED_APPS = [
     'activity_streams',
 
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_yasg',
     'corsheaders',
 ]
@@ -75,16 +79,19 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000', 
     'http://localhost:3000',
     'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3306', 
-    'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3000'
-    ]
+    'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3000',
+    "http://localhost:3000",  # React web app
+    "http://localhost:19006", # React Native dev server
+    # Add your production domains here
+]
 ALLOWED_HOSTS = ['*', os.getenv('DEPLOY_MACHINE_IP')]
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3306', 'http://' + str(os.getenv('DEPLOY_MACHINE_IP')) + ':3000']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
