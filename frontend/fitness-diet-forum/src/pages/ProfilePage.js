@@ -4,6 +4,7 @@ import axios from 'axios';
 import Meal from '../components/Meal';
 import ExerciseProgram from '../components/ExerciseProgram';
 import Post from '../components/Post';
+import EditProfileForm from "../components/EditProfileForm.js";
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
 
@@ -13,9 +14,11 @@ const ProfilePage = () => {
     const [programs, setPrograms] = useState();
     const [error, setError] = useState(null);
     const [activeSection, setActiveSection] = useState('exercises');
+    const [showEditForm, setShowEditForm] = useState(false);
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
+    const ownProfile = loggedInUser === username;
     const token = localStorage.getItem("token");
     const config = {
       headers: {
@@ -43,6 +46,10 @@ const ProfilePage = () => {
         fetchUserData();
     }, [username]);
 
+    const handleEditProfile = () => {
+        setShowEditForm(true);
+    };    
+
     const fetchExercisePrograms = async (workouts) => {
         try {
             setActiveSection('exercises');
@@ -66,7 +73,7 @@ const ProfilePage = () => {
             console.error("Error fetching user programs:", error);
         }
     };
-    
+
     const handleDeleteProgram = (programId) => {
         setPrograms(programs.filter(program => program.id !== programId));
     };
@@ -183,7 +190,7 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Follow Button */}
-                {loggedInUser !== username && (
+                {!ownProfile && (
                     <button
                         className={`follow-btn px-6 py-2 rounded-lg text-white ${
                             userData.is_following ? 'bg-gray-600' : 'bg-blue-500'
@@ -193,6 +200,26 @@ const ProfilePage = () => {
                         {userData.is_following ? 'Unfollow' : 'Follow'}
                     </button>
                 )}
+
+                {/* Edit Profile Button */}
+                {ownProfile && (
+                    <>
+                        <button
+                            className="follow-btn px-6 py-2 rounded-lg text-white bg-blue-500 hover:bg-blue-700"
+                            onClick={handleEditProfile}
+                        >
+                            Edit Profile
+                        </button>
+                        {showEditForm && (
+                            <EditProfileForm
+                                userData={userData}
+                                onClose={() => setShowEditForm(false)}
+                                onUpdate={(updatedData) => setUserData((prev) => ({ ...prev, ...updatedData }))}
+                            />
+                        )}
+                    </>
+                )}
+
             </div>
 
             {/* Right Side: Section Tabs (Posts, Meals, Exercises) */}
