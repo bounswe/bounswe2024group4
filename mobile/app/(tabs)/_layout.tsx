@@ -93,9 +93,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="WeekProgram"
+        name="WeeklyProgram"
         options={{
-          title: 'Week Program',
+          title: 'Weekly Program',
           tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="calendar-week" color={color} />,
         }}
         initialParams={{
