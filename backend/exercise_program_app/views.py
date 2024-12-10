@@ -15,6 +15,7 @@ from user_auth_app.models import User
 from datetime import datetime
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
+from activity_streams.views import log_activity
 
 
 @swagger_auto_schema(method='get', **get_exercises_schema)
@@ -105,7 +106,21 @@ def delete_workout_by_id(request, workout_id):
                 return JsonResponse({'error': 'You are not authorized to delete this workout'}, status=403)
 
             # Delete the workout
+            workout_name = workout.workout_name  # Store name for activity log before deletion
             workout.delete()
+
+            # Log the delete activity
+            log_activity(
+                actor=user,
+                activity_type="Delete",
+                obj={
+                    "type": "Workout",
+                    "id": f"http://example.org/workouts/{workout_id}",
+                    "name": workout_name
+                },
+                summary=f"{user.username} deleted the workout '{workout_name}'"
+            )
+
             return JsonResponse({'message': 'Workout deleted successfully'}, status=200)
 
         except Workout.DoesNotExist:
@@ -114,6 +129,8 @@ def delete_workout_by_id(request, workout_id):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    
 
 @swagger_auto_schema(method='post', **rate_workout_schema)
 @api_view(['POST'])
