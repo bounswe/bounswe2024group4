@@ -12,6 +12,7 @@ const ProfilePage = () => {
     const { username } = useParams();
     const [userData, setUserData] = useState({});
     const [programs, setPrograms] = useState();
+    const [profilePictureURL, setProfilePictureURL] = useState("");
     const [error, setError] = useState(null);
     const [activeSection, setActiveSection] = useState('exercises');
     const [showEditForm, setShowEditForm] = useState(false);
@@ -34,6 +35,7 @@ const ProfilePage = () => {
                     const data = response.data;
                     console.log(data)
                     setUserData(data);
+                    setProfilePictureURL(baseURL + data.profile_picture);
                     fetchExercisePrograms(data.workouts);
                 } else {
                     setError('User not found');
@@ -166,7 +168,7 @@ const ProfilePage = () => {
                     <img
                         src={
                             userData.profile_picture 
-                            ? userData.profile_picture 
+                            ? profilePictureURL
                             : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                         }
                         alt="Profile"
