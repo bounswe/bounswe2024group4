@@ -7,7 +7,6 @@ import axios from 'axios';
 import { useRouter, useGlobalSearchParams } from 'expo-router';
 
 const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
-
 const allowedMuscles = [
   "chest",
   "biceps",
@@ -59,7 +58,13 @@ export default function Index() {
 
   const fetchWorkoutPrograms = async () => {
     try {
-      const response = await axios.get(`${baseURL}/get-workouts/?username=${viewingUser}`);
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          'Authorization': 'Token ' + token
+        }
+      }
+      const response = await axios.get(`${baseURL}/get-workouts/?username=${viewingUser}`, config);
       setWorkoutPrograms(response.data);
     } catch (error) {
       console.error('Error fetching workout programs:', error);
