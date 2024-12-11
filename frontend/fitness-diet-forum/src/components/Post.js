@@ -50,17 +50,17 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
             }
         };
         fetchPostData();
-    }, [mealId, workoutId]);
+    }, [mealId, workoutId, hasLiked ]);
 
     const handleLikeClick = async () => {
+        const updatedHasLiked = !hasLiked;
+        const updatedLikeCount = likeCount + (hasLiked ? -1 : 1);
+    
+        // Optimistically update UI
+        setHasLiked(updatedHasLiked);
+        setLikeCount(updatedLikeCount);
+    
         try {
-            // Optimistically update UI
-            const updatedHasLiked = !hasLiked;
-            const updatedLikeCount = likeCount + (hasLiked ? -1 : 1);
-    
-            setHasLiked(updatedHasLiked);
-            setLikeCount(updatedLikeCount);
-    
             // Send a request to toggle like
             const response = await axios.post(
                 `${baseURL}/toggle_like/`, 
@@ -69,19 +69,17 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
             );
     
             if (response.status === 200) {
-                // Optionally log the server's response
-                console.log(response.data.message); // Example: "Post liked/unliked successfully"
+                console.log(response.data.message);
             } else {
                 throw new Error('Unexpected response status');
             }
         } catch (error) {
             console.error('Error toggling like:', error);
-    
-            // Revert UI state if the request fails
-            setHasLiked(!hasLiked); // Revert the hasLiked state
-            setLikeCount(likeCount + (hasLiked ? 1 : -1)); // Adjust the like count accordingly
+            setHasLiked(hasLiked); // Restore previous state of hasLiked
+            setLikeCount(likeCount); // Restore previous like count
         }
     };
+    
     
     
 
