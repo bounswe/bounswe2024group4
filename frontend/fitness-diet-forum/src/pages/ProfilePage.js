@@ -21,6 +21,7 @@ const ProfilePage = () => {
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
     const ownProfile = loggedInUser === username;
+    const [condition, setCondition] = useState(false); 
     const token = localStorage.getItem("token");
     const config = {
       headers: {
@@ -38,6 +39,7 @@ const ProfilePage = () => {
                     setUserData(data);
                     setProfilePictureURL(baseURL + data.profile_picture);
                     fetchExercisePrograms(data.workouts);
+                    setCondition(data.user_type === "super_member")
                 } else {
                     setError('User not found');
                 }
@@ -164,18 +166,31 @@ const ProfilePage = () => {
         <div className="profile-page flex flex-col md:flex-row min-h-screen">
             {/* Left Side: Profile Info */}
             <div className="profile-info w-full md:w-1/4 flex flex-col flex-start p-3 bg-gray-800 rounded-lg shadow-md mb-1 md:mb-0">
-                {/* Profile Picture */}
-                <div className="flex justify-start mb-6">
-                    <img
-                        src={
-                            userData.profile_picture 
-                            ? profilePictureURL
-                            : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                        }
-                        alt="Profile"
-                        className="profile-picture w-32 h-32 rounded-full border-4 border-gray-600"
+            {/* Profile Picture Wrapper */}
+            <div className="flex justify-start mb-6 relative">
+                {/* Condition to display the crown */}
+                {condition && (
+                    <img 
+                        src="https://www.transparentpng.com/thumb/crown/X0pLjy-download-gold-king-crown-transparent-image.png" 
+                        alt="download gold king crown transparent image @transparentpng.com"
+                        className="absolute top-0 left-0 w-20 h-16"
+                        style={{
+                            transform: 'translate(-10%, -60%)',
+                        }}
                     />
-                </div>
+                )}
+
+                {/* Profile Picture */}
+                <img
+                    src={
+                        userData.profile_picture 
+                        ? profilePictureURL
+                        : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                    }
+                    alt="Profile"
+                    className="profile-picture w-32 h-32 rounded-full border-4 border-gray-600"
+                />
+            </div>
 
                 {/* Username, Bio, Score */}
                 <div className="flex flex-col items-start mb-6">
