@@ -80,8 +80,6 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
         }
     };
     
-    
-    
 
     // Handle comment submit
     const handleCommentSubmit = (e) => {
@@ -100,7 +98,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
                 {/* Wrap profile picture and username in Link */}
                 <Link to={`/profile/${user.username}`} className="flex items-center">
                     <img
-                        src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} // Dynamically loads profile picture
+                        src={user.profile_picture ? `${baseURL}/${user.profile_picture}` : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
                         alt="Profile"
                         className="w-12 h-12 rounded-full mr-4"
                     />

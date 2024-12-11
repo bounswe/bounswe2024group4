@@ -15,7 +15,7 @@ const ProfilePage = () => {
     const [programs, setPrograms] = useState();
     const [profilePictureURL, setProfilePictureURL] = useState("");
     const [error, setError] = useState(null);
-    const [activeSection, setActiveSection] = useState('exercises');
+    const [activeSection, setActiveSection] = useState('posts');
     const [showEditForm, setShowEditForm] = useState(false);
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
@@ -55,9 +55,13 @@ const ProfilePage = () => {
         setShowEditForm(true);
     };    
 
+    const handleExercisePrograms = async (workouts) => {
+        setActiveSection('exercises');
+        fetchExercisePrograms(workouts);
+    }
+
     const fetchExercisePrograms = async (workouts) => {
         try {
-            setActiveSection('exercises');
     
             const workoutDetailsPromises = workouts.map(async (workout) => {
                 try {
@@ -273,7 +277,7 @@ const ProfilePage = () => {
                     </button>
                     <button
                         className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'exercises' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
-                        onClick={() => fetchExercisePrograms(userData.workouts) }
+                        onClick={() => handleExercisePrograms(userData.workouts) }
                     >
                         Exercises
                     </button>
