@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useGlobalSearchParams } from 'expo-router';
 
 interface LeaderboardEntry {
@@ -30,9 +31,18 @@ const Leaderboard: React.FC = () => {
 
   const fetchLeaderboard = async (endpoint: string) => {
     try {
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      }
+
       setLoading(true);
       setError(null);
-      const response = await axios.get(endpoint);
+      console.log(config.headers.Authorization);
+      // const response = await axios.get(endpoint);
+      const response = await axios.get(endpoint, config);
       if (response.status === 200) {
         const dataKey =
           activeTab === 'combined'
