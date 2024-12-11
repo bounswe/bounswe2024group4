@@ -72,6 +72,7 @@ def view_profile(request):
         meal_rating = viewed_user.meal_rating
         workout_rating_count = viewed_user.workout_rating_count
         meal_rating_count = viewed_user.meal_rating_count
+        user_type = viewed_user.user_type
         following_count = Follow.objects.filter(follower=viewed_user).count()
         followers_count = Follow.objects.filter(following=viewed_user).count()
 
@@ -107,6 +108,7 @@ def view_profile(request):
             'following_count': following_count,
             'followers_count': followers_count,
             'is_following': is_following,
+            'user_type': user_type,
             'posts': list(reversed([{
                 'post_id': post.id,
                 'user': post.user.username,
