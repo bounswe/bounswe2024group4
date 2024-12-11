@@ -6,20 +6,19 @@ import { Context } from "../globalContext/globalContext.js";
 import CreatePostModal from '../components/CreatePostModal.js';
 
 jest.mock('axios', () => ({
-get: jest.fn().mockResolvedValue({ data: [] }), // Default mock to avoid issues
-post: jest.fn().mockResolvedValue({ status: 200 })
+    get: jest.fn().mockResolvedValue({ data: [] }), // Default mock to avoid issues
+    post: jest.fn().mockResolvedValue({ status: 200 })
 }));
-
 
 // Mock localStorage
 beforeEach(() => {
-localStorage.setItem('username', 'testUser');
-localStorage.setItem('token', 'testToken');
+    localStorage.setItem('username', 'testUser');
+    localStorage.setItem('token', 'testToken');
 });
 
 // Mock global context
 const mockGlobalContext = {
-baseURL: 'http://localhost:3000'
+    baseURL: 'http://localhost:3000'
 };
 
 // Helper function to wrap component in context provider
