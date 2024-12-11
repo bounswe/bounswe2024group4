@@ -10,7 +10,7 @@ jest.mock('axios', () => ({
     get: jest.fn().mockResolvedValue({
       status: 200,
       data: [
-        { id: 1, name: "Full Body Workout" },
+        { },
       ],
     }),
 }));

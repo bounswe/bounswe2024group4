@@ -6,7 +6,7 @@ import { Context } from "../globalContext/globalContext.js";
 import CreatePostModal from '../components/CreatePostModal.js';
 
 jest.mock('axios', () => ({
-    get: jest.fn().mockResolvedValue({ data: [] }), // Default mock to avoid issues
+    get: jest.fn().mockResolvedValue({ data: [] }),
     post: jest.fn().mockResolvedValue({ status: 200 })
 }));
 
@@ -23,11 +23,11 @@ const mockGlobalContext = {
 
 // Helper function to wrap component in context provider
 const renderWithContext = (ui) => {
-return render(
-<Context.Provider value={mockGlobalContext}>
-    {ui}
-</Context.Provider>
-);
+    return render(
+        <Context.Provider value={mockGlobalContext}>
+            {ui}
+        </Context.Provider>
+    );
 };
 
 describe('CreatePostModal', () => {
