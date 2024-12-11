@@ -298,6 +298,7 @@ const ProfilePage = () => {
                                         workoutId={post.workout_id}
                                         like_count={post.like_count}
                                         liked={post.liked}
+                                        created_at={post.created_at}
                                     />
                                 ))
                             ) : (

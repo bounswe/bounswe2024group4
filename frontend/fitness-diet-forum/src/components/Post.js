@@ -5,14 +5,14 @@ import ExerciseProgram from "./ExerciseProgram";
 import Meal from "./Meal";
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom";
+import { formatDistanceToNowStrict } from "date-fns";
 
-const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) => {
+const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, created_at }) => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
-    const loggedInUser = localStorage.getItem("username");
-    const token = localStorage.getItem("token");
     const [error, setError] = useState(null);
+    const token = localStorage.getItem("token");
 
     const [workout, setWorkout] = useState(null);
     const [meal, setMeal] = useState(null);
@@ -22,6 +22,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
     const [showCommentBox, setShowCommentBox] = useState(false); // Hide comment box initially
     const [newComment, setNewComment] = useState(""); // Track new comment input
     const [comments, setComments] = useState([]); // List of comments
+    const createdDate = formatDistanceToNowStrict(created_at, { addSuffix: true });
     const config = {
         headers: {
             'Authorization': 'Token ' + token,
@@ -94,8 +95,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
     return (
         <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
             {/* Header */}
-            <div className="flex items-center mb-4">
-                {/* Wrap profile picture and username in Link */}
+            <div className="flex items-center mb-4 justify-between"> 
                 <Link to={`/profile/${user.username}`} className="flex items-center">
                     <img
                         src={user.profile_picture ? `${baseURL}/${user.profile_picture}` : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
@@ -103,15 +103,19 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
                         className="w-12 h-12 rounded-full mr-4"
                     />
                     <div>
-                        <h3 className="text-xl font-semibold">@{user.username}</h3>
-                        <div className="flex items-center text-yellow-400">
-                            {[...Array(5)].map((_, i) => (
-                                <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
-                            ))}
-                            <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
-                        </div>
+                    <h3 className="text-xl font-semibold">@{user.username}</h3>
+                    <div className="flex items-center text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                        <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
+                        ))}
+                        <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
+                    </div>
                     </div>
                 </Link>
+
+                <p className="text-gray-500 text-sm">
+                    {createdDate}
+                </p>
             </div>
 
             {/* Post Content */}
