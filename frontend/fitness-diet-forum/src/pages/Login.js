@@ -29,7 +29,7 @@ const Login = () => {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("username", username);
       localStorage.setItem("LoggedIn", "true");
-      localStorage.setItem("userType", response.data.user_type);
+      localStorage.setItem("userType", response.data.user.user_type);
 
       console.log("Login successful", response.data);
       navigate("/feed");  

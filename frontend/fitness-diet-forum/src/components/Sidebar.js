@@ -5,7 +5,8 @@ import '../css/index.css';
 
 const Sidebar = () => {
   const username = localStorage.getItem("username");
-  const condition = localStorage.getItem("userType") === "super-member";
+  console.log('USER TYPE:', localStorage.getItem("userType"))
+  const condition = localStorage.getItem("userType") === "super_member";
 
   return (
     <div className="flex flex-col h-screen fixed top-0 left-0 w-64 bg-black text-white p-4">
