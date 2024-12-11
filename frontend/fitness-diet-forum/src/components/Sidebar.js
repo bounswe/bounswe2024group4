@@ -56,8 +56,8 @@ const Sidebar = () => {
       <div className="mt-auto text-white">
         <p className="mb-2">
           {condition ? (
-            <>{username}, you are a super-member in our community!
-              <span className="relative group cursor-pointer">
+            <><span className="text-sm">{username}, you are a super-member in our community!</span>
+                <span className="relative group cursor-pointer">
                 <FaInfoCircle className="inline-block ml-2" />
                 <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-sm rounded p-2 w-36 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   You now can create new exercises and food options.
