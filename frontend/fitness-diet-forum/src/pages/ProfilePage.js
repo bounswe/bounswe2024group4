@@ -222,13 +222,13 @@ const ProfilePage = () => {
                         )}
                         <div
                             style={{
-                                position: "relative", // Changed from absolute for better responsiveness
-                                marginTop: "20px", // Add some spacing from other elements if needed
-                                width: "100%", // Set width to fit the parent container
-                                height: "300px", // Adjust height to fit well within the column
+                                position: "relative",
+                                marginTop: "20px",
+                                width: "100%",
+                                height: "300px",
                                 padding: "2px",
-                                backgroundColor: "#1e1e2f", // Optional: Background for contrast
-                                borderRadius: "8px", // Optional: Rounded edges for a polished look
+                                backgroundColor: "#1e1e2f",
+                                borderRadius: "8px",
                             }}
                         >
                             <WeightGraph weightData={userData.weight_history} />

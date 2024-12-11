@@ -26,8 +26,8 @@ const WeightGraph = ({ weightData }) => {
     return <p>No data available to display the weight graph.</p>;
   }
 
-  const dates = weightData.map((entry) => entry.date.slice(0, 10)); // Ensure date is formatted as a string
-  const weights = weightData.map((entry) => entry.weight); // Ensure weight is a number
+  const dates = weightData.map((entry) => entry.date.slice(0, 10)); 
+  const weights = weightData.map((entry) => entry.weight);
 
   const data = {
     labels: dates,
@@ -37,14 +37,14 @@ const WeightGraph = ({ weightData }) => {
         data: weights,
         borderColor: "rgba(75,192,192,1)",
         backgroundColor: "rgba(75,192,192,0.2)",
-        tension: 0.4, // Smooth line
+        tension: 0.4,
       },
     ],
   };
 
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // Allow the chart to fill the container
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: "top",
@@ -61,8 +61,8 @@ const WeightGraph = ({ weightData }) => {
           text: "Date",
         },
         ticks: {
-          maxRotation: 45, // Rotate labels up to 45 degrees
-          minRotation: 45, // Minimum rotation angle
+          maxRotation: 45,
+          minRotation: 45,
         },
       },
       y: {
@@ -70,8 +70,8 @@ const WeightGraph = ({ weightData }) => {
           display: true,
           text: "Weight (kg)",
         },
-        suggestedMin: Math.min(...weights) - 2, // Add buffer below
-        suggestedMax: Math.max(...weights) + 2, // Add buffer above
+        suggestedMin: Math.min(...weights) - 2,
+        suggestedMax: Math.max(...weights) + 2,
       },
     },
   };
