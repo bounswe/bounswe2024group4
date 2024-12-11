@@ -5,6 +5,7 @@ import Meal from '../components/Meal';
 import ExerciseProgram from '../components/ExerciseProgram';
 import Post from '../components/Post';
 import EditProfileForm from "../components/EditProfileForm.js";
+import WeightGraph from "../components/WeightGraph.js";
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
 
@@ -162,7 +163,7 @@ const ProfilePage = () => {
     return (
         <div className="profile-page flex flex-col md:flex-row min-h-screen">
             {/* Left Side: Profile Info */}
-            <div className="profile-info w-full md:w-1/4 flex flex-col items-start p-8 bg-gray-800 rounded-lg shadow-md mb-6 md:mb-0">
+            <div className="profile-info w-full md:w-1/4 flex flex-col flex-start p-3 bg-gray-800 rounded-lg shadow-md mb-1 md:mb-0">
                 {/* Profile Picture */}
                 <div className="flex justify-start mb-6">
                     <img
@@ -219,8 +220,22 @@ const ProfilePage = () => {
                                 onUpdate={(updatedData) => setUserData((prev) => ({ ...prev, ...updatedData }))}
                             />
                         )}
+                        <div
+                            style={{
+                                position: "relative",
+                                marginTop: "20px",
+                                width: "100%",
+                                height: "300px",
+                                padding: "2px",
+                                backgroundColor: "#1e1e2f",
+                                borderRadius: "8px",
+                            }}
+                        >
+                            <WeightGraph weightData={userData.weight_history} />
+                        </div>
                     </>
                 )}
+
 
             </div>
 
