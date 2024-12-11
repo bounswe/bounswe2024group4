@@ -221,16 +221,17 @@ const ProfilePage = () => {
                             />
                         )}
                         <div
+                            className="px-6 py-2 rounded-lg text-white"
                             style={{
                                 position: "relative",
                                 marginTop: "20px",
                                 width: "100%",
                                 height: "300px",
                                 padding: "2px",
-                                backgroundColor: "#1e1e2f",
                                 borderRadius: "8px",
                             }}
                         >
+                            Weight Journey
                             <WeightGraph weightData={userData.weight_history} />
                         </div>
                     </>
