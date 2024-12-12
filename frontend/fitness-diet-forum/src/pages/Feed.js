@@ -10,12 +10,13 @@ const Feed = () => {
   const token = localStorage.getItem("token"); // Get CSRF token if needed
 
   const [posts, setPosts] = useState([]); // State to hold the posts
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]); // State to hold bookmarked posts
   const [error, setError] = useState(null); // State to hold errors
+  const [activeTab, setActiveTab] = useState("feed"); // Manage active tab: "feed" or "bookmarked"
 
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        // Send GET request to the following_feed endpoint with the logged-in username
         const response = await axios.get(`${baseURL}/following_feed`, {
           params: { username: loggedInUser },
           headers: {
@@ -24,7 +25,8 @@ const Feed = () => {
         });
 
         if (response.status === 200) {
-          setPosts(response.data.posts); // Assuming response contains the posts array
+          setPosts(response.data.posts);
+          //console.log(response.data); 
         } else {
           setError("Failed to fetch posts");
         }
@@ -34,18 +36,72 @@ const Feed = () => {
       }
     };
 
-    fetchFeed();
-  }, [baseURL, loggedInUser, token]);
+    const fetchBookmarkedPosts = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/bookmarked_posts/`, {
+          headers: {
+            "Authorization": `Token ${token}`
+          }
+        });
+
+        if (response.status === 200) {
+          setBookmarkedPosts(response.data.bookmarked_posts);
+          //console.log(response.data);
+        } else {
+          setError("Failed to fetch bookmarked posts");
+        }
+      } catch (err) {
+        setError("Something went wrong");
+        console.error(err);
+      }
+    };
+
+    if (activeTab === "feed") {
+      fetchFeed();
+    } else if (activeTab === "bookmarked") {
+      fetchBookmarkedPosts();
+    }
+  }, [baseURL, loggedInUser, token, activeTab]);
 
   return (
     <div className="feed-container">
       <h2>Your Feed</h2>
+
+      {/* Tab Navigation */}
+      <div className="tabs">
+        <button
+          className={`tab-button ${activeTab === "feed" ? "active" : ""}`}
+          onClick={() => setActiveTab("feed")}
+        >
+          Feed
+        </button>
+        <button
+          className={`tab-button ${activeTab === "bookmarked" ? "active" : ""}`}
+          onClick={() => setActiveTab("bookmarked")}
+        >
+          Bookmarked Posts
+        </button>
+      </div>
+
       {/* Display error message if there's an error */}
       {error && <div className="text-red-500">{error}</div>}
 
-      {/* Render posts */}
-      {posts.length > 0 ? (
+      {/* Render posts based on active tab */}
+      {activeTab === "feed" && posts.length > 0 ? (
         posts.map((post) => (
+          <Post
+            key={post.id}
+            postId={post.post_id}
+            user={post.user}
+            content={post.content}
+            mealId={post.meal_id}
+            workoutId={post.workout_id}
+            like_count={post.like_count}
+            liked={post.liked}
+          />
+        ))
+      ) : activeTab === "bookmarked" && bookmarkedPosts.length > 0 ? (
+        bookmarkedPosts.map((post) => (
           <Post
             key={post.id}
             postId={post.post_id}
@@ -74,6 +130,27 @@ const Feed = () => {
             box-sizing: border-box;
           }
 
+          .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+          }
+
+          .tab-button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+          }
+
+          .tab-button.active {
+            background-color: #007bff;
+            color: white;
+          }
+
           body {
             margin: 0;
             padding: 0;
@@ -96,3 +173,4 @@ const Feed = () => {
 };
 
 export default Feed;
+
