@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaUser, FaEnvelope, FaUtensils, FaDumbbell, FaTrophy, FaInfoCircle } from 'react-icons/fa';
+import { FaHome, FaUser, FaUsers, FaUtensils, FaDumbbell, FaTrophy, FaInfoCircle } from 'react-icons/fa';
 import '../css/index.css';
 
 const Sidebar = () => {
@@ -27,10 +27,10 @@ const Sidebar = () => {
           <FaUser /> <span>Profile</span>
         </NavLink>
         <NavLink 
-          to="/messages" 
+          to="/discover" 
           className={({ isActive }) => isActive ? 'bg-blue-700 p-2 rounded flex items-center space-x-2' : 'hover:bg-blue-700 p-2 rounded flex items-center space-x-2'}
         >
-          <FaEnvelope /> <span>Messages</span>
+          <FaUsers /> <span>Discover</span>
         </NavLink>
         <NavLink 
           to="/meals" 
@@ -39,7 +39,7 @@ const Sidebar = () => {
           <FaUtensils /> <span>Meals</span>
         </NavLink>
         <NavLink 
-          to="/Exercises" 
+          to="/exercises" 
           className={({ isActive }) => isActive ? 'bg-blue-700 p-2 rounded flex items-center space-x-2' : 'hover:bg-blue-700 p-2 rounded flex items-center space-x-2'}
         >
           <FaDumbbell /> <span>Exercises</span>
