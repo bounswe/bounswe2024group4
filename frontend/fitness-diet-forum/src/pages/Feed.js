@@ -17,10 +17,9 @@ const Feed = () => {
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const response = await axios.get(`${baseURL}/following_feed`, {
-          params: { username: loggedInUser },
+        const response = await axios.get(`${baseURL}/following_feed/`, {
           headers: {
-            "Authorization": `Token ${token}` // If token is needed in headers
+            "Authorization": `Token ${token}` 
           }
         });
 
@@ -98,6 +97,7 @@ const Feed = () => {
             workoutId={post.workout_id}
             like_count={post.like_count}
             liked={post.liked}
+            created_at={post.created_at}
           />
         ))
       ) : activeTab === "bookmarked" && bookmarkedPosts.length > 0 ? (
