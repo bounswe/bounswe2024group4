@@ -10,7 +10,7 @@ urlpatterns = [
     path('meals/delete/<int:workout_id>/', views.delete_meal_by_id, name='delete_meal_by_id'),
     path('get_foodname_options/', views.get_foodname_options, name='get_foodname_options'),
     path('rate_meal/', views.rate_meal, name='rate_meal'),
-    path('get_meals_by_username/', views.get_meals_by_username, name='get_meals_by_username'),
+    path('get_meals_by_user_id/', views.get_meals_by_user_id, name='get_meals_by_user_id'),
     path('toggle_bookmark_meal/', views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
-    path('get_bookmarked_meals_by_username/', views.get_bookmarked_meals_by_username, name='get_bookmarked_meals_by_username'),
+    path('get_bookmarked_meals_by_user_id/', views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
 ]

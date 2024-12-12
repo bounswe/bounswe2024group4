@@ -68,6 +68,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
     
+    def check_super_member(self):
+        if (self.workout_rating_count + self.meal_rating_count % 3) == 0:
+            if self.score >= 4.5:
+                self.user_type = 'super_member'
+                self.is_superuser = True
+                self.save()
+            else:
+                self.user_type = 'member'
+                self.is_superuser = False
+                self.save()
+        return self.is_superuser
+    
     
 class Follow(models.Model):
     follower = models.ForeignKey('User', related_name='following_set', on_delete=models.CASCADE)

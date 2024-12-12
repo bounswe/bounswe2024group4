@@ -153,9 +153,7 @@ def rate_workout(request):
             user.workout_rating_count += 1
 
             user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
-            if user.score > 4.5 and (user.meal_rating_count + user.workout_rating_count) > 3:
-                user.is_superuser = True
-            user.save()
+            user.check_super_member()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
         except Exception as e:

@@ -90,9 +90,9 @@ urlpatterns = [
     path('meals/delete/<int:workout_id>/', diet_program_views.delete_meal_by_id, name='delete_meal_by_id'),
     path('get_foodname_options/', diet_program_views.get_foodname_options, name='get_foodname_options'),
     path('rate_meal/', diet_program_views.rate_meal, name='rate_meal'),
-    path('get_meals_by_username/', diet_program_views.get_meals_by_username, name='get_meals_by_username'),
+    path('get_meals_by_user_id/', diet_program_views.get_meals_by_user_id, name='get_meals_by_user_id'),
     path('toggle_bookmark_meal/', diet_program_views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
-    path('get_bookmarked_meals_by_username/', diet_program_views.get_bookmarked_meals_by_username, name='get_bookmarked_meals_by_username'),
+    path('get_bookmarked_meals_by_user_id/', diet_program_views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
     # Swagger endpoints
     # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
