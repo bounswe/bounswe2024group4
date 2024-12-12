@@ -1,55 +1,11 @@
-import React, { useState } from 'react';
-import Meal from '../components/Meal'; // Import the Meal component
-import Food from '../components/Food'; // Import the Food component
+import React, { useState, useContext } from 'react';
+import axios from 'axios';
+import Meal from '../components/Meal';
+import Food from '../components/Food';
+import { Context } from "../globalContext/globalContext.js";
 
 const MealList = () => {
-  const [meals, setMeals] = useState([
-    {
-      id: 1,
-      mealName: 'Lunch',
-      foods: [
-        {
-          foodName: 'Grilled Chicken Salad',
-          calories: 400,
-          protein: 40,
-          carbs: 20,
-          fat: 10,
-          ingredients: ['garlic cloves', 'olive oil', 'chicken breasts'],
-          ingredientAmounts: ['20', '1 cup', '1 pound'],
-          imageUrl: '/grilled_chicken_salad.jpeg',
-          recipeUrl: 'https://www.bonappetit.com/recipe/grilled-chicken-salad-with-garlic-confit',
-        },
-        {
-          foodName: 'Smoothie Bowl',
-          calories: 350,
-          protein: 20,
-          carbs: 40,
-          fat: 15,
-          ingredients: ['almond milk', 'frozen banana', 'berries'],
-          ingredientAmounts: ['1 cup', '1/2', '1 cup'],
-          imageUrl: '/smoothie_bowl.jpeg',
-          recipeUrl: 'https://www.example.com/smoothie-bowl-recipe',
-        },
-      ],
-    },
-    {
-      id: 2,
-      mealName: 'Breakfast',
-      foods: [
-        {
-          foodName: 'Avocado Toast with Poached Egg',
-          calories: 350,
-          protein: 15,
-          carbs: 30,
-          fat: 20,
-          ingredients: ['bread', 'eggs', 'avocado'],
-          ingredientAmounts: ['2 slices', '2', '2 tbsp'],
-          imageUrl: '/avocado_toast.jpg',
-          recipeUrl: 'https://www.upmcmyhealthmatters.com/avocado-toast/',
-        },
-      ],
-    },
-  ]);  
+  const [meals, setMeals] = useState([]);  
 
   const [newMeal, setNewMeal] = useState({ mealName: '', foods: [] });
   const [newFood, setNewFood] = useState({ foodName: '', calories: '', protein: '', carbs: '', fat: '', ingredients: [], ingredientAmounts: [], imageUrl: '', recipeUrl: '' });
@@ -58,8 +14,17 @@ const MealList = () => {
   const [mealCreated, setMealCreated] = useState(false); // Track whether the meal is created
   const [showForm, setShowForm] = useState(false);
 
-  const [searchTerm, setSearchTerm] = useState(''); // Track the search input
-  const [foodFound, setFoodFound] = useState(true); // Track if the food is found
+  const [searchTerm, setSearchTerm] = useState('');
+  const [foodFound, setFoodFound] = useState(true);
+
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
+  const token = localStorage.getItem("token");
+  const config = {
+    headers: {
+      'Authorization': 'Token ' + token
+    }
+  }
 
   const deleteMeal = (mealId) => {
     setMeals(meals.filter(meal => meal.id !== mealId));
@@ -132,9 +97,11 @@ const MealList = () => {
   };
 
   // Function to handle food search
-  const searchFood = () => {
-    const found = meals.some(meal => meal.foods.some(food => food.foodName.toLowerCase() === searchTerm.toLowerCase()));
-    setFoodFound(found); // Update whether the food is found or not
+  const searchFood = async () => {
+    //const response = await axios.post(`/${baseURL}/create_food_all/`, {food_name: searchTerm}, config);
+    //setFoodFound(response.data.found);
+    //setNewFood(response.data.food);
+    setFoodFound(true);
   };
 
   return (
@@ -229,10 +196,11 @@ const MealList = () => {
                 </button>
 
                 {/* Display message if food not found */}
-                {!foodFound && (
+                (
                   <>
+                  { !foodFound && 
                     <p className="text-red-500 mt-4">Food not found. Please enter the food information below.</p>
-                    
+                  }
                     {/* Food Item Inputs */}
                     <div className="space-y-6">
                       <h4 className="text-lg font-semibold text-white tracking-wide">Add Food Item</h4>
@@ -241,6 +209,7 @@ const MealList = () => {
                         name="foodName" 
                         value={newFood.foodName} 
                         onChange={handleFoodInputChange} 
+                        disabled={foodFound}
                         className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
                         placeholder="Food name"
                       />
@@ -248,7 +217,8 @@ const MealList = () => {
                         type="number" 
                         name="calories" 
                         value={newFood.calories} 
-                        onChange={handleFoodInputChange} 
+                        onChange={handleFoodInputChange}
+                        disabled={foodFound}
                         className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
                         placeholder="Calories"
                       />
@@ -258,13 +228,15 @@ const MealList = () => {
                           name="protein" 
                           value={newFood.protein} 
                           onChange={handleFoodInputChange} 
+                          disabled={foodFound} 
                           className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
                           placeholder="Protein (g)"
                         />
                         <input 
                           type="number" 
                           name="carbs" 
-                          value={newFood.carbs} 
+                          value={newFood.carbs}
+                          disabled={foodFound} 
                           onChange={handleFoodInputChange} 
                           className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
                           placeholder="Carbs (g)"
@@ -272,7 +244,8 @@ const MealList = () => {
                         <input 
                           type="number" 
                           name="fat" 
-                          value={newFood.fat} 
+                          value={newFood.fat}
+                          disabled={foodFound} 
                           onChange={handleFoodInputChange} 
                           className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
                           placeholder="Fat (g)"
@@ -283,6 +256,7 @@ const MealList = () => {
                         <input
                           type="text"
                           value={ingredientName}
+                          disabled={foodFound} 
                           onChange={(e) => setIngredientName(e.target.value)}
                           className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
                           placeholder="Ingredient name"
@@ -290,6 +264,7 @@ const MealList = () => {
                         <input
                           type="text"
                           value={ingredientAmount}
+                          disabled={foodFound} 
                           onChange={(e) => setIngredientAmount(e.target.value)}
                           className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
                           placeholder="Amount"
@@ -297,6 +272,7 @@ const MealList = () => {
                         <button
                           className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
                           onClick={addIngredient}
+                          disabled={foodFound}
                         >
                           Add Ingredient
                         </button>
@@ -341,7 +317,7 @@ const MealList = () => {
                       </div>
                     </div>
                   </>
-                )}
+                )
               </div>
             </>
           )}
