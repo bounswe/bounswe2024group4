@@ -1,5 +1,6 @@
 from drf_yasg import openapi
 
+# profiles app
 edit_profile_schema = {
     'operation_summary': 'Edit Profile',
     'operation_description': 'Edit the profile of the authenticated user',
@@ -71,6 +72,7 @@ view_profile_schema = {
         }
     }
 
+# simple features app
 follow_schema = {
     'operation_summary': 'Follow User',
     'operation_description': 'Follow a user',
@@ -187,6 +189,294 @@ get_meal_leaderboard_schema = {
     }
 }
 
+# diet program app
+create_meal_schema = {
+    'operation_summary': 'Create Meal',
+    'operation_description': 'Create a meal',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+            'foods': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'food_id': openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )),
+        },
+        required=['meal_name', 'foods']
+    ),
+    'responses': {
+        201: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+    }
+}
+
+create_food_all_schema = {
+    'operation_summary': 'Create Food',
+    'operation_description': 'Create a food',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+            'ingredients': openapi.Schema(type=openapi.TYPE_NUMBER),
+            'recipe_url': openapi.Schema(type=openapi.TYPE_NUMBER),
+        },
+        required=['food_name', 'ingredients'],
+    ), 
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'food_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        )),
+        201: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'food_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+    }
+}
+
+create_food_superuser_schema = {
+    'operation_summary': 'Create Food with Nutritional Values',
+    'operation_description': 'Create a food with nutritional values',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+            'ingredients': openapi.Schema(type=openapi.TYPE_STRING),
+            'recipe_url': openapi.Schema(type=openapi.TYPE_STRING),
+            'energ_kcal': openapi.Schema(type=openapi.TYPE_STRING),
+            'fat': openapi.Schema(type=openapi.TYPE_STRING),
+            'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+            'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+            'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+            'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+            'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+            'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+            'protein': openapi.Schema(type=openapi.TYPE_STRING),
+            'na': openapi.Schema(type=openapi.TYPE_STRING),
+            'k': openapi.Schema(type=openapi.TYPE_STRING),
+            'ca': openapi.Schema(type=openapi.TYPE_STRING),
+            'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+            'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+            'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+            'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+            'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+            'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        required=['food_name', 'ingredients'],
+    ),
+    'responses': {
+        201: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'food_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+    }
+}
+
+get_meal_from_id_schema = {
+    'operation_summary': 'Get Meal by ID',
+    'operation_description': 'Get a meal by ID',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'meal': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'foods': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'food_id': openapi.Schema(type=openapi.TYPE_STRING),
+                            }
+                        )),
+                    }
+                )
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+    }
+}
+
+delete_meal_by_id_schema = {
+    'operation_summary': 'Delete Meal by ID',
+    'operation_description': 'Delete a meal by ID',
+    'responses': { 
+        '200': openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        403: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+        405: openapi.Response('Invalid request'),
+    }
+}
+
+get_foodname_options_schema = {
+    'operation_summary': 'Get Food Name Options',
+    'operation_description': 'Get a list of food names',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_STRING
+            )
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        405: openapi.Response('Invalid request'),
+    }
+}
+
+rate_meal_schema = {
+    'operation_summary': 'Rate Meal',
+    'operation_description': 'Rate a meal',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the meal'),
+            'rating': openapi.Schema(type=openapi.TYPE_NUMBER, description='Rating of the meal')
+        },
+        required=['meal_id', 'rating'],
+        example={
+            'meal_id': 1,
+            'rating': 4.5
+        }
+    ),
+    'responses': {
+        200: openapi.Response('Meal rated successfully', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        400: 'Bad Request',
+        404: 'Meal not found',
+        405: 'Invalid request'
+    }
+}
+
+get_meals_by_user_id_schema = {
+    'operation_summary': 'Get Meals by User id',
+    'operation_description': 'Get the meals created by user',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the user'),
+        },
+        required=['meal_id'],
+        example={'meal_id': 1}
+    ),
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'meals': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'foods': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={'food_id': openapi.Schema(type=openapi.TYPE_STRING),}
+                        )),
+                    }
+                )),
+            }
+        )),
+        400: 'Bad Request',
+        404: 'User not found',
+        405: 'Invalid request'
+    }
+}
+
+toggle_bookmark_meal_schema = {
+    'operation_summary': 'Toggle Bookmark Meal',
+    'operation_description': 'Toggle bookmark on a meal',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the meal')
+        },
+        required=['meal_id'],
+        example={'meal_id': 1},
+    ),
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )),
+        400: 'Bad Request',
+        404: 'Not Found',
+        405: 'Invalid request',
+    }
+}
+
+get_bookmarked_meals_by_user_id_schema = {
+    'operation_summary': 'Get Bookmarked Meals by User ID',
+    'operation_description': 'Get the meals bookmarked by user ID',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the user'),
+        },
+        required=['user_id'],
+        example={'user_id': 1}
+    ),
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'meals': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'foods': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={'food_id': openapi.Schema(type=openapi.TYPE_STRING),}
+                        )),
+                    }
+                )),
+            }
+        )),
+        400: 'Bad Request',
+        404: 'User not found',
+        405: 'Invalid request'
+    }
+}
+
+
+# exercise program app
 workout_program_schema = {
     'operation_summary': 'Create Workout Programs',
     'operation_description': 'Creates a workout programs',
@@ -219,7 +509,6 @@ workout_program_schema = {
     }
 }
             
-
 get_exercises_schema = {
     'operation_summary': 'Get Exercises',
     'operation_description': 'Get a list of exercises',
@@ -398,6 +687,7 @@ log_workout_schema = {
     'tags': ['Workout Logs']
 }
 
+# social feed app
 feed_schema = {
     'operation_summary': 'Feed',
     'operation_description': 'Retrieve all posts',
@@ -426,6 +716,7 @@ following_feed_schema = {
     }
 }
 
+# posts app
 post_schema = {
     'operation_summary': 'Post',
     'operation_description': 'Create a post',
@@ -626,6 +917,7 @@ get_workouts_by_user_id_schema = {
     }
 }
 
+# user auth app schema
 sign_up_schema = {
     'operation_summary': 'Sign Up',
     'operation_description': 'Sign up a user',

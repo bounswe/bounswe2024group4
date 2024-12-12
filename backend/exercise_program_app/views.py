@@ -141,7 +141,9 @@ def rate_workout(request):
 
             user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
             user.workout_rating_count += 1
-            user.save()
+
+            user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+            user.check_super_member()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
         except Exception as e:
