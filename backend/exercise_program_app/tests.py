@@ -48,8 +48,6 @@ class WorkoutProgramTestCase(TestCase):
         self.assertEqual(response.json(), {'error': 'exercises are required'})
 
 
-
-
 class RateWorkoutTestCase(TestCase):
     def setUp(self):
         self.client = Client()
@@ -268,3 +266,72 @@ class GetWorkoutsByUserIdTestCase(TestCase):
         json_data = response.json()
         self.assertIn('detail', json_data)
         self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
+
+
+class CreateExerciseSuperUserTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user1 = User.objects.create_user(
+            username='testuser1',
+            email='test1@example.com',
+            password='password',
+            is_superuser=True,
+            workout_rating=5,
+            workout_rating_count=11
+        )
+        self.user2 = User.objects.create_user(
+            username='testuser2',
+            email='test2@example.com',
+            password='password',
+        )
+
+    def test_create_exercise_superuser(self):
+        # Log in the superuser to create an exercise
+        self.client.force_login(User.objects.get(username='testuser1'))
+        # Simulate a POST request to create an exercise with valid data
+        data = {
+            'type': 'Cardio',
+            'name': 'Running',
+            'muscle': 'Cardio',
+            'difficulty': 'Beginner',
+            'equipment': 'None',
+            'instruction': 'Run for 30 minutes'
+        }
+        response = self.client.post('/create-exercise/', json.dumps(data), content_type='application/json')
+        print('!!!!!!!!!!!!')
+        print('!!!!!!!!!!!!')
+        print('!!!!!!!!!!!!')
+        print('!!!!!!!!!!!!')
+        print('!!!!!!!!!!!!')
+        print(response.json())
+        print(self.user1.is_authenticated)
+        print(self.user1.is_superuser)
+        # Check that the response status code is 201 Created
+        self.assertEqual(response.status_code, 201)
+
+        # Check the JSON response data for the success message
+        json_data = response.json()
+        self.assertIn('message', json_data)
+        self.assertEqual(json_data['message'], 'Exercise created successfully')
+        self.client.logout()
+        
+        # Log in the normal user to use the exercise in a workout
+        self.client.login(username='testuser2', password='password')
+        url = reverse('workout_program')
+        data = {
+            'workout_name': 'Cardio Workout',
+            'exercises': [{
+                'type': 'Cardio',
+                'name': 'Running',
+                'muscle': 'Cardio',
+                'equipment': 'None',
+                'instruction': 'Run for 30 minutes'
+            }]
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['message'], 'Workout created successfully')
+        self.assertEqual(response.json()['workout_name'], 'Cardio Workout')
+        self.assertEqual(response.json()['exercises'][0]['name'], 'Running')
+
+    

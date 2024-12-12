@@ -4,10 +4,11 @@ from user_auth_app.models import User
 # unique. holds the exercises created by super-members and maybe caches the api data 
 class ExerciseInstance(models.Model):
     exercise_instance_id = models.AutoField(primary_key=True)
-    type = models.CharField(max_length=50)
+    type = models.CharField(max_length=50, default='exercise')
     name = models.CharField(max_length=50)
     muscle = models.CharField(max_length=50)
     equipment = models.CharField(max_length=50)
+    difficulty = models.CharField(max_length=50, default='Beginner')
     instruction = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
 

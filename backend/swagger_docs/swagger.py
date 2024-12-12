@@ -398,6 +398,41 @@ log_workout_schema = {
     'tags': ['Workout Logs']
 }
 
+create_exercise_superuser_schema = {
+    'operation_description': "Create a new exercise",
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'name': openapi.Schema(type=openapi.TYPE_STRING, description="Name of the exercise"),
+            'type': openapi.Schema(type=openapi.TYPE_STRING, description="Type of exercise"),
+            'muscle': openapi.Schema(type=openapi.TYPE_STRING, description="Primary muscle group worked"),
+            'equipment': openapi.Schema(type=openapi.TYPE_STRING, description="Equipment needed"),
+            'difficulty': openapi.Schema(type=openapi.TYPE_STRING, description="Difficulty level of the exercise"),
+            'instruction': openapi.Schema(type=openapi.TYPE_STRING, description="Instructions for the exercise"),
+        },
+        required=['name', 'muscle', 'equipment', 'instruction'],            
+    ),
+    'responses': {
+        200: openapi.Response(
+            description="Success",
+            examples={
+                'application/json': {
+                    'status': 'success',
+                    'exercise_id': 1,
+                    'name': 'Chest Press',
+                    'muscle': 'Chest',
+                    'equipment': 'Machine',
+                    'instruction': 'Sit on the machine and push the handles forward.',
+                    'difficulty': 'Beginner'
+                }
+            }
+        ),
+        400: 'Bad Request',
+        401: 'Unauthorized',
+    },
+    # 'tags': ['Exercises']
+}
+
 feed_schema = {
     'operation_summary': 'Feed',
     'operation_description': 'Retrieve all posts',
