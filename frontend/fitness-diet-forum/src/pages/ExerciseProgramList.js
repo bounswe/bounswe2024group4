@@ -59,8 +59,23 @@ const ExerciseProgramList = () => {
         }
     };
 
-    const handleDeleteProgram = (programId) => {
-        setPrograms(programs.filter(program => program.id !== programId));
+    const handleDeleteProgram = async (programId) => {
+        const programToDelete = programs.find(program => program.id === programId);
+        const updatedPrograms = programs.filter(program => program.id !== programId);
+    
+        setPrograms(updatedPrograms);
+    
+        try {
+            const response = await axios.delete(`${baseURL}/workouts/delete/${programId}/`, config);
+            
+            if (response.status !== 200) {
+                setPrograms(prevPrograms => [...prevPrograms, programToDelete]);
+                throw new Error('Failed to delete the program.');
+            }
+        } catch (error) {
+            console.error('Error deleting program:', error);
+            setPrograms(prevPrograms => [...prevPrograms, programToDelete]);
+        }
     };
 
     const handleAddExercise = (exercise) => {
