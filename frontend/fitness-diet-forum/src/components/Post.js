@@ -167,15 +167,18 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
                 <button className="flex items-center" onClick={handleLikeClick}>
                     <FaHeart className={`mr-2 ${hasLiked ? "text-red-500" : ""}`} /> {likeCount} Like
                 </button>
+
+                <button className="flex items-center" onClick={() => setShowCommentBox(!showCommentBox)}>
+                    <FaComment className="mr-2" /> Comment
+                </button>
+                
                 <button
                     className={`flex items-center ${isBookmarked ? "text-yellow-400" : "text-gray-400"}`}
                     onClick={toggleBookmark}
                 >
                     <FaBookmark className={`mr-2`} /> Bookmark
                 </button>
-                <button className="flex items-center" onClick={() => setShowCommentBox(!showCommentBox)}>
-                    <FaComment className="mr-2" /> Comment
-                </button>
+                
             </div>
 
             {/* Comment Box */}
