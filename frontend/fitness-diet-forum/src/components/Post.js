@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { FaHeart, FaComment } from "react-icons/fa";
+import { FaHeart, FaComment, FaBookmark } from "react-icons/fa";
 import { IoIosStar } from "react-icons/io";
 import ExerciseProgram from "./ExerciseProgram";
 import Meal from "./Meal";
@@ -10,88 +10,100 @@ import { Link } from "react-router-dom"; // Import Link from react-router-dom
 const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
-    const loggedInUser = localStorage.getItem("username");
     const token = localStorage.getItem("token");
-    const [error, setError] = useState(null);
 
+    const [error, setError] = useState(null);
     const [workout, setWorkout] = useState(null);
     const [meal, setMeal] = useState(null);
-
-    const [hasLiked, setHasLiked] = useState(liked); // Initially not liked
-    const [likeCount, setLikeCount] = useState(like_count); // Initial like count
-    const [showCommentBox, setShowCommentBox] = useState(false); // Hide comment box initially
-    const [newComment, setNewComment] = useState(""); // Track new comment input
-    const [comments, setComments] = useState([]); // List of comments
+    const [hasLiked, setHasLiked] = useState(liked);
+    const [likeCount, setLikeCount] = useState(like_count);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [showCommentBox, setShowCommentBox] = useState(false);
+    const [newComment, setNewComment] = useState("");
+    const [comments, setComments] = useState([]);
     const config = {
         headers: {
             'Authorization': 'Token ' + token,
         },
-    }
+    };
 
     useEffect(() => {
         const fetchPostData = async () => {
             try {
                 if (mealId) {
-                    // TO DO get meal with meal ID
+                    // TO DO: Fetch meal data using mealId
                 }
                 if (workoutId) {
                     const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, config);
-                    console.log(workoutResponse);
                     if (workoutResponse.status === 200) {
-                        const data = workoutResponse.data;
-                        console.log(data);
-                        setWorkout(data);
+                        setWorkout(workoutResponse.data);
                     } else {
                         setError('Workout not found');
                     }
+                }
+
+                // Fetch bookmark status
+                const bookmarkResponse = await axios.get(baseURL + "/bookmarked_posts/", config);
+                if (bookmarkResponse.status === 200) {
+                    const bookmarkedPostIds = bookmarkResponse.data.bookmarked_posts.map(post => post.id);
+                    setIsBookmarked(bookmarkedPostIds.includes(postId));
                 }
             } catch (error) {
                 setError('Something went wrong');
             }
         };
         fetchPostData();
-    }, [mealId, workoutId]);
+    }, [mealId, workoutId, postId, baseURL]);
 
     const handleLikeClick = async () => {
         try {
-            // Optimistically update UI
             const updatedHasLiked = !hasLiked;
             const updatedLikeCount = likeCount + (hasLiked ? -1 : 1);
-    
             setHasLiked(updatedHasLiked);
             setLikeCount(updatedLikeCount);
-    
-            // Send a request to toggle like
+
             const response = await axios.post(
                 `${baseURL}/toggle_like/`, 
-                { postId }, // Pass postId in the request body
+                { postId }, 
                 config
             );
-    
-            if (response.status === 200) {
-                // Optionally log the server's response
-                console.log(response.data.message); // Example: "Post liked/unliked successfully"
-            } else {
+
+            if (response.status !== 200) {
                 throw new Error('Unexpected response status');
             }
         } catch (error) {
             console.error('Error toggling like:', error);
-    
-            // Revert UI state if the request fails
-            setHasLiked(!hasLiked); // Revert the hasLiked state
-            setLikeCount(likeCount + (hasLiked ? 1 : -1)); // Adjust the like count accordingly
+            setHasLiked(!hasLiked);
+            setLikeCount(likeCount + (hasLiked ? 1 : -1));
         }
     };
-    
-    
 
-    // Handle comment submit
+    const toggleBookmark = async () => {
+        try {
+            const updatedIsBookmarked = !isBookmarked;
+            setIsBookmarked(updatedIsBookmarked);
+
+            const response = await axios.post(
+                `${baseURL}/toggle_bookmark/`,
+                { postId },
+                config
+            );
+
+            if (response.status !== 200) {
+                throw new Error("Unexpected response");
+            }
+        } catch (error) {
+            console.error("Error toggling bookmark:", error);
+            setIsBookmarked(!isBookmarked);
+        }
+    };
+
     const handleCommentSubmit = (e) => {
-        e.preventDefault(); // Prevent default form behavior
+        e.preventDefault();
         if (newComment.trim()) {
-            setComments([...comments, newComment]); // Add new comment to the list
-            setNewComment(""); // Clear comment input
-            setShowCommentBox(false); // Hide the comment box after submission
+            setComments([...comments, newComment]);
+            setNewComment("");
+            setShowCommentBox(false);
         }
     };
 
@@ -99,10 +111,9 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
         <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
             {/* Header */}
             <div className="flex items-center mb-4">
-                {/* Wrap profile picture and username in Link */}
                 <Link to={`/profile/${user.username}`} className="flex items-center">
                     <img
-                        src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"} // Dynamically loads profile picture
+                        src={user.profile_picture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
                         alt="Profile"
                         className="w-12 h-12 rounded-full mr-4"
                     />
@@ -119,7 +130,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
             </div>
 
             {/* Post Content */}
-            <div className="mb-4">{content}</div> {/* Body content can be text or an image */}
+            <div className="mb-4">{content}</div>
 
             {/* Meal */}
             {meal && (
@@ -150,10 +161,16 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
                 </div>
             )}
 
-            {/* Actions: Like & Comment */}
+            {/* Actions: Like & Bookmark */}
             <div className="flex justify-between mt-4 text-gray-400">
                 <button className="flex items-center" onClick={handleLikeClick}>
                     <FaHeart className={`mr-2 ${hasLiked ? "text-red-500" : ""}`} /> {likeCount} Like
+                </button>
+                <button
+                    className={`flex items-center ${isBookmarked ? "text-yellow-400" : "text-gray-400"}`}
+                    onClick={toggleBookmark}
+                >
+                    <FaBookmark className={`mr-2`} /> Bookmark
                 </button>
                 <button className="flex items-center" onClick={() => setShowCommentBox(!showCommentBox)}>
                     <FaComment className="mr-2" /> Comment
@@ -197,3 +214,4 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
 };
 
 export default Post;
+
