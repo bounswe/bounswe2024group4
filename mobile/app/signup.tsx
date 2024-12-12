@@ -57,19 +57,6 @@ const SignupScreen = () => {
 
     if (!newErrors.username && !newErrors.email && !newErrors.password && !newErrors.confirmPassword) {
       try {
-        // Fetch CSRF Token (if applicable)
-        const csrfResponse = await axios.get(`${baseURL}/csrf_token/`, { withCredentials: true });
-        const csrfToken = csrfResponse.data.csrf_token;
-
-        // Configure request headers
-        const config = {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-          },
-          withCredentials: true,
-        };
-
         // Post sign-up data
         const response = await axios.post(
           `${baseURL}/sign_up/`,
@@ -77,12 +64,9 @@ const SignupScreen = () => {
             username,
             email,
             password,
-            user_type: 'member', // Optional user_type field
-          },
-          config
+            user_type: 'member',
+          }
         );
-
-        await AsyncStorage.setItem('csrfToken', csrfResponse.data.csrf_token);
         console.log('Signup successful:', response.data);
         setSuccessModalVisible(true);
       } catch (err: any) {

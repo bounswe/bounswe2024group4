@@ -1,20 +1,31 @@
-import React, { useContext } from "react";
+import React, { useState, useContext } from "react";
 import { FaSearch } from 'react-icons/fa';
 import { Context } from "../globalContext/globalContext.js";
 import axios from 'axios';
-import { setLoggedIn } from "../components/Auth.js";
-import { useNavigate } from "react-router-dom";  
+import { useNavigate } from "react-router-dom";
+import CreatePostModal from "./CreatePostModal";
 
-const Topbar = () => {
+const Topbar = ({ }) => {
   // This function will be called when the logout button is clicked
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token")
+
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const handleLogout = async () => {
     try {
-      await axios.post(baseURL + "/log_out/");
-      setLoggedIn("false");
+      console.log(token);
+      await axios.post(baseURL + "/log_out/", null, {
+        headers: {
+          'Authorization': 'Token ' + token
+        }
+      });
+      localStorage.setItem("LoggedIn", "false");
       navigate("/");
     } catch (error) {
       console.log(error.message);
@@ -34,16 +45,25 @@ const Topbar = () => {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <button className="bg-black text-white p-2 rounded border-2 border-blue-500 shadow-lg transition-shadow duration-300 hover:shadow-blue-500 hover:shadow-lg hover:scale-105">
+        <button
+          onClick={openModal}
+          className="bg-black text-white p-2 rounded border-2 border-blue-500 shadow-lg transition-shadow duration-300 hover:shadow-blue-500 hover:shadow-lg hover:scale-105"
+        >
           Create Post
         </button>
-        <button 
-          onClick={handleLogout} 
+        <button
+          onClick={handleLogout}
           className="bg-red-500 text-white p-2 rounded border-2 border-red-700 shadow-lg transition-shadow duration-300 hover:shadow-red-500 hover:shadow-lg hover:scale-105"
         >
           Log Out
         </button>
       </div>
+
+      {/* CreatePostModal component integration */}
+      <CreatePostModal
+        isModalOpen={isModalOpen}
+        closeModal={closeModal}
+      />
     </div>
   );
 };

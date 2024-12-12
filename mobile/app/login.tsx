@@ -22,24 +22,14 @@ const LoginScreen = () => {
 
     setLoading(true);
     try {
-      const csrfResponse = await axios.get(`${baseURL}/csrf_token/`);
-      const csrfToken = csrfResponse.data.csrf_token;
-
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
-      };
-
-      const response = await axios.post(`${baseURL}/log_in/`, { username, password }, config);
-
+      const response = await axios.post(`${baseURL}/log_in/`, { username, password });
       console.log("Login successful:", response.data);
+      
       Alert.alert("Success", "Login successful!");
 
-      await AsyncStorage.setItem('username', username);
-      await AsyncStorage.setItem('csrfToken', csrfResponse.data.csrf_token);
+      await AsyncStorage.setItem("username", username);
+      await AsyncStorage.setItem("token", response.data.token);
+      await AsyncStorage.setItem("LoggedIn", "true");
 
       setLoading(false);
       router.push("/(tabs)");
@@ -47,7 +37,7 @@ const LoginScreen = () => {
       setLoading(false);
       if (typeof err === "object" && err !== null && "response" in err) {
         const errorResponse = (err as { response?: { status?: number } }).response;
-
+        
         Alert.alert(
           "Error",
           errorResponse?.status === 401
