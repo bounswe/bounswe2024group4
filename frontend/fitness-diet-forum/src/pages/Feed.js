@@ -16,8 +16,7 @@ const Feed = () => {
     const fetchFeed = async () => {
       try {
         // Send GET request to the following_feed endpoint with the logged-in username
-        const response = await axios.get(`${baseURL}/following_feed`, {
-          params: { username: loggedInUser },
+        const response = await axios.get(`${baseURL}/following_feed/`, {
           headers: {
             "Authorization": `Token ${token}` // If token is needed in headers
           }
