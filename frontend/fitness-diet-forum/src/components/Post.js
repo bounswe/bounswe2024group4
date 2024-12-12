@@ -45,7 +45,8 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
                 // Fetch bookmark status
                 const bookmarkResponse = await axios.get(baseURL + "/bookmarked_posts/", config);
                 if (bookmarkResponse.status === 200) {
-                    const bookmarkedPostIds = bookmarkResponse.data.bookmarked_posts.map(post => post.id);
+                    const bookmarkedPostIds = bookmarkResponse.data.bookmarked_posts.map(post => post.post_id);
+                    //console.log(bookmarkedPostIds);
                     setIsBookmarked(bookmarkedPostIds.includes(postId));
                 }
             } catch (error) {
@@ -88,7 +89,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked }) =
                 { postId },
                 config
             );
-
+            //console.log(postId);
             if (response.status !== 200) {
                 throw new Error("Unexpected response");
             }
