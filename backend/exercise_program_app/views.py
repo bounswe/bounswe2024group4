@@ -518,8 +518,9 @@ def workout_log(request, workout_id):
                 exercise_log.actual_reps = exercise_data.get('actual_reps', 0)
                 exercise_log.weight = exercise_data.get('weight', 0.0)
                 exercise_log.save()
-                
-        return JsonResponse({
+
+        # Prepare response data
+        response_data = {
             'message': 'Workout log updated successfully',
             'workout_id': workout.workout_id,
             'workout_name': workout.workout_name,
@@ -532,13 +533,94 @@ def workout_log(request, workout_id):
                 'actual_sets': log.actual_sets,
                 'actual_reps': log.actual_reps,
                 'weight': log.weight,
-                'target_sets': log.exercise.sets,  # Original target from workout
-                'target_reps': log.exercise.reps   # Original target from workout
+                'target_sets': log.exercise.sets,
+                'target_reps': log.exercise.reps
             } for log in workout_log.exercise_logs.all()]
-        })
+        }
+
+        # Log the activity to Firebase
+        try:
+            activity_data = {
+                "actor": {
+                    "isSuperUser": user.is_superuser,
+                    "id": user.user_id,
+                    "name": user.username
+                },
+                "type": "Log",
+                "object": {
+                    "type": "WorkoutLog",
+                    "id": workout_log.log_id,
+                    "workout": {
+                        "id": workout.workout_id,
+                        "name": workout.workout_name
+                    },
+                    "date": log_date.strftime('%Y-%m-%d'),
+                    "is_completed": workout_log.is_completed,
+                    "exercises": [{
+                        "id": log.exercise.exercise_id,
+                        "name": log.exercise.name,
+                        "type": log.exercise.type,
+                        "muscle": log.exercise.muscle,
+                        "is_completed": log.is_completed,
+                        "performance": {
+                            "actual_sets": log.actual_sets,
+                            "actual_reps": log.actual_reps,
+                            "weight": log.weight,
+                            "target_sets": log.exercise.sets,
+                            "target_reps": log.exercise.reps
+                        }
+                    } for log in workout_log.exercise_logs.all()]
+                },
+                "summary": f"{user.username} logged their '{workout.workout_name}' workout"
+            }
+
+            # Add to Firestore
+            db.collection("workoutLogActivities").add({
+                **activity_data,
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "published": datetime.utcnow().isoformat()
+            })
+
+        except Exception as e:
+            # Log the error but don't fail the request
+            print(f"Firebase logging failed: {str(e)}")
+
+        return JsonResponse(response_data)
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def get_workout_log_activities(request):
+    try:
+        # Start with base query
+        activities_ref = db.collection('workoutLogActivities')
+        query = activities_ref
+            
+        # Order by published date descending (newest first)
+        query = query.order_by('published', direction=firestore.Query.DESCENDING)
+        
+        # Execute query
+        activities = []
+        for doc in query.stream():
+            activity_data = doc.to_dict()
+            # Add document ID to the response
+            activity_data['id'] = doc.id
+            activities.append(activity_data)
+        
+        return JsonResponse({
+            'count': len(activities),
+            'activities': activities
+        }, safe=False, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=400)
 
 
 @api_view(['GET'])
