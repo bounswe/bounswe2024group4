@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.decorators import login_required
 from exercise_program_app.models import Workout
 from posts_app.models import Post
+from diet_program_app.models import Meal
 from rest_framework.authentication import TokenAuthentication
 
 
@@ -58,7 +59,6 @@ def edit_profile(request):
 @permission_classes([IsAuthenticated])
 def view_profile(request):
     if request.method == 'GET':
-        print(request.GET)
         viewing_user = request.user  # Get viewing user from token authentication
         viewed_username = request.GET.get('viewed_username')
         try:
@@ -67,25 +67,11 @@ def view_profile(request):
             return JsonResponse({'message': 'User not found'}, status=404)
         bio = viewed_user.bio
         profile_picture = viewed_user.profile_picture.url if viewed_user.profile_picture else ''
-        # score = user.score
-        workout_rating = viewed_user.workout_rating
-        meal_rating = viewed_user.meal_rating
-        workout_rating_count = viewed_user.workout_rating_count
-        meal_rating_count = viewed_user.meal_rating_count
+        score = viewed_user.score
         user_type = viewed_user.user_type
+
         following_count = Follow.objects.filter(follower=viewed_user).count()
         followers_count = Follow.objects.filter(following=viewed_user).count()
-
-        # if request.user == user: # If user is viewing their own profile
-        #     is_following = None
-        #     email = user.email
-        #     weight_history = Weight.objects.filter(user=user)
-        #     height = user.height
-        # else:
-        #     is_following = user.followers.filter(username=request.user.username).exists()
-        #     email = None
-        #     weight_history = []
-        #     height = None
 
         # is_following = user.following.filter(username=user.username).exists()
         is_following = Follow.objects.filter(follower=viewing_user, following=viewed_user).exists()
@@ -95,14 +81,14 @@ def view_profile(request):
 
         posts = Post.objects.filter(user=viewed_user)
         workouts = Workout.objects.filter(created_by=viewed_user)
-        # meals = Diet.objects.filter(user=user)
+        meals = Meal.objects.filter(created_by=viewed_user)
 
         context = {
             'username': viewed_username,
             'email': email,
             'bio': bio,
             'profile_picture': profile_picture,
-            'score': (workout_rating * workout_rating_count + meal_rating * meal_rating_count) / (workout_rating_count + meal_rating_count) if workout_rating_count + meal_rating_count > 0 else 0,
+            'score': score,
             'weight_history': [{'weight': weight.weight, 'date': weight.created_at} for weight in weight_history],
             'height': height,
             'following_count': following_count,
@@ -120,7 +106,7 @@ def view_profile(request):
                 'liked': viewing_user in post.liked_by.all(),
                 } for post in posts])),
             'workouts': list(reversed([{'workout_id': workout.workout_id} for workout in workouts])),
-            # 'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
+            'meals': list(reversed([{'meal_id': meal.meal_id} for meal in meals])),
         }
 
         return JsonResponse(context, status=200)

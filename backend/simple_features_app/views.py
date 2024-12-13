@@ -14,17 +14,7 @@ from rest_framework.authentication import TokenAuthentication
 @permission_classes([IsAuthenticated])
 def get_leaderboard(request):
     if request.method == 'GET':
-        ordered_user_list = (
-            User.objects.annotate(
-                rating= ( 
-                    (F('workout_rating') * F('workout_rating_count') +
-                        F('meal_rating') * F('meal_rating_count')) / 
-                    (F('workout_rating_count') + F('meal_rating_count'))
-                ) 
-            )
-            .order_by('-rating')  # Order by the combined rating in descending order
-            .values('username', 'profile_picture', 'rating')
-        )
+        ordered_user_list = User.objects.order_by('-score').values('username', 'profile_picture', 'score')
         return JsonResponse({'leaderboard': list(ordered_user_list)})
         
 

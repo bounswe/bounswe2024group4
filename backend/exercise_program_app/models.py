@@ -94,7 +94,14 @@ class ExerciseLog(models.Model):
     workout_log = models.ForeignKey(WorkoutLog, on_delete=models.CASCADE, related_name='exercise_logs')
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
     is_completed = models.BooleanField(default=False)
+    actual_sets = models.IntegerField(default=0)
+    actual_reps = models.IntegerField(default=0)
+    weight = models.FloatField(default=0.0)  # in kg or lbs
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ['workout_log', 'exercise']  # One log per exercise per workout log
+
+    def __str__(self):
+        return f"Log for {self.exercise.name} in {self.workout_log}"

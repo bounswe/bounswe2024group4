@@ -15,6 +15,11 @@ from user_auth_app.models import User
 from datetime import datetime
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
+from activity_streams.views import log_activity
+from datetime import datetime
+from fitness_project.firebase import db
+from firebase_admin import firestore
+
 
 
 @swagger_auto_schema(method='get', **get_exercises_schema)
@@ -80,6 +85,37 @@ def workout_program(request):
                 )
                 exercise.save()
 
+            # Log the activity
+            activity_data = {
+                "actor": {
+                    "isSuperUser": user.is_superuser,
+                    "id": user.user_id,
+                    "name": user.username
+                },
+                "type": "Create",
+                "object": {
+                    "type": "Workout",
+                    "id": workout.workout_id,
+                    "name": workout.workout_name,
+                    "exerciseCount": len(exercises),
+                    "exercises": [{
+                        "type": ex['type'],
+                        "name": ex['name'],
+                        "muscle": ex['muscle'],
+                        "sets": ex['sets'],
+                        "reps": ex['reps']
+                    } for ex in exercises]
+                },
+                "summary": f"{user.username} created a new workout program '{workout_name}'"
+            }
+
+            # Add to Firestore
+            db.collection("workoutActivities").add({
+                **activity_data,
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "published": datetime.utcnow().isoformat()
+            })
+
             return JsonResponse({
                 'message': 'Workout program created successfully',
                 'workout_id': workout.workout_id,
@@ -94,6 +130,40 @@ def workout_program(request):
             return JsonResponse({'error': str(e)}, status=400)
     else:
         return render(request, 'workout_program.html')
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def get_workout_activities(request):
+    try:
+  
+        # Start with base query
+        activities_ref = db.collection('workoutActivities')
+        query = activities_ref
+            
+        # Order by published date descending (newest first)
+        query = query.order_by('published', direction=firestore.Query.DESCENDING)
+        
+  
+        # Execute query
+        activities = []
+        for doc in query.stream():
+            activity_data = doc.to_dict()
+            # Add document ID to the response
+            activity_data['id'] = doc.id
+            activities.append(activity_data)
+        
+        return JsonResponse({
+            'count': len(activities),
+            'activities': activities
+        }, safe=False, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=400)
 
 
 @api_view(['DELETE'])
@@ -111,7 +181,21 @@ def delete_workout_by_id(request, workout_id):
                 return JsonResponse({'error': 'You are not authorized to delete this workout'}, status=403)
 
             # Delete the workout
+            workout_name = workout.workout_name  # Store name for activity log before deletion
             workout.delete()
+
+            # Log the delete activity
+            log_activity(
+                actor=user,
+                activity_type="Delete",
+                obj={
+                    "type": "Workout",
+                    "id": f"http://example.org/workouts/{workout_id}",
+                    "name": workout_name
+                },
+                summary=f"{user.username} deleted the workout '{workout_name}'"
+            )
+
             return JsonResponse({'message': 'Workout deleted successfully'}, status=200)
 
         except Workout.DoesNotExist:
@@ -120,6 +204,8 @@ def delete_workout_by_id(request, workout_id):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    
 
 @swagger_auto_schema(method='post', **rate_workout_schema)
 @api_view(['POST'])
@@ -147,7 +233,9 @@ def rate_workout(request):
 
             user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
             user.workout_rating_count += 1
-            user.save()
+
+            user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+            user.check_super_member()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
         except Exception as e:
@@ -394,96 +482,83 @@ def get_programs(request):
 
 #Log a workout and exercises and their statuses inside it
 @swagger_auto_schema(method='post', **log_workout_schema)
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def workout_log(request, workout_id):
-    if request.method == 'GET':
-        try:
-            user = request.user  # Get user from token authentication
-            workout = get_object_or_404(Workout, workout_id=workout_id)
-            workout_log = get_object_or_404(WorkoutLog, workout=workout)
-            workout_exercises = Exercise.objects.filter(workout=workout)
-            exercise_statuses = []
-            for exercise in workout_exercises:
+    try:
+        data = json.loads(request.body)
+        user = request.user
+        workout = get_object_or_404(Workout, workout_id=workout_id)
+        
+        # Handle date
+        date_str = data.get('date')
+        if date_str:
+            try:
+                log_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD'}, status=400)
+        else:
+            log_date = timezone.now().date()
+            
+        # Create or get workout log
+        workout_log, created = WorkoutLog.objects.get_or_create(
+            workout=workout,
+            user=user,
+            date=log_date
+        )
+        
+        # Update workout completion status
+        if 'workout_completed' in data:
+            workout_log.is_completed = data['workout_completed']
+            workout_log.save()
+            
+        # Handle exercise logs
+        if 'exercises' in data:
+            exercise_ids = [ex['exercise_id'] for ex in data['exercises']]
+            workout_exercises = Exercise.objects.filter(
+                workout=workout, 
+                exercise_id__in=exercise_ids
+            )
+            
+            if len(workout_exercises) != len(exercise_ids):
+                return JsonResponse({'error': 'Some exercises do not belong to this workout'}, status=400)
+                
+            for exercise_data in data['exercises']:
+                exercise = workout_exercises.get(exercise_id=exercise_data['exercise_id'])
                 exercise_log, _ = ExerciseLog.objects.get_or_create(
                     workout_log=workout_log,
                     exercise=exercise
                 )
-                exercise_statuses.append({
-                    'exercise_id': exercise.exercise_id,
-                    'name': exercise.name,
-                    'type': exercise.type,
-                    'muscle': exercise.muscle,
-                    'equipment': exercise.equipment,
-                    'difficulty': exercise.difficulty,
-                    'instruction': exercise.instruction,
-                    'sets': exercise.sets,
-                    'reps': exercise.reps,
-                    'is_completed': exercise_log.is_completed
-                })
-            return JsonResponse({
-                'workout_id': workout.workout_id,
-                'workout_name': workout.workout_name,
-                'is_completed': workout_log.is_completed,
-                'date': workout_log.date.strftime('%Y-%m-%d'),
-                'exercises': exercise_statuses
-            })
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    elif request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user = request.user  # Get user from token authentication
-            workout = get_object_or_404(Workout, workout_id=workout_id)
-            date_str = data.get('date')
-            if date_str:
-                try:
-                    log_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                except ValueError:
-                    return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD'}, status=400)
-            else:
-                log_date = timezone.now().date()
-            workout_log, created = WorkoutLog.objects.get_or_create(
-                workout=workout,
-                user=user,
-                date=log_date
-            )
-            if 'workout_completed' in data:
-                workout_log.is_completed = data['workout_completed']
-                workout_log.save()
-            if 'exercises' in data:
-                exercise_ids = [ex['exercise_id'] for ex in data['exercises']]
-                workout_exercises = Exercise.objects.filter(
-                    workout=workout, 
-                    exercise_id__in=exercise_ids
-                )
-                if len(workout_exercises) != len(exercise_ids):
-                    return JsonResponse({'error': 'Some exercises do not belong to this workout'}, status=400)
-                for exercise_data in data['exercises']:
-                    exercise = workout_exercises.get(exercise_id=exercise_data['exercise_id'])
-                    exercise_log, _ = ExerciseLog.objects.get_or_create(
-                        workout_log=workout_log,
-                        exercise=exercise
-                    )
-                    exercise_log.is_completed = exercise_data['is_completed']
-                    exercise_log.save()
-            return JsonResponse({
-                'message': 'Workout log updated successfully',
-                'workout_id': workout.workout_id,
-                'workout_name': workout.workout_name,
-                'is_completed': workout_log.is_completed,
-                'exercises': [{
-                    'exercise_id': log.exercise.exercise_id,
-                    'name': log.exercise.name,
-                    'is_completed': log.is_completed
-                } for log in workout_log.exercise_logs.all()]
-            })
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
+                
+                # Update exercise log with new fields
+                exercise_log.is_completed = exercise_data.get('is_completed', False)
+                exercise_log.actual_sets = exercise_data.get('actual_sets', 0)
+                exercise_log.actual_reps = exercise_data.get('actual_reps', 0)
+                exercise_log.weight = exercise_data.get('weight', 0.0)
+                exercise_log.save()
+                
+        return JsonResponse({
+            'message': 'Workout log updated successfully',
+            'workout_id': workout.workout_id,
+            'workout_name': workout.workout_name,
+            'date': log_date.strftime('%Y-%m-%d'),
+            'is_completed': workout_log.is_completed,
+            'exercises': [{
+                'exercise_id': log.exercise.exercise_id,
+                'name': log.exercise.name,
+                'is_completed': log.is_completed,
+                'actual_sets': log.actual_sets,
+                'actual_reps': log.actual_reps,
+                'weight': log.weight,
+                'target_sets': log.exercise.sets,  # Original target from workout
+                'target_reps': log.exercise.reps   # Original target from workout
+            } for log in workout_log.exercise_logs.all()]
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 
 @api_view(['GET'])
@@ -521,9 +596,15 @@ def get_workout_logs(request):
                         'equipment': ex_log.exercise.equipment,
                         'difficulty': ex_log.exercise.difficulty,
                         'instruction': ex_log.exercise.instruction,
-                        'sets': ex_log.exercise.sets,
-                        'reps': ex_log.exercise.reps,
-                        'is_completed': ex_log.is_completed
+                        # Target values from original workout
+                        'target_sets': ex_log.exercise.sets,
+                        'target_reps': ex_log.exercise.reps,
+                        # Actual performed values
+                        'actual_sets': ex_log.actual_sets,
+                        'actual_reps': ex_log.actual_reps,
+                        'weight': ex_log.weight,
+                        'is_completed': ex_log.is_completed,
+                        'last_updated': ex_log.updated_at.strftime('%Y-%m-%d %H:%M:%S') if ex_log.updated_at else None
                     } for ex_log in exercise_logs]
                 }
                 logs_data.append(log_data)
