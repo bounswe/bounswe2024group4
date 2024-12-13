@@ -29,6 +29,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
+from activity_streams import views as activity_streams_views
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -59,7 +60,9 @@ urlpatterns = [
     path('get-programs/', exercise_program_views.get_programs, name='get_programs'), # Get weekly programs by username
     path('workouts/toggle-bookmark/', exercise_program_views.toggle_bookmark_workout, name='toggle_bookmark_workout'), # Bookmark a workout
     path('get-bookmarked-workouts/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'), # Get bookmarked workouts by username
-    # User auth related endpoints
+
+    path('workout-activities/', exercise_program_views.get_workout_activities, name='get_workout_activities'),
+    #User auth related endpoints
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
     path('log_out/', auth_views.log_out, name='log_out'),
@@ -92,11 +95,17 @@ urlpatterns = [
     path('get_meals_by_user_id/', diet_program_views.get_meals_by_user_id, name='get_meals_by_user_id'),
     path('toggle_bookmark_meal/', diet_program_views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
     path('get_bookmarked_meals_by_user_id/', diet_program_views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
+    path('get_food_by_id/', diet_program_views.get_food_by_id, name='get_food_by_id'),
     # Swagger endpoints
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
+    path('get-activities/', activity_streams_views.get_activities, name='get_activity_stream'),
+    path('log-activity/', activity_streams_views.log_activity, name='log_activity'),
+    path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
+    
+
 ]
 
 if settings.DEBUG:

@@ -10,23 +10,24 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_by_user_id_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_by_user_id_schema
 
+
 @swagger_auto_schema(method='post', **create_meal_schema)
 @api_view(['POST'])
 def create_meal(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         user = request.user
-        # user = User.objects.get(username=data.get('username'))
         meal_name = data.get('meal_name')
+        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
         foods = data.get('foods', [])
         
         for food in foods:
             meal.foods.add(food)
         meal.save()
-        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
 
         return JsonResponse({'message': 'Meal created successfully'}, status=201)
     return JsonResponse({'message': 'Invalid request'}, status=400)
+
 
 @swagger_auto_schema(method='post', **create_food_all_schema)
 @api_view(['POST'])
@@ -37,74 +38,75 @@ def create_food_all(request):
         ingredients = data.get('ingredients')
         recipe_url = data.get('recipe_url')
 
-        try:       # if the food is in the database
-            food = Food.objects.get(name=food_name)
-            return JsonResponse({
-                'message': 'Food for meal found in the database',
-                'food_id': food.food_id
-                }, status=200)
+        # try:       # if the food is in the database
+        #     food = Food.objects.get(name=food_name)
+        #     return JsonResponse({
+        #         'message': 'Food for meal found in the database',
+        #         'food_id': food.food_id
+        #         }, status=200)
         # except Exception as e:
         #     return JsonResponse({'error': str(e)}, status=400)
 
-        except:    # if the food is not in the database
-            try:   # if the food is in the API
-                url = "https://api.edamam.com/api/nutrition-data"
-                params = {
-                    'app_id': os.getenv('EDAMAM_APP_ID'),
-                    'app_key': os.getenv('EDAMAM_APP_KEY'),
-                    'ingr': ingredients,
-                }
-                response = requests.get(url, params=params)
-                data = response.json()
+        # except:    # if the food is not in the database
+        try:   # if the food is in the API
+            url = "https://api.edamam.com/api/nutrition-data"
+            params = {
+                'app_id': os.getenv('EDAMAM_APP_ID'),
+                'app_key': os.getenv('EDAMAM_APP_KEY'),
+                'ingr': ingredients,
+            }
+            response = requests.get(url, params=params)
+            data = response.json()
 
-                nutrients = data.get('totalNutrients')
-                
-                if (nutrients == {}):
-                    return JsonResponse({'message': 'Food not found'}, status=404)
-
-                # return JsonResponse({'message': response.json()}, status=200)
-
-                energ_kcal = f'{nutrients.get("ENERC_KCAL").get("quantity")} {nutrients.get("ENERC_KCAL").get("unit")}' if nutrients.get("ENERC_KCAL") else 'N/A'
-                fat=f'{nutrients.get("FAT").get("quantity")} {nutrients.get("FAT").get("unit")}' if nutrients.get("FAT") else 'N/A'
-                fat_saturated=f'{nutrients.get("FASAT").get("quantity")} {nutrients.get("FASAT").get("unit")}' if nutrients.get("FASAT") else 'N/A'
-                fat_trans=f'{nutrients.get("FATRN").get("quantity")} {nutrients.get("FATRN").get("unit")}' if nutrients.get("FATRN") else 'N/A'
-                carbo=f'{nutrients.get("CHOCDF").get("quantity")} {nutrients.get("CHOCDF").get("unit")}' if nutrients.get("CHOCDF") else 'N/A'
-                fiber=f'{nutrients.get("FIBTG").get("quantity")} {nutrients.get("FIBTG").get("unit")}' if nutrients.get("FIBTG") else 'N/A'
-                sugar=f'{nutrients.get("SUGAR").get("quantity")} {nutrients.get("SUGAR").get("unit")}' if nutrients.get("SUGAR") else 'N/A'
-                protein=f'{nutrients.get("PROCNT").get("quantity")} {nutrients.get("PROCNT").get("unit")}' if nutrients.get("PROCNT") else 'N/A'
-                cholesterol=f'{nutrients.get("CHOLE").get("quantity")} {nutrients.get("CHOLE").get("unit")}' if nutrients.get("CHOLE") else 'N/A'
-                na=f'{nutrients.get("NA").get("quantity")} {nutrients.get("NA").get("unit")}' if nutrients.get("NA") else 'N/A'
-                ca=f'{nutrients.get("CA").get("quantity")} {nutrients.get("CA").get("unit")}' if nutrients.get("CA") else 'N/A'
-                k=f'{nutrients.get("K").get("quantity")} {nutrients.get("K").get("unit")}' if nutrients.get("K") else 'N/A'
-                vit_k=f'{nutrients.get("VITK1").get("quantity")} {nutrients.get("VITK1").get("unit")}' if nutrients.get("VITK1") else 'N/A'
-                vit_c = f'{nutrients.get("VITC").get("quantity")} {nutrients.get("VITC").get("unit")}' if nutrients.get("VITC") else 'N/A'
-                vit_a_rae = f'{nutrients.get("VITA_RAE").get("quantity")} {nutrients.get("VITA_RAE").get("unit")}' if nutrients.get("VITA_RAE") else 'N/A'
-                vit_d = f'{nutrients.get("VITD").get("quantity")} {nutrients.get("VITD").get("unit")}' if nutrients.get("VITD") else 'N/A'
-                vit_b12 = f'{nutrients.get("VITB12").get("quantity")} {nutrients.get("VITB12").get("unit")}' if nutrients.get("VITB12") else 'N/A'
-                vit_b6 = f'{nutrients.get("VITB6A").get("quantity")} {nutrients.get("VITB6A").get("unit")}' if nutrients.get("VITB6A") else 'N/A'
-
-
-                food = Food.objects.create(
-                    name=food_name, ingredients=ingredients,
-                    energ_kcal=energ_kcal,
-                    fat=fat, fat_saturated=fat_saturated, fat_trans=fat_trans,
-                    carbo=carbo, fiber=fiber, sugar=sugar,
-                    protein=protein,
-                    cholesterol=cholesterol,
-                    na=na, ca=ca, k=k,
-                    vit_k=vit_k, vit_c=vit_c, vit_a_rae=vit_a_rae, vit_d=vit_d, vit_b12=vit_b12, vit_b6=vit_b6,
-                    recipe_url=recipe_url,
-                )
-                food.save()
-
-                return JsonResponse({
-                    'message': 'Food for meal created successfully with Edamam Nutrition Analysis API',
-                    'food_id': food.food_id
-                    }, status=201)
-                
-            except :
+            nutrients = data.get('totalNutrients')
+            
+            if (nutrients == {}):
                 return JsonResponse({'message': 'Food not found'}, status=404)
+
+            # return JsonResponse({'message': response.json()}, status=200)
+
+            energ_kcal = f'{nutrients.get("ENERC_KCAL").get("quantity")} {nutrients.get("ENERC_KCAL").get("unit")}' if nutrients.get("ENERC_KCAL") else 'N/A'
+            fat=f'{nutrients.get("FAT").get("quantity")} {nutrients.get("FAT").get("unit")}' if nutrients.get("FAT") else 'N/A'
+            fat_saturated=f'{nutrients.get("FASAT").get("quantity")} {nutrients.get("FASAT").get("unit")}' if nutrients.get("FASAT") else 'N/A'
+            fat_trans=f'{nutrients.get("FATRN").get("quantity")} {nutrients.get("FATRN").get("unit")}' if nutrients.get("FATRN") else 'N/A'
+            carbo=f'{nutrients.get("CHOCDF").get("quantity")} {nutrients.get("CHOCDF").get("unit")}' if nutrients.get("CHOCDF") else 'N/A'
+            fiber=f'{nutrients.get("FIBTG").get("quantity")} {nutrients.get("FIBTG").get("unit")}' if nutrients.get("FIBTG") else 'N/A'
+            sugar=f'{nutrients.get("SUGAR").get("quantity")} {nutrients.get("SUGAR").get("unit")}' if nutrients.get("SUGAR") else 'N/A'
+            protein=f'{nutrients.get("PROCNT").get("quantity")} {nutrients.get("PROCNT").get("unit")}' if nutrients.get("PROCNT") else 'N/A'
+            cholesterol=f'{nutrients.get("CHOLE").get("quantity")} {nutrients.get("CHOLE").get("unit")}' if nutrients.get("CHOLE") else 'N/A'
+            na=f'{nutrients.get("NA").get("quantity")} {nutrients.get("NA").get("unit")}' if nutrients.get("NA") else 'N/A'
+            ca=f'{nutrients.get("CA").get("quantity")} {nutrients.get("CA").get("unit")}' if nutrients.get("CA") else 'N/A'
+            k=f'{nutrients.get("K").get("quantity")} {nutrients.get("K").get("unit")}' if nutrients.get("K") else 'N/A'
+            vit_k=f'{nutrients.get("VITK1").get("quantity")} {nutrients.get("VITK1").get("unit")}' if nutrients.get("VITK1") else 'N/A'
+            vit_c = f'{nutrients.get("VITC").get("quantity")} {nutrients.get("VITC").get("unit")}' if nutrients.get("VITC") else 'N/A'
+            vit_a_rae = f'{nutrients.get("VITA_RAE").get("quantity")} {nutrients.get("VITA_RAE").get("unit")}' if nutrients.get("VITA_RAE") else 'N/A'
+            vit_d = f'{nutrients.get("VITD").get("quantity")} {nutrients.get("VITD").get("unit")}' if nutrients.get("VITD") else 'N/A'
+            vit_b12 = f'{nutrients.get("VITB12").get("quantity")} {nutrients.get("VITB12").get("unit")}' if nutrients.get("VITB12") else 'N/A'
+            vit_b6 = f'{nutrients.get("VITB6A").get("quantity")} {nutrients.get("VITB6A").get("unit")}' if nutrients.get("VITB6A") else 'N/A'
+
+
+            food = Food.objects.create(
+                name=food_name, ingredients=ingredients,
+                energ_kcal=energ_kcal,
+                fat=fat, fat_saturated=fat_saturated, fat_trans=fat_trans,
+                carbo=carbo, fiber=fiber, sugar=sugar,
+                protein=protein,
+                cholesterol=cholesterol,
+                na=na, ca=ca, k=k,
+                vit_k=vit_k, vit_c=vit_c, vit_a_rae=vit_a_rae, vit_d=vit_d, vit_b12=vit_b12, vit_b6=vit_b6,
+                recipe_url=recipe_url,
+            )
+            food.save()
+
+            return JsonResponse({
+                'message': 'Food for meal created successfully with Edamam Nutrition Analysis API',
+                'food_id': food.food_id
+                }, status=201)
+            
+        except :
+            return JsonResponse({'message': 'Food not found'}, status=404)
     return JsonResponse({'message': 'Invalid request'}, status=400)
+
 
 @swagger_auto_schema(method='post', **create_food_superuser_schema)
 @api_view(['POST'])
@@ -112,7 +114,6 @@ def create_food_superuser(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         user = request.user
-        # user = User.objects.get(username=data.get('username'))
         if user.is_superuser:
             food = Food.objects.create(
                 food_name = data.get('food_name'),
@@ -148,7 +149,8 @@ def create_food_superuser(request):
         else:
             return JsonResponse({'message': 'Not a superuser'}, status=401)
     return JsonResponse({'message': 'Invalid request'}, status=400)
-        
+
+
 @swagger_auto_schema(method='get', **get_meal_from_id_schema)
 @api_view(['GET'])
 def get_meal_from_id(request):
@@ -159,7 +161,7 @@ def get_meal_from_id(request):
         food_list = []
         for food in foods:
             food_list.append({
-                'food_name': food.food_name,
+                'food_name': food.name,
                 'ingredients': [ingredient.split(' ') for ingredient in food.ingredients.split(',')],
                 'energ_kcal': food.energ_kcal,
                 'fat': food.fat,
@@ -172,9 +174,7 @@ def get_meal_from_id(request):
                 'cholesterol': food.cholesterol,
                 'na': food.na,
                 'ca': food.ca,
-                # 'mg': food.mg,
                 'k': food.k,
-                # 'fe': food.fe,
                 'vit_k': food.vit_k,
                 'vit_c': food.vit_c,
                 'vit_a_rae': food.vit_a_rae,
@@ -186,19 +186,13 @@ def get_meal_from_id(request):
         return JsonResponse({'meal_name': meal.meal_name, 'foods': food_list}, status=200)
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
+
 @swagger_auto_schema(method='delete', **delete_meal_by_id_schema)
 @api_view(['DELETE'])
 def delete_meal_by_id(request, meal_id):
     if request.method == 'DELETE':
         try:
-            # Get the username from the request body (or headers if preferred)
-            data = json.loads(request.body)
-            username = data.get('username')
-
-            if not username:
-                return JsonResponse({'error': 'Username is required'}, status=400)
-
-            user = User.objects.get(username=username)
+            user = request.user
             meal = Meal.objects.get(meal_id=meal_id)
 
             # Check if the user is the creator of the workout
@@ -220,13 +214,15 @@ def delete_meal_by_id(request, meal_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 @swagger_auto_schema(method='get', **get_foodname_options_schema)
 @api_view(['GET'])
 def get_foodname_options(request):
     if request.method == 'GET':
         foods = Food.objects.all()
-        return JsonResponse({'food_list': [food.name for food in foods]}, status=200)
+        return JsonResponse({'food_list': [{"food_id": food.food_id, "name": food.name, "calories": food.energ_kcal} for food in foods]}, status=200)
     return JsonResponse({'message': 'Invalid request'}, status=405)
+
 
 @swagger_auto_schema(method='post', **rate_meal_schema)
 @api_view(['POST'])
@@ -258,6 +254,7 @@ def rate_meal(request):
 
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
+
 @swagger_auto_schema(method='get', **get_meals_by_user_id_schema)
 @api_view(['GET'])
 def get_meals_by_user_id(request):
@@ -285,9 +282,7 @@ def get_meals_by_user_id(request):
                     'cholesterol',
                     'na',
                     'ca',
-                    # 'mg',
                     'k',
-                    # 'fe',
                     'vit_k',
                     'vit_c',
                     'vit_a_rae',
@@ -301,6 +296,7 @@ def get_meals_by_user_id(request):
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
     return JsonResponse({'message': 'Invalid request'}, status=405)
+
 
 @swagger_auto_schema(method='post', **toggle_bookmark_meal_schema)
 @api_view(['POST'])
@@ -332,6 +328,7 @@ def toggle_bookmark_meal(request):
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'message': 'Invalid request'}, status=405)
 
+
 @swagger_auto_schema(method='get', **get_bookmarked_meals_by_user_id_schema)
 @api_view(['GET'])
 def get_bookmarked_meals_by_user_id(request):
@@ -359,9 +356,7 @@ def get_bookmarked_meals_by_user_id(request):
                 'cholesterol',
                 'na',
                 'ca',
-                # 'mg',
                 'k',
-                # 'fe',
                 'vit_k',
                 'vit_c',
                 'vit_a_rae',
@@ -376,3 +371,39 @@ def get_bookmarked_meals_by_user_id(request):
             return JsonResponse({'error': 'User not found'}, status=404)
     return JsonResponse({'message': 'Invalid request'}, status=405)
 
+
+@swagger_auto_schema(method='get', **get_food_by_id_schema)
+@api_view(['GET'])
+def get_food_by_id(request):
+    if request.method == 'GET':
+        try:
+            food_id = request.GET.get('food_id')
+            food = Food.objects.get(food_id=food_id)
+            return JsonResponse({
+                'food_name': food.name,
+                'ingredients': [ingredient.split(' ') for ingredient in food.ingredients.split(',')],
+                'energ_kcal': food.energ_kcal,
+                'fat': food.fat,
+                'fat_saturated': food.fat_saturated,
+                'fat_trans': food.fat_trans,
+                'carbo': food.carbo,
+                'fiber': food.fiber,
+                'sugar': food.sugar,
+                'protein': food.protein,
+                'cholesterol': food.cholesterol,
+                'na': food.na,
+                'ca': food.ca,
+                'k': food.k,
+                'vit_k': food.vit_k,
+                'vit_c': food.vit_c,
+                'vit_a_rae': food.vit_a_rae,
+                'vit_d': food.vit_d,
+                'vit_b12': food.vit_b12,
+                'vit_b6': food.vit_b6,
+                'recipe_url': food.recipe_url,
+            }, status=200)
+        except Food.DoesNotExist:
+            return JsonResponse({'error': 'Food not found'}, status=404)
+    return JsonResponse({'message': 'Invalid request'}, status=405)
+
+        
