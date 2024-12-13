@@ -4,22 +4,26 @@ from user_auth_app.models import User
 from posts_app.models import Comment, Post
 from exercise_program_app.models import Workout
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from drf_yasg.utils import swagger_auto_schema
 from swagger_docs.swagger import post_schema, toggle_like_schema, comment_schema, liked_posts_schema, bookmarked_posts_schema
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 @swagger_auto_schema(method='post', **post_schema)
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def post(request):
     if request.method == 'POST':
-        #user = request.user
-        data = request.data
-        user = User.objects.get(username=data.get('username'))
-        content = data.get('content')
-        workoutId = data.get('workoutId')
-        mealId = data.get('mealId')
-        post = Post.objects.create(user=user, content=content)
+        user = request.user
+        content = request.data.get('content')
+        workoutId = request.data.get('workoutId')
+        mealId = request.data.get('mealId')
+
+        if not content:
+            return JsonResponse({'error': 'Content is required'}, status=400)
         
         if workoutId:
             try:
@@ -33,7 +37,8 @@ def post(request):
                 post.mealId = mealId
             except ValueError:
                 return JsonResponse({'error': 'mealId must be an integer'}, status=400)
-            
+                
+        post = Post.objects.create(user=user, content=content)
         post.save()
 
         return JsonResponse({'message': 'Post created successfully', 'post_id': post.id}, status=201)
@@ -44,6 +49,8 @@ def post(request):
 
 @swagger_auto_schema(method='post', **toggle_like_schema)
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def toggle_like(request):
     if request.method == 'POST':
@@ -58,8 +65,7 @@ def toggle_like(request):
             except ValueError:
                 return JsonResponse({'error': 'postId must be an integer'}, status=400)
             
-            user = User.objects.get(username=request.POST.get('username'))
-            # user = User.objects.get(username=request.user.username)
+            user = request.user  # Get user from token authentication
             post = Post.objects.get(id=postId)
 
             if post in user.liked_posts.all():
@@ -85,6 +91,8 @@ def toggle_like(request):
 
 @swagger_auto_schema(method='post', **comment_schema)
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def comment(request):
     if request.method == 'POST':
@@ -102,8 +110,7 @@ def comment(request):
             except ValueError:
                 return JsonResponse({'error': 'postId must be an integer'}, status=400)
             
-            user = User.objects.get(username=request.POST.get('username'))
-            # user = User.objects.get(username=request.user.username)
+            user = request.user  # Get user from token authentication
             post = Post.objects.get(id=postId)
 
             comment = Comment.objects.create(user=user, post=post, content=content)
@@ -119,6 +126,8 @@ def comment(request):
 
 @swagger_auto_schema(method='post', **toggle_like_schema)
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def toggle_bookmark(request):
     if request.method == 'POST':
@@ -133,8 +142,7 @@ def toggle_bookmark(request):
             except ValueError:
                 return JsonResponse({'error': 'postId must be an integer'}, status=400)
             
-            user = User.objects.get(username=request.POST.get('username'))
-            # user = User.objects.get(username=request.user.username)
+            user = request.user  # Get user from token authentication
             post = Post.objects.get(id=postId)
 
             if post in user.bookmarked_posts.all():
@@ -154,11 +162,12 @@ def toggle_bookmark(request):
 
 @swagger_auto_schema(method='get', **liked_posts_schema)
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def liked_posts(request):
     if request.method == 'GET':
-        user = User.objects.get(username=request.GET.get('username'))
-        # user = User.objects.get(username=request.user.username)
+        user = request.user  # Get user from token authentication
         liked_posts = user.liked_posts.all().values()
         return JsonResponse({'liked_posts': list(liked_posts)}, status=200)
     else:
@@ -167,12 +176,27 @@ def liked_posts(request):
 
 @swagger_auto_schema(method='get', **bookmarked_posts_schema)
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def bookmarked_posts(request):
     if request.method == 'GET':
-        user = User.objects.get(username=request.GET.get('username'))
-        # user = User.objects.get(username=request.user.username)
-        bookmarked_posts = user.bookmarked_posts.all().values()
-        return JsonResponse({'bookmarked_posts': list(bookmarked_posts)}, status=200)
+        user = request.user  # Get user from token authentication
+        bookmarked_posts = user.bookmarked_posts.all()
+
+        return JsonResponse({'bookmarked_posts': list(reversed([{
+                'post_id': post.id,
+                'content': post.content,
+                'workout_id': post.workout.workout_id if post.workout else None,
+                'meal_id': post.mealId,
+                'like_count': post.likeCount,
+                'created_at': post.created_at,
+                'liked': user in post.liked_by.all(),
+                'user': {
+                    'username': post.user.username,
+                    'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None,
+                    'score': post.user.score
+                }
+                } for post in bookmarked_posts]))}, status=200)
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)

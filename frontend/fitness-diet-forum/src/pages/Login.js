@@ -3,7 +3,6 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import animationData from "../assets/Animation1.json"; 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";  
-import { setLoggedIn } from "../components/Auth.js";
 import { Context } from "../globalContext/globalContext.js";
 
 
@@ -22,27 +21,18 @@ const Login = () => {
     setError("");  
 
     try {
-      const csrfTokenResp = await axios.get(baseURL + "/csrf_token/");
-      console.log(csrfTokenResp.data.csrf_token);
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRFToken": csrfTokenResp.data.csrf_token,
-        },
-      };
       const response = await axios.post(baseURL + "/log_in/", {
         username,
         password,
-      }, config);
-      localStorage.setItem("csrfToken", csrfTokenResp.data.csrf_token);
-
+      });
+      console.log(response);
+      localStorage.setItem("token", response.data.token);
       localStorage.setItem("username", username);
+      localStorage.setItem("LoggedIn", "true");
+      localStorage.setItem("userType", response.data.user.user_type);
+
       console.log("Login successful", response.data);
-      setLoggedIn("true");
-      
-      navigate("/meals");  
-      console.log("username:",localStorage.getItem("username"))
+      navigate("/feed");  
     } catch (err) {
       setLoading(false);
       if (err.response && err.response.status === 401) {

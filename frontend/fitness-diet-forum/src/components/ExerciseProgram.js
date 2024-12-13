@@ -1,29 +1,91 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Exercise from "./Exercise";
 import axios from "axios";
 import "../css/index.css";
 import { Context } from "../globalContext/globalContext.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBookmark as solidBookmark } from "@fortawesome/free-solid-svg-icons";
+import { faBookmark as regularBookmark } from "@fortawesome/free-regular-svg-icons";
+
 
 const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, currentRating, ratingCount, showRating }) => {
-    const [rating, setRating] = useState(0); // User's selected rating
-    const [hoveredRating, setHoveredRating] = useState(0); // Highlighted stars on hover
-    const [message, setMessage] = useState(null); // Feedback message after submission
-    const [averageRating, setAverageRating] = useState(currentRating); // State for average rating
-    const [totalRatings, setTotalRatings] = useState(ratingCount); // State for total ratings
+    const [rating, setRating] = useState(0);
+    const [hoveredRating, setHoveredRating] = useState(0);
+    const [message, setMessage] = useState(null);
+    const [averageRating, setAverageRating] = useState(currentRating);
+    const [totalRatings, setTotalRatings] = useState(ratingCount);
+    const [isBookmarked, setIsBookmarked] = useState(false); // Bookmark state
+    const [username, setUsername] = useState(""); // Username state
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
+    const token = localStorage.getItem("token");
+    const config = {
+        headers: {
+            'Authorization': 'Token ' + token
+        },
+    }
+
+    // Fetch username and bookmark status
+    useEffect(() => {
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername) {
+            setUsername(storedUsername);
+
+            // Fetch all bookmarked workouts
+            const fetchBookmarkedWorkouts = async () => {
+                try {
+                    const response = await axios.get(`${baseURL}/get-bookmarked-workouts/`, config);
+
+                    if (response.status === 200) {
+                        // Check if the current workout is bookmarked
+                        const bookmarkedWorkoutIds = response.data.map(workout => workout.id);
+                        setIsBookmarked(bookmarkedWorkoutIds.includes(programId));
+                    }
+                } catch (error) {
+                    console.error("Error fetching bookmarked workouts:", error);
+                }
+            };
+
+            fetchBookmarkedWorkouts();
+        } else {
+            console.error("Username not found in localStorage.");
+        }
+    }, [baseURL, programId]);
+
+    // Toggle Bookmark Function
+    const toggleBookmarkWorkout = async () => {
+        if (!username) {
+            setMessage("Username is required to bookmark a workout.");
+            return;
+        }
+
+        try {
+            const response = await axios.post(baseURL + "/workouts/toggle-bookmark/", {
+                workout_id: programId,
+            }, config);
+
+            if (response.status === 200) {
+                const { message } = response.data;
+                setMessage(message);
+
+                // Toggle bookmark state
+                setIsBookmarked((prev) => !prev);
+            }
+        } catch (error) {
+            console.error("Error toggling bookmark:", error);
+            setMessage("Failed to toggle bookmark. Please try again.");
+        }
+    };
 
     const handleRatingSubmit = async () => {
         try {
             const response = await axios.post(baseURL + "/rate-workout/", {
                 workout_id: programId,
                 rating: rating,
-            });
+            }, config);
 
             if (response.status === 200) {
                 setMessage("Rating submitted successfully!");
-
-                // Update average rating and rating count immediately
                 const newTotalRatings = totalRatings + 1;
                 const newAverageRating =
                     (averageRating * totalRatings + rating) / newTotalRatings;
@@ -38,7 +100,19 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
     };
 
     return (
-        <div className="w-full bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
+        <div className="relative w-full bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
+            {/* Bookmark Button */}
+            <button
+    className="absolute top-4 right-4 text-2xl hover:text-yellow-400 transition-all duration-300"
+    onClick={toggleBookmarkWorkout}
+    aria-label="Bookmark Program"
+            >
+            <FontAwesomeIcon
+            icon={isBookmarked ? solidBookmark : regularBookmark}
+            className={isBookmarked ? "text-yellow-400" : "text-gray-400"}
+            />
+        </button>
+
             {/* Program Name */}
             <div className="mb-4">
                 <h2 className="text-2xl font-semibold">{programName}</h2>
@@ -88,7 +162,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
                     <button
                         className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 hover:bg-blue-700 transition-all duration-300"
                         onClick={handleRatingSubmit}
-                        disabled={rating === 0} // Disable the button if no rating is selected
+                        disabled={rating === 0}
                     >
                         Submit Rating
                     </button>
@@ -112,3 +186,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
 };
 
 export default ExerciseProgram;
+
+
+
+

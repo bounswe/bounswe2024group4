@@ -15,12 +15,17 @@ const CreatePostModal = ({
   const globalContext = useContext(Context);
   const { baseURL } = globalContext;
   const username = localStorage.getItem('username');
-  const csrf_token = localStorage.getItem("csrfToken");
+  const token = localStorage.getItem("token");
+  const config = {
+    headers: {
+      'Authorization': 'Token ' + token
+    }
+  }
 
   useEffect(() => {
     if (isModalOpen) {
       axios
-        .get(`${baseURL}/get-workouts/?username=${username}`)
+        .get(`${baseURL}/get-workouts/?username=${username}`, config)
         .then((response) => {
           setWorkouts(response.data);
         })
@@ -48,14 +53,6 @@ const CreatePostModal = ({
     }
 
     try {
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrf_token,
-        },
-      };
-
       const body = {
         content: postContent,
         workoutId: parseInt(newWorkout),

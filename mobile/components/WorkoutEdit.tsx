@@ -1,20 +1,6 @@
 import React from 'react';
 import { Modal, SafeAreaView, Text, TextInput, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-
-interface Exercise {
-  id: string;
-  image: any;
-  name: string;
-  sets: number;
-  reps: number;
-}
-
-interface Workout {
-  id: string;
-  name: string;
-  exercises: Exercise[];
-  rating?: string;
-}
+import { Workout } from '../constants/types';
 
 interface WorkoutEditProps {
   workout: Workout;
@@ -39,27 +25,30 @@ const WorkoutEdit: React.FC<WorkoutEditProps> = ({
     index: number,
     field: 'sets' | 'reps' | 'name'
   ) => {
-    let numericValue = parseInt(value, 10);
-    if (isNaN(numericValue)) numericValue = 0;
-
     if (field === 'name') {
+      // Directly update the workout name
       setEditableWorkout((prev) => ({
         ...prev,
         name: value,
       }));
     } else {
+      // Update sets or reps of a specific exercise
+      let numericValue = parseInt(value, 10);
+      if (isNaN(numericValue)) numericValue = 0;
+  
       const updatedExercises = [...editableWorkout.exercises];
       updatedExercises[index] = {
         ...updatedExercises[index],
         [field]: numericValue,
       };
-
+  
       setEditableWorkout((prev) => ({
         ...prev,
         exercises: updatedExercises,
       }));
     }
   };
+  
 
   return (
     <Modal visible={isVisible} transparent animationType="slide">
