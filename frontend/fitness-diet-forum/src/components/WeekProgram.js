@@ -1,11 +1,11 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import DayProgram from "./DayProgram";
 import TodaysExercises from "./TodaysExercises";
 import axios from 'axios';
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
 
-const WeekProgram = ({ programs , bookmarkedPrograms}) => {
+const WeekProgram = ({ programs, bookmarkedPrograms }) => {
   const [weekPrograms, setWeekPrograms] = useState([]);
   const [currentDay, setCurrentDay] = useState(null);
   const [currentDayPrograms, setCurrentDayPrograms] = useState([]);
@@ -13,15 +13,46 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
   const { baseURL } = globalContext;
   const username = localStorage.getItem("username");
   const token = localStorage.getItem("token");
+
   const config = {
     headers: {
-      'Authorization': 'Token ' + token
-    }
-  }
+      'Authorization': 'Token ' + token,
+    },
+  };
 
   const daysOfWeek = [
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
   ];
+
+  // Fetch programs from backend when component loads
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        
+        const response = await axios.get(`${baseURL}/get-programs/`, config);
+        const programs = response.data;
+
+        
+        if (programs.length > 0) {
+          const lastProgram = programs[programs.length - 1];
+
+          
+          const mappedWorkouts = lastProgram.workouts.map((workout) => ({
+            day: workout.day, 
+            id: workout.workout.workout_id, 
+            workout_name: workout.workout.workout_name, 
+            exercises: workout.workout.exercises, 
+          }));
+
+          
+          setWeekPrograms(mappedWorkouts);
+        }
+      } catch (error) {
+        console.error("Error fetching programs:", error);
+      }
+    };
+    fetchPrograms();
+  }, [baseURL]);
 
   const handleAddProgram = (day, programToAdd) => {
     setWeekPrograms((prevPrograms) => {
@@ -50,12 +81,11 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
   const handleEndExercise = async (completedExercises) => {
     console.log(currentDayPrograms[0]);
 
-    // Prepare exercises with their updated 'is_completed' status
     const updatedExercises = currentDayPrograms.map(program => ({
       ...program,
       exercises: program.exercises.map(exercise => ({
         ...exercise,
-        is_completed: completedExercises.includes(exercise.name), // Set the completion status based on user interaction
+        is_completed: completedExercises.includes(exercise.name),
       })),
     }));
 
@@ -64,7 +94,6 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
     };
 
     try {
-      // Assuming you want to update the exercises' completion status and log the workout at the same time
       const response = await axios.post(
         `${baseURL}/workout-log/${currentDayPrograms[0].id}/`,
         body,
@@ -80,29 +109,23 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
   };
 
   const saveWeeklyProgram = async () => {
-    // Prepare the data in a format suitable for the backend
     const workoutsData = {};
-    
-    // Map the week programs to fit the backend structure
+
     weekPrograms.forEach((program) => {
-      workoutsData[daysOfWeek.indexOf(program.day) + 1] = program.id;
+      workoutsData[daysOfWeek.indexOf(program.day) ] = program.id;
     });
-  
+    console.log(weekPrograms)
     try {
-      // Send the data to the backend for program creation
       const response = await axios.post(`${baseURL}/create-program/`, {
-        workouts: workoutsData, // Send the workouts data as a key-value object
+        workouts: workoutsData,
         username: username,
       }, config);
-  
+
       console.log("Program saved successfully:", response.data);
-      // Optionally, handle success (e.g., display a success message)
     } catch (error) {
       console.error("Error saving program:", error);
-      // Optionally, handle failure (e.g., display an error message)
     }
   };
-  
 
   const getAvailablePrograms = (day) => {
     const addedProgramIds = weekPrograms
@@ -159,7 +182,6 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
         />
       )}
 
-      {/* Save Button */}
       <div className="mt-4">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -173,3 +195,4 @@ const WeekProgram = ({ programs , bookmarkedPrograms}) => {
 };
 
 export default WeekProgram;
+
