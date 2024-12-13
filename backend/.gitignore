@@ -22,3 +22,4 @@ simple_features_app/__pycache__
 simple_features_app/migrations/__pycache__
 .pytest_cache
 /secrets/serviceAccountKey.json
+test_env

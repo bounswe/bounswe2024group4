@@ -178,17 +178,6 @@ def delete_workout_by_id(request, workout_id):
             workout_name = workout.workout_name  # Store name for activity log before deletion
             workout.delete()
 
-            # Log the delete activity
-            log_activity(
-                actor=user,
-                activity_type="Delete",
-                obj={
-                    "type": "Workout",
-                    "id": f"http://example.org/workouts/{workout_id}",
-                    "name": workout_name
-                },
-                summary=f"{user.username} deleted the workout '{workout_name}'"
-            )
 
             return JsonResponse({'message': 'Workout deleted successfully'}, status=200)
 
