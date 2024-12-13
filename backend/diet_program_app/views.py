@@ -9,6 +9,9 @@ from user_auth_app.models import User
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_by_user_id_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_by_user_id_schema
+from firebase_admin import firestore
+from datetime import datetime
+
 
 @swagger_auto_schema(method='post', **create_meal_schema)
 @api_view(['POST'])
@@ -16,18 +19,99 @@ def create_meal(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         user = request.user
-        # user = User.objects.get(username=data.get('username'))
         meal_name = data.get('meal_name')
         foods = data.get('foods', [])
         
+        # Create the meal first
+        meal = Meal.objects.create(
+            meal_name=meal_name,
+            created_by=user,
+            rating=0,
+            rating_count=0
+        )
+        
+        # Then add foods to it
         for food in foods:
             meal.foods.add(food)
         meal.save()
-        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
 
-        return JsonResponse({'message': 'Meal created successfully'}, status=201)
+        try:
+            # Log the activity
+            activity_data = {
+                "actor": {
+                    "isSuperUser": user.is_superuser,
+                    "id": user.user_id,
+                    "name": user.username
+                },
+                "type": "Create",
+                "object": {
+                    "type": "Meal",
+                    "id": meal.meal_id,
+                    "name": meal.meal_name,
+                    "foodCount": len(foods),
+                    "foods": [{
+                        "id": food.food_id,
+                        "name": food.name,
+                        "ingredients": food.ingredients,
+                        "nutrients": {
+                            "calories": food.energ_kcal,
+                            "protein": food.protein,
+                            "carbohydrates": food.carbo,
+                            "fat": food.fat,
+                            "fat_saturated": food.fat_saturated,
+                            "fat_trans": food.fat_trans,
+                            "fiber": food.fiber,
+                            "sugar": food.sugar,
+                            "cholesterol": food.cholesterol,
+                            "sodium": food.na,
+                            "calcium": food.ca,
+                            "potassium": food.k,
+                            "vitamins": {
+                                "k": food.vit_k,
+                                "c": food.vit_c,
+                                "a_rae": food.vit_a_rae,
+                                "d": food.vit_d,
+                                "b12": food.vit_b12,
+                                "b6": food.vit_b6
+                            }
+                        },
+                        "recipe_url": food.recipe_url,
+                        "creator_level": food.creator_level
+                    } for food in meal.foods.all()]
+                },
+                "summary": f"{user.username} created a new meal '{meal_name}'"
+            }
+
+            # Add to Firestore
+            db = firestore.client()
+            db.collection("mealActivities").add({
+                **activity_data,
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "published": datetime.utcnow().isoformat()
+            })
+
+            return JsonResponse({
+                'message': 'Meal created successfully',
+                'meal_id': meal.meal_id,
+                'meal_name': meal.meal_name,
+                'created_by': meal.created_by.username,
+                'foods_count': len(foods)
+            }, status=201)
+
+        except Exception as e:
+            # Log the error but don't fail the request
+            print(f"Firebase logging failed: {str(e)}")
+            return JsonResponse({
+                'message': 'Meal created successfully (logging failed)',
+                'meal_id': meal.meal_id,
+                'meal_name': meal.meal_name,
+                'created_by': meal.created_by.username,
+                'foods_count': len(foods)
+            }, status=201)
+
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
+    
 @swagger_auto_schema(method='post', **create_food_all_schema)
 @api_view(['POST'])
 def create_food_all(request):
