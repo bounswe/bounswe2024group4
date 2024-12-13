@@ -5,9 +5,10 @@ from .models import Workout, Exercise
 from django.urls import reverse
 import json
 
-class WorkoutProgramTestCase(TestCase):
+class WorkoutProgramTestCase(APITestCase):
     def setUp(self):
-        User.objects.create(username='user1', email='user1@kaanmail.com')
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='user1', email='user1@kaanmail.com', password='password')
 
     def test_get_exercises(self):
         self.client.force_login(User.objects.get(username='user1'))
@@ -15,34 +16,60 @@ class WorkoutProgramTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_workout_program(self):
-        self.client.force_login(User.objects.get(username='user1'))
+        url = reverse('log_in')
+        data = {
+            'username': 'user1',
+            'password': 'password'
+        }
+        response = self.client.post(url, data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+
         data = {"workout_name": "Full Body Workout",
              "exercises": [{
                     "type": "strength",
                     "name": "Barbell Squat",
                     "muscle": "legs",
                     "equipment": "barbell",
+                    "difficulty": "Intermediate",
+                    "sets": 1,
+                    "reps": 12,
                     "instruction": "Stand with feet shoulder-width apart, barbell on upper back. Squat down until thighs are parallel to ground. Return to starting position."
                 },{
                     "type": "strength",
                     "name": "Bench Press",
                     "muscle": "chest",
                     "equipment": "barbell",
+                    "difficulty": "Beginner",
+                    "sets": 3,
+                    "reps": 10,
                     "instruction": "Lie on bench, grip barbell slightly wider than shoulders. Lower bar to chest, then press up to starting position."
                 },{
                     "type": "compound",
                     "name": "Deadlift",
                     "muscle": "back",
                     "equipment": "barbell",
+                    "difficulty": "Expert",
+                    "sets": 4,
+                    "reps": 8,
                     "instruction": "Stand with feet hip-width apart, bend at hips and knees to grip barbell. Keep back straight, lift bar by extending hips and knees."
                 }
             ]
         }
+
         response = self.client.post('/workout_program/', json.dumps(data), content_type='application/json')
+        print(response.json())
         self.assertEqual(response.status_code, 201)
     
     def test_missing_exercises(self):
-        self.client.force_login(User.objects.get(username='user1'))
+        url = reverse('log_in')
+        data = {
+            'username': 'user1',
+            'password': 'password'
+        }
+        response = self.client.post(url, data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
         data = {'workout_name': 'Leg Day'}
         response = self.client.post('/workout_program/', data=json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 400)
