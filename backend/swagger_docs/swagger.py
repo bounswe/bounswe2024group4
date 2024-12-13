@@ -189,6 +189,7 @@ get_meal_leaderboard_schema = {
     }
 }
 
+# diet program app
 get_food_by_id_schema = {
     'operation_summary': 'Get Food by ID',
     'operation_description': 'Get a food by ID',
@@ -231,7 +232,6 @@ get_food_by_id_schema = {
     }
 }
 
-# diet program app
 create_meal_schema = {
     'operation_summary': 'Create Meal',
     'operation_description': 'Create a meal',
@@ -726,6 +726,41 @@ log_workout_schema = {
         401: 'Unauthorized - User not logged in'
     },
     'tags': ['Workout Logs']
+}
+
+create_exercise_superuser_schema = {
+    'operation_description': "Create a new exercise",
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'name': openapi.Schema(type=openapi.TYPE_STRING, description="Name of the exercise"),
+            'type': openapi.Schema(type=openapi.TYPE_STRING, description="Type of exercise"),
+            'muscle': openapi.Schema(type=openapi.TYPE_STRING, description="Primary muscle group worked"),
+            'equipment': openapi.Schema(type=openapi.TYPE_STRING, description="Equipment needed"),
+            'difficulty': openapi.Schema(type=openapi.TYPE_STRING, description="Difficulty level of the exercise"),
+            'instruction': openapi.Schema(type=openapi.TYPE_STRING, description="Instructions for the exercise"),
+        },
+        required=['name', 'muscle', 'equipment', 'instruction'],            
+    ),
+    'responses': {
+        200: openapi.Response(
+            description="Success",
+            examples={
+                'application/json': {
+                    'status': 'success',
+                    'exercise_id': 1,
+                    'name': 'Chest Press',
+                    'muscle': 'Chest',
+                    'equipment': 'Machine',
+                    'instruction': 'Sit on the machine and push the handles forward.',
+                    'difficulty': 'Beginner'
+                }
+            }
+        ),
+        400: 'Bad Request',
+        401: 'Unauthorized',
+    },
+    # 'tags': ['Exercises']
 }
 
 # social feed app

@@ -61,6 +61,8 @@ urlpatterns = [
     path('get-bookmarked-workouts/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'), # Get bookmarked workouts by username
     path('workout-activities/', exercise_program_views.get_workout_activities, name='get_workout_activities'),
     path('get-workout-log-activities/', exercise_program_views.get_workout_log_activities, name='get_workout_log_activities'),
+    path('create-exercise/', exercise_program_views.create_exercise_superuser, name='create-exercise'), # Create an exercise
+
     #User auth related endpoints
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
