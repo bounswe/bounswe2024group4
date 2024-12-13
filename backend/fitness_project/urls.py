@@ -29,7 +29,6 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
-from activity_streams import views as activity_streams_views
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -60,9 +59,10 @@ urlpatterns = [
     path('get-programs/', exercise_program_views.get_programs, name='get_programs'), # Get weekly programs by username
     path('workouts/toggle-bookmark/', exercise_program_views.toggle_bookmark_workout, name='toggle_bookmark_workout'), # Bookmark a workout
     path('get-bookmarked-workouts/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'), # Get bookmarked workouts by username
-
     path('workout-activities/', exercise_program_views.get_workout_activities, name='get_workout_activities'),
+    path('get-workout-log-activities/', exercise_program_views.get_workout_log_activities, name='get_workout_log_activities'),
     path('create-exercise/', exercise_program_views.create_exercise_superuser, name='create-exercise'), # Create an exercise
+
     #User auth related endpoints
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
@@ -87,6 +87,7 @@ urlpatterns = [
     path('unfollow/', simple_features_views.unfollow, name='unfollow'),
     # Meal related endpoints
     path('create_meal/', diet_program_views.create_meal, name='create_meal'),
+    path('get_meal_activities/', diet_program_views.get_meal_activities, name='get_meal_activities'),
     path('create_food_all/', diet_program_views.create_food_all, name='create_food_all'),
     path('create_food_superuser/', diet_program_views.create_food_superuser, name='create_food_superuser'),
     path('get_meal_from_id/', diet_program_views.get_meal_from_id, name='get_meal_from_id'),
@@ -102,9 +103,7 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
-    path('get-activities/', activity_streams_views.get_activities, name='get_activity_stream'),
-    path('log-activity/', activity_streams_views.log_activity, name='log_activity'),
-    path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
+  #  path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
     
 
 ]

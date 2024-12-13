@@ -3,7 +3,15 @@ from rest_framework.test import APIClient, APITestCase
 from user_auth_app.models import User
 from .models import Workout, Exercise
 from django.urls import reverse
+from user_auth_app.models import User
+from .models import Workout, Exercise, WorkoutLog, ExerciseLog
 import json
+from unittest.mock import patch, MagicMock
+from datetime import datetime, date
+from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from firebase_admin import firestore
+
 
 class WorkoutProgramTestCase(APITestCase):
     def setUp(self):
@@ -296,6 +304,169 @@ class GetWorkoutsByUserIdTestCase(TestCase):
         self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
+
+class WorkoutLogTestCase(TestCase):
+    def setUp(self):
+        # Create test user
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        
+        # Create token for authentication
+        self.token = Token.objects.create(user=self.user)
+        
+        # Create test workout
+        self.workout = Workout.objects.create(
+            workout_name='Test Workout',
+            created_by=self.user
+        )
+        
+        # Create test exercises
+        self.exercise1 = Exercise.objects.create(
+            workout=self.workout,
+            type='strength',
+            name='Push-ups',
+            muscle='chest',
+            equipment='bodyweight',
+            instruction='Do push-ups',
+            sets=3,
+            reps=10
+        )
+        
+        self.exercise2 = Exercise.objects.create(
+            workout=self.workout,
+            type='strength',
+            name='Pull-ups',
+            muscle='back',
+            equipment='bar',
+            instruction='Do pull-ups',
+            sets=3,
+            reps=8
+        )
+        
+        # Set up the client
+        self.client = Client()
+        
+        # Test data
+        self.log_data = {
+            'date': '2024-03-21',
+            'workout_completed': True,
+            'exercises': [
+                {
+                    'exercise_id': self.exercise1.exercise_id,
+                    'is_completed': True,
+                    'actual_sets': 3,
+                    'actual_reps': 10,
+                    'weight': 0.0
+                },
+                {
+                    'exercise_id': self.exercise2.exercise_id,
+                    'is_completed': True,
+                    'actual_sets': 3,
+                    'actual_reps': 8,
+                    'weight': 0.0
+                }
+            ]
+        }
+
+    def send_request(self, url, data=None, method='post'):
+        headers = {'HTTP_AUTHORIZATION': f'Token {self.token.key}'}
+        if method.lower() == 'post':
+            return self.client.post(
+                url,
+                data=json.dumps(data) if data else None,
+                content_type='application/json',
+                **headers
+            )
+        return self.client.get(url, **headers)
+
+    @patch('exercise_program_app.views.db')
+    def test_workout_log_success(self, mock_db):
+        # Set up Firebase mock
+        mock_collection = MagicMock()
+        mock_db.collection.return_value = mock_collection
+        mock_collection.add.return_value = None
+
+        # Make the request
+        url = reverse('workout_log', args=[self.workout.workout_id])
+        response = self.send_request(url, self.log_data)
+
+        # Check response status and content
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['workout_id'], self.workout.workout_id)
+        self.assertEqual(response_data['workout_name'], 'Test Workout')
+        self.assertEqual(response_data['is_completed'], True)
+        self.assertEqual(len(response_data['exercises']), 2)
+
+        # Check database entries
+        workout_log = WorkoutLog.objects.get(
+            workout=self.workout,
+            user=self.user,
+            date=datetime.strptime(self.log_data['date'], '%Y-%m-%d').date()
+        )
+        self.assertTrue(workout_log.is_completed)
+
+        # Check exercise logs
+        exercise_logs = ExerciseLog.objects.filter(workout_log=workout_log)
+        self.assertEqual(exercise_logs.count(), 2)
+        
+        # Verify Firebase was called correctly
+        mock_db.collection.assert_called_once_with('workoutLogActivities')
+        mock_collection.add.assert_called_once()
+        
+        # Get the data that was passed to Firebase
+        firebase_call_args = mock_collection.add.call_args[0][0]
+        
+        # Verify Firebase data structure
+        self.assertEqual(firebase_call_args['type'], 'Log')
+        self.assertEqual(firebase_call_args['actor']['name'], 'testuser')
+        self.assertEqual(firebase_call_args['object']['type'], 'WorkoutLog')
+        self.assertEqual(len(firebase_call_args['object']['exercises']), 2)
+
+
+    def test_workout_log_invalid_exercise(self):
+        # Modify data to include invalid exercise ID
+        modified_data = self.log_data.copy()
+        modified_data['exercises'][0]['exercise_id'] = 999
+
+        url = reverse('workout_log', args=[self.workout.workout_id])
+        response = self.send_request(url, modified_data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()['error'],
+            'Some exercises do not belong to this workout'
+        )
+
+    def test_workout_log_invalid_date(self):
+        # Modify data to include invalid date
+        modified_data = self.log_data.copy()
+        modified_data['date'] = '2024-13-45'
+
+        url = reverse('workout_log', args=[self.workout.workout_id])
+        response = self.send_request(url, modified_data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()['error'],
+            'Invalid date format. Use YYYY-MM-DD'
+        )
+
+    def test_workout_log_no_exercises(self):
+        # Remove exercises from data
+        modified_data = self.log_data.copy()
+        modified_data.pop('exercises')
+
+        url = reverse('workout_log', args=[self.workout.workout_id])
+        response = self.send_request(url, modified_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()['exercises']), 0
+                         
+                         
 class CreateExerciseSuperUserTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
