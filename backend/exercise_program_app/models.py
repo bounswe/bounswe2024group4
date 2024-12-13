@@ -38,6 +38,7 @@ class Exercise(models.Model):
     name = models.CharField(max_length=50)
     muscle = models.CharField(max_length=50)
     equipment = models.CharField(max_length=50)
+    difficulty = models.CharField(max_length=50, default='Beginner')
     instruction = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     sets = models.IntegerField(default=0)

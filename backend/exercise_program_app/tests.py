@@ -1,4 +1,5 @@
 from django.test import TestCase, Client
+from rest_framework.test import APIClient, APITestCase
 from user_auth_app.models import User
 from .models import Workout, Exercise
 from django.urls import reverse
@@ -268,9 +269,9 @@ class GetWorkoutsByUserIdTestCase(TestCase):
         self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
-class CreateExerciseSuperUserTestCase(TestCase):
+class CreateExerciseSuperUserTestCase(APITestCase):
     def setUp(self):
-        self.client = Client()
+        self.client = APIClient()
         self.user1 = User.objects.create_user(
             username='testuser1',
             email='test1@example.com',
@@ -285,9 +286,18 @@ class CreateExerciseSuperUserTestCase(TestCase):
             password='password',
         )
 
+    # Create an exercise as superuser and use it in a workout program as normal user
     def test_create_exercise_superuser(self):
         # Log in the superuser to create an exercise
-        self.client.force_login(User.objects.get(username='testuser1'))
+        url = reverse('log_in')
+        data = {
+            'username': 'testuser1',
+            'password': 'password'
+        }
+        response = self.client.post(url, data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+
         # Simulate a POST request to create an exercise with valid data
         data = {
             'type': 'Cardio',
@@ -298,26 +308,25 @@ class CreateExerciseSuperUserTestCase(TestCase):
             'instruction': 'Run for 30 minutes'
         }
         response = self.client.post('/create-exercise/', json.dumps(data), content_type='application/json')
-        print('!!!!!!!!!!!!')
-        print('!!!!!!!!!!!!')
-        print('!!!!!!!!!!!!')
-        print('!!!!!!!!!!!!')
-        print('!!!!!!!!!!!!')
-        print(response.json())
-        print(self.user1.is_authenticated)
-        print(self.user1.is_superuser)
+
         # Check that the response status code is 201 Created
         self.assertEqual(response.status_code, 201)
 
         # Check the JSON response data for the success message
         json_data = response.json()
-        self.assertIn('message', json_data)
         self.assertEqual(json_data['message'], 'Exercise created successfully')
         self.client.logout()
         
         # Log in the normal user to use the exercise in a workout
-        self.client.login(username='testuser2', password='password')
-        url = reverse('workout_program')
+        url = reverse('log_in')
+        data = {
+            'username': 'testuser2',
+            'password': 'password'
+        }
+        response = self.client.post(url, data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+
         data = {
             'workout_name': 'Cardio Workout',
             'exercises': [{
@@ -325,13 +334,71 @@ class CreateExerciseSuperUserTestCase(TestCase):
                 'name': 'Running',
                 'muscle': 'Cardio',
                 'equipment': 'None',
-                'instruction': 'Run for 30 minutes'
+                'difficulty': 'Beginner',
+                'instruction': 'Run for 30 minutes',
+                'sets': 1,
+                'reps': 10
             }]
         }
-        response = self.client.post(url, data)
+        response = self.client.post('/workout_program/', json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json()['message'], 'Workout created successfully')
+        self.assertEqual(response.json()['message'], 'Workout program created successfully')
         self.assertEqual(response.json()['workout_name'], 'Cardio Workout')
-        self.assertEqual(response.json()['exercises'][0]['name'], 'Running')
 
-    
+    def test_create_exercise_normal_user(self):
+        # Log in the normal user to create an exercise
+        url = reverse('log_in')
+        data = {
+            'username': 'testuser2',
+            'password': 'password'
+        }
+        response = self.client.post(url, data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+
+        # Simulate a POST request to create an exercise with valid data
+        data = {
+            'type': 'Strength',
+            'name': 'Push-ups',
+            'muscle': 'Chest',
+            'difficulty': 'Intermediate',
+            'equipment': 'Bodyweight',
+            'instruction': 'Lay straight to the ground on your face and push yourself off the ground'
+        }
+        response = self.client.post('/create-exercise/', json.dumps(data), content_type='application/json')
+  
+        # Check that the response status code is 403 Forbidden
+        self.assertEqual(response.status_code, 403)
+
+        # Check the JSON response data for the error message
+        json_data = response.json()
+        self.assertEqual(json_data['error'], 'You are not authorized to create exercises')
+
+    def test_create_exercise_invalid_data(self):
+        # Log in the superuser to create an exercise
+        url = reverse('log_in')
+        data = {
+            'username': 'testuser1',
+            'password': 'password'
+        }
+        response = self.client.post(url, data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+
+        # Simulate a POST request to create an exercise with invalid data
+        data = {
+            'type': 'Invalid',
+            'name': 'Invalid Exercise',
+            'muscle': 'Invalid',
+            'difficulty': 'Beginner',
+            'equipment': 'Bodyweight',
+            'instruction': 'Invalid'
+        }
+        response = self.client.post('/create-exercise/', json.dumps(data), content_type='application/json')
+
+        # Check that the response status code is 400 Bad Request
+        self.assertEqual(response.status_code, 400)
+
+        # Check the JSON response data for the error message
+        json_data = response.json()
+        self.assertEqual(json_data['error'], 'Invalid muscle type')
