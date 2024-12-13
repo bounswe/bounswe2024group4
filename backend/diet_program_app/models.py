@@ -22,9 +22,7 @@ class Food(models.Model):
     cholesterol = models.TextField(default='N/A')
     na = models.TextField(default='N/A')
     ca = models.TextField(default='N/A')
-    # mg = models.TextField(default='N/A')
     k = models.TextField(default='N/A')
-    # fe = models.TextField(default='N/A')
     vit_k = models.TextField(default='N/A')
     vit_c = models.TextField(default='N/A')
     vit_a_rae = models.TextField(default='N/A')
@@ -32,9 +30,9 @@ class Food(models.Model):
     vit_b12 = models.TextField(default='N/A')
     vit_b6 = models.TextField(default='N/A')
 
-    recipe_url = models.URLField(default='')
+    recipe_url = models.URLField(default='', blank=True)
 
-    creator_level = models.IntegerField(default=0) # 0: User, 1: Superuser, 2: API
+    # creator_level = models.IntegerField(default=0) # 0: User, 1: Superuser, 2: API
 
     def _str_(self):
         return self.food_name

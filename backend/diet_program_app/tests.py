@@ -1,3 +1,128 @@
-from django.test import TestCase
+from rest_framework.test import APIClient, APITestCase
+from user_auth_app.models import User
+from diet_program_app.models import Meal, Food
+from django.urls import reverse
+import json
 
 # Create your tests here.
+class TestCreateMealFood(APITestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(username='testuser1', email='testuser1@gmail.com', password='password', is_superuser=True)
+        self.client = APIClient()
+
+    def test_create_food_all_api(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['message'], 'Food for meal created successfully with Edamam Nutrition Analysis API')
+        self.assertEqual(response.json()['calories'], "52.0 kcal")
+
+    def test_create_food_all_fail(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Sushi',
+            'ingredients': '100 gr sushi',
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['message'], 'Food not found')
+        
+    def test_create_meal(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'meal_name': 'Breakfast',
+            'foods': [1],
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['message'], 'Meal created successfully')
+        self.assertEqual(response.json()['meal_name'], 'Breakfast')
+        self.assertEqual(response.json()['foods_count'], 1)
+
+    def test_create_food_superuser(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_superuser/', json.dumps(data), content_type='application/json')
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_food_superuser_use_in_meal(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_superuser/', json.dumps(data), content_type='application/json')
+
+        self.assertEqual(response.status_code, 201)
+        food_id = response.json()['food_id']
+        # self.user1.log_out()
+
+        self.user2 = User.objects.create_user(username='testuser2', email='testuser2@gmail.com', password='password')
+        data = {'username': 'testuser2', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+
+        data = {'meal_name': 'Breakfast', 'foods': [food_id],}
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['message'], 'Meal created successfully')
+        self.assertEqual(response.json()['meal_name'], 'Breakfast')
+        self.assertEqual(response.json()['foods_count'], 1)
+
+    def test_create_food_superuser_not_super(self):
+        self.user2 = User.objects.create_user(username='testuser2', email='testuser2@gmail.com', password='password')
+        response = self.client.post(reverse('log_in'), {'username': 'testuser2', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_superuser/', json.dumps(data), content_type='application/json')
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()['message'], 'Not a superuser')
+
+
+
