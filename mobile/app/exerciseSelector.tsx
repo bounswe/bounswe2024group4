@@ -2,17 +2,8 @@ import { Text, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from 'react';
 import { Stack, useLocalSearchParams, useGlobalSearchParams, useRouter } from "expo-router";
 import axios from 'axios';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Exercise } from '../constants/types';
-
-const clearAsyncStorage = async () => {
-  try {
-    await AsyncStorage.removeItem('existingExercises');
-    console.log('AsyncStorage cleared!');
-  } catch (error) {
-    console.error('Failed to clear AsyncStorage:', error);
-  }
-};
 
 export default function ExerciseSelect() {
   const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
@@ -27,7 +18,13 @@ export default function ExerciseSelect() {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const response = await axios.get(`${baseURL}/get_exercises/?muscle=${muscleName}`, {});
+        const token = await AsyncStorage.getItem("token");
+        const config = {
+          headers: {
+            'Authorization': 'Token ' + token
+          }
+        }
+        const response = await axios.get(`${baseURL}/get_exercises/?muscle=${muscleName}`, config);
         const uniqueExercises = response.data.filter(
           (exercise: Exercise, index: number, self: Exercise[]) =>
             index === self.findIndex((e) => e.name === exercise.name)
@@ -64,7 +61,6 @@ export default function ExerciseSelect() {
   };
 
   const handleBackButtonPress = async () => {
-    await clearAsyncStorage();
     router.push({
       pathname: "../muscleGroupSelector",
       params: { viewingUser, viewedUser },

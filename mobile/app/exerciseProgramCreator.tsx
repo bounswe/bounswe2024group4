@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, TouchableOpacity, Text, Alert } from "react-native";
+import { SafeAreaView, StyleSheet, TouchableOpacity, Text, Alert, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useGlobalSearchParams, Stack, useRouter } from "expo-router";
 import WorkoutProgram from "../components/WorkoutProgram";
@@ -13,7 +13,6 @@ export default function ExerciseCreate() {
   const { selectedExercises, muscleName } = useLocalSearchParams<{ selectedExercises: string; muscleName: string }>();
   const { viewingUser, viewedUser } = useGlobalSearchParams();
   const router = useRouter();
-
   const [workoutProgram, setWorkoutProgram] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,8 +65,12 @@ export default function ExerciseCreate() {
     }
 
     try {
-      const csrfToken = await AsyncStorage.getItem("csrfToken");
-
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          'Authorization': 'Token ' + token
+        }
+      }
       const workoutData = workoutProgram.exercises.map((exercise: Exercise) => ({
         type: exercise.type,
         name: exercise.name,
@@ -82,14 +85,6 @@ export default function ExerciseCreate() {
         workout_name: workoutProgram.name,
         exercises: workoutData,
         username: await AsyncStorage.getItem("username"),
-      };
-
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": csrfToken,
-        },
       };
 
       await axios.post(`${baseURL}/workout_program/`, body, config);
@@ -145,19 +140,32 @@ export default function ExerciseCreate() {
   return (
     <SafeAreaView style={styles.screen}>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.background}>
-        {workoutProgram && (
-          <WorkoutProgram workout={workoutProgram} onUpdate={handleWorkoutUpdate} />
-        )}
-        <SafeAreaView style={styles.buttonRow}>
-          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <SafeAreaView style={styles.background}>
+          {workoutProgram && (
+            <WorkoutProgram workout={workoutProgram} onUpdate={handleWorkoutUpdate} />
+          )}
+          <TouchableOpacity
+            onPress={() => {
+              router.push({
+                pathname: "../muscleGroupSelector",
+                params: { viewingUser, viewedUser },
+              });
+            }}
+            style={styles.addButton}
+          >
+            <FontAwesome5 name="plus" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSave} style={styles.proceedButton}>
-            <Text style={styles.proceedButtonText}>Save</Text>
-          </TouchableOpacity>
+          <SafeAreaView style={styles.buttonRow}>
+            <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSave} style={styles.proceedButton}>
+              <Text style={styles.proceedButtonText}>Save</Text>
+            </TouchableOpacity>
+          </SafeAreaView>
         </SafeAreaView>
-      </SafeAreaView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -173,11 +181,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#1b1d21",
   },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+    paddingBottom: 20,
+  },
   loadingText: {
     fontSize: 20,
     color: "white",
     textAlign: "center",
     marginTop: 20,
+  },
+  addButton: {
+    position: "relative",
+    top: 10,
+    left: 175,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#1B55AC",
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonRow: {
     flexDirection: "row",

@@ -45,6 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     bookmarked_posts = models.ManyToManyField('posts_app.Post', related_name='bookmarked_by', blank=True)
     following = models.ManyToManyField('self', symmetrical=False, through='Follow', related_name='followers')
     bookmarked_workouts = models.ManyToManyField('exercise_program_app.Workout', related_name='bookmarked_by_users', blank=True)
+    bookmarked_meals = models.ManyToManyField('diet_program_app.Meal', related_name='bookmarked_by_users', blank=True)
 
     
     # Adding related_name to avoid clashes with Django's built-in auth.User
@@ -66,6 +67,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+    
+    def check_super_member(self):
+        if (self.workout_rating_count + self.meal_rating_count % 3) == 0:
+            if self.score >= 4.5:
+                self.user_type = 'super_member'
+                self.is_superuser = True
+                self.save()
+            else:
+                self.user_type = 'member'
+                self.is_superuser = False
+                self.save()
+        return self.is_superuser
     
     
 class Follow(models.Model):
