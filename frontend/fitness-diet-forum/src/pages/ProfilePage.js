@@ -15,7 +15,7 @@ const ProfilePage = () => {
     const [programs, setPrograms] = useState();
     const [profilePictureURL, setProfilePictureURL] = useState("");
     const [error, setError] = useState(null);
-    const [activeSection, setActiveSection] = useState('exercises');
+    const [activeSection, setActiveSection] = useState('posts');
     const [showEditForm, setShowEditForm] = useState(false);
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
@@ -55,9 +55,13 @@ const ProfilePage = () => {
         setShowEditForm(true);
     };    
 
+    const handleExercisePrograms = async (workouts) => {
+        setActiveSection('exercises');
+        fetchExercisePrograms(workouts);
+    }
+
     const fetchExercisePrograms = async (workouts) => {
         try {
-            setActiveSection('exercises');
     
             const workoutDetailsPromises = workouts.map(async (workout) => {
                 try {
@@ -79,8 +83,23 @@ const ProfilePage = () => {
         }
     };
 
-    const handleDeleteProgram = (programId) => {
-        setPrograms(programs.filter(program => program.id !== programId));
+    const handleDeleteProgram = async (programId) => {
+        const programToDelete = programs.find(program => program.id === programId);
+        const updatedPrograms = programs.filter(program => program.id !== programId);
+    
+        setPrograms(updatedPrograms);
+    
+        try {
+            const response = await axios.delete(`${baseURL}/workouts/delete/${programId}/`, config);
+            
+            if (response.status !== 200) {
+                setPrograms(prevPrograms => [...prevPrograms, programToDelete]);
+                throw new Error('Failed to delete the program.');
+            }
+        } catch (error) {
+            console.error('Error deleting program:', error);
+            setPrograms(prevPrograms => [...prevPrograms, programToDelete]);
+        }
     };
 
     const errorContainerStyle = {
@@ -236,16 +255,17 @@ const ProfilePage = () => {
                             />
                         )}
                         <div
+                            className="px-6 py-2 rounded-lg text-white"
                             style={{
                                 position: "relative",
                                 marginTop: "20px",
                                 width: "100%",
                                 height: "300px",
                                 padding: "2px",
-                                backgroundColor: "#1e1e2f",
                                 borderRadius: "8px",
                             }}
                         >
+                            Weight Journey
                             <WeightGraph weightData={userData.weight_history} />
                         </div>
                     </>
@@ -272,7 +292,7 @@ const ProfilePage = () => {
                     </button>
                     <button
                         className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'exercises' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
-                        onClick={() => fetchExercisePrograms(userData.workouts) }
+                        onClick={() => handleExercisePrograms(userData.workouts) }
                     >
                         Exercises
                     </button>
@@ -293,6 +313,7 @@ const ProfilePage = () => {
                                         workoutId={post.workout_id}
                                         like_count={post.like_count}
                                         liked={post.liked}
+                                        created_at={post.created_at}
                                     />
                                 ))
                             ) : (
