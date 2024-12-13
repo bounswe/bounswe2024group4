@@ -403,98 +403,75 @@ def get_programs(request):
 
 #Log a workout and exercises and their statuses inside it
 @swagger_auto_schema(method='post', **log_workout_schema)
-@api_view(['GET', 'POST'])
+@api_view(['POST'])  # Changed to only POST
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def workout_log(request, workout_id):
-    #This GET part is useless
-    if request.method == 'GET':
-        try:
-            user = request.user  # Get user from token authentication
-            workout = get_object_or_404(Workout, workout_id=workout_id)
-            workout_log = get_object_or_404(WorkoutLog, workout=workout)
-            workout_exercises = Exercise.objects.filter(workout=workout)
-            exercise_statuses = []
-            for exercise in workout_exercises:
+    try:
+        data = json.loads(request.body)
+        user = request.user  # Get user from token authentication
+        workout = get_object_or_404(Workout, workout_id=workout_id)
+        
+        # Handle date
+        date_str = data.get('date')
+        if date_str:
+            try:
+                log_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD'}, status=400)
+        else:
+            log_date = timezone.now().date()
+            
+        # Create or get workout log
+        workout_log, created = WorkoutLog.objects.get_or_create(
+            workout=workout,
+            user=user,
+            date=log_date
+        )
+        
+        # Update workout completion status
+        if 'workout_completed' in data:
+            workout_log.is_completed = data['workout_completed']
+            workout_log.save()
+            
+        # Handle exercise logs
+        if 'exercises' in data:
+            exercise_ids = [ex['exercise_id'] for ex in data['exercises']]
+            workout_exercises = Exercise.objects.filter(
+                workout=workout, 
+                exercise_id__in=exercise_ids
+            )
+            
+            if len(workout_exercises) != len(exercise_ids):
+                return JsonResponse({'error': 'Some exercises do not belong to this workout'}, status=400)
+                
+            for exercise_data in data['exercises']:
+                exercise = workout_exercises.get(exercise_id=exercise_data['exercise_id'])
                 exercise_log, _ = ExerciseLog.objects.get_or_create(
                     workout_log=workout_log,
                     exercise=exercise
                 )
-                exercise_statuses.append({
-                    'exercise_id': exercise.exercise_id,
-                    'name': exercise.name,
-                    'type': exercise.type,
-                    'muscle': exercise.muscle,
-                    'equipment': exercise.equipment,
-                    'instruction': exercise.instruction,
-                    'sets': exercise.sets,
-                    'reps': exercise.reps,
-                    'is_completed': exercise_log.is_completed
-                })
-            return JsonResponse({
-                'workout_id': workout.workout_id,
-                'workout_name': workout.workout_name,
-                'is_completed': workout_log.is_completed,
-                'date': workout_log.date.strftime('%Y-%m-%d'),
-                'exercises': exercise_statuses
-            })
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    elif request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user = request.user  # Get user from token authentication
-            workout = get_object_or_404(Workout, workout_id=workout_id)
-            date_str = data.get('date')
-            if date_str:
-                try:
-                    log_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                except ValueError:
-                    return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD'}, status=400)
-            else:
-                log_date = timezone.now().date()
-            workout_log, created = WorkoutLog.objects.get_or_create(
-                workout=workout,
-                user=user,
-                date=log_date
-            )
-            if 'workout_completed' in data:
-                workout_log.is_completed = data['workout_completed']
-                workout_log.save()
-            if 'exercises' in data:
-                exercise_ids = [ex['exercise_id'] for ex in data['exercises']]
-                workout_exercises = Exercise.objects.filter(
-                    workout=workout, 
-                    exercise_id__in=exercise_ids
-                )
-                if len(workout_exercises) != len(exercise_ids):
-                    return JsonResponse({'error': 'Some exercises do not belong to this workout'}, status=400)
-                for exercise_data in data['exercises']:
-                    exercise = workout_exercises.get(exercise_id=exercise_data['exercise_id'])
-                    exercise_log, _ = ExerciseLog.objects.get_or_create(
-                        workout_log=workout_log,
-                        exercise=exercise
-                    )
-                    exercise_log.is_completed = exercise_data['is_completed']
-                    exercise_log.save()
-            return JsonResponse({
-                'message': 'Workout log updated successfully',
-                'workout_id': workout.workout_id,
-                'workout_name': workout.workout_name,
-                'is_completed': workout_log.is_completed,
-                'exercises': [{
-                    'exercise_id': log.exercise.exercise_id,
-                    'name': log.exercise.name,
-                    'is_completed': log.is_completed
-                } for log in workout_log.exercise_logs.all()]
-            })
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
+                exercise_log.is_completed = exercise_data['is_completed']
+                exercise_log.save()
+                
+        return JsonResponse({
+            'message': 'Workout log updated successfully',
+            'workout_id': workout.workout_id,
+            'workout_name': workout.workout_name,
+            'is_completed': workout_log.is_completed,
+            'exercises': [{
+                'exercise_id': log.exercise.exercise_id,
+                'name': log.exercise.name,
+                'is_completed': log.is_completed
+            } for log in workout_log.exercise_logs.all()]
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 
+        
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
