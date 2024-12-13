@@ -90,10 +90,13 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
     }));
 
     const body = {
+      workout_completed: true,
       exercises: updatedExercises,
+      date : new Date().toISOString().split("T")[0]
     };
 
     try {
+      console.log(currentDayPrograms[0].id,body);
       const response = await axios.post(
         `${baseURL}/workout-log/${currentDayPrograms[0].id}/`,
         body,
