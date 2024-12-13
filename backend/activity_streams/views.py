@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 import json
 from fitness_project.firebase import db
+from firebase_admin import firestore
 
 @csrf_exempt
 def log_activity(request):

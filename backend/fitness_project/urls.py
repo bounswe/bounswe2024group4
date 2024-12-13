@@ -58,6 +58,7 @@ urlpatterns = [
     path('get-programs/', exercise_program_views.get_programs, name='get_programs'), # Get weekly programs by username
     path('workouts/toggle-bookmark/', exercise_program_views.toggle_bookmark_workout, name='toggle_bookmark_workout'), # Bookmark a workout
     path('get-bookmarked-workouts/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'), # Get bookmarked workouts by username
+    path('workout-activities/', exercise_program_views.get_workout_activities, name='get_workout_activities'),
     #User auth related endpoints
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
@@ -89,6 +90,7 @@ urlpatterns = [
     path('get-activities/', activity_streams_views.get_activities, name='get_activity_stream'),
     path('log-activity/', activity_streams_views.log_activity, name='log_activity'),
     path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
+    
 
 ]
 
