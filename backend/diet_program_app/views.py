@@ -490,7 +490,7 @@ def get_bookmarked_meals_by_user_id(request):
     return JsonResponse({'message': 'Invalid request'}, status=405)
 
 
-@swagger_auto_schema(method='get', **get_food_by_id_schema)
+#@swagger_auto_schema(method='get', **get_food_by_id_schema)
 @api_view(['GET'])
 def get_food_by_id(request):
     if request.method == 'GET':
