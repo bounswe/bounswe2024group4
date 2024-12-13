@@ -15,7 +15,6 @@ from user_auth_app.models import User
 from datetime import datetime
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
-from activity_streams.views import log_activity
 from datetime import datetime
 from fitness_project.firebase import db
 from firebase_admin import firestore
