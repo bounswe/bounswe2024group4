@@ -25,5 +25,5 @@ urlpatterns = [
     path('rate_workout/', views.rate_workout, name='rate_workout'),
     path('workout/<int:workout_id>/', views.get_workout_by_id, name='get_workout_by_id'),
     path('workouts/user/<int:user_id>/', views.get_workouts_by_user_id, name='get_workouts_by_user_id'),
-
+    
 ]

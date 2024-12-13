@@ -4,10 +4,11 @@ from user_auth_app.models import User
 # unique. holds the exercises created by super-members and maybe caches the api data 
 class ExerciseInstance(models.Model):
     exercise_instance_id = models.AutoField(primary_key=True)
-    type = models.CharField(max_length=50)
+    type = models.CharField(max_length=50, default='exercise')
     name = models.CharField(max_length=50)
     muscle = models.CharField(max_length=50)
     equipment = models.CharField(max_length=50)
+    difficulty = models.CharField(max_length=50, default='Beginner')
     instruction = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -37,6 +38,7 @@ class Exercise(models.Model):
     name = models.CharField(max_length=50)
     muscle = models.CharField(max_length=50)
     equipment = models.CharField(max_length=50)
+    difficulty = models.CharField(max_length=50, default='Beginner')
     instruction = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     sets = models.IntegerField(default=0)
@@ -92,7 +94,14 @@ class ExerciseLog(models.Model):
     workout_log = models.ForeignKey(WorkoutLog, on_delete=models.CASCADE, related_name='exercise_logs')
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
     is_completed = models.BooleanField(default=False)
+    actual_sets = models.IntegerField(default=0)
+    actual_reps = models.IntegerField(default=0)
+    weight = models.FloatField(default=0.0)  # in kg or lbs
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ['workout_log', 'exercise']  # One log per exercise per workout log
+
+    def __str__(self):
+        return f"Log for {self.exercise.name} in {self.workout_log}"
