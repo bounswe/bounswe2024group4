@@ -10,7 +10,9 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_by_user_id_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_by_user_id_schema
 from firebase_admin import firestore
+from fitness_project.firebase import db
 from datetime import datetime
+
 
 
 @swagger_auto_schema(method='post', **create_meal_schema)
@@ -111,7 +113,37 @@ def create_meal(request):
 
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
-    
+
+@api_view(['GET'])
+def get_meal_activities(request):
+    try:
+        # Start with base query
+        activities_ref = db.collection('mealActivities')
+        query = activities_ref
+            
+        # Order by published date descending (newest first)
+        query = query.order_by('published', direction=firestore.Query.DESCENDING)
+        
+        # Execute query
+        activities = []
+        for doc in query.stream():
+            activity_data = doc.to_dict()
+            # Add document ID to the response
+            activity_data['id'] = doc.id
+            activities.append(activity_data)
+        
+        return JsonResponse({
+            'count': len(activities),
+            'activities': activities
+        }, safe=False, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=400)
+
+
+
 @swagger_auto_schema(method='post', **create_food_all_schema)
 @api_view(['POST'])
 def create_food_all(request):
