@@ -189,6 +189,48 @@ get_meal_leaderboard_schema = {
     }
 }
 
+get_food_by_id_schema = {
+    'operation_summary': 'Get Food by ID',
+    'operation_description': 'Get a food by ID',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'food': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'ingredients': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'recipe_url': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'energ_kcal': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+                        'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+                        'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+                        'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                        'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                        'na': openapi.Schema(type=openapi.TYPE_STRING),
+                        'k': openapi.Schema(type=openapi.TYPE_STRING),
+                        'ca': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                )
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+        405: openapi.Response('Invalid request'),
+    }
+}
+
 # diet program app
 create_meal_schema = {
     'operation_summary': 'Create Meal',
@@ -474,7 +516,6 @@ get_bookmarked_meals_by_user_id_schema = {
         405: 'Invalid request'
     }
 }
-
 
 # exercise program app
 workout_program_schema = {

@@ -21,5 +21,6 @@ swagger_docs/__pycache__
 simple_features_app/__pycache__
 simple_features_app/migrations/__pycache__
 .pytest_cache
+fitness_project/__pycache__/
 /secrets/serviceAccountKey.json
 test_env
