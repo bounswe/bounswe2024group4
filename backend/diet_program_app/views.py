@@ -527,28 +527,6 @@ def get_food_by_id(request):
     return JsonResponse({'message': 'Invalid request'}, status=405)
 
 
-@api_view(['DELETE'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def delete_food(request, food_id):
-    if request.method == 'DELETE':
-        try:
-            user = request.user
-            if not user.is_superuser:
-                return JsonResponse({'error': 'Only superusers can delete food items'}, status=403)
-
-            food = Food.objects.get(food_id=food_id)
-            food.delete()
-            return JsonResponse({'message': 'Food deleted successfully'}, status=200)
-
-        except Food.DoesNotExist:
-            return JsonResponse({'error': 'Food not found'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -591,101 +569,6 @@ def edit_meal(request, meal_id):
 
         except Meal.DoesNotExist:
             return JsonResponse({'error': 'Meal not found'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
-@api_view(['PUT'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def edit_food(request, food_id):
-    if request.method == 'PUT':
-        try:
-            user = request.user
-            if not user.is_superuser:
-                return JsonResponse({'error': 'Only superusers can edit food items'}, status=403)
-
-            data = json.loads(request.body)
-            food = Food.objects.get(food_id=food_id)
-
-            # Update fields if provided
-            if 'name' in data:
-                food.name = data['name']
-            if 'ingredients' in data:
-                food.ingredients = data['ingredients']
-            if 'energ_kcal' in data:
-                food.energ_kcal = data['energ_kcal']
-            if 'fat' in data:
-                food.fat = data['fat']
-            if 'fat_saturated' in data:
-                food.fat_saturated = data['fat_saturated']
-            if 'fat_trans' in data:
-                food.fat_trans = data['fat_trans']
-            if 'carbo' in data:
-                food.carbo = data['carbo']
-            if 'fiber' in data:
-                food.fiber = data['fiber']
-            if 'sugar' in data:
-                food.sugar = data['sugar']
-            if 'protein' in data:
-                food.protein = data['protein']
-            if 'cholesterol' in data:
-                food.cholesterol = data['cholesterol']
-            if 'na' in data:
-                food.na = data['na']
-            if 'ca' in data:
-                food.ca = data['ca']
-            if 'k' in data:
-                food.k = data['k']
-            if 'vit_k' in data:
-                food.vit_k = data['vit_k']
-            if 'vit_c' in data:
-                food.vit_c = data['vit_c']
-            if 'vit_a_rae' in data:
-                food.vit_a_rae = data['vit_a_rae']
-            if 'vit_d' in data:
-                food.vit_d = data['vit_d']
-            if 'vit_b12' in data:
-                food.vit_b12 = data['vit_b12']
-            if 'vit_b6' in data:
-                food.vit_b6 = data['vit_b6']
-            if 'recipe_url' in data:
-                food.recipe_url = data['recipe_url']
-
-            food.save()
-
-            return JsonResponse({
-                'message': 'Food updated successfully',
-                'food_id': food.food_id,
-                'name': food.name,
-                'ingredients': food.ingredients,
-                'energ_kcal': food.energ_kcal,
-                'fat': food.fat,
-                'fat_saturated': food.fat_saturated,
-                'fat_trans': food.fat_trans,
-                'carbo': food.carbo,
-                'fiber': food.fiber,
-                'sugar': food.sugar,
-                'protein': food.protein,
-                'cholesterol': food.cholesterol,
-                'na': food.na,
-                'ca': food.ca,
-                'k': food.k,
-                'vit_k': food.vit_k,
-                'vit_c': food.vit_c,
-                'vit_a_rae': food.vit_a_rae,
-                'vit_d': food.vit_d,
-                'vit_b12': food.vit_b12,
-                'vit_b6': food.vit_b6,
-                'recipe_url': food.recipe_url
-            }, status=200)
-
-        except Food.DoesNotExist:
-            return JsonResponse({'error': 'Food not found'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
