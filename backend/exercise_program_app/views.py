@@ -206,7 +206,7 @@ def rate_workout(request):
             workout_id = data.get('workout_id')
             rating = float(data.get('rating'))
             workout = Workout.objects.get(workout_id=workout_id)
-            user = workout.created_by
+            user = request.user  # Get the user who is rating, not the workout creator
  
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)
@@ -214,15 +214,23 @@ def rate_workout(request):
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
 
+            # Update workout rating
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
             workout.save()
 
-            user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
+            # Update user rating
+            if user.workout_rating_count == 0:
+                user.workout_rating = rating
+            else:
+                user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
             user.workout_rating_count += 1
 
-            user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+            # Update user score
+            if user.workout_rating_count + user.meal_rating_count > 0:
+                user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
             user.check_super_member()
+            user.save()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
         except Exception as e:
@@ -237,22 +245,23 @@ def rate_workout(request):
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def get_workout_by_id(request, workout_id):
-    if request.method == 'GET':
-        try:
-            workout = Workout.objects.get(workout_id=workout_id)
-            workout_data = {
-                'id': workout.workout_id,
-                'workout_name': workout.workout_name,
-                'created_by': workout.created_by.username,
-                'rating': workout.rating,
-                'rating_count': workout.rating_count,
-                'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'difficulty', 'instruction', 'sets', 'reps', 'exercise_id'))
-            }
-            return JsonResponse(workout_data, status=200)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    try:
+        workout = Workout.objects.get(workout_id=workout_id)
+        return JsonResponse({
+            'id': workout.workout_id,
+            'workout_name': workout.workout_name,
+            'created_by': workout.created_by.username,
+            'rating': workout.rating,
+            'rating_count': workout.rating_count,
+            'exercises': list(workout.exercise_set.values(
+                'type', 'name', 'muscle', 'equipment', 
+                'instruction', 'sets', 'reps'
+            ))
+        }, status=200)
+    except Workout.DoesNotExist:
+        return JsonResponse({'error': 'Workout not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 
 @swagger_auto_schema(method='get', **get_workout_by_id_schema)

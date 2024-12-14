@@ -17,34 +17,43 @@ from rest_framework.permissions import IsAuthenticated
 @csrf_exempt
 def post(request):
     if request.method == 'POST':
-        user = request.user
         content = request.data.get('content')
         workoutId = request.data.get('workoutId')
         mealId = request.data.get('mealId')
 
         if not content:
             return JsonResponse({'error': 'Content is required'}, status=400)
-        
+
+        # Create the post first
+        post = Post.objects.create(
+            user=request.user,
+            content=content
+        )
+
+        # Add workout if provided
         if workoutId:
             try:
                 workout = Workout.objects.get(workout_id=workoutId)
                 post.workout = workout
+                post.save()
             except Workout.DoesNotExist:
+                post.delete()  # Clean up if workout doesn't exist
                 return JsonResponse({'error': 'Workout not found'}, status=404)
-        
-        if mealId:
-            try:
-                post.mealId = mealId
-            except ValueError:
-                return JsonResponse({'error': 'mealId must be an integer'}, status=400)
-                
-        post = Post.objects.create(user=user, content=content)
-        post.save()
 
-        return JsonResponse({'message': 'Post created successfully', 'post_id': post.id}, status=201)
+        # Add meal if provided
+        if mealId:
+            post.mealId = mealId
+            post.save()
+
+        return JsonResponse({
+            'message': 'Post created successfully',
+            'post_id': post.id,
+            'content': post.content,
+            'workout_id': post.workout.workout_id if post.workout else None,
+            'meal_id': post.mealId
+        }, status=201)
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
-        # return render(request, 'create_post.html')
 
 
 @swagger_auto_schema(method='post', **toggle_like_schema)
