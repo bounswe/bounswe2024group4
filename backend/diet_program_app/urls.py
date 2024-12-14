@@ -13,4 +13,5 @@ urlpatterns = [
     path('get_meals_by_user_id/', views.get_meals_by_user_id, name='get_meals_by_user_id'),
     path('toggle_bookmark_meal/', views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
     path('get_bookmarked_meals_by_user_id/', views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
+    path('meal/<int:meal_id>/edit/', views.edit_meal, name='edit_meal'),
 ]
