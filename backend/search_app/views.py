@@ -10,7 +10,9 @@ from rest_framework.authentication import TokenAuthentication
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from swagger_docs.swagger import search_schema
 
+@swagger_auto_schema(method='get', **search_schema)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -92,5 +94,3 @@ def search(request):
         } for workout in workouts]
 
     return JsonResponse(response)
-
-# Create your views here.

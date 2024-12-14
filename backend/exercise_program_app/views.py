@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema, rate_workout_schema, get_workout_by_id_schema, create_exercise_superuser_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema, rate_workout_schema, get_workout_by_id_schema, create_exercise_superuser_schema, get_workouts_schema, toggle_bookmark_workout_schema, get_bookmarked_workouts_schema
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from user_auth_app.models import User
@@ -255,7 +255,7 @@ def get_workout_by_id(request, workout_id):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-@swagger_auto_schema(method='get', **get_workout_by_id_schema)
+@swagger_auto_schema(method='get', **get_workouts_schema)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -291,6 +291,7 @@ def get_workouts(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@swagger_auto_schema(method='post', **toggle_bookmark_workout_schema)
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -326,6 +327,7 @@ def toggle_bookmark_workout(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@swagger_auto_schema(method='get', **get_bookmarked_workouts_schema)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
