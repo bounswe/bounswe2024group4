@@ -102,8 +102,8 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
-    # path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
-    
+  #  path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
+    path('search/', include('search_app.urls')),
 
 ]
 
