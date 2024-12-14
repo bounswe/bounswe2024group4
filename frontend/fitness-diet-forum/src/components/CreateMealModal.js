@@ -281,15 +281,25 @@ const CreateMealModal = (userMeals, onClose) => {
                     {newMeal.foods.map((food, index) => (
                       <Food
                         key={index}
-                        foodName={food.foodName}
-                        calories={food.calories}
+                        foodName={food.food_name}
+                        calories={food.energ_kcal}
                         protein={food.protein}
                         carbs={food.carbs}
                         fat={food.fat}
                         ingredients={food.ingredients}
-                        ingredientAmounts={food.ingredientAmounts}
                         imageUrl={food.imageUrl}
                         recipeUrl={food.recipeUrl}
+                        ca={food.ca}
+                        cholesterol={food.recipeUrl}
+                        fiber={food.recipeUrl}
+                        k={food.recipeUrl}
+                        na={food.recipeUrl}
+                        vitARae={food.recipeUrl}
+                        vitB6={food.recipeUrl}
+                        vitB12={food.recipeUrl}
+                        vitC={food.recipeUrl}
+                        vitD={food.recipeUrl}
+                        vitK={food.recipeUrl}
                       />
                     ))}
                   </div>
@@ -437,6 +447,17 @@ const CreateMealModal = (userMeals, onClose) => {
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
                             visible={true}
+                            placeholder="Enter recipe URL"
+                        />
+                        <NutrientSection
+                            title="Photo"
+                            nutrients={[
+                                
+                            ]}
+                            handleInputChange={handleInputChange}
+                            disabled={!!newFood}
+                            visible={true}
+                            placeholder="Enter image URL"
                         />
                         <NutrientSection
                             title="Calories"
