@@ -113,6 +113,9 @@ urlpatterns = [
     # Include all posts-related URLs
     path('', include('posts_app.urls')),  # This will include all URLs from posts_app.urls
 
+    # Include all diet program related URLs
+    path('', include('diet_program_app.urls')),
+
 ]
 
 if settings.DEBUG:
