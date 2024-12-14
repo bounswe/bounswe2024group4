@@ -483,7 +483,7 @@ def workout_log(request, workout_id):
         data = json.loads(request.body)
         user = request.user
         workout = get_object_or_404(Workout, workout_id=workout_id)
-        
+
         # Handle date
         date_str = data.get('date')
         if date_str:
@@ -505,10 +505,11 @@ def workout_log(request, workout_id):
         if 'workout_completed' in data:
             workout_log.is_completed = data['workout_completed']
             workout_log.save()
-            
+        print(data)
         # Handle exercise logs
         if 'exercises' in data['exercises']:
             exercise_ids = [ex['exercise_id'] for ex in data['exercises']]
+            print("ex ids:",exercise_ids)
             workout_exercises = Exercise.objects.filter(
                 workout=workout, 
                 exercise_id__in=exercise_ids
@@ -518,7 +519,9 @@ def workout_log(request, workout_id):
                 return JsonResponse({'error': 'Some exercises do not belong to this workout'}, status=400)
                 
             for exercise_data in data['exercises']:
+                print("ex data:",exercise_data)
                 exercise = workout_exercises.get(exercise_id=exercise_data['exercise_id'])
+                print("exercise:")
                 exercise_log, _ = ExerciseLog.objects.get_or_create(
                     workout_log=workout_log,
                     exercise=exercise
@@ -530,6 +533,9 @@ def workout_log(request, workout_id):
                 exercise_log.actual_reps = exercise_data.get('actual_reps', 0)
                 exercise_log.weight = exercise_data.get('weight', 0.0)
                 exercise_log.save()
+
+        else:
+            print("no exercise")
                 
         return JsonResponse({
             'message': 'Workout log updated successfully',
