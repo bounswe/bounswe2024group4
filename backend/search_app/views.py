@@ -34,14 +34,14 @@ def search(request):
             'user_type',
             'workout_rating',
             'meal_rating'
-        ).order_by('-user_id')[:10]
+        ).order_by('-user_id')
         response['users'] = list(users)
 
     if search_type in ['all', 'posts']:
         posts = Post.objects.filter(
             Q(content__icontains=search_query) |
             Q(user__username__icontains=search_query)
-        ).select_related('user').order_by('-created_at')[:10]
+        ).select_related('user').order_by('-created_at')
         
         response['posts'] = [{
             'id': post.id,
@@ -60,7 +60,7 @@ def search(request):
         meals = Meal.objects.filter(
             Q(meal_name__icontains=search_query) |
             Q(created_by__username__icontains=search_query)
-        ).select_related('created_by').order_by('-created_at')[:10]
+        ).select_related('created_by').order_by('-created_at')
         
         response['meals'] = [{
             'meal_id': meal.meal_id,
@@ -78,7 +78,7 @@ def search(request):
         workouts = Workout.objects.filter(
             Q(workout_name__icontains=search_query) |
             Q(created_by__username__icontains=search_query)
-        ).select_related('created_by').order_by('-created_at')[:10]
+        ).select_related('created_by').order_by('-created_at')
         
         response['workouts'] = [{
             'workout_id': workout.workout_id,
