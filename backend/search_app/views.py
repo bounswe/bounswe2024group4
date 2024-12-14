@@ -10,20 +10,24 @@ from rest_framework.authentication import TokenAuthentication
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+import json
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def search(request):
-    search_query = request.GET.get('search', '').strip()
-    search_type = request.GET.get('type', 'all').lower()
+    # search_query = request.GET.get('search', '').strip()
+    # search_type = request.GET.get('type', 'all').lower()
+    data = json.loads(request.body)
+    search_query = data.get('search', '').strip()
+    filters = data.get('filters', {})
 
     if not search_query:
         return JsonResponse({'error': 'Search query is required'}, status=400)
 
     response = {}
 
-    if search_type in ['all', 'users']:
+    if 'users' in filters or filters == {}:
         users = User.objects.filter(
             Q(username__icontains=search_query) |
             Q(bio__icontains=search_query)
@@ -37,7 +41,7 @@ def search(request):
         ).order_by('-user_id')
         response['users'] = list(users)
 
-    if search_type in ['all', 'posts']:
+    if 'posts' in filters or filters == {}:
         posts = Post.objects.filter(
             Q(content__icontains=search_query) |
             Q(user__username__icontains=search_query)
@@ -56,7 +60,7 @@ def search(request):
             'meal_id': post.mealId
         } for post in posts]
 
-    if search_type in ['all', 'meals']:
+    if 'meals' in filters or filters == {}:
         meals = Meal.objects.filter(
             Q(meal_name__icontains=search_query) |
             Q(created_by__username__icontains=search_query)
@@ -74,7 +78,7 @@ def search(request):
             }
         } for meal in meals]
 
-    if search_type in ['all', 'workouts']:
+    if 'workouts' in filters or filters == {}:
         workouts = Workout.objects.filter(
             Q(workout_name__icontains=search_query) |
             Q(created_by__username__icontains=search_query)
@@ -93,4 +97,3 @@ def search(request):
 
     return JsonResponse(response)
 
-# Create your views here.
