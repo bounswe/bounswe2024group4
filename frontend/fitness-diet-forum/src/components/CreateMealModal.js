@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
-import Food from '../components/Food';
+import Food from './Food';
+import NutrientSection from "./NutrientSection.js";
 
 
 const CreateMealModal = (userMeals, onClose) => {
@@ -26,7 +27,6 @@ const CreateMealModal = (userMeals, onClose) => {
       }
     }
 
-    const [foodName, setFoodName] = useState('');
     const [ca, setCa] = useState('');
     const [carbo, setCarbo] = useState('');
     const [cholesterol, setCholesterol] = useState('');
@@ -62,11 +62,6 @@ const CreateMealModal = (userMeals, onClose) => {
     const handleMealInputChange = (e) => {
         const { name, value } = e.target;
         setNewMeal(prev => ({ ...prev, [name]: value }));
-    };
-    
-    const handleFoodInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewFood(prev => ({ ...prev, [name]: value }));
     };
 
     // Function to handle input change
@@ -336,249 +331,7 @@ const CreateMealModal = (userMeals, onClose) => {
                   { !foodFound && 
                     <p className="text-red-500 mt-4">Food not found. Please enter the food information below.</p>
                   }
-                    {/* Food Item Inputs */}
-                    <div className="flex mt-6 space-x-4 justify-center items-center">
-                    {/* Energy Section */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <label style={labelStyle}>Energy (Kcal)</label>
-                            <input
-                                type="text"
-                                name="energKcal"
-                                value={newFood ? newFood.energ_kcal : energKcal}
-                                onChange={handleInputChange}
-                                disabled={newFood ? true : false}
-                                style={inputStyle}
-                            />
-                        </div>
-                        {/* Recipe URL Section */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <label style={labelStyle}>Recipe URL</label>
-                            <input
-                            type="text"
-                            name="recipeUrl"
-                            value={newFood ? newFood.recipe_url : recipeUrl}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                            />
-                        </div>
-                    </div>
-                    <h4 className="text-lg font-semibold text-white tracking-wide mb-4">Nutrients</h4>
-                    <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        gap: '20px',
-                        padding: '5px',
-                        flexWrap: 'wrap',
-                    }}
-                    >
-                    {/* Macronutrients Section */}
-                    <div style={{ width: '32%' }}>
-                        <h5 className="text-md font-semibold text-white mb-2">Macronutrients</h5>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Carbohydrates</label>
-                        <input
-                            type="text"
-                            name="carbo"
-                            value={newFood ? newFood.carbo : carbo}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Fat</label>
-                        <input
-                            type="text"
-                            name="fat"
-                            value={newFood ? newFood.fat : fat}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Saturated Fat</label>
-                        <input
-                            type="text"
-                            name="fatSaturated"
-                            value={newFood ? newFood.fat_saturated : fatSaturated}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Trans Fat</label>
-                        <input
-                            type="text"
-                            name="fatTrans"
-                            value={newFood ? newFood.fat_trans : fatTrans}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Protein</label>
-                        <input
-                            type="text"
-                            name="protein"
-                            value={newFood ? newFood.protein : protein}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Sugar</label>
-                        <input
-                            type="text"
-                            name="sugar"
-                            value={newFood ? newFood.sugar : sugar}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                    </div>
-
-                    {/* Micronutrients Section */}
-                    <div style={{ width: '32%' }}>
-                        <h5 className="text-md font-semibold text-white mb-2">Micronutrients</h5>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Cholesterol</label>
-                        <input
-                            type="text"
-                            name="cholesterol"
-                            value={newFood ? newFood.cholesterol : cholesterol}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Fiber</label>
-                        <input
-                            type="text"
-                            name="fiber"
-                            value={newFood ? newFood.fiber : fiber}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Potassium</label>
-                        <input
-                            type="text"
-                            name="k"
-                            value={newFood ? newFood.k : k}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Sodium</label>
-                        <input
-                            type="text"
-                            name="na"
-                            value={newFood ? newFood.na : na}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Calcium</label>
-                        <input
-                            type="text"
-                            name="ca"
-                            value={newFood ? newFood.ca : ca}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                    </div>
-
-                    {/* Vitamins Section */}
-                    <div style={{ width: '32%' }}>
-                        <h5 className="text-md font-semibold text-white mb-2">Vitamins</h5>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Vitamin A</label>
-                        <input
-                            type="text"
-                            name="recipeUrl"
-                            value={newFood ? newFood.vit_a_rae : vitARae}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Vitamin B6</label>
-                        <input
-                            type="text"
-                            name="recipeUrl"
-                            value={newFood ? newFood.vit_b6 : vitB6}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Vitamin B12</label>
-                        <input
-                            type="text"
-                            name="recipeUrl"
-                            value={newFood ? newFood.vit_b12 : vitB12}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Vitamin C</label>
-                        <input
-                            type="text"
-                            name="recipeUrl"
-                            value={newFood ? newFood.vit_c : vitC}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Vitamin D</label>
-                        <input
-                            type="text"
-                            name="recipeUrl"
-                            value={newFood ? newFood.vit_d : vitD}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={labelStyle}>Vitamin K</label>
-                        <input
-                            type="text"
-                            name="recipeUrl"
-                            value={newFood ? newFood.vit_k : vitK}
-                            onChange={handleInputChange}
-                            disabled={newFood ? true : false}
-                            style={inputStyle}
-                        />
-                        </div>
-                    </div>
-                    </div>
-
-
-                  </>
-                {/* Show Input Fields if newFood is null */}
+                  {/* Show Input Fields if newFood is null */}
                 {newFood === null ? (
                     <div>
                     <h4 className="text-lg font-semibold text-white tracking-wide">Add Ingredient</h4>
@@ -615,7 +368,7 @@ const CreateMealModal = (userMeals, onClose) => {
                     <div className="space-y-4">
                         {newFood.ingredients && newFood.ingredients.length > 0 ? (
                         newFood.ingredients.map((ingredient, index) => (
-                            <div key={index} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg shadow-lg">
+                            <div key={index} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg shadow-lg w-1/3">
                             <div className="flex flex-col">
                                 {/* Display quantity, unit, and ingredient name */}
                                 <span className="text-white font-semibold">{ingredient.slice(2).join(" ")}</span>
@@ -631,6 +384,71 @@ const CreateMealModal = (userMeals, onClose) => {
                     </div>
                     </div>
                 )}
+
+                {/* Nutrient Sections */}
+                <h4 className="text-lg font-semibold text-white tracking-wide mb-4">Nutrients</h4>
+                    <div className="flex justify-between gap-8 flex-row">
+                    <div className="flex flex-col gap-8 w-1/3">
+                        <NutrientSection
+                            title="Recipe"
+                            nutrients={[
+                                { label: "", name: "recipeURL", value: newFood?.recipe_url || recipeUrl },
+                            ]}
+                            handleInputChange={handleInputChange}
+                            disabled={!!newFood}
+                        />
+                        <NutrientSection
+                            title="Calories"
+                            nutrients={[
+                                { label: "", name: "calories", value: newFood?.energ_kcal || energKcal },
+                            ]}
+                            handleInputChange={handleInputChange}
+                            disabled={!!newFood}
+                        />
+                    </div>
+                        <NutrientSection
+                            title="Macronutrients"
+                            nutrients={[
+                                { label: "Carbohydrates", name: "carbo", value: newFood?.carbo || carbo },
+                                { label: "Fat", name: "fat", value: newFood?.fat || fat },
+                                { label: "Saturated Fat", name: "fatSaturated", value: newFood?.fat_saturated || fatSaturated },
+                                { label: "Trans Fat", name: "fatTrans", value: newFood?.fat_trans || fatTrans },
+                                { label: "Protein", name: "protein", value: newFood?.protein || protein },
+                                { label: "Sugar", name: "sugar", value: newFood?.sugar || sugar },
+                            ]}
+                            handleInputChange={handleInputChange}
+                            disabled={!!newFood}
+                        />
+
+                        <NutrientSection
+                            title="Micronutrients"
+                            nutrients={[
+                                { label: "Cholesterol", name: "cholesterol", value: newFood?.cholesterol || cholesterol },
+                                { label: "Fiber", name: "fiber", value: newFood?.fiber || fiber },
+                                { label: "Potassium", name: "k", value: newFood?.k || k },
+                                { label: "Sodium", name: "na", value: newFood?.na || na },
+                                { label: "Calcium", name: "ca", value: newFood?.ca || ca },
+                            ]}
+                            handleInputChange={handleInputChange}
+                            disabled={!!newFood}
+                        />
+
+                        <NutrientSection
+                            title="Vitamins"
+                            nutrients={[
+                                { label: "Vitamin A", name: "vitARae", value: newFood?.vit_a_rae || vitARae },
+                                { label: "Vitamin B6", name: "vitB6", value: newFood?.vit_b6 || vitB6 },
+                                { label: "Vitamin B12", name: "vitB12", value: newFood?.vit_b12 || vitB12 },
+                                { label: "Vitamin C", name: "vitC", value: newFood?.vit_c || vitC },
+                                { label: "Vitamin D", name: "vitD", value: newFood?.vit_d || vitD },
+                                { label: "Vitamin K", name: "vitK", value: newFood?.vit_k || vitK },
+                            ]}
+                            handleInputChange={handleInputChange}
+                            disabled={!!newFood}
+                        />
+                    </div>
+                  </>
+                
                 {/* Buttons in a Row */}
                 <div className="flex justify-between mt-6 space-x-4">
                     <button 
