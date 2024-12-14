@@ -8,7 +8,7 @@ from user_auth_app.models import User
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
-from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_by_user_id_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_by_user_id_schema
+from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_by_user_id_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_by_user_id_schema, get_food_by_id_schema
 from firebase_admin import firestore
 from fitness_project.firebase import db
 from datetime import datetime
@@ -204,7 +204,19 @@ def create_food_all(request):
             return JsonResponse({
                 'message': 'Food for meal created successfully with Edamam Nutrition Analysis API',
                 'food_id': food.food_id,
-                'calories': energ_kcal
+                'food_name': food_name,
+                'ingredients': ingredients,
+                'recipe_url': recipe_url,
+                'image_url': image_url,
+                'calories': energ_kcal,
+                'fat': fat,
+                'fat_saturated': fat_saturated,
+                'fat_trans': fat_trans,
+                'carbo': carbo, 'fiber': fiber, 'sugar': sugar,
+                'protein': protein,
+                'cholesterol': cholesterol,
+                'na': na, 'ca': ca, 'k': k,
+                'vit_k': vit_k, 'vit_c': vit_c, 'vit_a_rae': vit_a_rae, 'vit_d': vit_d, 'vit_b12': vit_b12, 'vit_b6': vit_b6,
                 }, status=201)
             
         except :
@@ -219,37 +231,71 @@ def create_food_superuser(request):
         data = json.loads(request.body)
         user = request.user
         if user.is_superuser:
+            food_name = data.get('food_name')
+            ingredients = data.get('ingredients')
+            recipe_url = data.get('recipe_url') if data.get('recipe_url') else ''
+            image_url = data.get('image_url') if data.get('image_url') else ''
+            energ_kcal = data.get('energ_kcal') if data.get('energ_kcal') else 'N/A'
+            fat = data.get('fat') if data.get('fat') else 'N/A'
+            fat_saturated = data.get('fat_saturated') if data.get('fat_saturated') else 'N/A'
+            fat_trans = data.get('fat_trans') if data.get('fat_trans') else 'N/A'
+            carbo = data.get('carbo') if data.get('carbo') else 'N/A'
+            fiber = data.get('fiber') if data.get('fiber') else 'N/A'
+            sugar = data.get('sugar') if data.get('sugar') else 'N/A'
+            protein = data.get('protein') if data.get('protein') else 'N/A'
+            cholesterol = data.get('cholesterol') if data.get('cholesterol') else 'N/A'
+            na = data.get('na') if data.get('na') else 'N/A'
+            ca = data.get('ca') if data.get('ca') else 'N/A'
+            k = data.get('k') if data.get('k') else 'N/A'
+            vit_k = data.get('vit_k') if data.get('vit_k') else 'N/A'
+            vit_c = data.get('vit_c') if data.get('vit_c') else 'N/A'
+            vit_a_rae = data.get('vit_a_rae') if data.get('vit_a_rae') else 'N/A'
+            vit_d = data.get('vit_d') if data.get('vit_d') else 'N/A'
+            vit_b12 = data.get('vit_b12') if data.get('vit_b12') else 'N/A'
+            vit_b6 = data.get('vit_b6') if data.get('vit_b6') else 'N/A'
+
             food = Food.objects.create(
-                name = data.get('food_name'),
-                ingredients = data.get('ingredients'),
-                image_url = data.get('image_url') if data.get('image_url') else '',
-                recipe_url = data.get('recipe_url') if data.get('recipe_url') else '',
-
-                energ_kcal = data.get('energ_kcal') if data.get('energ_kcal') else 'N/A',
-                fat = data.get('fat') if data.get('fat') else 'N/A',
-                fat_saturated = data.get('fat_saturated') if data.get('fat_saturated') else 'N/A',
-                fat_trans = data.get('fat_trans') if data.get('fat_trans') else 'N/A',
-
-                carbo = data.get('carbo') if data.get('carbo') else 'N/A',
-                fiber = data.get('fiber') if data.get('fiber') else 'N/A',
-                sugar = data.get('sugar') if data.get('sugar') else 'N/A',
-
-                protein = data.get('protein') if data.get('protein') else 'N/A',
-                cholesterol = data.get('cholesterol') if data.get('cholesterol') else 'N/A',
-
-                na = data.get('na') if data.get('na') else 'N/A',
-                ca = data.get('ca') if data.get('ca') else 'N/A',
-                k = data.get('k') if data.get('k') else 'N/A',
-                
-                vit_k = data.get('vit_k') if data.get('vit_k') else 'N/A',
-                vit_c = data.get('vit_c') if data.get('vit_c') else 'N/A',
-                vit_a_rae = data.get('vit_a_rae') if data.get('vit_a_rae') else 'N/A',
-                vit_d = data.get('vit_d') if data.get('vit_d') else 'N/A',
-                vit_b12 = data.get('vit_b12') if data.get('vit_b12') else 'N/A',
-                vit_b6 = data.get('vit_b6') if data.get('vit_b6') else 'N/A',
+                name = food_name,
+                ingredients = ingredients,
+                image_url = image_url,
+                recipe_url = recipe_url,
+                energ_kcal = energ_kcal,
+                fat = fat,
+                fat_saturated = fat_saturated,
+                fat_trans = fat_trans,
+                carbo = carbo,
+                fiber = fiber,
+                sugar = sugar,
+                protein = protein,
+                cholesterol = cholesterol,
+                na = na,
+                ca = ca,
+                k = k,
+                vit_k = vit_k,
+                vit_c = vit_c,
+                vit_a_rae = vit_a_rae,
+                vit_d = vit_d,
+                vit_b12 = vit_b12,
+                vit_b6 = vit_b6
             )
             food.save()
-            return JsonResponse({'message': 'Food created successfully', 'food_id': food.food_id}, status=201)
+            return JsonResponse({
+                'message': 'Food created successfully', 
+                'food_id': food.food_id,
+                'food_name': food_name,
+                'ingredients': ingredients,
+                'recipe_url': recipe_url,
+                'image_url': image_url,
+                'calories': energ_kcal,
+                'fat': fat,
+                'fat_saturated': fat_saturated,
+                'fat_trans': fat_trans,
+                'carbo': carbo, 'fiber': fiber, 'sugar': sugar,
+                'protein': protein,
+                'cholesterol': cholesterol,
+                'na': na, 'ca': ca, 'k': k,
+                'vit_k': vit_k, 'vit_c': vit_c, 'vit_a_rae': vit_a_rae, 'vit_d': vit_d, 'vit_b12': vit_b12, 'vit_b6': vit_b6,
+                }, status=201)
         else:
             return JsonResponse({'message': 'Not a superuser'}, status=401)
     return JsonResponse({'message': 'Invalid request'}, status=400)
@@ -293,7 +339,10 @@ def get_meal_from_id(request):
                 'image_url': food.image_url if food.image_url else '',
             })
         return JsonResponse({
-            'meal_name': meal.meal_name, 
+            'meal_name': meal.meal_name,
+            'created_at': meal.created_at,
+            'rating': meal.rating,
+
             'foods': food_list
             }, status=200)
     return JsonResponse({'message': 'Invalid request'}, status=400)
@@ -351,18 +400,18 @@ def rate_meal(request):
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
             
-            meal = Meal.objects.get(id=meal_id)
+            meal = Meal.objects.get(meal_id=meal_id)
+            user = meal.created_by
+            
             meal.rating = (meal.rating * meal.rating_count + rating) / (meal.rating_count + 1)
             meal.save()
-
-            user = meal.created_by
-            if not user:
-                return JsonResponse({'error': 'No user found'}, status=400)
+            
             user.meal_rating = (user.meal_rating * user.meal_rating_count + rating) / (user.meal_rating_count + 1)
-            user.meal_rating_count += 1
+            user.meal_rating_count = user.meal_rating_count + 1
 
             user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
             user.check_super_member()
+            user.save()
 
             return JsonResponse({'message': 'Meal rated successfully'}, status=200)
         except Exception as e:
@@ -373,11 +422,10 @@ def rate_meal(request):
 
 @swagger_auto_schema(method='get', **get_meals_by_user_id_schema)
 @api_view(['GET'])
-def get_meals_by_user_id(request):
+def get_meals(request):
     if request.method == 'GET':
         try:
-            user_id = request.GET.get('user_id')
-            user = User.objects.get(user_id=user_id)
+            user = request.user
             meals = Meal.objects.filter(created_by=user)
             meals_data = [{
                 'meal_id': meal.meal_id,
@@ -426,7 +474,7 @@ def toggle_bookmark_meal(request):
             if not user or not meal_id:
                 return JsonResponse({'error': 'meal_id is required'}, status=400)
             
-            meal = Meal.objects.get(id=meal_id)
+            meal = Meal.objects.get(meal_id=meal_id)
 
             if meal in user.bookmarked_meals.all():
                 user.bookmarked_meals.remove(meal)
@@ -455,12 +503,12 @@ def get_bookmarked_meals_by_user_id(request):
             user = User.objects.get(user_id=user_id)
             meals = user.bookmarked_meals.all()
             meals_data = [{
-            'meal_id': meal.id,
+            'meal_id': meal.meal_id,
             'meal_name': meal.meal_name,
             'created_at': meal.created_at,
             'rating': meal.rating,
             'foods': list(meal.foods.values(
-                'food_name',
+                'name',
                 'ingredients',
                 'recipe_url',
                 'image_url',
@@ -490,7 +538,7 @@ def get_bookmarked_meals_by_user_id(request):
     return JsonResponse({'message': 'Invalid request'}, status=405)
 
 
-#@swagger_auto_schema(method='get', **get_food_by_id_schema)
+@swagger_auto_schema(method='get', **get_food_by_id_schema)
 @api_view(['GET'])
 def get_food_by_id(request):
     if request.method == 'GET':

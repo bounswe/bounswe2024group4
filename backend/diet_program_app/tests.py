@@ -4,7 +4,6 @@ from diet_program_app.models import Meal, Food
 from django.urls import reverse
 import json
 
-# Create your tests here.
 class TestCreateMealFood(APITestCase):
     def setUp(self):
         self.user1 = User.objects.create_user(username='testuser1', email='testuser1@gmail.com', password='password', is_superuser=True)
@@ -18,7 +17,7 @@ class TestCreateMealFood(APITestCase):
         
         data = {
             'food_name': 'Apple',
-            'ingredients': '100 gr apple',
+            'ingredients': '100 gr apple,',
         }
         response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
         
@@ -159,11 +158,162 @@ class TestMealFeatures(APITestCase):
         self.assertEqual(response.json()['meal_id'], meal_id)
 
     def test_two_toggle_bookmark_meal(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        food_id = response.json()['food_id']
+        data = {
+            'meal_name': 'Apple Breakfast',
+            'foods': [food_id],
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id = response.json()['meal_id']
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+        response = self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+            
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Meal bookmark removed successfully')
+        self.assertEqual(response.json()['meal_id'], meal_id)
 
     def test_three_toggle_bookmark_meal(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        food_id = response.json()['food_id']
+        data = {
+            'meal_name': 'Apple Breakfast',
+            'foods': [food_id],
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id = response.json()['meal_id']
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+        response = self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Meal bookmarked successfully')
+        self.assertEqual(response.json()['meal_id'], meal_id)
 
     def test_four_toggle_bookmark_meal(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
         
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        food_id = response.json()['food_id']
+        data = {
+            'meal_name': 'Apple Breakfast',
+            'foods': [food_id],
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id = response.json()['meal_id']
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+        response = self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id}), content_type='application/json')
+            
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Meal bookmark removed successfully')
+        self.assertEqual(response.json()['meal_id'], meal_id)
+        
+    def test_rate_meal(self):        
+        response = self.client.post(reverse('log_in'), {'username': 'testuser1', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        food_id = response.json()['food_id']
+        data = {
+            'meal_name': 'Apple Breakfast',
+            'foods': [food_id],
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id = response.json()['meal_id']
+
+        response = self.client.post(reverse('log_in'), {'username': 'testuser2', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+
+        response = self.client.post('/rate_meal/', json.dumps({'meal_id': meal_id, 'rating': 5}), content_type='application/json')
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Meal rated successfully')
+
+    def test_rate_meal_become_super(self):
+        self.user3 = User.objects.create_user(username='testuser3', email='testuser3@gmail.com', password='password')
+        self.user4 = User.objects.create_user(username='testuser4', email='testuser4@gmail.com', password='password')
+        response = self.client.post(reverse('log_in'), {'username': 'testuser1', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        food_id = response.json()['food_id']
+        data = {
+            'meal_name': 'Apple Breakfast',
+            'foods': [food_id],
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id = response.json()['meal_id']
+
+        response = self.client.post(reverse('log_in'), {'username': 'testuser2', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+        response = self.client.post('/rate_meal/', json.dumps({'meal_id': meal_id, 'rating': 5}), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Meal rated successfully')
+
+        response = self.client.post(reverse('log_in'), {'username': 'testuser3', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+        response = self.client.post('/rate_meal/', json.dumps({'meal_id': meal_id, 'rating': 4.2}), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Meal rated successfully')
+
+        response = self.client.post(reverse('log_in'), {'username': 'testuser4', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+        response = self.client.post('/rate_meal/', json.dumps({'meal_id': meal_id, 'rating': 4.5}), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Meal rated successfully')
+
+        self.user1.refresh_from_db()
+        self.assertTrue(self.user1.is_superuser)
 
 
 class TestMealFoodGettersAndDelete(APITestCase):
@@ -249,7 +399,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
         self.assertTrue(food_id1 in [item['food_id'] for item in response.json()['food_list']])
         self.assertTrue(food_id2 in [item['food_id'] for item in response.json()['food_list']])
 
-    def test_get_meals_by_user_id(self):
+    def test_get_meals(self):
         response = self.client.post(reverse('log_in'), {'username': 'testuser1', 'password': 'password'})
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
 
@@ -275,10 +425,10 @@ class TestMealFoodGettersAndDelete(APITestCase):
         response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
         meal_id2 = response.json()['meal_id']
 
-        response = self.client.get('/get_meals_by_user_id/', {'user_id': self.user1.user_id})
+        response = self.client.get('/get_meals/')
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(meal_id1 in [item['meal_id'] for item in response.json()['meals']])
-        self.assertFalse(meal_id2 in [item['meal_id'] for item in response.json()['meals']])
+        self.assertTrue(meal_id2 in [item['meal_id'] for item in response.json()['meals']])
+        self.assertFalse(meal_id1 in [item['meal_id'] for item in response.json()['meals']])
 
     def test_get_bookmarked_meals_by_user_id(self):
         response = self.client.post(reverse('log_in'), {'username': 'testuser1', 'password': 'password'})
@@ -304,12 +454,45 @@ class TestMealFoodGettersAndDelete(APITestCase):
         self.user2 = User.objects.create_user(username='testuser2', email="test2@gmail.com", password="password")
         response = self.client.post(reverse('log_in'), {'username': 'testuser2', 'password': 'password'})
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
-        response = self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id1}), content_type='application/json')
+
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id1}), content_type='application/json')
+        response = self.client.get('/get_bookmarked_meals_by_user_id/', {'user_id': self.user2.user_id})
+        # print(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(meal_id1 in [item['meal_id'] for item in response.json()['meals']])
+        self.assertEqual(len(response.json()['meals']), 1)
+
+    def test_double_bookmark_test_get_bookmarked_meals_by_user_id(self):
+        response = self.client.post(reverse('log_in'), {'username': 'testuser1', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+            'energ_kcal': '52.0',
+            'fat': '0.2',
+            'fat_saturated': '0.1'
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+
+        data = {
+            'meal_name': 'Apple Breakfast',
+            'foods': [response.json()['food_id']],
+        }
+
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id1 = response.json()['meal_id']
+
+        self.user2 = User.objects.create_user(username='testuser2', email='testuser2@gmail.com', password='password')
+        response = self.client.post(reverse('log_in'), {'username': 'testuser2', 'password': 'password'})
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
+
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id1}), content_type='application/json')
+        self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id1}), content_type='application/json')
         response = self.client.get('/get_bookmarked_meals_by_user_id/', {'user_id': self.user2.user_id})
 
         self.assertEqual(response.status_code, 200)
-        print(response.json())
-        self.assertTrue(meal_id1 in [item['meal_id'] for item in response.json()['meals']])
-        # self.assertEqual(len(response.json()['meals_list']), 1)
+        self.assertEqual(response.json()['meals'], [])
 
 

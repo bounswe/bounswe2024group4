@@ -93,7 +93,7 @@ urlpatterns = [
     path('meals/delete/<int:meal_id>/', diet_program_views.delete_meal_by_id, name='delete_meal_by_id'),
     path('get_foodname_options/', diet_program_views.get_foodname_options, name='get_foodname_options'),
     path('rate_meal/', diet_program_views.rate_meal, name='rate_meal'),
-    path('get_meals_by_user_id/', diet_program_views.get_meals_by_user_id, name='get_meals_by_user_id'),
+    path('get_meals/', diet_program_views.get_meals, name='get_meals'),
     path('toggle_bookmark_meal/', diet_program_views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
     path('get_bookmarked_meals_by_user_id/', diet_program_views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
     path('get_food_by_id/', diet_program_views.get_food_by_id, name='get_food_by_id'),
@@ -102,7 +102,7 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
-  #  path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
+    # path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
     
 
 ]
