@@ -35,9 +35,39 @@ def create_meal(request):
             rating_count=0
         )
         
+        meal.calories = 0
+        meal.protein = 0
+        meal.fat = 0
+        meal.carbs = 0
+        meal.fiber = 0
         # Then add foods to it
         for food in foods:
             meal.foods.add(food)
+        for food in foods:
+            try:
+                meal.calories += float(food.energ_kcal.split(' ')[0])
+            except:
+                meal.calories = 0
+        for food in foods:
+            try:
+                meal.protein += float(food.protein.split(' ')[0])
+            except:
+                meal.protein = 0
+        for food in foods:
+            try:
+                meal.fat += float(food.fat.split(' ')[0])
+            except:
+                meal.fat = 0
+        for food in foods:
+            try:
+                meal.carbs += float(food.carbo.split(' ')[0])
+            except:
+                meal.carbs = 0
+        for food in foods:
+            try:
+                meal.fiber += float(food.fiber.split(' ')[0])
+            except:
+                meal.fiber = 0
         meal.save()
 
         try:
