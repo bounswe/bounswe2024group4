@@ -4,6 +4,7 @@ import TodaysExercises from "./TodaysExercises";
 import axios from 'axios';
 import '../css/index.css';
 import { Context } from "../globalContext/globalContext.js";
+import { useNavigate } from "react-router-dom";
 
 const WeekProgram = ({ programs, bookmarkedPrograms }) => {
   const [weekPrograms, setWeekPrograms] = useState([]);
@@ -19,6 +20,7 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
       'Authorization': 'Token ' + token,
     },
   };
+  const navigate = useNavigate();
 
   const daysOfWeek = [
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
@@ -82,8 +84,8 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
     console.log(currentDayPrograms[0]);
 
     const updatedExercises = currentDayPrograms.map(program => ({
-      ...program,
-      exercises: program.exercises.map(exercise => ({
+      //...program,
+        exercises: program.exercises.map(exercise => ({
         ...exercise,
         is_completed: completedExercises.includes(exercise.name),
       })),
@@ -96,7 +98,7 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
     };
 
     try {
-      console.log(currentDayPrograms[0].id,body);
+      console.log(currentDayPrograms[0]);
       const response = await axios.post(
         `${baseURL}/workout-log/${currentDayPrograms[0].id}/`,
         body,
@@ -192,6 +194,12 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
         >
           Save Weekly Program
         </button>
+        <button
+    className="bg-green-500 text-white px-4 py-2 rounded"
+    onClick={() => navigate('/history')} 
+  >
+    View History
+  </button>
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import AuthenticatedLayout from './layouts/AuthenticatedLayout';
 import PublicLayout from './layouts/PublicLayout';
 import  PrivateRoute  from "./components/PrivateRoute";
 import ProfilePage from './pages/ProfilePage';
+import History from './components/History';
 function App() {
   return (
     <Router>
@@ -101,6 +102,16 @@ function App() {
         <PrivateRoute>
           <AuthenticatedLayout>
             <LeaderBoard />
+          </AuthenticatedLayout>
+        </PrivateRoute>
+      }
+    />
+    <Route
+      path="/history"
+      element={
+        <PrivateRoute>
+          <AuthenticatedLayout>
+            <History />
           </AuthenticatedLayout>
         </PrivateRoute>
       }
