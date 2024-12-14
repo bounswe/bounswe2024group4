@@ -34,12 +34,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     useEffect(() => {
         const fetchPostData = async () => {
             try {
-                // Optional: If you have an endpoint to get existing comments, you can fetch them here.
-                // Example (assuming endpoint exists):
-                // const commentsRes = await axios.get(`${baseURL}/get_comments/?postId=${postId}`, config);
-                // if (commentsRes.status === 200) {
-                //     setComments(commentsRes.data.comments);
-                // }
+
 
                 if (mealId) {
                     // TODO: Fetch meal data using mealId if needed
