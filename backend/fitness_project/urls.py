@@ -106,6 +106,13 @@ urlpatterns = [
   #  path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
     path('search/', include('search_app.urls')),
 
+    # Posts related endpoints
+    path('post/<int:post_id>/delete/', post_views.delete_post, name='delete_post'),
+    path('comment/<int:comment_id>/delete/', post_views.delete_comment, name='delete_comment'),
+
+    # Include all posts-related URLs
+    path('', include('posts_app.urls')),  # This will include all URLs from posts_app.urls
+
 ]
 
 if settings.DEBUG:
