@@ -31,11 +31,11 @@ class Food(models.Model):
     vit_b6 = models.TextField(default='N/A')
 
     recipe_url = models.URLField(default='', blank=True)
-
-    # creator_level = models.IntegerField(default=0) # 0: User, 1: Superuser, 2: API
+    image_url = models.URLField(default='', blank=True, upload_to='food_images/')
 
     def _str_(self):
         return self.food_name
+
 
 class Meal(models.Model):
     meal_id = models.AutoField(primary_key=True)

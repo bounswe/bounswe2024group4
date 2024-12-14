@@ -78,7 +78,7 @@ def create_meal(request):
                             }
                         },
                         "recipe_url": food.recipe_url,
-                        # "creator_level": food.creator_level
+                        "image_url": food.image_url
                     } for food in meal.foods.all()]
                 },
                 "summary": f"{user.username} created a new meal '{meal_name}'"
@@ -150,10 +150,8 @@ def create_food_all(request):
         data = json.loads(request.body)
         food_name = data.get('food_name')
         ingredients = data.get('ingredients')
-        recipe_url = data.get('recipe_url')
-
-        if not recipe_url:
-            recipe_url = ''
+        recipe_url = data.get('recipe_url') if data.get('recipe_url') else ''
+        image_url = data.get('image_url') if data.get('image_url') else ''
 
         try:   # if the food is in the API
             url = "https://api.edamam.com/api/nutrition-data"
@@ -199,6 +197,7 @@ def create_food_all(request):
                 na=na, ca=ca, k=k,
                 vit_k=vit_k, vit_c=vit_c, vit_a_rae=vit_a_rae, vit_d=vit_d, vit_b12=vit_b12, vit_b6=vit_b6,
                 recipe_url=recipe_url,
+                image_url=image_url
             )
             food.save()
 
@@ -222,7 +221,9 @@ def create_food_superuser(request):
         if user.is_superuser:
             food = Food.objects.create(
                 name = data.get('food_name'),
-                ingredients = data.get('ingredients') ,
+                ingredients = data.get('ingredients'),
+                image_url = data.get('image_url') if data.get('image_url') else '',
+                recipe_url = data.get('recipe_url') if data.get('recipe_url') else '',
 
                 energ_kcal = data.get('energ_kcal') if data.get('energ_kcal') else 'N/A',
                 fat = data.get('fat') if data.get('fat') else 'N/A',
@@ -246,8 +247,6 @@ def create_food_superuser(request):
                 vit_d = data.get('vit_d') if data.get('vit_d') else 'N/A',
                 vit_b12 = data.get('vit_b12') if data.get('vit_b12') else 'N/A',
                 vit_b6 = data.get('vit_b6') if data.get('vit_b6') else 'N/A',
-
-                recipe_url = data.get('recipe_url') if data.get('recipe_url') else '',
             )
             food.save()
             return JsonResponse({'message': 'Food created successfully', 'food_id': food.food_id}, status=201)
@@ -287,6 +286,7 @@ def get_meal_from_id(request):
                 'vit_b12': food.vit_b12,
                 'vit_b6': food.vit_b6,
                 'recipe_url': food.recipe_url,
+                'image_url': food.image_url,
             })
         return JsonResponse({'meal_name': meal.meal_name, 'foods': food_list}, status=200)
     return JsonResponse({'message': 'Invalid request'}, status=400)
@@ -299,10 +299,13 @@ def delete_meal_by_id(request, meal_id):
         try:
             user = request.user
             meal = Meal.objects.get(meal_id=meal_id)
-
             # Check if the user is the creator of the workout
             if meal.created_by != user:
                 return JsonResponse({'error': 'You are not authorized to delete this meal'}, status=403)
+            
+            # delete the image from images folder
+            if meal.image_url and os.path.exists(meal.image_url) and meal.image_url != '':
+                os.remove(meal.image_url)
 
             # Delete the workout
             meal.delete()
@@ -375,7 +378,9 @@ def get_meals_by_user_id(request):
                 'rating': meal.rating,
                 'foods': list(meal.foods.values(
                     'food_name',
-                    'ingredients', 
+                    'ingredients',
+                    'recipe_url',
+                    'image_url',
                     'energ_kcal', 
                     'fat', 
                     'fat_saturated', 
@@ -394,7 +399,6 @@ def get_meals_by_user_id(request):
                     'vit_d',
                     'vit_b12',
                     'vit_b6',
-                    'recipe_url',
                 )),
             } for meal in meals]
             return JsonResponse({'message': 'Meals found', 'meals': meals_data}, status=200)
@@ -449,7 +453,9 @@ def get_bookmarked_meals_by_user_id(request):
             'rating': meal.rating,
             'foods': list(meal.foods.values(
                 'food_name',
-                'ingredients', 
+                'ingredients',
+                'recipe_url',
+                'image_url',
                 'energ_kcal', 
                 'fat', 
                 'fat_saturated', 
@@ -468,7 +474,6 @@ def get_bookmarked_meals_by_user_id(request):
                 'vit_d',
                 'vit_b12',
                 'vit_b6',
-                'recipe_url',
             )),
         } for meal in meals]
             return JsonResponse({'message': 'Meals found', 'meals': meals_data}, status=200)
@@ -487,6 +492,8 @@ def get_food_by_id(request):
             return JsonResponse({
                 'food_name': food.name,
                 'ingredients': [ingredient.split(' ') for ingredient in food.ingredients.split(',')],
+                'recipe_url': food.recipe_url,
+                'image_url': food.image_url,
                 'energ_kcal': food.energ_kcal,
                 'fat': food.fat,
                 'fat_saturated': food.fat_saturated,
@@ -505,7 +512,6 @@ def get_food_by_id(request):
                 'vit_d': food.vit_d,
                 'vit_b12': food.vit_b12,
                 'vit_b6': food.vit_b6,
-                'recipe_url': food.recipe_url,
             }, status=200)
         except Food.DoesNotExist:
             return JsonResponse({'error': 'Food not found'}, status=404)
