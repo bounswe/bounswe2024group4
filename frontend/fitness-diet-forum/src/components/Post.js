@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import { FaHeart, FaComment, FaBookmark } from "react-icons/fa";
 import { IoIosStar } from "react-icons/io";
 import ExerciseProgram from "./ExerciseProgram";
@@ -24,18 +24,27 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     const [showCommentBox, setShowCommentBox] = useState(false);
     const [newComment, setNewComment] = useState("");
     const [comments, setComments] = useState([]);
-    const config = {
+
+    const config = useMemo(() => ({
         headers: {
-            'Authorization': 'Token ' + token,
+          'Authorization': 'Token ' + token,
         },
-    };
+      }), [token]);
 
     useEffect(() => {
         const fetchPostData = async () => {
             try {
+                // Optional: If you have an endpoint to get existing comments, you can fetch them here.
+                // Example (assuming endpoint exists):
+                // const commentsRes = await axios.get(`${baseURL}/get_comments/?postId=${postId}`, config);
+                // if (commentsRes.status === 200) {
+                //     setComments(commentsRes.data.comments);
+                // }
+
                 if (mealId) {
-                    // TO DO: Fetch meal data using mealId
+                    // TODO: Fetch meal data using mealId if needed
                 }
+
                 if (workoutId) {
                     const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, config);
                     if (workoutResponse.status === 200) {
@@ -49,43 +58,52 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 const bookmarkResponse = await axios.get(baseURL + "/bookmarked_posts/", config);
                 if (bookmarkResponse.status === 200) {
                     const bookmarkedPostIds = bookmarkResponse.data.bookmarked_posts.map(post => post.post_id);
-                    //console.log(bookmarkedPostIds);
                     setIsBookmarked(bookmarkedPostIds.includes(postId));
                 }
             } catch (error) {
                 setError('Something went wrong');
             }
         };
+        const fetchComments = async () => {
+            if (!postId) return;
+            try {
+              const response = await axios.get(`${baseURL}/get_comments/?postId=${postId}`, config);
+              if (response.status === 200) {
+                setComments(response.data.comments);
+              }
+            } catch (error) {
+              console.error("Error fetching comments:", error);
+            }
+          };
         fetchPostData();
-    }, [mealId, workoutId, hasLiked ]);
+        fetchComments();
+    }, [mealId, workoutId, hasLiked, baseURL, config, postId]);
 
     const handleLikeClick = async () => {
         const updatedHasLiked = !hasLiked;
         const updatedLikeCount = likeCount + (hasLiked ? -1 : 1);
-    
+
         // Optimistically update UI
         setHasLiked(updatedHasLiked);
         setLikeCount(updatedLikeCount);
-    
+
         try {
             const response = await axios.post(
                 `${baseURL}/toggle_like/`, 
                 { postId }, 
                 config
             );
-    
-            if (response.status === 200) {
-                console.log(response.data.message);
-            } else {
+
+            if (response.status !== 200) {
                 throw new Error('Unexpected response status');
             }
         } catch (error) {
             console.error('Error toggling like:', error);
-            setHasLiked(hasLiked); // Restore previous state of hasLiked
-            setLikeCount(likeCount); // Restore previous like count
+            // Revert on error
+            setHasLiked(hasLiked);
+            setLikeCount(likeCount);
         }
     };
-    
 
     const toggleBookmark = async () => {
         try {
@@ -97,7 +115,6 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 { postId },
                 config
             );
-            //console.log(postId);
             if (response.status !== 200) {
                 throw new Error("Unexpected response");
             }
@@ -107,12 +124,26 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
         }
     };
 
-    const handleCommentSubmit = (e) => {
+    const handleCommentSubmit = async (e) => {
         e.preventDefault();
         if (newComment.trim()) {
-            setComments([...comments, newComment]);
-            setNewComment("");
-            setShowCommentBox(false);
+            try {
+                const response = await axios.post(
+                    `${baseURL}/comment/`,
+                    { postId, content: newComment },
+                    config
+                );
+                if (response.status === 201) {
+                    // Successfully created comment on backend
+                    // Add the new comment to the local state
+                    const comment_id = response.data.comment_id;
+                    setComments(prevComments => [...prevComments, { id: comment_id, content: newComment }]);
+                    setNewComment("");
+                    setShowCommentBox(false);
+                }
+            } catch (error) {
+                console.error('Error creating comment:', error);
+            }
         }
     };
 
@@ -127,13 +158,13 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                         className="w-12 h-12 rounded-full mr-4"
                     />
                     <div>
-                    <h3 className="text-xl font-semibold">@{user.username}</h3>
-                    <div className="flex items-center text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                        <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
-                        ))}
-                        <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
-                    </div>
+                        <h3 className="text-xl font-semibold">@{user.username}</h3>
+                        <div className="flex items-center text-yellow-400">
+                            {[...Array(5)].map((_, i) => (
+                                <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
+                            ))}
+                            <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
+                        </div>
                     </div>
                 </Link>
 
@@ -190,7 +221,6 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 >
                     <FaBookmark className={`mr-2`} /> Bookmark
                 </button>
-                
             </div>
 
             {/* Comment Box */}
@@ -217,17 +247,25 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 <div className="mt-4">
                     <h4 className="font-semibold mb-2">Comments:</h4>
                     <ul>
-                        {comments.map((comment, index) => (
-                            <li key={index} className="mb-2">
-                                {comment}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+                        {comments.map((comment) => (
+                    <li key={comment.id} className="mb-2">
+                    <Link
+                    to={`/profile/${comment.username}`}
+                    className="font-semibold text-blue-400 hover:underline mr-2"
+                    >
+            @{comment.username}
+          </Link>
+          {comment.content}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
         </div>
     );
 };
 
 export default Post;
+
 

@@ -200,3 +200,39 @@ def bookmarked_posts(request):
                 } for post in bookmarked_posts]))}, status=200)
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
+
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def get_comments_for_post(request):
+    post_id = request.query_params.get('postId')
+
+    if not post_id:
+        return JsonResponse({'error': 'postId query parameter is required'}, status=400)
+
+    try:
+        post_id = int(post_id)
+    except ValueError:
+        return JsonResponse({'error': 'postId must be an integer'}, status=400)
+
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({'error': 'Post not found'}, status=404)
+
+    comments = Comment.objects.filter(post=post).order_by('-created_at')
+
+    
+    data = []
+    for comment in comments:
+        data.append({
+            'id': comment.id,
+            'content': comment.content,
+            'username': comment.user.username,
+            'created_at': comment.created_at.isoformat()
+        })
+
+    return JsonResponse({'comments': data}, status=200)

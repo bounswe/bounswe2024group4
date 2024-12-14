@@ -85,6 +85,7 @@ urlpatterns = [
     path('following_feed/', social_feed_views.following_feed, name='following_feed'),
     path('follow/', simple_features_views.follow, name='follow'),
     path('unfollow/', simple_features_views.unfollow, name='unfollow'),
+    path('get_comments/',post_views.get_comments_for_post,name='get_comments'),
     # Meal related endpoints
     path('create_meal/', diet_program_views.create_meal, name='create_meal'),
     path('get_meal_activities/', diet_program_views.get_meal_activities, name='get_meal_activities'),
