@@ -78,7 +78,7 @@ def create_meal(request):
                             }
                         },
                         "recipe_url": food.recipe_url,
-                        "image_url": food.image_url
+                        "image_url": food.image_url if food.image_url else ''
                     } for food in meal.foods.all()]
                 },
                 "summary": f"{user.username} created a new meal '{meal_name}'"
@@ -260,7 +260,11 @@ def create_food_superuser(request):
 def get_meal_from_id(request):
     if request.method == 'GET':
         meal_id = request.GET.get('meal_id')
-        meal = Meal.objects.get(id=meal_id)
+        try:
+            meal = Meal.objects.get(meal_id=meal_id)
+        except Meal.DoesNotExist:
+            return JsonResponse({'message': 'Meal not found'}, status=404)
+        
         foods = meal.foods.all()
         food_list = []
         for food in foods:
@@ -286,9 +290,12 @@ def get_meal_from_id(request):
                 'vit_b12': food.vit_b12,
                 'vit_b6': food.vit_b6,
                 'recipe_url': food.recipe_url,
-                'image_url': food.image_url,
+                'image_url': food.image_url if food.image_url else '',
             })
-        return JsonResponse({'meal_name': meal.meal_name, 'foods': food_list}, status=200)
+        return JsonResponse({
+            'meal_name': meal.meal_name, 
+            'foods': food_list
+            }, status=200)
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
 
@@ -304,8 +311,9 @@ def delete_meal_by_id(request, meal_id):
                 return JsonResponse({'error': 'You are not authorized to delete this meal'}, status=403)
             
             # delete the image from images folder
-            if meal.image_url and os.path.exists(meal.image_url) and meal.image_url != '':
-                os.remove(meal.image_url)
+            for food in meal.foods.all():
+                if food.image_url and os.path.exists(food.image_url) and food.image_url != '':
+                    os.remove(food.image_url)
 
             # Delete the workout
             meal.delete()
@@ -372,12 +380,12 @@ def get_meals_by_user_id(request):
             user = User.objects.get(user_id=user_id)
             meals = Meal.objects.filter(created_by=user)
             meals_data = [{
-                'meal_id': meal.id,
+                'meal_id': meal.meal_id,
                 'meal_name': meal.meal_name,
                 'created_at': meal.created_at,
                 'rating': meal.rating,
                 'foods': list(meal.foods.values(
-                    'food_name',
+                    'name',
                     'ingredients',
                     'recipe_url',
                     'image_url',

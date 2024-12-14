@@ -31,7 +31,7 @@ class Food(models.Model):
     vit_b6 = models.TextField(default='N/A')
 
     recipe_url = models.URLField(default='', blank=True)
-    image_url = models.URLField(default='', blank=True, upload_to='food_images/')
+    image_url = models.ImageField(default='', blank=True, upload_to='food_images/')
 
     def _str_(self):
         return self.food_name
