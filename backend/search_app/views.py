@@ -18,23 +18,31 @@ from django.db.models.functions import Cast
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def search(request):
-    # search_query = request.GET.get('search', '').strip()
-    # search_type = request.GET.get('type', 'all').lower()
-    data = json.loads(request.body)
-    search_query = data.get('search', '').strip()
-    filters = data.get('filters', {})
+    search_query = request.GET.get('search', '').strip()  # 'meals' or 'workouts' or 'posts' or 'users' or 'all' or 'super_member'
+    categories = request.GET.get('categories', 'all')
+    muscles = request.GET.get('muscles', '').split(',')
+    min_calories = request.GET.get('min_calories', 0)
+    max_calories = request.GET.get('max_calories', int(1e9))
+    min_protein = request.GET.get('min_protein', 0)
+    max_protein = request.GET.get('max_protein', int(1e9))
+    min_fat = request.GET.get('min_fat', 0)
+    max_fat = request.GET.get('max_fat', int(1e9))
+    min_carbs = request.GET.get('min_carbs', 0)
+    max_carbs = request.GET.get('max_carbs', int(1e9))
+    min_fiber = request.GET.get('min_fiber', 0)
+    max_fiber = request.GET.get('max_fiber', int(1e9))
 
-    if not search_query:
+    if not search_query or search_query == '':
         return JsonResponse({'error': 'Search query is required'}, status=400)
 
     response = {}
 
-    if 'users' in filters or filters == {}:
+    if 'users' in categories or 'all' in categories:
         user_queryset = User.objects.filter(
             Q(username__icontains=search_query) |
             Q(bio__icontains=search_query)
         )
-        if 'super_member' in filters:
+        if 'super_member' in categories:
             user_queryset = user_queryset.filter(user_type='super_member')
         
         users = user_queryset.values(
@@ -47,7 +55,7 @@ def search(request):
         ).order_by('-user_id')
         response['users'] = list(users)
 
-    if 'posts' in filters or filters == {}:
+    if 'posts' in categories or 'all' in categories:
         posts = Post.objects.filter(
             Q(content__icontains=search_query) |
             Q(user__username__icontains=search_query)
@@ -66,25 +74,14 @@ def search(request):
             'meal_id': post.mealId
         } for post in posts]
 
-    if 'meals' in filters or not filters:
+    if 'meals' in categories or 'all' in categories:
         # Base query: search by meal name or creator's username
         meal_queryset = Meal.objects.filter(
             Q(meal_name__icontains=search_query) |
             Q(created_by__username__icontains=search_query)
         ).select_related('created_by').order_by('-created_at')
 
-        if 'meals' in filters:
-            min_calories = filters['meals']['min_calories'] if 'min_calories' in filters['meals'] else 0
-            max_calories = filters['meals']['max_calories'] if 'max_calories' in filters['meals'] else int(1e9)
-            min_protein = filters['meals']['min_protein'] if 'min_protein' in filters['meals'] else 0
-            max_protein = filters['meals']['max_protein'] if 'max_protein' in filters['meals'] else int(1e9)
-            min_fat = filters['meals']['min_fat'] if 'min_fat' in filters['meals'] else 0
-            max_fat = filters['meals']['max_fat'] if 'max_fat' in filters['meals'] else int(1e9)
-            min_carbs = filters['meals']['min_carbs'] if 'min_carbs' in filters['meals'] else 0
-            max_carbs = filters['meals']['max_carbs'] if 'max_carbs' in filters['meals'] else int(1e9)
-            min_fiber = filters['meals']['min_fiber'] if 'min_fiber' in filters['meals'] else 0
-            max_fiber = filters['meals']['max_fiber'] if 'max_fiber' in filters['meals'] else int(1e9)
-            
+        if 'meals' in categories:            
             meal_queryset = meal_queryset.filter(
                 calories__lte=float(max_calories),
                 calories__gte=float(min_calories),
@@ -111,14 +108,14 @@ def search(request):
             }
         } for meal in meal_queryset]
 
-    if 'workouts' in filters or filters == {}:
+    if 'workouts' in categories or 'all' in categories:
         workout_queryset = Workout.objects.filter(
             Q(workout_name__icontains=search_query) |
             Q(created_by__username__icontains=search_query)
         ).select_related('created_by').order_by('-created_at')
         
-        if 'workouts' in filters: 
-            for muscle in filters['workouts']:
+        if not muscles == ['']:
+            for muscle in muscles:
                 workout_queryset = workout_queryset.filter(
                     exercise__muscle__icontains=muscle
                 ).distinct()
