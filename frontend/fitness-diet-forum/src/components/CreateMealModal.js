@@ -445,7 +445,7 @@ const CreateMealModal = (userMeals, onClose) => {
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
-                            visible={newFood}
+                            visible={newFood || isSuperMember}
                         />
                     </div>
                         <NutrientSection
@@ -458,7 +458,7 @@ const CreateMealModal = (userMeals, onClose) => {
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
-                            visible={newFood}
+                            visible={newFood || isSuperMember}
                         />
 
                         <NutrientSection
@@ -471,7 +471,7 @@ const CreateMealModal = (userMeals, onClose) => {
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
-                            visible={newFood}
+                            visible={newFood || isSuperMember}
                         />
 
                         <NutrientSection
@@ -486,7 +486,7 @@ const CreateMealModal = (userMeals, onClose) => {
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
-                            visible={newFood}
+                            visible={newFood || isSuperMember}
                         />
                     </div>
                   </>
