@@ -9,6 +9,9 @@ from user_auth_app.models import User
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
 from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_by_user_id_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_by_user_id_schema, get_food_by_id_schema
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from firebase_admin import firestore
 from fitness_project.firebase import db
 from datetime import datetime
@@ -572,5 +575,55 @@ def get_food_by_id(request):
         except Food.DoesNotExist:
             return JsonResponse({'error': 'Food not found'}, status=404)
     return JsonResponse({'message': 'Invalid request'}, status=405)
+
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def edit_meal(request, meal_id):
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            user = request.user
+            meal = Meal.objects.get(meal_id=meal_id)
+
+            # Check if user is authorized to edit this meal
+            if meal.created_by != user:
+                return JsonResponse({'error': 'You are not authorized to edit this meal'}, status=403)
+
+            # Update meal name if provided
+            new_meal_name = data.get('meal_name')
+            if new_meal_name:
+                meal.meal_name = new_meal_name
+
+            # Update foods if provided
+            new_foods = data.get('foods')
+            if new_foods is not None:
+                # Clear existing foods and add new ones
+                meal.foods.clear()
+                for food_id in new_foods:
+                    try:
+                        food = Food.objects.get(food_id=food_id)
+                        meal.foods.add(food)
+                    except Food.DoesNotExist:
+                        return JsonResponse({'error': f'Food with id {food_id} not found'}, status=404)
+
+            meal.save()
+
+            return JsonResponse({
+                'message': 'Meal updated successfully',
+                'meal_id': meal.meal_id,
+                'meal_name': meal.meal_name,
+                'foods': list(meal.foods.values('food_id', 'name'))
+            }, status=200)
+
+        except Meal.DoesNotExist:
+            return JsonResponse({'error': 'Meal not found'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
         
