@@ -16,30 +16,30 @@ const CreateMealModal = (userMeals, onClose) => {
     const [foodFound, setFoodFound] = useState(true);
     const [foods, setFoods] = useState([]);
     const [suggestedFoods, setSuggestedFoods] = useState([]);
+    const [ingredientsList, setIngredientsList] = useState([]);
 
     const [error, setError] = useState(null);
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const token = localStorage.getItem("token");
+    const isSuperMember = localStorage.getItem("userType") === "super_member"
     const config = {
       headers: {
         'Authorization': 'Token ' + token
       }
     }
 
+    const [foodName, setFoodName] = useState('');
     const [ca, setCa] = useState('');
     const [carbo, setCarbo] = useState('');
     const [cholesterol, setCholesterol] = useState('');
     const [energKcal, setEnergKcal] = useState('');
     const [fat, setFat] = useState('');
-    const [fatSaturated, setFatSaturated] = useState('');
-    const [fatTrans, setFatTrans] = useState('');
     const [fiber, setFiber] = useState('');
     const [k, setK] = useState('');
     const [na, setNa] = useState('');
     const [protein, setProtein] = useState('');
     const [recipeUrl, setRecipeUrl] = useState('');
-    const [sugar, setSugar] = useState('');
     const [vitARae, setVitARae] = useState('');
     const [vitB6, setVitB6] = useState('');
     const [vitB12, setVitB12] = useState('');
@@ -58,6 +58,28 @@ const CreateMealModal = (userMeals, onClose) => {
         };
         fetchFoods();
       }, [baseURL]);
+
+    const fetchNutrients = async () => {
+        const body = {
+            'food_name': foodName,
+            'ingredients': ingredientsList
+                    .map(ingredient => `${ingredient.amount} gr ${ingredient.name}`)
+                    .join(",")
+        }
+        try{
+            const nutrientsResponse = await axios.post(baseURL + "/create_food_all/", body, config);
+            console.log(nutrientsResponse);
+            if(nutrientsResponse.status !== 201){       
+                setNewFood(null);
+                setError("Food not found");
+            }else{
+                setNewFood(nutrientsResponse.data.food);
+            }
+        }catch{
+            setError("Food not found");
+            setNewFood(null);
+        }
+    };
 
     const handleMealInputChange = (e) => {
         const { name, value } = e.target;
@@ -83,12 +105,6 @@ const CreateMealModal = (userMeals, onClose) => {
         case 'fat':
             setFat(value);
             break;
-        case 'fatSaturated':
-            setFatSaturated(value);
-            break;
-        case 'fatTrans':
-            setFatTrans(value);
-            break;
         case 'fiber':
             setFiber(value);
             break;
@@ -103,9 +119,6 @@ const CreateMealModal = (userMeals, onClose) => {
             break;
         case 'recipeUrl':
             setRecipeUrl(value);
-            break;
-        case 'sugar':
-            setSugar(value);
             break;
         case 'vitARae':
             setVitARae(value);
@@ -132,16 +145,26 @@ const CreateMealModal = (userMeals, onClose) => {
     
     // Function to handle adding an ingredient
     const addIngredient = () => {
-        setNewFood(prevFood => ({
-            ...prevFood,
-            ingredients: [...prevFood.ingredients, ingredientName],
-            ingredientAmounts: [...prevFood.ingredientAmounts, ingredientAmount]
-        }));
+        if(ingredientAmount && ingredientName){
+            setIngredientsList([
+                ...ingredientsList,
+                { name: ingredientName, amount: ingredientAmount }
+              ]);
+        }
+        console.log(ingredientsList);
         // Reset ingredient fields
         setIngredientName('');
         setIngredientAmount('');
     };
 
+    const removeIngredient = (amount, name) => {
+        if (amount && name) {
+            setIngredientsList(prevList =>
+                prevList.filter(ingredient => !(ingredient.name === name && ingredient.amount === amount))
+            );
+        }
+    };
+    
     // Function to handle food addition
     const addFoodToMeal = () => {
         const food = {
@@ -210,6 +233,7 @@ const CreateMealModal = (userMeals, onClose) => {
             setFoodFound(false);
             setNewFood(null);
             setSuggestedFoods([]);
+            setFoodName(searchTerm);
         }
     };
 
@@ -221,27 +245,6 @@ const CreateMealModal = (userMeals, onClose) => {
             mealName: newMeal.mealName,
             foods: [],
         });
-    };
-
-    const inputStyle = {
-        width: '200px',
-        padding: '10px',
-        fontSize: '14px',
-        border: '1px solid border-gray-600',
-        borderRadius: '5px',
-        margin: '5px',
-        transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-        backgroundColor: '#374151',
-        cursor: newFood ? 'not-allowed' : 'text',
-        color: 'white'
-    };
-
-    const labelStyle = {
-        width: '200px',
-        marginBottom: '5px',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        color: '#FFFF'
     };
 
     return (
@@ -328,39 +331,75 @@ const CreateMealModal = (userMeals, onClose) => {
 
                 {/* Display message if food not found */}
                   <>
-                  { !foodFound && 
+                { !foodFound && 
                     <p className="text-red-500 mt-4">Food not found. Please enter the food information below.</p>
-                  }
-                  {/* Show Input Fields if newFood is null */}
+                }
+                {/* Show Input Fields if newFood is null */}
                 {newFood === null ? (
                     <div>
                     <h4 className="text-lg font-semibold text-white tracking-wide">Add Ingredient</h4>
                     <div className="flex items-center space-x-4">
                         <input
-                        type="text"
-                        value={ingredientName}
-                        disabled={newFood ? true : false}
-                        onChange={(e) => setIngredientName(e.target.value)}
-                        className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
-                        placeholder="Ingredient name"
+                            type="text"
+                            value={ingredientName}
+                            disabled={newFood ? true : false}
+                            onChange={(e) => setIngredientName(e.target.value)}
+                            className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
+                            placeholder="Ingredient name"
                         />
                         <input
-                        type="text"
-                        value={ingredientAmount}
-                        disabled={newFood ? true : false}
-                        onChange={(e) => setIngredientAmount(e.target.value)}
-                        className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
-                        placeholder="Amount"
+                            type="text"
+                            value={ingredientAmount}
+                            disabled={newFood ? true : false}
+                            onChange={(e) => setIngredientAmount(e.target.value)}
+                            className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
+                            placeholder="Amount (gr)"
                         />
                         <button
-                        className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
-                        onClick={addIngredient}
-                        disabled={newFood ? true : false}
+                            className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
+                            onClick={addIngredient}
+                            disabled={newFood ? true : false}
                         >
                         Add Ingredient
                         </button>
                     </div>
+                    {/* Displaying added ingredients with the same styling as input fields */}
+                    <div className="mt-4">
+                    <h5 className="text-lg font-semibold text-white">Added Ingredients</h5>
+                    <div className="space-y-4">
+                        {ingredientsList.map((ingredient, index) => (
+                        <div className="flex items-center space-x-4">
+                            <div
+                                key={index}
+                                className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText"
+                            >
+                                <span>{ingredient.name} ({ingredient.amount} gr)</span>
+                            </div>
+                                <button
+                                    className="w-auto min-w-[200px] py-2 px-8 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition-all duration-300"
+                                    onClick={() => removeIngredient(ingredient.amount, ingredient.name)}
+                                >
+                                Remove Ingredient
+                                </button>
+                            </div>
+                            ))}
+                        </div>
                     </div>
+                        <div>
+                            <button
+                                className="w-auto min-w-[200px] py-2 px-8 bg-purple-500 text-white text-lg font-semibold rounded-lg hover:bg-purple-700 transition-all duration-300"
+                                onClick={fetchNutrients}
+                            >
+                                Get Nutrients
+                            </button>
+                            {error && (
+                                <p className="text-red-500 text-lg font-semibold">
+                                    {error}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    
                 ) : (
                     // Show the list of ingredients if newFood is not null
                     <div className="mt-8">
@@ -385,6 +424,7 @@ const CreateMealModal = (userMeals, onClose) => {
                     </div>
                 )}
 
+
                 {/* Nutrient Sections */}
                 <h4 className="text-lg font-semibold text-white tracking-wide mb-4">Nutrients</h4>
                     <div className="flex justify-between gap-8 flex-row">
@@ -392,10 +432,11 @@ const CreateMealModal = (userMeals, onClose) => {
                         <NutrientSection
                             title="Recipe"
                             nutrients={[
-                                { label: "", name: "recipeURL", value: newFood?.recipe_url || recipeUrl },
+                                { label: "", name: "recipeUrl", value: newFood?.recipe_url || recipeUrl },
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
+                            visible={true}
                         />
                         <NutrientSection
                             title="Calories"
@@ -404,6 +445,7 @@ const CreateMealModal = (userMeals, onClose) => {
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
+                            visible={newFood}
                         />
                     </div>
                         <NutrientSection
@@ -411,26 +453,25 @@ const CreateMealModal = (userMeals, onClose) => {
                             nutrients={[
                                 { label: "Carbohydrates", name: "carbo", value: newFood?.carbo || carbo },
                                 { label: "Fat", name: "fat", value: newFood?.fat || fat },
-                                { label: "Saturated Fat", name: "fatSaturated", value: newFood?.fat_saturated || fatSaturated },
-                                { label: "Trans Fat", name: "fatTrans", value: newFood?.fat_trans || fatTrans },
                                 { label: "Protein", name: "protein", value: newFood?.protein || protein },
-                                { label: "Sugar", name: "sugar", value: newFood?.sugar || sugar },
+                                { label: "Fiber", name: "fiber", value: newFood?.fiber || fiber },
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
+                            visible={newFood}
                         />
 
                         <NutrientSection
                             title="Micronutrients"
                             nutrients={[
                                 { label: "Cholesterol", name: "cholesterol", value: newFood?.cholesterol || cholesterol },
-                                { label: "Fiber", name: "fiber", value: newFood?.fiber || fiber },
                                 { label: "Potassium", name: "k", value: newFood?.k || k },
                                 { label: "Sodium", name: "na", value: newFood?.na || na },
                                 { label: "Calcium", name: "ca", value: newFood?.ca || ca },
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
+                            visible={newFood}
                         />
 
                         <NutrientSection
@@ -445,6 +486,7 @@ const CreateMealModal = (userMeals, onClose) => {
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
+                            visible={newFood}
                         />
                     </div>
                   </>
