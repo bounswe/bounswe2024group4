@@ -200,3 +200,58 @@ def bookmarked_posts(request):
                 } for post in bookmarked_posts]))}, status=200)
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
+
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_post(request, post_id):
+    if request.method == 'DELETE':
+        try:
+            user = request.user
+            post = Post.objects.get(id=post_id)
+
+            # Check if user is authorized to delete this post
+            if post.user != user:
+                return JsonResponse({'error': 'You are not authorized to delete this post'}, status=403)
+
+            post.delete()
+            return JsonResponse({
+                'message': 'Post deleted successfully',
+                'post_id': post_id
+            }, status=200)
+
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_comment(request, comment_id):
+    if request.method == 'DELETE':
+        try:
+            user = request.user
+            comment = Comment.objects.get(id=comment_id)
+
+            # Check if user is authorized to delete this comment
+            if comment.user != user:
+                return JsonResponse({'error': 'You are not authorized to delete this comment'}, status=403)
+
+            post_id = comment.post.id  # Store post_id before deletion for response
+            comment.delete()
+            
+            return JsonResponse({
+                'message': 'Comment deleted successfully',
+                'comment_id': comment_id,
+                'post_id': post_id
+            }, status=200)
+
+        except Comment.DoesNotExist:
+            return JsonResponse({'error': 'Comment not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
