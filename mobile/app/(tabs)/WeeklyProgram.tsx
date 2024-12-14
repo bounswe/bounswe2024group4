@@ -4,14 +4,15 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Modal,
   FlatList,
   Alert,
   ScrollView,
+  Modal,
   ActivityIndicator,
 } from "react-native";
+import { useRouter } from "expo-router";
 import axios from "axios";
-import { useRouter, useGlobalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Exercise {
   id: string;
@@ -24,6 +25,7 @@ interface Program {
   id: string;
   workout_name: string;
   exercises: Exercise[];
+  day?: string;
 }
 
 const baseURL = "http://" + process.env.EXPO_PUBLIC_API_URL + ":8000";
@@ -38,135 +40,178 @@ const daysOfWeek = [
   "Sunday",
 ];
 
-const WeeklyProgram = () => {
-  const { viewingUser, viewedUser } = useGlobalSearchParams();
+const WeeklyProgram: React.FC = () => {
   const router = useRouter();
-  const [workoutPrograms, setWorkoutPrograms] = useState<Program[]>([]);
-  const [weekPrograms, setWeekPrograms] = useState<Record<string, Program[]>>({});
+  const [weekPrograms, setWeekPrograms] = useState<Program[]>([]);
+  const [currentDay, setCurrentDay] = useState<string | null>(null);
+  const [availablePrograms, setAvailablePrograms] = useState<Program[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchWorkouts = async () => {
+    const fetchPrograms = async () => {
       try {
-        const userToFetch = viewedUser || viewingUser;
-        if (!userToFetch) {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          Alert.alert("Error", "User not authenticated.");
           return;
         }
-        const response = await axios.get(`${baseURL}/get-workouts/?username=${userToFetch}`);
-        setWorkoutPrograms(response.data);
+
+        const config = { headers: { Authorization: `Token ${token}` } };
+
+        const response = await axios.get(`${baseURL}/get-workouts/`, config);
+        setAvailablePrograms(response.data);
       } catch (error) {
-        Alert.alert("Error", "Failed to fetch workouts.");
+        console.error("Error fetching programs:", error);
+        Alert.alert("Error", "Failed to fetch programs.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWorkouts();
-  }, [viewedUser, viewingUser]);
+    fetchPrograms();
+  }, []);
 
-  const handleAddProgram = (day: string, program: Program) => {
-    setWeekPrograms((prev) => ({
-      ...prev,
-      [day]: prev[day] ? [...prev[day], program] : [program],
-    }));
+  const handleAddProgram = (day: string, programToAdd: Program) => {
+    setWeekPrograms((prev) => {
+      const isDuplicate = prev.some(
+        (program) => program.day === day && program.id === programToAdd.id
+      );
+      if (!isDuplicate) {
+        return [...prev, { ...programToAdd, day }];
+      }
+      return prev;
+    });
     setModalVisible(false);
   };
 
   const handleRemoveProgram = (day: string, programId: string) => {
-    setWeekPrograms((prev) => ({
-      ...prev,
-      [day]: prev[day]?.filter((program) => program.id !== programId),
-    }));
+    setWeekPrograms((prev) =>
+      prev.filter((program) => !(program.day === day && program.id === programId))
+    );
   };
 
-  const handleStartExercise = (day: string) => {
-    const programsForDay = weekPrograms[day];
-    if (!programsForDay || programsForDay.length === 0) {
-      Alert.alert("No Programs", `No programs assigned for ${day}.`);
-      return;
-    }
-
-    const exercises = programsForDay.flatMap((program) => program.exercises);
-    router.push({
-      pathname: "/daily_exercise",
-      params: { day, exercises: JSON.stringify(exercises) },
+  const saveWeeklyProgram = async () => {
+    const workoutsData: Record<number, string> = {};
+    weekPrograms.forEach((program) => {
+      workoutsData[daysOfWeek.indexOf(program.day || "") + 1] = program.id;
     });
-  };
 
-  const renderDay = (day: string) => (
-    <View key={`day-${day}`} style={styles.dayContainer}>
-      <Text style={styles.dayTitle}>{day}</Text>
-      {weekPrograms[day]?.map((program) => (
-        <View key={`program-${program.id}`} style={styles.programContainer}>
-          <Text style={styles.programTitle}>{program.workout_name}</Text>
-          {program.exercises.map((exercise) => (
-            <Text key={`exercise-${exercise.id ?? exercise.name}`} style={styles.exerciseText}>
-              {exercise.name} - {exercise.sets} sets x {exercise.reps} reps
-            </Text>
-          ))}
-          <TouchableOpacity
-            onPress={() => handleRemoveProgram(day, program.id)}
-            style={styles.removeButton}
-          >
-            <Text style={styles.removeButtonText}>X</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-      <TouchableOpacity
-        onPress={() => {
-          setSelectedDay(day);
-          setModalVisible(true);
-        }}
-        style={styles.addButton}
-      >
-        <Text style={styles.addButtonText}>Add Program</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => handleStartExercise(day)}
-        style={styles.startButton}
-      >
-        <Text style={styles.startButtonText}>Start Exercise</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "User not authenticated.");
+        return;
+      }
+
+      const config = { headers: { Authorization: `Token ${token}` } };
+
+      const response = await axios.post(
+        `${baseURL}/create-program/`,
+        { workouts: workoutsData },
+        config
+      );
+
+      console.log("Program saved successfully:", response.data);
+      Alert.alert("Success", "Weekly program saved successfully!");
+    } catch (error) {
+      console.error("Error saving program:", error);
+      Alert.alert("Error", "Failed to save weekly program.");
+    }
+  };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#FFFFFF" />
-        <Text style={styles.loadingText}>Loading workout programs...</Text>
+        <Text style={styles.loadingText}>Loading programs...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={{ paddingBottom: 60 }} style={styles.container}>
       <Text style={styles.header}>Weekly Exercise Program</Text>
-      {daysOfWeek.map(renderDay)}
-
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalHeader}>Select a Program</Text>
-          <FlatList
-            data={workoutPrograms}
-            renderItem={({ item }) => (
+      {daysOfWeek.map((day) => {
+        const dayPrograms = weekPrograms.filter((program) => program.day === day);
+        return (
+          <View key={day} style={styles.dayContainer}>
+            <Text style={styles.dayTitle}>{day}</Text>
+            <View style={styles.exercisesContainer}>
+              {dayPrograms.length > 0 ? (
+                dayPrograms.map((program, programIndex) => (
+                  <View key={`${day}-${program.id || programIndex}`} style={styles.programContainer}>
+                    <Text style={styles.programTitle}>{program.workout_name}</Text>
+                    {program.exercises.map((exercise, exerciseIndex) => (
+                      <Text
+                        key={`${program.id}-${exercise.id || exerciseIndex}`}
+                        style={styles.exerciseText}
+                      >
+                        - {exercise.name}: {exercise.sets} sets x {exercise.reps} reps
+                      </Text>
+                    ))}
+                    <TouchableOpacity
+                      onPress={() => handleRemoveProgram(day, program.id)}
+                      style={styles.removeButton}
+                    >
+                      <Text style={styles.removeButtonText}>Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noProgramText}>No programs assigned</Text>
+              )}
               <TouchableOpacity
-                onPress={() => handleAddProgram(selectedDay!, item)}
-                style={styles.modalProgram}
+                onPress={() => {
+                  setCurrentDay(day);
+                  setModalVisible(true);
+                }}
+                style={styles.addButton}
               >
-                <Text style={styles.modalProgramText}>{item.workout_name}</Text>
+                <Text style={styles.addButtonText}>Add Program</Text>
               </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item.id.toString()}
-          />
-          <TouchableOpacity
-            onPress={() => setModalVisible(false)}
-            style={styles.modalCancelButton}
-          >
-            <Text style={styles.modalCancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
+            </View>
+          </View>
+        );
+      })}
+
+      <TouchableOpacity onPress={saveWeeklyProgram} style={styles.saveButton}>
+        <Text style={styles.saveButtonText}>Save Weekly Program</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => router.push("/last_five_programs")}
+        style={styles.lastFiveButton}
+      >
+        <Text style={styles.lastFiveButtonText}>View Last 5 Weekly Exercises</Text>
+      </TouchableOpacity>
+
+      {/* Modal for Adding Programs */}
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalHeader}>Select a Program</Text>
+            <FlatList
+              data={availablePrograms}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handleAddProgram(currentDay!, item)}
+                  style={styles.programItem}
+                >
+                  <Text style={styles.programItemText}>{item.workout_name}</Text>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.programListContainer}
+              showsVerticalScrollIndicator={false}
+            />
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.closeButton}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </ScrollView>
@@ -174,141 +219,159 @@ const WeeklyProgram = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1e1e1e",
-    padding: 15,
+  container: { 
+    flex: 1, 
+    backgroundColor: "#1e1e1e", 
+    padding: 15 
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1e1e1e",
+  loadingContainer: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center" 
   },
-  loadingText: {
-    marginTop: 10,
-    color: "#ffffff",
+  loadingText: { 
+    color: "#FFF", 
+    fontSize: 18 
   },
-  header: {
-    color: "#ffffff",
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
+  header: { 
+    color: "#FFF", 
+    fontSize: 22, 
+    fontWeight: "bold", 
+    marginBottom: 20 
   },
-  dayContainer: {
-    marginBottom: 20,
-    backgroundColor: "#333333",
-    padding: 15,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 5,
+  dayContainer: { 
+    backgroundColor: "#333", 
+    marginBottom: 15, 
+    borderRadius: 10, 
+    padding: 10 
   },
-  dayTitle: {
-    color: "#2196F3",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+  dayTitle: { 
+    color: "#FFF", 
+    fontSize: 18, 
+    fontWeight: "bold" 
   },
-  programContainer: {
-    marginTop: 10,
-    backgroundColor: "#444444",
-    padding: 15,
-    borderRadius: 10,
+  exercisesContainer: { 
+    marginTop: 10 
   },
-  programTitle: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "bold",
+  programContainer: { 
+    backgroundColor: "#444", 
+    padding: 10, 
+    borderRadius: 8, 
+    marginBottom: 10 
   },
-  exerciseText: {
-    color: "#cccccc",
-    fontSize: 14,
+  programTitle: { 
+    color: "#FFF", 
+    fontSize: 16, 
+    fontWeight: "bold" 
   },
-  addButton: {
-    marginTop: 15,
-    backgroundColor: "#4CAF50",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+  exerciseText: { 
+    color: "#DDD", 
+    fontSize: 14, 
+    marginLeft: 10 
   },
-  addButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  removeButton: { 
+    alignSelf: "flex-end", 
+    marginTop: 5 
   },
-  startButton: {
-    marginTop: 10,
-    backgroundColor: "#2196F3",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+  removeButtonText: { 
+    color: "#FF5252", 
+    fontSize: 14 
   },
-  startButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  noProgramText: { 
+    color: "#CCC", 
+    fontSize: 14, 
+    textAlign: "center", 
+    marginVertical: 10 
   },
-  removeButton: {
-    marginTop: 5,
-    backgroundColor: "#FF5252",
-    padding: 6,
-    borderRadius: 20,
-    alignItems: "center",
-    width: 30,
-    height: 30,
+  addButton: { 
+    backgroundColor: "#4CAF50", 
+    padding: 10, 
+    borderRadius: 8, 
+    alignItems: "center", 
+    marginTop: 10 
   },
-  removeButtonText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "bold",
-    textAlign: "center",
+  addButtonText: { 
+    color: "#FFF", 
+    fontSize: 16 
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    padding: 20,
+  saveButton: { 
+    marginTop: 20, 
+    padding: 15, 
+    backgroundColor: "#FFD700", 
+    borderRadius: 10 
   },
-  modalHeader: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
+  saveButtonText: { 
+    color: "#333", 
+    fontWeight: "bold", 
+    textAlign: "center" 
   },
-  modalProgram: {
-    padding: 15,
-    backgroundColor: "#333333",
-    marginBottom: 10,
-    borderRadius: 10,
+  lastFiveButton: { 
+    marginTop: 20, 
+    padding: 15, 
+    backgroundColor: "#2196F3", 
+    borderRadius: 10 
   },
-  modalProgramText: {
-    color: "white",
-    fontSize: 16,
+  lastFiveButtonText: { 
+    color: "#FFF", 
+    textAlign: "center", 
+    fontSize: 16 
   },
-  modalCancelButton: {
-    marginTop: 20,
-    backgroundColor: "#FF5252",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
+  modalOverlay: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    backgroundColor: "rgba(0,0,0,0.6)", 
+    paddingHorizontal: 20 
   },
-  modalCancelButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  modalContent: { 
+    width: "100%", 
+    maxHeight: "80%", 
+    backgroundColor: "#222", 
+    borderRadius: 15, 
+    padding: 20, 
+    shadowColor: "#000", 
+    shadowOffset: { 
+      width: 0, 
+      height: 2 
+    }, 
+    shadowOpacity: 0.8, 
+    shadowRadius: 10, 
+    elevation: 5 
+  },
+  modalHeader: { 
+    color: "#FFF", 
+    fontSize: 20, 
+    fontWeight: "bold", 
+    marginBottom: 15, 
+    textAlign: "center" 
+  },
+  programListContainer: { 
+    paddingVertical: 10 
+  },
+  programItem: { 
+    padding: 15, 
+    backgroundColor: "#444", 
+    borderRadius: 10, 
+    marginBottom: 10 
+  },
+  programItemText: { 
+    color: "#FFF", 
+    fontSize: 16, 
+    fontWeight: "600" 
+  },
+  closeButton: { 
+    marginTop: 15, 
+    backgroundColor: "#FF5252", 
+    padding: 12, 
+    borderRadius: 8, 
+    alignItems: "center" 
+  },
+  closeButtonText: { 
+    color: "#FFF", 
+    fontSize: 16, 
+    fontWeight: "bold" 
   },
 });
 
-export default WeeklyProgram;
 
+export default WeeklyProgram;
