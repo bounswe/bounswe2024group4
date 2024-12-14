@@ -66,7 +66,7 @@ class WorkoutProgramTestCase(APITestCase):
         }
 
         response = self.client.post('/workout_program/', json.dumps(data), content_type='application/json')
-        print(response.json())
+        # print(response.json())
         self.assertEqual(response.status_code, 201)
     
     def test_missing_exercises(self):
@@ -304,7 +304,6 @@ class GetWorkoutsByUserIdTestCase(TestCase):
         self.assertEqual(json_data['detail'], 'Method "POST" not allowed.')
 
 
-
 class WorkoutLogTestCase(TestCase):
     def setUp(self):
         # Create test user
@@ -464,7 +463,7 @@ class WorkoutLogTestCase(TestCase):
         response = self.send_request(url, modified_data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()['exercises']), 0
+        self.assertEqual(len(response.json()['exercises']), 0)
                          
                          
 class CreateExerciseSuperUserTestCase(APITestCase):

@@ -193,7 +193,6 @@ def delete_workout_by_id(request, workout_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-    
 
 @swagger_auto_schema(method='post', **rate_workout_schema)
 @api_view(['POST'])
@@ -325,7 +324,6 @@ def toggle_bookmark_workout(request):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 
 @api_view(['GET'])

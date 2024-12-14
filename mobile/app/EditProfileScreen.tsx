@@ -6,140 +6,78 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  Modal,
   ScrollView,
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useGlobalSearchParams } from "expo-router";
-import axios from 'axios';
+import { useRouter } from "expo-router";
+import axios from "axios";
 
 const EditProfileScreen = () => {
   const router = useRouter();
-  const query = useGlobalSearchParams();
+  const baseURL = `http://${process.env.EXPO_PUBLIC_API_URL}:8000`;
 
-  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
-
-  const [userInfo, setUserInfo] = useState({
-    username: Array.isArray(query.username) ? query.username[0] : query.username || "",
-    email: Array.isArray(query.email) ? query.email[0] : query.email || "",
-    bio: Array.isArray(query.bio) ? query.bio[0] : query.bio || "",
-    profilePicture: Array.isArray(query.profilePicture)
-      ? query.profilePicture[0]
-      : query.profilePicture || "",
-    weight: Array.isArray(query.weight) ? query.weight[0] : query.weight || "",
-    height: Array.isArray(query.height) ? query.height[0] : query.height || "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [errors, setErrors] = useState({
+  const [userInfo, setUserInfo] = useState<{
+    username: string;
+    email: string;
+    bio: string;
+    profilePicture: string | null;
+    weight: string;
+    height: string;
+    password: string;
+    confirmPassword: string;
+  }>({
+    username: "",
     email: "",
-    password: "",
-    confirmPassword: "",
+    bio: "",
+    profilePicture: null,
     weight: "",
     height: "",
+    password: "",
+    confirmPassword: "",
   });
 
-  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [errors, setErrors] = useState<Partial<typeof userInfo>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const profilePictureUri = userInfo.profilePicture && userInfo.profilePicture.trim() !== "" ? userInfo.profilePicture : "https://via.placeholder.com/150";
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof typeof userInfo, value: string): void => {
     setUserInfo((prev) => ({ ...prev, [field]: value }));
     setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
   };
 
-  const validateEmail = (email: string): string => {
-    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (!email) return "Email is required.";
-    if (!emailRegex.test(email)) return "Invalid email format.";
-    return "";
-  };
+  const validateFields = () => {
+    const newErrors: Partial<typeof userInfo> = {};
 
-  const validatePassword = (password: string): string => {
-    if (!password) return "";
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      return "Password must include uppercase, lowercase, number, and special character.";
+    if (userInfo.email && !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userInfo.email)) {
+      newErrors.email = "Invalid email format.";
     }
-    return "";
-  };
 
-  const validateNumber = (value: string): string => {
-    const numberRegex = /^[0-9]*$/;
-    if (!value) return "This field is required.";
-    if (!numberRegex.test(value)) return "Only numbers are allowed.";
-    return "";
-  };
+    if (userInfo.password && userInfo.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long.";
+    }
 
-  const handleSave = async () => {
-    const emailError = validateEmail(userInfo.email);
-    const passwordError = userInfo.password
-      ? validatePassword(userInfo.password)
-      : "";
-    const confirmPasswordError =
-      userInfo.password &&
-      userInfo.password !== userInfo.confirmPassword
-        ? "Passwords do not match."
-        : "";
-    const weightError = validateNumber(userInfo.weight);
-    const heightError = validateNumber(userInfo.height);
+    if (userInfo.password !== userInfo.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+    }
 
-    const newErrors = {
-      email: emailError,
-      password: passwordError,
-      confirmPassword: confirmPasswordError,
-      weight: weightError,
-      height: heightError,
-    };
+    if (userInfo.weight && isNaN(Number(userInfo.weight))) {
+      newErrors.weight = "Weight must be a number.";
+    }
+
+    if (userInfo.height && isNaN(Number(userInfo.height))) {
+      newErrors.height = "Height must be a number.";
+    }
 
     setErrors(newErrors);
-
-    if (!emailError && !passwordError && !confirmPasswordError && !weightError && !heightError) {
-      try {
-        // Fetch CSRF Token (if applicable)
-        const csrfResponse = await axios.get(`${baseURL}/csrf_token/`, { withCredentials: true });
-        const csrfToken = csrfResponse.data.csrf_token;
-    
-        // Configure request headers
-        const config = {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-          },
-          withCredentials: true,
-        };
-    
-        // Post edit profile data
-        const response = await axios.post(
-          `${baseURL}/edit_profile/`,
-          {
-            username: userInfo.username,
-            email: userInfo.email,
-            bio: userInfo.bio,
-            profile_picture: userInfo.profilePicture || "",
-            weight: userInfo.weight,
-            height: userInfo.height,
-            password: userInfo.password,
-          },
-          config
-        );
-    
-        console.log('Profile updated successfully:', response.data);
-        setSuccessModalVisible(true);
-      } catch (err: any) {
-        console.error('Profile update failed:', err.response?.data || err.message);
-        Alert.alert('Profile Update Error', err.response?.data?.message || 'Profile update failed. Please try again.');
-      }
-    };
-  }
+    return Object.keys(newErrors).length === 0;
+  };
 
   const pickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
       Alert.alert("Permission required", "We need permission to access your photos.");
@@ -154,16 +92,59 @@ const EditProfileScreen = () => {
     });
 
     if (!result.canceled) {
-      setUserInfo((prev) => ({
-        ...prev,
-        profilePicture: result.assets[0].uri,
-      }));
+      setUserInfo((prev) => ({ ...prev, profilePicture: result.assets[0].uri }));
     }
   };
 
-  const handleModalClose = () => {
-    setSuccessModalVisible(false);
-    router.push("/profile");
+  const handleSave = async () => {
+    if (!validateFields()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    const token = await AsyncStorage.getItem("token");
+
+    if (!token) {
+      Alert.alert("Error", "You are not authenticated.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const formDataToSend = new FormData();
+    Object.keys(userInfo).forEach((key) => {
+      const value = userInfo[key as keyof typeof userInfo];
+      if (value) {
+        if (key === "profilePicture") {
+          formDataToSend.append(key, {
+            uri: value,
+            type: "image/jpeg",
+            name: "profile_picture.jpg",
+          } as any);
+        } else {
+          formDataToSend.append(key, value);
+        }
+      }
+    });
+
+    try {
+      const config = {
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const response = await axios.post(`${baseURL}/edit_profile/`, formDataToSend, config);
+
+      if (response.status === 200) {
+        Alert.alert("Success", "Profile updated successfully!");
+        router.push("/profile");
+      }
+    } catch (error: any) {
+      console.error("Profile update failed:", error.response?.data || error.message);
+      Alert.alert("Error", "Failed to update profile. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -172,266 +153,183 @@ const EditProfileScreen = () => {
         <Text style={styles.header}>Edit Profile</Text>
 
         {/* Profile Picture */}
-        <View style={styles.imageContainer}>
+        <View style={styles.profilePictureContainer}>
           <TouchableOpacity onPress={pickImage}>
-            <Image source={{ uri: profilePictureUri }}
+            <Image
               style={styles.profilePicture}
+              source={{ uri: userInfo.profilePicture || "https://via.placeholder.com/150" }}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={pickImage}>
-            <Text style={styles.changePhotoText}>Change Photo</Text>
-          </TouchableOpacity>
+          <Text style={styles.changePhotoText}>Change Photo</Text>
         </View>
 
         {/* Username */}
         <Text style={styles.label}>Username</Text>
         <TextInput
           style={styles.input}
+          placeholder="Username"
           value={userInfo.username}
-          onChangeText={(text) => handleInputChange("username", text)}
+          onChangeText={(value) => handleInputChange("username", value)}
         />
+        {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
 
         {/* Email */}
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
+          placeholder="Email"
           value={userInfo.email}
-          keyboardType="email-address"
-          onChangeText={(text) => handleInputChange("email", text)}
+          onChangeText={(value) => handleInputChange("email", value)}
         />
-        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
         {/* Bio */}
         <Text style={styles.label}>Bio</Text>
         <TextInput
-          style={[styles.input, styles.textArea]}
+          style={styles.input}
+          placeholder="Bio"
           value={userInfo.bio}
-          multiline
-          numberOfLines={3}
-          onChangeText={(text) => handleInputChange("bio", text)}
+          onChangeText={(value) => handleInputChange("bio", value)}
         />
 
         {/* Weight */}
         <Text style={styles.label}>Weight (kg)</Text>
         <TextInput
           style={styles.input}
+          placeholder="Weight (kg)"
           value={userInfo.weight}
           keyboardType="numeric"
-          onChangeText={(text) => handleInputChange("weight", text)}
+          onChangeText={(value) => handleInputChange("weight", value)}
         />
-        {errors.weight ? <Text style={styles.errorText}>{errors.weight}</Text> : null}
+        {errors.weight && <Text style={styles.errorText}>{errors.weight}</Text>}
 
         {/* Height */}
         <Text style={styles.label}>Height (cm)</Text>
         <TextInput
           style={styles.input}
+          placeholder="Height (cm)"
           value={userInfo.height}
           keyboardType="numeric"
-          onChangeText={(text) => handleInputChange("height", text)}
+          onChangeText={(value) => handleInputChange("height", value)}
         />
-        {errors.height ? <Text style={styles.errorText}>{errors.height}</Text> : null}
+        {errors.height && <Text style={styles.errorText}>{errors.height}</Text>}
 
         {/* Password */}
         <Text style={styles.label}>Password</Text>
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
-            value={userInfo.password}
-            secureTextEntry={!showPassword}
             placeholder="Enter new password"
-            onChangeText={(text) => handleInputChange("password", text)}
+            secureTextEntry={!showPassword}
+            value={userInfo.password}
+            onChangeText={(value) => handleInputChange("password", value)}
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="#609FFF" />
           </TouchableOpacity>
         </View>
-        {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+        {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
         {/* Confirm Password */}
         <Text style={styles.label}>Confirm Password</Text>
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
-            value={userInfo.confirmPassword}
-            secureTextEntry={!showConfirmPassword}
             placeholder="Confirm new password"
-            onChangeText={(text) => handleInputChange("confirmPassword", text)}
+            secureTextEntry={!showConfirmPassword}
+            value={userInfo.confirmPassword}
+            onChangeText={(value) => handleInputChange("confirmPassword", value)}
           />
           <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
             <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={20} color="#609FFF" />
           </TouchableOpacity>
         </View>
-        {errors.confirmPassword ? (
-          <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-        ) : null}
+        {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
 
         {/* Save Button */}
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={isSubmitting}>
+          <Text style={styles.saveButtonText}>{isSubmitting ? "Saving..." : "Save Changes"}</Text>
         </TouchableOpacity>
-
-        {/* Success Modal */}
-        <Modal
-          visible={successModalVisible}
-          animationType="fade"
-          transparent={true}
-          onRequestClose={handleModalClose}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
-              <Text style={styles.modalText}>Profile Updated Successfully!</Text>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={handleModalClose}
-              >
-                <Text style={styles.modalButtonText}>OK</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1B55AC",
+  scrollContainer: { 
+    flexGrow: 1, 
+    alignItems: "center", 
+    backgroundColor: "#1B2B4C" 
   },
-  container: {
-    backgroundColor: "#0B2346",
-    padding: 20,
-    borderRadius: 12,
-    width: "95%",
-    elevation: 5,
-    shadowColor: '#000', 
+  container: { 
+    padding: 20, 
+    backgroundColor: "#081C39", 
+    borderRadius: 15, 
+    width: "95%" 
   },
-  header: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#609FFF",
-    marginBottom: 20,
-    textAlign: "center",
+  header: { 
+    fontSize: 24, 
+    fontWeight: "bold", 
+    marginBottom: 20, 
+    textAlign: "center", 
+    color: "#fff" 
   },
-  imageContainer: {
-    alignItems: "center",
-    marginBottom: 20,
+  profilePictureContainer: { 
+    alignItems: "center", 
+    marginBottom: 20 
   },
-  profilePicture: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: "#609FFF",
+  profilePicture: { 
+    width: 150, 
+    height: 150, 
+    borderRadius: 75, 
+    borderWidth: 2, 
+    borderColor: "#609FFF" 
   },
-  changePhotoText: {
-    color: "#609FFF",
-    fontSize: 14,
-    fontWeight: "bold",
-    marginTop: 8,
-    textAlign: "center",
+  changePhotoText: { 
+    color: "#609FFF", 
+    fontSize: 14, 
+    textAlign: "center", 
+    marginTop: 10 
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#fff",
+  label: { 
+    color: "#fff", 
+    marginBottom: 8, 
+    fontSize: 16 
   },
-  input: {
-    backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 16,
-    fontSize: 14,
+  input: { 
+    backgroundColor: "#fff", 
+    padding: 12, 
+    borderRadius: 8, 
+    marginBottom: 16 
   },
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
+  passwordContainer: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    backgroundColor: "#fff", 
+    borderRadius: 8, 
+    padding: 10, 
+    marginBottom: 16 
   },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    marginBottom: 12,
-    height: 50,
+  passwordInput: { 
+    flex: 1 
   },
-  passwordInput: {
-    flex: 1,
-    height: "100%",
-    paddingHorizontal: 8,
+  saveButton: { 
+    backgroundColor: "#609FFF", 
+    paddingVertical: 15, 
+    borderRadius: 8, 
+    alignItems: "center" 
   },
-  errorText: {
-    color: "#FF0000",
-    fontSize: 12,
-    marginBottom: 10,
+  saveButtonText: { 
+    color: "#fff", 
+    fontSize: 16, 
+    fontWeight: "bold" 
   },
-  saveButton: {
-    backgroundColor: "#609FFF",
-    paddingVertical: 12,
-    borderRadius: 25,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 12,
-    alignItems: "center",
-    width: "80%",
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  iconContainer: {
-    marginBottom: 15,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 50,
-    width: 100,
-    height: 100,
-  },
-  modalText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1B55AC",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  modalButton: {
-    backgroundColor: "#609FFF",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  modalButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+  errorText: { 
+    color: "red", 
+    fontSize: 12, 
+    marginBottom: 5 
   },
 });
+
 
 export default EditProfileScreen;

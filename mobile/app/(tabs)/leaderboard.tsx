@@ -72,7 +72,7 @@ const Leaderboard: React.FC = () => {
 
   const handleUsernameClick = (viewedUser: string) => {
     router.push({
-      pathname: '/profile',
+      pathname: '/others-profile',
       params: {
       viewingUser,
       viewedUser,
