@@ -190,6 +190,48 @@ get_meal_leaderboard_schema = {
 }
 
 # diet program app
+get_food_by_id_schema = {
+    'operation_summary': 'Get Food by ID',
+    'operation_description': 'Get a food by ID',
+    'responses': {
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'food': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'ingredients': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'recipe_url': openapi.Schema(type=openapi.TYPE_NUMBER),
+                        'energ_kcal': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+                        'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+                        'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+                        'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+                        'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                        'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                        'na': openapi.Schema(type=openapi.TYPE_STRING),
+                        'k': openapi.Schema(type=openapi.TYPE_STRING),
+                        'ca': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+                        'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
+                    }
+                )
+            }
+        )),
+        400: openapi.Response('Bad Request'),
+        401: openapi.Response('Unauthorized'),
+        404: openapi.Response('Not Found'),
+        405: openapi.Response('Invalid request'),
+    }
+}
+
 create_meal_schema = {
     'operation_summary': 'Create Meal',
     'operation_description': 'Create a meal',
@@ -475,7 +517,6 @@ get_bookmarked_meals_by_user_id_schema = {
     }
 }
 
-
 # exercise program app
 workout_program_schema = {
     'operation_summary': 'Create Workout Programs',
@@ -685,6 +726,41 @@ log_workout_schema = {
         401: 'Unauthorized - User not logged in'
     },
     'tags': ['Workout Logs']
+}
+
+create_exercise_superuser_schema = {
+    'operation_description': "Create a new exercise",
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'name': openapi.Schema(type=openapi.TYPE_STRING, description="Name of the exercise"),
+            'type': openapi.Schema(type=openapi.TYPE_STRING, description="Type of exercise"),
+            'muscle': openapi.Schema(type=openapi.TYPE_STRING, description="Primary muscle group worked"),
+            'equipment': openapi.Schema(type=openapi.TYPE_STRING, description="Equipment needed"),
+            'difficulty': openapi.Schema(type=openapi.TYPE_STRING, description="Difficulty level of the exercise"),
+            'instruction': openapi.Schema(type=openapi.TYPE_STRING, description="Instructions for the exercise"),
+        },
+        required=['name', 'muscle', 'equipment', 'instruction'],            
+    ),
+    'responses': {
+        200: openapi.Response(
+            description="Success",
+            examples={
+                'application/json': {
+                    'status': 'success',
+                    'exercise_id': 1,
+                    'name': 'Chest Press',
+                    'muscle': 'Chest',
+                    'equipment': 'Machine',
+                    'instruction': 'Sit on the machine and push the handles forward.',
+                    'difficulty': 'Beginner'
+                }
+            }
+        ),
+        400: 'Bad Request',
+        401: 'Unauthorized',
+    },
+    # 'tags': ['Exercises']
 }
 
 # social feed app
