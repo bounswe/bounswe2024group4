@@ -13,7 +13,15 @@ const ExerciseProgramList = () => {
     const [workoutName, setWorkoutName] = useState(""); // State for workout name
     const [reps, setReps] = useState('');  // State for repetitions input
     const [sets, setSets] = useState('');  // State for sets input
-    const [isCreatingProgram, setIsCreatingProgram] = useState(false); // Toggle for program creation
+    const [isCreatingProgram, setIsCreatingProgram] = useState(false);
+    const [isCreatingExercise, setIsCreatingExercise] = useState(false);
+    const [exerciseData, setExerciseData] = useState({
+        type: "",
+        name: "",
+        equipment: "",
+        difficulty: "",
+        instruction: "",
+    });
     const [activeExerciseIndex, setActiveExerciseIndex] = useState(null); // Track active exercise for input fields
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
@@ -39,6 +47,34 @@ const ExerciseProgramList = () => {
 
         fetchUserPrograms();
     }, [baseURL, isCreatingProgram]);
+
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setExerciseData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async () => {
+        const payload = {
+            ...exerciseData,
+            muscle: selectedMuscle.toLowerCase(),
+        };
+
+        try {
+            const response = await axios.post(baseURL + "/create-exercise/", payload, config);
+            if (response.status === 201) {
+                alert("Exercise created successfully");
+                setIsCreatingExercise(false);
+            } else {
+                alert("Failed to create exercise");
+                setIsCreatingExercise(false);
+            }
+        } catch (error) {
+            console.error("Error creating exercise:", error);
+            alert("An error occurred while creating the exercise.");
+            setIsCreatingExercise(false);
+        }
+    };
 
     const fetchExercises = async (muscles) => {
         try {
@@ -87,7 +123,7 @@ const ExerciseProgramList = () => {
                 muscle: exercise.muscle,
                 equipment: exercise.equipment,
                 difficulty: exercise.difficulty,
-                instructions: exercise.instructions,
+                instruction: exercise.instruction,
                 repetitions: reps,
                 sets: sets
             };
@@ -117,17 +153,15 @@ const ExerciseProgramList = () => {
                 name: exercise.name,
                 muscle: exercise.muscle,
                 equipment: exercise.equipment,
-                instruction: exercise.instruction,
+                instruction: exercise.instruction || exercise.instructions,
                 reps: exercise.repetitions,
                 sets: exercise.sets,
-                instruction: exercise.instructions,
                 difficulty: exercise.difficulty
             }));
 
             const body = {
                 workout_name: workoutName,
-                exercises: workoutData,
-                username: localStorage.getItem("username")
+                exercises: workoutData
             };
 
             const response = await axios.post(`${baseURL}/workout_program/`, body, config);
@@ -288,6 +322,85 @@ const ExerciseProgramList = () => {
                         </div>
                     </div>
                 </div>
+            ) : isCreatingExercise ? (
+                <div className="w-full flex justify-between gap-16">
+        {/* Muscle Groups Section */}
+        <div className="muscle-groups-container w-1/3">
+            <MuscleGroups
+                onSelectMuscle={(label, matches) => {
+                    setSelectedMuscle(matches[0]);
+                }}
+            />
+        </div>
+
+        {/* Input Form Section */}
+        <div className="input-container w-1/2 flex flex-col gap-2">
+        <h2 className="text-xl font-semibold mb-4">Exercise Details</h2>
+            <input
+                type="text"
+                name="name"
+                placeholder="Selected Muscle Group"
+                value={selectedMuscle ? selectedMuscle.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : ""}
+                disabled={true}
+                className="p-2 border rounded bg-gray-600"
+            />
+            <input
+                type="text"
+                name="name"
+                placeholder="Exercise Name"
+                value={exerciseData.name}
+                onChange={handleInputChange}
+                className="p-2 border rounded bg-gray-600"
+            />
+            <select
+                name="type"
+                value={exerciseData.type}
+                onChange={handleInputChange}
+                className="p-2 border rounded bg-gray-600"
+            >
+                <option value="">Select Exercise Type</option>
+                <option value="cardio">Cardio</option>
+                <option value="olympic_weightlifting">Olympic Weightlifting</option>
+                <option value="plyometrics">Plyometrics</option>
+                <option value="powerlifting">Powerlifting</option>
+                <option value="strength">Strength</option>
+                <option value="stretching">Stretching</option>
+                <option value="strongman">Strongman</option>
+            </select>
+            <input
+                type="text"
+                name="equipment"
+                placeholder="Equipment"
+                value={exerciseData.equipment}
+                onChange={handleInputChange}
+                className="p-2 border rounded bg-gray-600"
+            />
+            <select
+                name="difficulty"
+                value={exerciseData.difficulty}
+                onChange={handleInputChange}
+                className="p-2 border rounded bg-gray-600"
+            >
+                <option value="">Select Difficulty</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="expert">Expert</option>
+            </select>
+            <textarea
+                name="instruction"
+                placeholder="Exercise Instructions"
+                value={exerciseData.instruction}
+                onChange={handleInputChange}
+                className="p-2 border rounded bg-gray-600"
+            />
+            <button
+                onClick={handleSubmit}
+                className="p-2 bg-primary text-white rounded-lg"
+            >
+                Submit Exercise
+            </button>
+        </div>
+    </div>
             ) : (
                 // Display User Programs
                 <div className="user-programs-list w-full">
@@ -295,12 +408,20 @@ const ExerciseProgramList = () => {
                         <h1 className="text-4xl font-bold mb-10 tracking-wider">
                             Your Exercise Programs
                         </h1>
-                        <button
-                            onClick={() => setIsCreatingProgram(true)}
-                            className="p-2 bg-primary text-white rounded-lg"
-                        >
-                            Create New Program
-                        </button>
+                        <div>
+                            <button
+                                onClick={() => setIsCreatingProgram(true)}
+                                className="p-2 bg-primary text-white rounded-lg mr-2"
+                            >
+                                Create New Program
+                            </button>
+                            <button
+                                onClick={()=>setIsCreatingExercise(true)}
+                                className="p-2 bg-primary text-white rounded-lg"
+                            >
+                                Create New Exercise
+                            </button>
+                        </div>
                     </div>
                     <div className="flex flex-wrap gap-8">
                         {programs.length === 0 ? (
