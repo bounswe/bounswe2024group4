@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { Rating } from 'react-native-ratings';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBookmark as sBookmark, faHeart as sHeart, faComment as sComment } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark, faHeart, faComment } from '@fortawesome/free-regular-svg-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import WorkoutProgram from './WorkoutProgram';
+import CommentModal from './CommentModal';
 
 const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
@@ -13,7 +21,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
   const [isLiked, setIsLiked] = useState(liked);
   const [likesCount, setLikesCount] = useState(like_count);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  const [isCommentsVisible, setIsCommentsVisible] = useState(false);
   const [workout, setWorkout] = useState(null);
   const [meal, setMeal] = useState(null);
   const [error, setError] = useState(null);
@@ -42,10 +50,15 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
         }
 
         if (workoutId) {
-          const workoutResponse = await axios.get(`${baseURL}/get-workout/${workoutId}`, config);
+          const workoutResponse = await axios.get(`${baseURL}/get-workout/${workoutId}/`, config);
           if (workoutResponse.status === 200) {
             setWorkout(workoutResponse.data);
           }
+        }
+
+        const commentsResponse = await axios.get(`${baseURL}/get_comments/?postId=${postId}`, config);
+        if (commentsResponse.status === 200) {
+          setComments(commentsResponse.data.comments || []);
         }
       } catch (error) {
         setError('Failed to fetch post data');
@@ -54,8 +67,8 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
     };
 
     fetchPostData();
-  }, [mealId, workoutId]);
-  
+  }, [mealId, workoutId, postId]);
+
   const handleWorkoutUpdate = (updatedWorkout) => {
     setWorkout(updatedWorkout);
   };
@@ -65,12 +78,12 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
       const token = await AsyncStorage.getItem('token');
       const updatedIsLiked = !isLiked;
       const updatedLikesCount = likesCount + (isLiked ? -1 : 1);
-  
+
       setIsLiked(updatedIsLiked);
       setLikesCount(updatedLikesCount);
       
       onLikeUpdate(postId, updatedIsLiked, updatedLikesCount);
-  
+
       const response = await axios.post(
         `${baseURL}/toggle_like/`,
         { postId: postId },
@@ -80,18 +93,15 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
           },
         }
       );
-  
+
       if (response.status !== 200) {
-        setIsLiked(!updatedIsLiked);
-        setLikesCount(updatedLikesCount + (updatedIsLiked ? -1 : 1));
-        onLikeUpdate(postId, !updatedIsLiked, updatedLikesCount + (updatedIsLiked ? -1 : 1));
         throw new Error('Failed to toggle like');
       }
     } catch (error) {
-      console.error('Error toggling like:', error.response?.data || error);
+      console.error('Error toggling like:', error);
       setIsLiked(!updatedIsLiked);
-      setLikesCount(updatedLikesCount + (updatedIsLiked ? -1 : 1));
-      onLikeUpdate(postId, !updatedIsLiked, updatedLikesCount + (updatedIsLiked ? -1 : 1));
+      setLikesCount(likesCount);
+      onLikeUpdate(postId, !updatedIsLiked, likesCount);
     }
   };
 
@@ -116,37 +126,46 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
     }
   };
 
-  const toggleComments = async () => {
-    if (!showComments) {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        const response = await axios.get(
-          `${baseURL}/get_comments/${postId}`,
-          {
-            headers: {
-              'Authorization': `Token ${token}`,
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          setComments(response.data);
+  const handleCommentSubmit = async (commentText) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.post(
+        `${baseURL}/comment/`,
+        { postId, content: commentText },
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+          },
         }
-      } catch (error) {
-        console.error('Error fetching comments:', error);
+      );
+
+      if (response.status === 201) {
+        const comment_id = response.data.comment_id;
+        const username = await AsyncStorage.getItem('username');
+        setComments(prevComments => [...prevComments, {
+          id: comment_id,
+          content: commentText,
+          username: username,
+          time: 'Just now'
+        }]);
       }
+    } catch (error) {
+      console.error('Error creating comment:', error);
     }
-    setShowComments(!showComments);
   };
 
   return (
     <View style={styles.postContainer}>
       <View style={styles.userInfoContainer}>
         <View style={styles.userDetails}>
-          <Image 
-            source={{ uri: user.profile_picture }} 
-            style={styles.profileImage} 
-          />
+        <Image
+          source={{ 
+            uri: user.profile_picture 
+              ? `${baseURL}/${user.profile_picture}` 
+              : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+          }}
+          style={styles.profileImage}
+        />
           <View style={styles.userTextContainer}>
             <Text style={styles.username}>@{user.username}</Text>
             {user.rating && (
@@ -202,7 +221,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
           </TouchableOpacity>
 
           <TouchableOpacity 
-            onPress={toggleComments} 
+            onPress={() => setIsCommentsVisible(true)} 
             style={styles.actionButton}
           >
             <FontAwesomeIcon 
@@ -228,15 +247,13 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
         </TouchableOpacity>
       </View>
 
-      {showComments && (
-        <View style={styles.commentsContainer}>
-          {comments.map((comment, index) => (
-            <View key={index} style={styles.commentItem}>
-              <Text style={styles.commentText}>{comment}</Text>
-            </View>
-          ))}
-        </View>
-      )}
+      <CommentModal
+        visible={isCommentsVisible}
+        onClose={() => setIsCommentsVisible(false)}
+        comments={comments}
+        onCommentSubmit={handleCommentSubmit}
+        postId={postId}
+      />
     </View>
   );
 };
@@ -302,11 +319,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 8,
   },
+  workoutContainer: {
+    backgroundColor: '#1E293B',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 12,
+  },
   actionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 8,
+    marginTop: 12,
   },
   leftActions: {
     flexDirection: 'row',
@@ -321,21 +344,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 16,
     color: '#94A3B8',
-  },
-  commentsContainer: {
-    marginTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#1E293B',
-    paddingTop: 16,
-  },
-  commentItem: {
-    marginBottom: 12,
-  },
-  commentText: {
-    fontSize: 14,
-    color: '#CBD5E1',
-    lineHeight: 20,
-  },
+  }
 });
 
 export default Post;
