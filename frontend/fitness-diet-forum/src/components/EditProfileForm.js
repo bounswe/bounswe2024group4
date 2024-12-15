@@ -13,8 +13,8 @@ const EditProfileForm = ({ userData, onClose, onUpdate }) => {
         height: userData.height || "",
         password: "",
     });
-    const [profilePicture, setProfilePicture] = useState(null); // To handle file input
-    const [preview, setPreview] = useState(userData.profile_picture || ""); // Profile picture preview
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [preview, setPreview] = useState(userData.profile_picture || ""); 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {

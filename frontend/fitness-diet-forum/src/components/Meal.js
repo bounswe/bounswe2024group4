@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Food from './Food';
 import '../css/index.css';
+import { Context } from "../globalContext/globalContext.js";
 
 const Meal = ({ mealName, foods, onDelete, isOwn }) => {
+  const globalContext = useContext(Context);
+  const { baseURL } = globalContext;
   return (
     <div className="meal bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
       <div className="mb-4">
@@ -13,15 +16,25 @@ const Meal = ({ mealName, foods, onDelete, isOwn }) => {
         {foods.map((food, index) => (
           <Food
             key={index}
-            foodName={food.foodName}
-            calories={food.calories}
+            foodName={food.name}
+            calories={food.energ_kcal}
             protein={food.protein}
-            carbs={food.carbs}
+            carbs={food.carbo}
             fat={food.fat}
             ingredients={food.ingredients}
-            ingredientAmounts={food.ingredientAmounts}
-            imageUrl={food.imageUrl}
-            recipeUrl={food.recipeUrl}
+            imageUrl={baseURL + "/" + food.image_url}
+            recipeUrl={food.recipe_url}
+            ca={food.ca}
+            cholesterol={food.cholesterol}
+            fiber={food.fiber}
+            k={food.k}
+            na={food.na}
+            vitARae={food.vit_a_rae}
+            vitB6={food.vit_b6}
+            vitB12={food.vit_b12}
+            vitC={food.vit_c}
+            vitD={food.vit_d}
+            vitK={food.vit_k}
           />
         ))}
       </div>
