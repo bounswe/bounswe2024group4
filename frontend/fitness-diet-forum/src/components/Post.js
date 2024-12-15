@@ -37,7 +37,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                     // TO DO: Fetch meal data using mealId
                 }
                 if (workoutId) {
-                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, config);
+                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}/`, config);
                     if (workoutResponse.status === 200) {
                         setWorkout(workoutResponse.data);
                     } else {
@@ -169,7 +169,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                         programId={workout.id}
                         currentRating={workout.rating}
                         ratingCount={workout.rating_count}
-                        showRating={true}
+                        showRating={user.username!==localStorage.getItem('username')}
                     />
                 </div>
             )}

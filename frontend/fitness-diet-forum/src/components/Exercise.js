@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../css/index.css'; // Adjust this path if necessary
 
-const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
+const Exercise = ({ exerciseName, sets, reps, instruction, equipment, difficulty }) => {
     const [showInstruction, setShowInstruction] = useState(false);
 
     const toggleVisibility = () => {
@@ -37,6 +37,16 @@ const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
                         Equipment:
                     </h3>
                     <p className="text-base">{formatString(equipment)}</p> {/* Changed to text-base */}
+                </div>
+            )}
+
+            {/* Difficulty Section */}
+            {difficulty && (
+                <div>
+                    <h3 className="text-base font-semibold text-blue-300"> {/* Changed to text-base */}
+                        Difficulty:
+                    </h3>
+                    <p className="text-base">{formatString(difficulty)}</p> {/* Changed to text-base */}
                 </div>
             )}
 
