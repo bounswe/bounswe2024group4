@@ -134,6 +134,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
                         reps={exercise.reps}
                         instruction={exercise.instruction}
                         equipment={exercise.equipment}
+                        difficulty={exercise.difficulty}
                     />
                 ))}
             </div>
