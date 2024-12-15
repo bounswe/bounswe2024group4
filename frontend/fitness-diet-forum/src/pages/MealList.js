@@ -67,6 +67,7 @@ const MealList = () => {
             <div className="grid gap-10">
               {meals.map((meal) => (
                 <Meal
+                  key={meal.meal_id}
                   mealId={meal.meal_id}
                   mealName={meal.mealName}
                   foods={meal.foods}
