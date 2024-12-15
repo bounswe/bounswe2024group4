@@ -482,42 +482,50 @@ def get_meals(request):
         try:
             user = request.user
             meals = Meal.objects.filter(created_by=user)
-            meals_data = [{
-                'meal_id': meal.meal_id,
-                'meal_name': meal.meal_name,
-                'created_at': meal.created_at,
-                'rating': meal.rating,
-                'rating_count': meal.rating_count,
-                'calories': meal.calories,
-                'protein': meal.protein,
-                'fat': meal.fat,
-                'carbs': meal.carbs,
-                'fiber': meal.fiber,
-                'foods': list(meal.foods.values(
-                    'name',
-                    'ingredients',
-                    'recipe_url',
-                    'image_url',
-                    'energ_kcal', 
-                    'fat', 
-                    'fat_saturated', 
-                    'fat_trans', 
-                    'carbo',
-                    'fiber',
-                    'sugar',
-                    'protein',
-                    'cholesterol',
-                    'na',
-                    'ca',
-                    'k',
-                    'vit_k',
-                    'vit_c',
-                    'vit_a_rae',
-                    'vit_d',
-                    'vit_b12',
-                    'vit_b6',
-                )),
-            } for meal in meals]
+            meals_data = []
+            
+            for meal in meals:
+                foods_data = []
+                for food in meal.foods.all():
+                    foods_data.append({
+                        'name': food.name,
+                        'ingredients': food.ingredients,
+                        'recipe_url': food.recipe_url,
+                        'image_url': food.image_url.url if food.image_url else '',
+                        'energ_kcal': food.energ_kcal,
+                        'fat': food.fat,
+                        'fat_saturated': food.fat_saturated,
+                        'fat_trans': food.fat_trans,
+                        'carbo': food.carbo,
+                        'fiber': food.fiber,
+                        'sugar': food.sugar,
+                        'protein': food.protein,
+                        'cholesterol': food.cholesterol,
+                        'na': food.na,
+                        'ca': food.ca,
+                        'k': food.k,
+                        'vit_k': food.vit_k,
+                        'vit_c': food.vit_c,
+                        'vit_a_rae': food.vit_a_rae,
+                        'vit_d': food.vit_d,
+                        'vit_b12': food.vit_b12,
+                        'vit_b6': food.vit_b6,
+                    })
+                
+                meals_data.append({
+                    'meal_id': meal.meal_id,
+                    'meal_name': meal.meal_name,
+                    'created_at': meal.created_at,
+                    'rating': meal.rating,
+                    'rating_count': meal.rating_count,
+                    'calories': meal.calories,
+                    'protein': meal.protein,
+                    'fat': meal.fat,
+                    'carbs': meal.carbs,
+                    'fiber': meal.fiber,
+                    'foods': foods_data,
+                })
+
             return JsonResponse({'message': 'Meals found', 'meals': meals_data}, status=200)
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
