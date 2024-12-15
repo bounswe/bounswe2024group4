@@ -108,8 +108,8 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
                 aria-label="Bookmark Program"
             >
             <FontAwesomeIcon
-            icon={isBookmarked ? solidBookmark : regularBookmark}
-            className={isBookmarked ? "text-yellow-400" : "text-gray-400"}
+                icon={isBookmarked ? solidBookmark : regularBookmark}
+                className={isBookmarked ? "text-yellow-400" : "text-gray-400"}
             />
         </button>
 
