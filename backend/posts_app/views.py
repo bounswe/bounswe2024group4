@@ -17,34 +17,43 @@ from rest_framework.permissions import IsAuthenticated
 @csrf_exempt
 def post(request):
     if request.method == 'POST':
-        user = request.user
         content = request.data.get('content')
         workoutId = request.data.get('workoutId')
         mealId = request.data.get('mealId')
 
         if not content:
             return JsonResponse({'error': 'Content is required'}, status=400)
-        
+
+        # Create the post first
+        post = Post.objects.create(
+            user=request.user,
+            content=content
+        )
+
+        # Add workout if provided
         if workoutId:
             try:
                 workout = Workout.objects.get(workout_id=workoutId)
                 post.workout = workout
+                post.save()
             except Workout.DoesNotExist:
+                post.delete()  # Clean up if workout doesn't exist
                 return JsonResponse({'error': 'Workout not found'}, status=404)
-        
-        if mealId:
-            try:
-                post.mealId = mealId
-            except ValueError:
-                return JsonResponse({'error': 'mealId must be an integer'}, status=400)
-                
-        post = Post.objects.create(user=user, content=content)
-        post.save()
 
-        return JsonResponse({'message': 'Post created successfully', 'post_id': post.id}, status=201)
+        # Add meal if provided
+        if mealId:
+            post.mealId = mealId
+            post.save()
+
+        return JsonResponse({
+            'message': 'Post created successfully',
+            'post_id': post.id,
+            'content': post.content,
+            'workout_id': post.workout.workout_id if post.workout else None,
+            'meal_id': post.mealId
+        }, status=201)
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
-        # return render(request, 'create_post.html')
 
 
 @swagger_auto_schema(method='post', **toggle_like_schema)
@@ -200,3 +209,95 @@ def bookmarked_posts(request):
                 } for post in bookmarked_posts]))}, status=200)
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def get_comments_for_post(request):
+    post_id = request.query_params.get('postId')
+
+    if not post_id:
+        return JsonResponse({'error': 'postId query parameter is required'}, status=400)
+
+    try:
+        post_id = int(post_id)
+    except ValueError:
+        return JsonResponse({'error': 'postId must be an integer'}, status=400)
+
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({'error': 'Post not found'}, status=404)
+
+    comments = Comment.objects.filter(post=post).order_by('-created_at')
+
+    
+    data = []
+    for comment in comments:
+        data.append({
+            'id': comment.id,
+            'content': comment.content,
+            'username': comment.user.username,
+            'created_at': comment.created_at.isoformat()
+        })
+
+    return JsonResponse({'comments': data}, status=200)
+
+  
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_post(request, post_id):
+    if request.method == 'DELETE':
+        try:
+            user = request.user
+            post = Post.objects.get(id=post_id)
+
+            # Check if user is authorized to delete this post
+            if post.user != user:
+                return JsonResponse({'error': 'You are not authorized to delete this post'}, status=403)
+
+            post.delete()
+            return JsonResponse({
+                'message': 'Post deleted successfully',
+                'post_id': post_id
+            }, status=200)
+
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+  
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_comment(request, comment_id):
+    if request.method == 'DELETE':
+        try:
+            user = request.user
+            comment = Comment.objects.get(id=comment_id)
+
+            # Check if user is authorized to delete this comment
+            if comment.user != user:
+                return JsonResponse({'error': 'You are not authorized to delete this comment'}, status=403)
+
+            post_id = comment.post.id  # Store post_id before deletion for response
+            comment.delete()
+            
+            return JsonResponse({
+                'message': 'Comment deleted successfully',
+                'comment_id': comment_id,
+                'post_id': post_id
+            }, status=200)
+
+        except Comment.DoesNotExist:
+            return JsonResponse({'error': 'Comment not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
