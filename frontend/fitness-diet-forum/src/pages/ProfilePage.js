@@ -13,6 +13,7 @@ const ProfilePage = () => {
     const { username } = useParams();
     const [userData, setUserData] = useState({});
     const [programs, setPrograms] = useState();
+    const [posts, setPosts] = useState([]);
     const [profilePictureURL, setProfilePictureURL] = useState("");
     const [error, setError] = useState(null);
     const [activeSection, setActiveSection] = useState('posts');
@@ -37,6 +38,7 @@ const ProfilePage = () => {
                     const data = response.data;
                     console.log(data)
                     setUserData(data);
+                    setPosts(data.posts);
                     setProfilePictureURL(baseURL + data.profile_picture);
                     fetchExercisePrograms(data.workouts);
                     setCondition(data.user_type === "super_member")
@@ -49,7 +51,7 @@ const ProfilePage = () => {
         };
 
         fetchUserData();
-    }, [username]);
+    }, [username, posts]);
 
     const handleEditProfile = () => {
         setShowEditForm(true);
@@ -62,7 +64,6 @@ const ProfilePage = () => {
 
     const fetchExercisePrograms = async (workouts) => {
         try {
-    
             const workoutDetailsPromises = workouts.map(async (workout) => {
                 try {
                     const response = await axios.get(`${baseURL}/get-workout/${workout.workout_id}/`, config);
@@ -100,6 +101,11 @@ const ProfilePage = () => {
             console.error('Error deleting program:', error);
             setPrograms(prevPrograms => [...prevPrograms, programToDelete]);
         }
+    };
+
+    const handlePostDelete = (postId) => {
+        console.log('handlePostDelete called');
+        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
     };
 
     const errorContainerStyle = {
@@ -302,8 +308,8 @@ const ProfilePage = () => {
                 <div className="section-content w-full">
                     {activeSection === 'posts' && (
                         <div className="posts-section">
-                            {userData.posts && userData.posts.length > 0 ? (
-                                userData.posts.map((post, index) => (
+                            {posts && posts.length > 0 ? (
+                                posts.map((post, index) => (
                                     <Post
                                         key={index}
                                         postId={post.post_id}
@@ -314,6 +320,8 @@ const ProfilePage = () => {
                                         like_count={post.like_count}
                                         liked={post.liked}
                                         created_at={post.created_at}
+                                        isOwn={ownProfile}
+                                        onDelete={handlePostDelete}
                                     />
                                 ))
                             ) : (
