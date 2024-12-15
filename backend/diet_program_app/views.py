@@ -392,6 +392,7 @@ def get_meal_from_id(request):
             'meal_id': meal_id,
             'created_at': meal.created_at,
             'rating': meal.rating,
+            'rating_count': meal.rating_count,
             'calories': meal.calories,
             'protein': meal.protein,
             'fat': meal.fat,
