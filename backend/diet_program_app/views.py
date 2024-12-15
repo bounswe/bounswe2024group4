@@ -111,7 +111,7 @@ def create_meal(request):
                             }
                         },
                         "recipe_url": food.recipe_url,
-                        "image_url": food.image_url if food.image_url else ''
+                        "image_url": food.image_url.url if food.image_url else ''
                     } for food in meal.foods.all()]
                 },
                 "summary": f"{user.username} created a new meal '{meal_name}'"
@@ -180,11 +180,10 @@ def get_meal_activities(request):
 @api_view(['POST'])
 def create_food_all(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        food_name = data.get('food_name')
-        ingredients = data.get('ingredients')
-        recipe_url = data.get('recipe_url') if data.get('recipe_url') else ''
-        image_url = data.get('image_url') if data.get('image_url') else ''
+        food_name = request.POST.get('food_name')
+        ingredients = request.POST.get('ingredients')
+        recipe_url = request.POST.get('recipe_url') if request.POST.get('recipe_url') else ''
+        image_url = request.FILES.get('image_url') if request.FILES.get('image_url') else ''
 
         try:   # if the food is in the API
             url = "https://api.edamam.com/api/nutrition-data"
@@ -195,8 +194,8 @@ def create_food_all(request):
             }
             response = requests.get(url, params=params)
             data = response.json()
-
             nutrients = data.get('totalNutrients')
+
             if (nutrients == {}):
                 return JsonResponse({'message': 'Food not found'}, status=404)
 
@@ -240,7 +239,7 @@ def create_food_all(request):
                 'food_name': food_name,
                 'ingredients': ingredients,
                 'recipe_url': recipe_url,
-                'image_url': image_url,
+                'image_url': food.image_url if food.image_url else '',
                 'calories': energ_kcal,
                 'fat': fat,
                 'fat_saturated': fat_saturated,
@@ -261,77 +260,94 @@ def create_food_all(request):
 @api_view(['POST'])
 def create_food_superuser(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
         user = request.user
         if user.is_superuser:
-            food_name = data.get('food_name')
-            ingredients = data.get('ingredients')
-            recipe_url = data.get('recipe_url') if data.get('recipe_url') else ''
-            image_url = data.get('image_url') if data.get('image_url') else ''
-            energ_kcal = data.get('energ_kcal') if data.get('energ_kcal') else 'N/A'
-            fat = data.get('fat') if data.get('fat') else 'N/A'
-            fat_saturated = data.get('fat_saturated') if data.get('fat_saturated') else 'N/A'
-            fat_trans = data.get('fat_trans') if data.get('fat_trans') else 'N/A'
-            carbo = data.get('carbo') if data.get('carbo') else 'N/A'
-            fiber = data.get('fiber') if data.get('fiber') else 'N/A'
-            sugar = data.get('sugar') if data.get('sugar') else 'N/A'
-            protein = data.get('protein') if data.get('protein') else 'N/A'
-            cholesterol = data.get('cholesterol') if data.get('cholesterol') else 'N/A'
-            na = data.get('na') if data.get('na') else 'N/A'
-            ca = data.get('ca') if data.get('ca') else 'N/A'
-            k = data.get('k') if data.get('k') else 'N/A'
-            vit_k = data.get('vit_k') if data.get('vit_k') else 'N/A'
-            vit_c = data.get('vit_c') if data.get('vit_c') else 'N/A'
-            vit_a_rae = data.get('vit_a_rae') if data.get('vit_a_rae') else 'N/A'
-            vit_d = data.get('vit_d') if data.get('vit_d') else 'N/A'
-            vit_b12 = data.get('vit_b12') if data.get('vit_b12') else 'N/A'
-            vit_b6 = data.get('vit_b6') if data.get('vit_b6') else 'N/A'
+            # Retrieve fields from request.POST
+            food_name = request.POST.get('food_name')
+            ingredients = request.POST.get('ingredients')
+            recipe_url = request.POST.get('recipe_url', '')
+            
+            # If you previously had `image_url` as a URL field, but now it's an ImageField:
+            # Retrieve the uploaded file from request.FILES
+            image_url = request.FILES.get('image_url', '')
 
+            # For nutritional values, use `get()` with a default of 'N/A'
+            energ_kcal = request.POST.get('energ_kcal', 'N/A')
+            fat = request.POST.get('fat', 'N/A')
+            fat_saturated = request.POST.get('fat_saturated', 'N/A')
+            fat_trans = request.POST.get('fat_trans', 'N/A')
+            carbo = request.POST.get('carbo', 'N/A')
+            fiber = request.POST.get('fiber', 'N/A')
+            sugar = request.POST.get('sugar', 'N/A')
+            protein = request.POST.get('protein', 'N/A')
+            cholesterol = request.POST.get('cholesterol', 'N/A')
+            na = request.POST.get('na', 'N/A')
+            ca = request.POST.get('ca', 'N/A')
+            k = request.POST.get('k', 'N/A')
+            vit_k = request.POST.get('vit_k', 'N/A')
+            vit_c = request.POST.get('vit_c', 'N/A')
+            vit_a_rae = request.POST.get('vit_a_rae', 'N/A')
+            vit_d = request.POST.get('vit_d', 'N/A')
+            vit_b12 = request.POST.get('vit_b12', 'N/A')
+            vit_b6 = request.POST.get('vit_b6', 'N/A')
+
+            # Create the Food object
             food = Food.objects.create(
-                name = food_name,
-                ingredients = ingredients,
-                image_url = image_url,
-                recipe_url = recipe_url,
-                energ_kcal = energ_kcal,
-                fat = fat,
-                fat_saturated = fat_saturated,
-                fat_trans = fat_trans,
-                carbo = carbo,
-                fiber = fiber,
-                sugar = sugar,
-                protein = protein,
-                cholesterol = cholesterol,
-                na = na,
-                ca = ca,
-                k = k,
-                vit_k = vit_k,
-                vit_c = vit_c,
-                vit_a_rae = vit_a_rae,
-                vit_d = vit_d,
-                vit_b12 = vit_b12,
-                vit_b6 = vit_b6
+                name=food_name,
+                ingredients=ingredients,
+                image_url=image_url,        # Use the uploaded image file
+                recipe_url=recipe_url,
+                energ_kcal=energ_kcal,
+                fat=fat,
+                fat_saturated=fat_saturated,
+                fat_trans=fat_trans,
+                carbo=carbo,
+                fiber=fiber,
+                sugar=sugar,
+                protein=protein,
+                cholesterol=cholesterol,
+                na=na,
+                ca=ca,
+                k=k,
+                vit_k=vit_k,
+                vit_c=vit_c,
+                vit_a_rae=vit_a_rae,
+                vit_d=vit_d,
+                vit_b12=vit_b12,
+                vit_b6=vit_b6
             )
             food.save()
+
             return JsonResponse({
                 'message': 'Food created successfully', 
                 'food_id': food.food_id,
                 'food_name': food_name,
                 'ingredients': ingredients,
                 'recipe_url': recipe_url,
-                'image_url': image_url,
+                'image_url': food.image_url if food.image_url else '',
                 'calories': energ_kcal,
                 'fat': fat,
                 'fat_saturated': fat_saturated,
                 'fat_trans': fat_trans,
-                'carbo': carbo, 'fiber': fiber, 'sugar': sugar,
+                'carbo': carbo,
+                'fiber': fiber,
+                'sugar': sugar,
                 'protein': protein,
                 'cholesterol': cholesterol,
-                'na': na, 'ca': ca, 'k': k,
-                'vit_k': vit_k, 'vit_c': vit_c, 'vit_a_rae': vit_a_rae, 'vit_d': vit_d, 'vit_b12': vit_b12, 'vit_b6': vit_b6,
-                }, status=201)
+                'na': na,
+                'ca': ca,
+                'k': k,
+                'vit_k': vit_k,
+                'vit_c': vit_c,
+                'vit_a_rae': vit_a_rae,
+                'vit_d': vit_d,
+                'vit_b12': vit_b12,
+                'vit_b6': vit_b6,
+            }, status=201)
         else:
             return JsonResponse({'message': 'Not a superuser'}, status=401)
     return JsonResponse({'message': 'Invalid request'}, status=400)
+
 
 
 @swagger_auto_schema(method='get', **get_meal_from_id_schema)
@@ -349,7 +365,7 @@ def get_meal_from_id(request):
         for food in foods:
             food_list.append({
                 'food_name': food.name,
-                'ingredients': [ingredient.split(' ') for ingredient in food.ingredients.split(',')],
+                'ingredients': [ingredient.split('\n') for ingredient in food.ingredients.split(',')],
                 'energ_kcal': food.energ_kcal,
                 'fat': food.fat,
                 'fat_saturated': food.fat_saturated,
@@ -369,13 +385,17 @@ def get_meal_from_id(request):
                 'vit_b12': food.vit_b12,
                 'vit_b6': food.vit_b6,
                 'recipe_url': food.recipe_url,
-                'image_url': food.image_url if food.image_url else '',
+                'image_url': food.image_url.url if food.image_url else '',
             })
         return JsonResponse({
             'meal_name': meal.meal_name,
             'created_at': meal.created_at,
             'rating': meal.rating,
-
+            'calories': meal.calories,
+            'protein': meal.protein,
+            'fat': meal.fat,
+            'carbs': meal.carbs,
+            'fiber': meal.fiber,
             'foods': food_list
             }, status=200)
     return JsonResponse({'message': 'Invalid request'}, status=400)
@@ -465,6 +485,11 @@ def get_meals(request):
                 'meal_name': meal.meal_name,
                 'created_at': meal.created_at,
                 'rating': meal.rating,
+                'calories': meal.calories,
+                'protein': meal.protein,
+                'fat': meal.fat,
+                'carbs': meal.carbs,
+                'fiber': meal.fiber,
                 'foods': list(meal.foods.values(
                     'name',
                     'ingredients',
@@ -580,9 +605,9 @@ def get_food_by_id(request):
             food = Food.objects.get(food_id=food_id)
             return JsonResponse({
                 'food_name': food.name,
-                'ingredients': [ingredient.split(' ') for ingredient in food.ingredients.split(',')],
+                'ingredients': [ingredient.split('\n') for ingredient in food.ingredients.split(',')],
                 'recipe_url': food.recipe_url,
-                'image_url': food.image_url,
+                'image_url': food.image_url.url,
                 'energ_kcal': food.energ_kcal,
                 'fat': food.fat,
                 'fat_saturated': food.fat_saturated,

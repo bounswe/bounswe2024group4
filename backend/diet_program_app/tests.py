@@ -17,13 +17,30 @@ class TestCreateMealFood(APITestCase):
         
         data = {
             'food_name': 'Apple',
-            'ingredients': '100 gr apple,',
+            'ingredients': '100 gr apple',
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
-        
+        response = self.client.post('/create_food_all/', data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()['message'], 'Food for meal created successfully with Edamam Nutrition Analysis API')
         self.assertEqual(response.json()['calories'], "52.0 kcal")
+
+    def test_create_food_all_api_mulitple_ingrdients(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Apple Twist',
+            'ingredients': '100 gr apple\n10 gr sugar\n5 gr cinnamon',
+        }
+        # Send data as form data (default), no JSON
+        response = self.client.post('/create_food_all/', data)
+    
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['message'], 'Food for meal created successfully with Edamam Nutrition Analysis API')
+        self.assertTrue(float(response.json()['calories'].split(' ')[0]) > 52)
+
 
     def test_create_food_all_fail(self):
         data = {'username': 'testuser1', 'password': 'password'}
@@ -35,7 +52,7 @@ class TestCreateMealFood(APITestCase):
             'food_name': 'Sushi',
             'ingredients': '100 gr sushi',
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['message'], 'Food not found')
         
@@ -69,7 +86,7 @@ class TestCreateMealFood(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_superuser/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_superuser/', data)
 
         self.assertEqual(response.status_code, 201)
 
@@ -86,11 +103,10 @@ class TestCreateMealFood(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_superuser/', json.dumps(data), content_type='application/json')
 
+        response = self.client.post('/create_food_superuser/', data)
         self.assertEqual(response.status_code, 201)
         food_id = response.json()['food_id']
-        # self.user1.log_out()
 
         self.user2 = User.objects.create_user(username='testuser2', email='testuser2@gmail.com', password='password')
         data = {'username': 'testuser2', 'password': 'password'}
@@ -143,7 +159,7 @@ class TestMealFeatures(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -170,7 +186,7 @@ class TestMealFeatures(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -198,7 +214,7 @@ class TestMealFeatures(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -227,7 +243,7 @@ class TestMealFeatures(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -255,7 +271,7 @@ class TestMealFeatures(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -285,7 +301,7 @@ class TestMealFeatures(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
