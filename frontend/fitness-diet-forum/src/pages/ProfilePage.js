@@ -13,6 +13,8 @@ const ProfilePage = () => {
     const { username } = useParams();
     const [userData, setUserData] = useState({});
     const [programs, setPrograms] = useState();
+    const [meals, setMeals] = useState([]);
+    const [mealsWithDetail, setMealsWithDetail] = useState([]);
     const [posts, setPosts] = useState([]);
     const [profilePictureURL, setProfilePictureURL] = useState("");
     const [error, setError] = useState(null);
@@ -42,6 +44,7 @@ const ProfilePage = () => {
                     setPosts(data.posts);
                     setProfilePictureURL(baseURL + data.profile_picture);
                     fetchExercisePrograms(data.workouts);
+                    fetchMeals(data.meals);
                     setCondition(data.user_type === "super_member")
                 } else {
                     setError('User not found');
@@ -61,6 +64,11 @@ const ProfilePage = () => {
     const handleExercisePrograms = async (workouts) => {
         setActiveSection('exercises');
         fetchExercisePrograms(workouts);
+    }
+
+    const handleMeals = async (meals) => {
+        setActiveSection('meals');
+        fetchMeals(meals);
     }
 
     const fetchExercisePrograms = async (workouts) => {
@@ -85,6 +93,30 @@ const ProfilePage = () => {
         }
     };
 
+    const fetchMeals = async (meals) => {
+        try {
+            const mealDetailsPromises = meals.map(async (meal) => {
+                try {
+                    const response = await axios.get(`${baseURL}/get_meal_from_id/?meal_id=${meal.meal_id}`, config);
+                    console.log(response.data);
+                    return response.data; // Extract workout data from the response
+                } catch (error) {
+                    console.error(`Error fetching details for meal`, error);
+                    return null; // Handle errors gracefully by returning null
+                }
+            });
+    
+            // Wait for all requests to resolve
+            const mealDetails = await Promise.all(mealDetailsPromises);
+    
+            // Filter out any null results and update the programs state
+            setMealsWithDetail(mealDetails.filter((meal) => meal !== null));
+            console.log("MEALS:", mealsWithDetail);
+        } catch (error) {
+            console.error("Error fetching user meals:", error);
+        }
+    };
+
     const handleDeleteProgram = async (programId) => {
         const programToDelete = programs.find(program => program.id === programId);
         const updatedPrograms = programs.filter(program => program.id !== programId);
@@ -103,6 +135,17 @@ const ProfilePage = () => {
             setPrograms(prevPrograms => [...prevPrograms, programToDelete]);
         }
     };
+
+    const handleDeleteMeal = async (mealId) => {
+        try {
+            const deleteResponse = await axios.delete(`${baseURL}/meals/delete/${mealId}/`, config);
+            if (deleteResponse.status === 200) {
+                setMealsWithDetail(mealsWithDetail.filter((meal) => meal.meal_id !== mealId));
+            }
+        } catch (error) {
+            setError('Could not delete meal.');
+        }
+    }
 
     const handlePostDelete = (postId) => {
         console.log('handlePostDelete called');
@@ -294,13 +337,13 @@ const ProfilePage = () => {
                     </button>
                     <button
                         className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'meals' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
-                        onClick={() =>  setActiveSection('meals')}
+                        onClick={() =>  handleMeals(userData.meals)}
                     >
                         Meals
                     </button>
                     <button
                         className={`tab-btn px-6 py-2 rounded-lg text-white ${activeSection === 'exercises' ? 'bg-blue-500' : 'bg-gray-600'} hover:bg-blue-700`}
-                        onClick={() => handleExercisePrograms(userData.workouts) }
+                        onClick={() => handleExercisePrograms(userData.workouts)}
                     >
                         Exercises
                     </button>
@@ -334,11 +377,16 @@ const ProfilePage = () => {
 
                     {activeSection === 'meals' && (
                         <div className="meals-section">
-                            {userData.meals && userData.meals.length > 0 ? (
-                                userData.meals.map((meal, index) => (
+                            {mealsWithDetail && mealsWithDetail.length > 0 ? (
+                                mealsWithDetail.map((meal, index) => (
                                     <div key={index} className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
                                         <h3 className="text-lg font-bold mb-2">{meal.name}</h3>
-                                        <Meal mealName={meal.name} foods={meal.foods} onDelete={() => {}} />
+                                        <Meal 
+                                            mealName={meal.name} 
+                                            foods={meal.foods} 
+                                            onDelete={() => handleDeleteMeal(meal.meal_id)}
+                                            isOwn={ownProfile} 
+                                        />
                                     </div>
                                 ))
                             ) : (

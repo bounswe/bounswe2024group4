@@ -16,6 +16,7 @@ const MealList = () => {
       'Authorization': 'Token ' + token
     }
   }
+  const [changed, setChanged] = useState(false);
 
   useEffect(() => {
     const fetchUserMeals = async () => {
@@ -23,7 +24,6 @@ const MealList = () => {
             const response = await axios.get(baseURL + `/get_meals/`, config);
             if (response.status === 200) {
                 const data = response.data;
-                console.log(data);
                 setMeals(data.meals);
             } else {
                 setError('User not found');
@@ -34,10 +34,18 @@ const MealList = () => {
     };
 
     fetchUserMeals();
-  }, []);
+  }, [changed]);
 
-  const deleteMeal = (mealId) => {
-    setMeals(meals.filter((meal) => meal.id !== mealId));
+  const deleteMeal = async (mealId) => {
+    try {
+      const deleteResponse = await axios.delete(`${baseURL}/meals/delete/${mealId}/`, config);
+      if (deleteResponse.status === 200) {
+        setMeals(meals.filter((meal) => meal.meal_id !== mealId));
+        setChanged(!changed);
+      }
+    } catch (error) {
+        setError('Could not delete meal.');
+    }
   };
 
   return (
@@ -58,7 +66,7 @@ const MealList = () => {
               key={meal.id}
               mealName={meal.mealName}
               foods={meal.foods}
-              onDelete={() => deleteMeal(meal.id)}
+              onDelete={() => deleteMeal(meal.meal_id)}
               isOwn={true}
             />
           ))}

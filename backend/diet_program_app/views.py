@@ -389,6 +389,7 @@ def get_meal_from_id(request):
             })
         return JsonResponse({
             'meal_name': meal.meal_name,
+            'meal_id': meal_id,
             'created_at': meal.created_at,
             'rating': meal.rating,
             'calories': meal.calories,
@@ -414,8 +415,8 @@ def delete_meal_by_id(request, meal_id):
             
             # delete the image from images folder
             for food in meal.foods.all():
-                if food.image_url and os.path.exists(food.image_url) and food.image_url != '':
-                    os.remove(food.image_url)
+                if food.image_url and os.path.exists(food.image_url.url) and food.image_url.url != '':
+                    os.remove(food.image_url.url)
 
             # Delete the workout
             meal.delete()

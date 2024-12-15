@@ -16,13 +16,13 @@ const Meal = ({ mealName, foods, onDelete, isOwn }) => {
         {foods.map((food, index) => (
           <Food
             key={index}
-            foodName={food.name}
+            foodName={food.name || food.food_name}
             calories={food.energ_kcal}
             protein={food.protein}
             carbs={food.carbo}
             fat={food.fat}
             ingredients={food.ingredients}
-            imageUrl={baseURL + "/" + food.image_url}
+            imageUrl={baseURL + food.image_url}
             recipeUrl={food.recipe_url}
             ca={food.ca}
             cholesterol={food.cholesterol}
