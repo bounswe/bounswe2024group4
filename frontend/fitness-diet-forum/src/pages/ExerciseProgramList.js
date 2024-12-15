@@ -86,6 +86,7 @@ const ExerciseProgramList = () => {
                 name: exercise.name,
                 muscle: exercise.muscle,
                 equipment: exercise.equipment,
+                difficulty: exercise.difficulty,
                 instructions: exercise.instructions,
                 repetitions: reps,
                 sets: sets
@@ -119,7 +120,8 @@ const ExerciseProgramList = () => {
                 instruction: exercise.instruction,
                 reps: exercise.repetitions,
                 sets: exercise.sets,
-                instruction: exercise.instructions
+                instruction: exercise.instructions,
+                difficulty: exercise.difficulty
             }));
 
             const body = {
@@ -183,13 +185,15 @@ const ExerciseProgramList = () => {
                                                     key={index}
                                                     className={`exercise-item mb-4 p-3 rounded-sm ${activeExerciseIndex === index ? "bg-gray-800" : ""}`}
                                                 >
-                                                    <p 
-                                                        onClick={() => setActiveExerciseIndex(index)} 
-                                                        className="cursor-pointer text-xl hover:text-primary font-bold"
-                                                    >
-                                                        {exercise.name}
-                                                    </p>
-
+                                                    <div>
+                                                        <p 
+                                                            onClick={() => setActiveExerciseIndex(index)} 
+                                                            className="cursor-pointer text-xl hover:text-primary font-bold"
+                                                        >
+                                                            {exercise.name}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500">{exercise.difficulty}</p>
+                                                    </div>
                                                     {/* Show inputs for active exercise */}
                                                     {activeExerciseIndex === index && (
                                                         <div className="exercise-inputs mt-3">
@@ -253,6 +257,7 @@ const ExerciseProgramList = () => {
                                     <li key={index} className="mb-4">
                                         <p className="text-xl">{exercise.name} ({exercise.muscle})</p>
                                         <p>Sets: {exercise.sets} | Reps: {exercise.repetitions}</p>
+                                        <p>Difficulty: {exercise.difficulty}</p>
                                         <button
                                             className="text-red-500"
                                             onClick={() => handleRemoveExercise(index)}
