@@ -308,7 +308,7 @@ const ExerciseProgramList = () => {
                         ) : (
                             programs.map((program) => (
                                 <ExerciseProgram
-                                    key={program.id}  // Use `program.id` as the unique key
+                                    key={program.id}
                                     programName={program.workout_name}
                                     exercises={program.exercises}
                                     onDelete={() => handleDeleteProgram(program.id)}
