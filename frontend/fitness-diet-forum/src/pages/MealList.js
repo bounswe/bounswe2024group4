@@ -63,11 +63,14 @@ const MealList = () => {
         <div className="grid gap-10">
           {meals.map((meal) => (
             <Meal
-              key={meal.id}
+              mealId={meal.meal_id}
               mealName={meal.mealName}
               foods={meal.foods}
               onDelete={() => deleteMeal(meal.meal_id)}
               isOwn={true}
+              currentRating={meal.rating} 
+              ratingCount={meal.rating_count}
+              showRating={false}
             />
           ))}
         </div>

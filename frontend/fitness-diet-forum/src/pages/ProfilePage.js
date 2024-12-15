@@ -386,6 +386,10 @@ const ProfilePage = () => {
                                             foods={meal.foods} 
                                             onDelete={() => handleDeleteMeal(meal.meal_id)}
                                             isOwn={ownProfile} 
+                                            mealId={meal.meal_id}
+                                            currentRating={meal.rating} 
+                                            ratingCount={meal.rating_count}
+                                            showRating={!ownProfile}
                                         />
                                     </div>
                                 ))

@@ -103,13 +103,13 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
         <div className="relative w-full bg-gray-800 border border-gray-600 shadow-lg rounded-lg p-6 text-lightText flex flex-col">
             {/* Bookmark Button */}
             <button
-    className="absolute top-4 right-4 text-2xl hover:text-yellow-400 transition-all duration-300"
-    onClick={toggleBookmarkWorkout}
-    aria-label="Bookmark Program"
+                className="absolute top-4 right-4 text-2xl hover:text-yellow-400 transition-all duration-300"
+                onClick={toggleBookmarkWorkout}
+                aria-label="Bookmark Program"
             >
             <FontAwesomeIcon
-            icon={isBookmarked ? solidBookmark : regularBookmark}
-            className={isBookmarked ? "text-yellow-400" : "text-gray-400"}
+                icon={isBookmarked ? solidBookmark : regularBookmark}
+                className={isBookmarked ? "text-yellow-400" : "text-gray-400"}
             />
         </button>
 
