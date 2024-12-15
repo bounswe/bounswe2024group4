@@ -1,9 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import Meal from '../components/Meal';
-import Food from '../components/Food';
 import CreateMealModal from '../components/CreateMealModal.js';
-import { Context } from "../globalContext/globalContext.js";
 
 const MealList = () => {
   const [meals, setMeals] = useState([]);  

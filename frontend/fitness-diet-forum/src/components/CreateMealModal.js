@@ -73,7 +73,7 @@ const CreateMealModal = (userMeals, onClose) => {
                 setNewFood(null);
                 setError("Food not found");
             }else{
-                setNewFood(nutrientsResponse.data.food);
+                setNewFood(nutrientsResponse.data);
             }
         }catch{
             setError("Food not found");
@@ -341,7 +341,7 @@ const CreateMealModal = (userMeals, onClose) => {
 
                 {/* Display message if food not found */}
                   <>
-                { !foodFound && 
+                { (!foodFound && !newFood) && 
                     <p className="text-red-500 mt-4">Food not found. Please enter the food information below.</p>
                 }
                 {/* Show Input Fields if newFood is null */}
@@ -415,14 +415,14 @@ const CreateMealModal = (userMeals, onClose) => {
                     <div className="mt-8">
                     <h4 className="text-lg font-semibold text-white tracking-wide mb-4">Ingredients List</h4>
                     <div className="space-y-4">
-                        {newFood.ingredients && newFood.ingredients.length > 0 ? (
-                        newFood.ingredients.map((ingredient, index) => (
+                        {ingredientsList && ingredientsList.length > 0 ? (
+                        ingredientsList.map((ingredient, index) => (
                             <div key={index} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg shadow-lg w-1/3">
                             <div className="flex flex-col">
                                 {/* Display quantity, unit, and ingredient name */}
-                                <span className="text-white font-semibold">{ingredient.slice(2).join(" ")}</span>
+                                <span className="text-white font-semibold">{ingredient.name}</span>
                                 <span className="text-gray-400">
-                                {ingredient[0]} {ingredient[1]}
+                                {ingredient.amount} gr
                                 </span>
                             </div>
                             </div>
@@ -462,7 +462,7 @@ const CreateMealModal = (userMeals, onClose) => {
                         <NutrientSection
                             title="Calories"
                             nutrients={[
-                                { label: "", name: "calories", value: newFood?.energ_kcal || energKcal },
+                                { label: "", name: "calories", value: newFood?.calories || energKcal },
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}
