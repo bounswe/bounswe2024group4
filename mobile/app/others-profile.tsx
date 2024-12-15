@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,88 +8,104 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Modal,
-} from "react-native";
-import { TabView, TabBar } from "react-native-tab-view";
-import { LineChart } from "react-native-chart-kit";
-import { Rating } from "react-native-ratings";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import WorkoutsScreen from "../../components/WorkoutsScreen";
-import PostsScreen from "./index";
-import MealsScreen from "../../components/MealsScreen";
+} from 'react-native';
+import { TabView, TabBar } from 'react-native-tab-view';
+import { Rating } from 'react-native-ratings';
+import { LineChart } from 'react-native-chart-kit';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
+import WorkoutsScreen from '../components/WorkoutsScreen';
+import PostsScreen from './(tabs)/index';
+import MealsScreen from '../components/MealsScreen';
 
 interface Route {
-  key: "posts" | "workouts" | "meals";
+  key: 'posts' | 'workouts' | 'meals';
   title: string;
 }
 
-function MyProfileScreen() {
-  const router = useRouter();
+function ProfileDetailScreen() {
+  const { viewedUser, viewingUser, isEditing } = useGlobalSearchParams();
   const [index, setIndex] = useState(0);
   const [routes] = useState<Route[]>([
-    { key: "posts", title: "Posts" },
-    { key: "workouts", title: "Workouts" },
-    { key: "meals", title: "Meals" },
+    { key: 'posts', title: 'Posts' },
+    { key: 'workouts', title: 'Workouts' },
+    { key: 'meals', title: 'Meals' },
   ]);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
-  const baseURL = `http://${process.env.EXPO_PUBLIC_API_URL}:8000`;
+  const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
   useEffect(() => {
-    const fetchMyProfile = async () => {
+    if (viewedUser === viewingUser && !isEditing) {
+      router.replace('/profile');
+    }
+    const fetchProfileData = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const username = await AsyncStorage.getItem("username");
-        const config = { headers: { Authorization: `Token ${token}` } };
+        const token = await AsyncStorage.getItem('token');
+        const config = {
+          headers: {
+            Authorization: 'Token ' + token,
+          },
+        };
 
         const profileResponse = await axios.get(
-          `${baseURL}/view_profile/?viewed_username=${username}`,
+          `${baseURL}/view_profile/?viewed_username=${viewedUser}`,
           config
         );
-        setUserData(profileResponse.data);
+        const data = profileResponse.data;
+        setUserData(data);
+        setIsFollowing(data.is_following);
 
-        const workoutDetailsPromises = profileResponse.data.workouts.map(async (workout: any) => {
-          const response = await axios.get(
-            `${baseURL}/get-workout/${workout.workout_id}/`,
-            config
-          );
+        const workoutDetailsPromises = data.workouts.map(async (workout: any) => {
+          const response = await axios.get(`${baseURL}/get-workout/${workout.workout_id}/`, config);
           return response.data;
         });
 
         const detailedWorkouts = await Promise.all(workoutDetailsPromises);
         setPrograms(detailedWorkouts);
       } catch (error) {
-        console.error("Error fetching profile data:", error);
+        console.error('Error fetching profile data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMyProfile();
-  }, []);
+    fetchProfileData();
+  }, [viewedUser, viewingUser, isEditing]);
 
-  const handleEditProfile = () => {
-    router.push({
-      pathname: "/EditProfileScreen",
-      params: {
-        username: userData.username,
-        bio: userData.bio,
-        email: userData.email,
-        profilePicture: userData.profile_picture,
-        height: userData.height,
-        recentWeight: userData.weight_history?.[userData.weight_history.length - 1]?.weight,
-        isEditing: "true",
-      },
-    });
+  const handleFollowToggle = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const config = {
+        headers: {
+          Authorization: 'Token ' + token,
+        },
+      };
+
+      const action = isFollowing ? 'unfollow' : 'follow';
+      await axios.post(
+        `${baseURL}/${action}/`,
+        {
+          follower: await AsyncStorage.getItem('username'),
+          following: viewedUser,
+        },
+        config
+      );
+      setIsFollowing(!isFollowing);
+    } catch (error) {
+      console.error('Error toggling follow state:', error);
+    }
   };
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color="#FFFFFF" />
       </View>
     );
@@ -97,18 +113,25 @@ function MyProfileScreen() {
 
   if (!userData) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <Text style={{ color: "#FFFFFF" }}>Failed to load profile.</Text>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: '#FFFFFF' }}>Failed to load profile.</Text>
       </View>
     );
   }
 
-  const { bio, profile_picture, score, followers_count, following_count, posts, height, weight_history } =
-    userData;
-  const profilePictureUri =
-    profile_picture?.trim() !== "" ? profile_picture : "https://via.placeholder.com/150";
-  const recentWeight =
-    weight_history?.length > 0 ? weight_history[weight_history.length - 1].weight : null;
+  const {
+    bio,
+    profile_picture,
+    score,
+    followers_count,
+    following_count,
+    posts,
+    height,
+    weight_history,
+  } = userData;
+
+  const profilePictureUri = profile_picture?.trim() !== '' ? profile_picture : 'https://via.placeholder.com/150';
+  const recentWeight = weight_history?.length > 0 ? weight_history[weight_history.length - 1] : null;
 
   const labels = weight_history?.length > 0
     ? weight_history.map((item: any) => new Date(item.date).toLocaleDateString())
@@ -119,11 +142,11 @@ function MyProfileScreen() {
 
   const renderScene = ({ route }: { route: Route }) => {
     switch (route.key) {
-      case "workouts":
-        return <WorkoutsScreen workoutPrograms={programs} isOwnProfile={true} />;
-      case "posts":
+      case 'workouts':
+        return <WorkoutsScreen workoutPrograms={programs} isOwnProfile={false} />;
+      case 'posts':
         return <PostsScreen />;
-      case "meals":
+      case 'meals':
         return <MealsScreen />;
       default:
         return null;
@@ -164,14 +187,15 @@ function MyProfileScreen() {
           </View>
         </View>
       </View>
+
       <View style={styles.userBioContainer}>
-        <Text style={styles.userName}>{userData.username}</Text>
-        <Text style={styles.userBio}>{bio || "No bio available."}</Text>
+        <Text style={styles.userName}>{viewedUser}</Text>
+        <Text style={styles.userBio}>{bio || 'No bio available.'}</Text>
         <View style={styles.additionalInfo}>
           <Text style={styles.additionalInfoText}>Height: {height} cm</Text>
           <View style={styles.weightContainer}>
             <Text style={styles.additionalInfoText}>
-              Recent Weight: {recentWeight ? `${recentWeight} kg` : "N/A"}
+              Recent Weight: {recentWeight ? `${recentWeight.weight} kg` : 'N/A'}
             </Text>
             {weight_history?.length > 0 && (
               <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -180,15 +204,22 @@ function MyProfileScreen() {
             )}
           </View>
         </View>
-        <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
+      </View>
+
+      <View style={styles.actionButtonContainer}>
+        <TouchableOpacity
+          style={[styles.followButton, isFollowing ? styles.unfollowButton : {}]}
+          onPress={handleFollowToggle}
+        >
+          <Text style={styles.buttonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
         </TouchableOpacity>
       </View>
+
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
         onIndexChange={setIndex}
-        initialLayout={{ width: Dimensions.get("window").width }}
+        initialLayout={{ width: Dimensions.get('window').width }}
         renderTabBar={(props) => (
           <TabBar
             {...props}
@@ -204,7 +235,7 @@ function MyProfileScreen() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalHeader}>Weight History</Text>
-            {weights.length > 0 ? (
+            {weight_history?.length > 0 ? (
               <LineChart
                 data={{
                   labels: labels,
@@ -214,13 +245,13 @@ function MyProfileScreen() {
                     },
                   ],
                 }}
-                width={Dimensions.get("window").width - 40}
+                width={Dimensions.get('window').width - 40}
                 height={220}
                 yAxisSuffix="kg"
                 chartConfig={{
-                  backgroundColor: "#1B55AC",
-                  backgroundGradientFrom: "#1B55AC",
-                  backgroundGradientTo: "#609FFF",
+                  backgroundColor: '#1B55AC',
+                  backgroundGradientFrom: '#1B55AC',
+                  backgroundGradientTo: '#609FFF',
                   decimalPlaces: 1,
                   color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                   labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -228,9 +259,9 @@ function MyProfileScreen() {
                     borderRadius: 16,
                   },
                   propsForDots: {
-                    r: "6",
-                    strokeWidth: "2",
-                    stroke: "#FFA726",
+                    r: '6',
+                    strokeWidth: '2',
+                    stroke: '#FFA726',
                   },
                 }}
                 bezier
@@ -258,70 +289,71 @@ function MyProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1B55AC",
+    backgroundColor: '#1B55AC',
   },
   userInfo: {
-    flexDirection: "row",
+    flexDirection: 'row',
     padding: 16,
-    backgroundColor: "#1B55AC",
-    alignItems: "center",
+    backgroundColor: '#1B55AC',
+    alignItems: 'center',
   },
   profilePicture: {
     width: 110,
     height: 110,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: "#609FFF",
+    borderColor: '#609FFF',
+    overflow: 'hidden',
     marginRight: 40,
   },
   statsContainer: {
     flex: 1,
   },
   rowStats: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 10,
   },
   stat: {
-    alignItems: "center",
+    alignItems: 'center',
   },
   statNumber: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: 'bold',
+    color: '#fff',
   },
   statLabel: {
     fontSize: 13,
-    color: "#dcdcdc",
+    color: '#dcdcdc',
   },
   boldText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: 'bold',
+    color: '#fff',
   },
   ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 4,
   },
   ratingText: {
     marginLeft: 6,
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#FFD700",
+    fontWeight: 'bold',
+    color: '#FFD700',
   },
   userBioContainer: {
     padding: 16,
-    backgroundColor: "#1B55AC",
+    backgroundColor: '#1B55AC',
   },
   userName: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: 'bold',
+    color: '#fff',
   },
   userBio: {
     fontSize: 14,
-    color: "#dcdcdc",
+    color: '#dcdcdc',
     marginTop: 10,
   },
   additionalInfo: {
@@ -329,38 +361,59 @@ const styles = StyleSheet.create({
   },
   additionalInfoText: {
     fontSize: 14,
-    color: "#fff",
+    color: '#fff',
     marginBottom: 5,
   },
   weightContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   moreText: {
     color: '#609FFF',
     fontWeight: 'bold',
     marginLeft: 10,
   },
-  editButton: {
-    backgroundColor: "#609FFF",
+  noDataText: {
+    color: '#fff',
+    fontSize: 14,
+    marginTop: 10,
+    fontWeight: 'bold',
+  },
+  actionButtonContainer: {
+    marginVertical: 16,
+    alignItems: 'center',
+  },
+  followButton: {
+    backgroundColor: '#609FFF',
     paddingVertical: 10,
     paddingHorizontal: 70,
     borderRadius: 25,
-    marginTop: 10,
-    alignSelf: "center",
   },
-  editButtonText: {
-    color: "#fff",
+  unfollowButton: {
+    backgroundColor: '#FF0000',
+  },
+  buttonText: {
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+  },
+  tabBar: {
+    backgroundColor: '#1B55AC',
+  },
+  tabLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  indicator: {
+    backgroundColor: '#FFA726',
+    height: 3,
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: "#fff",
@@ -370,40 +423,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalHeader: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1B55AC",
-    marginBottom: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1B55AC',
+    marginBottom: 10,
   },
   closeButton: {
-    backgroundColor: "#609FFF",
+    backgroundColor: '#609FFF',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 10,
+    borderRadius: 8,
     marginTop: 20,
   },
   closeButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  tabBar: {
-    backgroundColor: "#1B55AC",
-  },
-  tabLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  indicator: {
-    backgroundColor: "#FFA726",
-    height: 3,
-  },
-  noDataText: {
-    fontSize: 16,
-    color: "#FF0000",
-    marginTop: 10,
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
-export default MyProfileScreen;
+export default ProfileDetailScreen;

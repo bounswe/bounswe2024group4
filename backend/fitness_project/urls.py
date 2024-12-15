@@ -62,7 +62,6 @@ urlpatterns = [
     path('workout-activities/', exercise_program_views.get_workout_activities, name='get_workout_activities'),
     path('get-workout-log-activities/', exercise_program_views.get_workout_log_activities, name='get_workout_log_activities'),
     path('create-exercise/', exercise_program_views.create_exercise_superuser, name='create-exercise'), # Create an exercise
-
     #User auth related endpoints
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
@@ -91,10 +90,10 @@ urlpatterns = [
     path('create_food_all/', diet_program_views.create_food_all, name='create_food_all'),
     path('create_food_superuser/', diet_program_views.create_food_superuser, name='create_food_superuser'),
     path('get_meal_from_id/', diet_program_views.get_meal_from_id, name='get_meal_from_id'),
-    path('meals/delete/<int:workout_id>/', diet_program_views.delete_meal_by_id, name='delete_meal_by_id'),
+    path('meals/delete/<int:meal_id>/', diet_program_views.delete_meal_by_id, name='delete_meal_by_id'),
     path('get_foodname_options/', diet_program_views.get_foodname_options, name='get_foodname_options'),
     path('rate_meal/', diet_program_views.rate_meal, name='rate_meal'),
-    path('get_meals_by_user_id/', diet_program_views.get_meals_by_user_id, name='get_meals_by_user_id'),
+    path('get_meals/', diet_program_views.get_meals, name='get_meals'),
     path('toggle_bookmark_meal/', diet_program_views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
     path('get_bookmarked_meals_by_user_id/', diet_program_views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
     path('get_food_by_id/', diet_program_views.get_food_by_id, name='get_food_by_id'),
@@ -104,7 +103,17 @@ urlpatterns = [
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
   #  path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
-    
+    path('search/', include('search_app.urls')),
+
+    # Posts related endpoints
+    path('post/<int:post_id>/delete/', post_views.delete_post, name='delete_post'),
+    path('comment/<int:comment_id>/delete/', post_views.delete_comment, name='delete_comment'),
+
+    # Include all posts-related URLs
+    path('', include('posts_app.urls')),  # This will include all URLs from posts_app.urls
+
+    # Include all diet program related URLs
+    path('', include('diet_program_app.urls')),
 
 ]
 
