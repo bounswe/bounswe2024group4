@@ -13,7 +13,7 @@ export interface Exercise {
   
   export interface Workout {
     id: string;
-    name: string;
+    workout_name: string;
     created_by: string;
     rating: number;
     rating_count: number;
