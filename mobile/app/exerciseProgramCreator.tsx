@@ -33,13 +33,14 @@ export default function ExerciseCreate() {
           muscle: exercise.muscle || muscleName,
           equipment: exercise.equipment || "",
           instructions: exercise.instructions || "",
+          difficulty: exercise.difficulty || "",
         }));
 
         const combinedExercisesArray = Array.from(new Set([...existingExercisesArray, ...newExercises]));
 
         const newWorkoutProgram: Workout = {
           id: "1",
-          name: "Draft",
+          workout_name: "Draft",
           created_by: (await AsyncStorage.getItem("username")) || "unknown",
           exercises: combinedExercisesArray as Exercise[],
           rating: 0,
@@ -79,10 +80,11 @@ export default function ExerciseCreate() {
         instruction: exercise.instructions,
         sets: exercise.sets,
         reps: exercise.reps,
+        difficulty: exercise.difficulty
       }));
 
       const body = {
-        workout_name: workoutProgram.name,
+        workout_name: workoutProgram.workout_name,
         exercises: workoutData,
         username: await AsyncStorage.getItem("username"),
       };
@@ -143,7 +145,7 @@ export default function ExerciseCreate() {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <SafeAreaView style={styles.background}>
           {workoutProgram && (
-            <WorkoutProgram workout={workoutProgram} onUpdate={handleWorkoutUpdate} />
+            <WorkoutProgram workout={workoutProgram} onUpdate={handleWorkoutUpdate} isEditable={true} />
           )}
           <TouchableOpacity
             onPress={() => {
