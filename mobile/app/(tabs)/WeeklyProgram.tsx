@@ -61,6 +61,7 @@ const WeeklyProgram: React.FC = () => {
 
         const response = await axios.get(`${baseURL}/get-workouts/`, config);
         setAvailablePrograms(response.data);
+        console.log(response.data)
       } catch (error) {
         console.error("Error fetching programs:", error);
         Alert.alert("Error", "Failed to fetch programs.");
@@ -92,26 +93,31 @@ const WeeklyProgram: React.FC = () => {
   };
 
   const saveWeeklyProgram = async () => {
+    if (weekPrograms.length === 0) {
+      Alert.alert("Error", "Please add at least one program before saving.");
+      return;
+    }
+  
     const workoutsData: Record<number, string> = {};
     weekPrograms.forEach((program) => {
       workoutsData[daysOfWeek.indexOf(program.day || "") + 1] = program.id;
     });
-
+  
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert("Error", "User not authenticated.");
         return;
       }
-
+  
       const config = { headers: { Authorization: `Token ${token}` } };
-
+  
       const response = await axios.post(
         `${baseURL}/create-program/`,
         { workouts: workoutsData },
         config
       );
-
+  
       console.log("Program saved successfully:", response.data);
       Alert.alert("Success", "Weekly program saved successfully!");
     } catch (error) {
@@ -119,6 +125,7 @@ const WeeklyProgram: React.FC = () => {
       Alert.alert("Error", "Failed to save weekly program.");
     }
   };
+  
 
   if (loading) {
     return (
@@ -135,7 +142,7 @@ const WeeklyProgram: React.FC = () => {
       {daysOfWeek.map((day) => {
         const dayPrograms = weekPrograms.filter((program) => program.day === day);
         return (
-          <View key={day} style={styles.dayContainer}>
+          <View key={day} testID={`day-${day}`} style={styles.dayContainer}>
             <Text style={styles.dayTitle}>{day}</Text>
             <View style={styles.exercisesContainer}>
               {dayPrograms.length > 0 ? (
