@@ -17,9 +17,7 @@ def get_leaderboard(request):
         users = User.objects.order_by('-score')  # Get the full queryset of Users
         leaderboard = []
         for user in users:
-            # Build the absolute URI to the profile picture if it exists
-            profile_picture_url = request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else ''
-            
+            profile_picture_url = user.profile_picture.url if user.profile_picture else ''
             leaderboard.append({
                 'username': user.username,
                 'profile_picture': profile_picture_url,
@@ -39,7 +37,7 @@ def get_workout_leaderboard(request):
         workout_leaderboard = []
         
         for user in users:
-            profile_picture_url = request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else ''
+            profile_picture_url = user.profile_picture.url if user.profile_picture else ''
             workout_leaderboard.append({
                 'username': user.username,
                 'profile_picture': profile_picture_url,
@@ -58,7 +56,7 @@ def get_meal_leaderboard(request):
         users = User.objects.order_by('-meal_rating')
         meal_leaderboard = []
         for user in users:
-            profile_picture_url = request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else ''
+            profile_picture_url = user.profile_picture.url if user.profile_picture else ''
             meal_leaderboard.append({
                 'username': user.username,
                 'profile_picture': profile_picture_url,
