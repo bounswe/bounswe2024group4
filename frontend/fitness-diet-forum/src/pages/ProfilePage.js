@@ -22,7 +22,8 @@ const ProfilePage = () => {
     const { baseURL } = globalContext;
     const loggedInUser = localStorage.getItem("username");
     const ownProfile = loggedInUser === username;
-    const [condition, setCondition] = useState(false); 
+    const [condition, setCondition] = useState(false);
+    const [postDeleted, setPostDeleted] = useState(false);
     const token = localStorage.getItem("token");
     const config = {
       headers: {
@@ -51,7 +52,7 @@ const ProfilePage = () => {
         };
 
         fetchUserData();
-    }, [username, posts]);
+    }, [username, postDeleted]);
 
     const handleEditProfile = () => {
         setShowEditForm(true);
@@ -105,6 +106,7 @@ const ProfilePage = () => {
 
     const handlePostDelete = (postId) => {
         console.log('handlePostDelete called');
+        setPostDeleted(!postDeleted);
         setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
     };
 
