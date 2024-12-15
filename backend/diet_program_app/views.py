@@ -389,6 +389,7 @@ def get_meal_from_id(request):
             })
         return JsonResponse({
             'meal_name': meal.meal_name,
+            'meal_id': meal_id,
             'created_at': meal.created_at,
             'rating': meal.rating,
             'calories': meal.calories,
