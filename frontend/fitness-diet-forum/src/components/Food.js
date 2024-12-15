@@ -22,12 +22,21 @@ const Food = ({
   vitD,
   vitK
 }) => {
-  const [activeTab, setActiveTab] = useState('nutrients'); // State for tab switching
-  const [visibleSection, setVisibleSection] = useState(null); // State to track which section is visible
+  const [activeTab, setActiveTab] = useState('nutrients');
+  const [visibleSection, setVisibleSection] = useState(null);
 
   const toggleSection = (section) => {
     setVisibleSection(visibleSection === section ? null : section); // Toggle visibility
   };
+  const ingredientList = ingredients.split("\n").map(line => {
+    const parts = line.split(" ");
+    const amount = parts.slice(0, 2).join(" "); // First two parts as amount (e.g., "100 gr")
+    const name = parts.slice(2).join(" "); // Remaining parts as name
+    return {
+        name: name.trim(),
+        amount: amount.trim()
+    };
+  });
 
   return (
     <div className="w-full max-w-xl mx-auto relative"> 
@@ -170,10 +179,10 @@ const Food = ({
           {activeTab === 'ingredients' && (
             <div className="ingredients transition-opacity duration-500 ease-in-out opacity-100">
               <ul className="mt-4 space-y-2 list-none">
-                {ingredients.map((ingredient, index) => (
+                {ingredientList.map((ingredient, index) => (
                   <li key={index} className="flex justify-between text-lg w-full">
                     <span className="break-words">{ingredient.name}</span>
-                    <span className="ml-auto">{ingredient.amount} gr</span>
+                    <span className="ml-auto">{ingredient.amount}</span>
                   </li>
                 ))}
               </ul>

@@ -86,6 +86,7 @@ const CreateMealModal = (onClose) => {
                 setError("Food not found");
             }else{
                 setNewFood(nutrientsResponse.data);
+                setError(null);
             }
         }catch{
             setError("Food not found");
@@ -197,11 +198,13 @@ const CreateMealModal = (onClose) => {
             foods: [...prevMeal.foods, food],
         }));
 
-        // Reset the newFood form
         setNewFood(null);
-        // Clear search term and result
-        setSearchTerm(''); // Clear search input
-        setFoodFound(true); // Reset search result
+        setSearchTerm('');
+        setFoodFound(true);
+        setIngredientsList([]);
+        setRecipeUrl("");
+        setFoodPicture(null);
+        setPreview("");
     };
     // Function to finalize and add the meal to the list
     const handleCreateMeal = () => {
@@ -305,9 +308,9 @@ const CreateMealModal = (onClose) => {
                         protein={food.protein}
                         carbs={food.carbo}
                         fat={food.fat}
-                        ingredients={ingredientsList}
-                        imageUrl={baseURL + foodPicture}
-                        recipeUrl={recipeUrl}
+                        ingredients={food.ingredients}
+                        imageUrl={baseURL + food.image_url}
+                        recipeUrl={food.recipe_url}
                         ca={food.ca}
                         cholesterol={food.cholesterol}
                         fiber={food.fiber}
