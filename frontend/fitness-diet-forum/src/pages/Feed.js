@@ -126,7 +126,7 @@ const Feed = () => {
             padding: 20px;
             margin: 0;
             max-width: 100vw; /* Make sure it takes up the full width */
-            height: 100vh; /* Fill the screen height */
+            height: 86vh; /* Fill the screen height */
             overflow-y: auto; /* Enable scroll if the content overflows */
             box-sizing: border-box;
           }
