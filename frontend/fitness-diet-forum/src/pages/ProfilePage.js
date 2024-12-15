@@ -136,6 +136,17 @@ const ProfilePage = () => {
         }
     };
 
+    const handleDeleteMeal = async (mealId) => {
+        try {
+            const deleteResponse = await axios.delete(`${baseURL}/meals/delete/${mealId}/`, config);
+            if (deleteResponse.status === 200) {
+                setMealsWithDetail(mealsWithDetail.filter((meal) => meal.meal_id !== mealId));
+            }
+        } catch (error) {
+            setError('Could not delete meal.');
+        }
+    }
+
     const handlePostDelete = (postId) => {
         console.log('handlePostDelete called');
         setPostDeleted(!postDeleted);
@@ -373,7 +384,7 @@ const ProfilePage = () => {
                                         <Meal 
                                             mealName={meal.name} 
                                             foods={meal.foods} 
-                                            onDelete={() => {}}
+                                            onDelete={() => handleDeleteMeal(meal.meal_id)}
                                             isOwn={ownProfile} 
                                         />
                                     </div>
