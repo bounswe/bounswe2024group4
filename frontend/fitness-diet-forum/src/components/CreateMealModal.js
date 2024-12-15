@@ -9,8 +9,8 @@ const CreateMealModal = (onClose) => {
     const [newMeal, setNewMeal] = useState({ mealName: '', foods: [] });
     const [mealCreated, setMealCreated] = useState(false); // Track whether the meal is created
     const [newFood, setNewFood] = useState(null);
-    const [ingredientName, setIngredientName] = useState(''); // Track ingredient name
-    const [ingredientAmount, setIngredientAmount] = useState(''); // Track ingredient amount
+    const [ingredientName, setIngredientName] = useState('');
+    const [ingredientAmount, setIngredientAmount] = useState(''); 
     const [searchTerm, setSearchTerm] = useState('');
     const [foodFound, setFoodFound] = useState(true);
     const [foods, setFoods] = useState([]);
@@ -34,7 +34,7 @@ const CreateMealModal = (onClose) => {
     const [ca, setCa] = useState('');
     const [carbo, setCarbo] = useState('');
     const [cholesterol, setCholesterol] = useState('');
-    const [energKcal, setEnergKcal] = useState('');
+    const [calories, setcalories] = useState('');
     const [fat, setFat] = useState('');
     const [fiber, setFiber] = useState('');
     const [k, setK] = useState('');
@@ -120,8 +120,8 @@ const CreateMealModal = (onClose) => {
         case 'cholesterol':
             setCholesterol(value);
             break;
-        case 'energKcal':
-            setEnergKcal(value);
+        case 'calories':
+            setcalories(value);
             break;
         case 'fat':
             setFat(value);
@@ -207,10 +207,24 @@ const CreateMealModal = (onClose) => {
         setPreview("");
     };
     // Function to finalize and add the meal to the list
-    const handleCreateMeal = () => {
+    const handleCreateMeal = async () => {
         const newMealData = {
             ...newMeal,
         };
+        try{
+            const mealResponse = await axios.post(
+                baseURL + "/create_meal/", 
+                newMealData, 
+                config
+            );
+            if(mealResponse.status !== 201){       
+                setError("Meal couldn't be created.");
+            }else{
+                setError(null);
+            }
+        }catch{
+            setError("Something went wrong.");
+        }
         setNewMeal({ mealName: '', foods: [] });
         setMealCreated(false); // Reset the meal creation process
 //        onClose;
@@ -236,6 +250,24 @@ const CreateMealModal = (onClose) => {
         const foodResponse = await axios.get(baseURL + "/get_food_by_id/?food_id="+food.food_id, config);
         console.log("RESPONSE:", foodResponse);
         setNewFood(foodResponse.data);
+        function parseIngredients(ingredients) {
+            if (Array.isArray(ingredients)) {
+                ingredients = ingredients.flat().join("\n");
+            }
+            return ingredients.split("\n").map(line => {
+                const parts = line.trim().split(" ");
+                const amount = parts.slice(0, 2).join(" ");
+                const name = parts.slice(2).join(" ");
+                return {
+                    name: name.trim(),
+                    amount: amount.trim()
+                };
+            });
+          }
+        
+        const ingList = parseIngredients(foodResponse.data.ingredients);
+        setIngredientsList(ingList);
+        setPreview(baseURL + foodResponse.data.image_url)
         setFoodFound(true);
         setSuggestedFoods([]);  // Clear the suggestions
     };
@@ -501,7 +533,7 @@ const CreateMealModal = (onClose) => {
                         <NutrientSection
                             title="Calories"
                             nutrients={[
-                                { label: "", name: "calories", value: newFood?.calories || energKcal },
+                                { label: "", name: "calories", value: newFood?.calories || calories },
                             ]}
                             handleInputChange={handleInputChange}
                             disabled={!!newFood}

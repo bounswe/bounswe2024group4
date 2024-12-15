@@ -26,17 +26,29 @@ const Food = ({
   const [visibleSection, setVisibleSection] = useState(null);
 
   const toggleSection = (section) => {
-    setVisibleSection(visibleSection === section ? null : section); // Toggle visibility
+    setVisibleSection(visibleSection === section ? null : section); 
   };
-  const ingredientList = ingredients.split("\n").map(line => {
-    const parts = line.split(" ");
-    const amount = parts.slice(0, 2).join(" "); // First two parts as amount (e.g., "100 gr")
-    const name = parts.slice(2).join(" "); // Remaining parts as name
-    return {
-        name: name.trim(),
-        amount: amount.trim()
-    };
-  });
+
+  function parseIngredients(ingredients) {
+    // Check if ingredients is an array or a string
+    if (Array.isArray(ingredients)) {
+        // If the array is nested (e.g., [[...]]), flatten it
+        ingredients = ingredients.flat().join("\n");
+    }
+
+    // Now ingredients is a string, parse it
+    return ingredients.split("\n").map(line => {
+        const parts = line.trim().split(" ");
+        const amount = parts.slice(0, 2).join(" "); // First two parts as amount
+        const name = parts.slice(2).join(" "); // Remaining parts as name
+        return {
+            name: name.trim(),
+            amount: amount.trim()
+        };
+    });
+  }
+
+  const ingredientList = parseIngredients(ingredients);
 
   return (
     <div className="w-full max-w-xl mx-auto relative"> 
