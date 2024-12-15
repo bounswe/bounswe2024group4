@@ -188,6 +188,3 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
 
 export default ExerciseProgram;
 
-
-
-
