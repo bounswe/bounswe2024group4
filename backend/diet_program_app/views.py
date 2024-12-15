@@ -324,7 +324,7 @@ def create_food_superuser(request):
                 'food_name': food_name,
                 'ingredients': ingredients,
                 'recipe_url': recipe_url,
-                'image_url': food.image_url if food.image_url else '',
+                'image_url': food.image_url.url if food.image_url else '',
                 'calories': energ_kcal,
                 'fat': fat,
                 'fat_saturated': fat_saturated,

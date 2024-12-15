@@ -3,10 +3,9 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Food from './Food';
 import NutrientSection from "./NutrientSection.js";
-import { faHouseMedicalCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 
-const CreateMealModal = (onClose) => {
+const CreateMealModal = ({onClose}) => {
     const [newMeal, setNewMeal] = useState({ meal_name: '', foods: [] });
     const [mealCreated, setMealCreated] = useState(false); // Track whether the meal is created
     const [newFood, setNewFood] = useState(null);
@@ -22,6 +21,8 @@ const CreateMealModal = (onClose) => {
     const [preview, setPreview] = useState(""); 
 
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const token = localStorage.getItem("token");
@@ -240,7 +241,7 @@ const CreateMealModal = (onClose) => {
         setNewMeal({ meal_name: '', foods: [] });
         setFoodIDs([]);
         setMealCreated(false); // Reset the meal creation process
-//        onClose;
+        onClose();
     };
 
     const handleFoodNameInputChange = (e) => {
@@ -309,11 +310,61 @@ const CreateMealModal = (onClose) => {
 
     const createMeal = () => {
         setMealCreated(true);
-        setNewMeal({
-            meal_name: newMeal.meal_name,
-            foods: [],
-        });
     };
+
+    const saveFood = async () => {
+        const formDataToSend = new FormData();
+        formDataToSend.append('food_name', foodName);
+        formDataToSend.append('ingredients', ingredientsList
+            .map(ingredient => `${ingredient.amount} gr ${ingredient.name}`)
+            .join("\n"));
+        formDataToSend.append('recipe_url', recipeUrl);
+        formDataToSend.append('image_url', foodPicture);
+        formDataToSend.append('energ_kcal', calories);
+        formDataToSend.append('fat', fat);
+        formDataToSend.append('fiber', fiber);
+        formDataToSend.append('carbo', carbo);
+        formDataToSend.append('protein', protein);
+        formDataToSend.append('cholesterol', cholesterol);
+        formDataToSend.append('na', na);
+        formDataToSend.append('ca', ca);
+        formDataToSend.append('k', k);
+        formDataToSend.append('vit_k', vitK);
+        formDataToSend.append('vit_c', vitC);
+        formDataToSend.append('vit_a_rae', vitARae);
+        formDataToSend.append('vit_d', vitD);
+        formDataToSend.append('vit_b12', vitB12);
+        formDataToSend.append('vit_b6', vitB6);
+    
+        try {
+            const nutrientsResponse = await axios.post(
+                baseURL + "/create_food_superuser/", 
+                formDataToSend, 
+                {
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+            console.log(nutrientsResponse);
+            if (nutrientsResponse.status !== 201) {       
+                setNewFood(null);
+                setError("Food not found");
+                setSuccessMessage('');
+            } else {
+                setNewFood(nutrientsResponse.data);
+                setError(null);
+                setSuccessMessage("Food saved successfully! 🎉");
+            }
+        } catch (error) {
+            console.error(error);
+            setError("Food could not be saved.");
+            setNewFood(null);
+            setSuccessMessage('');
+        }
+    };
+    
 
     return (
         <div className="mt-10 p-8 bg-gray-800 rounded-lg shadow-lg space-y-8">
@@ -412,96 +463,6 @@ const CreateMealModal = (onClose) => {
                 { (!foodFound && !newFood) && 
                     <p className="text-red-500 mt-4">Food not found. Please enter the food information below.</p>
                 }
-                {/* Show Input Fields if newFood is null */}
-                {newFood === null ? (
-                    <div>
-                    <h4 className="text-lg font-semibold text-white tracking-wide">Add Ingredient</h4>
-                    <div className="flex items-center space-x-4">
-                        <input
-                            type="text"
-                            value={ingredientName}
-                            disabled={newFood ? true : false}
-                            onChange={(e) => setIngredientName(e.target.value)}
-                            className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
-                            placeholder="Ingredient name"
-                        />
-                        <input
-                            type="text"
-                            value={ingredientAmount}
-                            disabled={newFood ? true : false}
-                            onChange={(e) => setIngredientAmount(e.target.value)}
-                            className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
-                            placeholder="Amount (gr)"
-                        />
-                        <button
-                            className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
-                            onClick={addIngredient}
-                            disabled={newFood ? true : false}
-                        >
-                        Add Ingredient
-                        </button>
-                    </div>
-                    {/* Displaying added ingredients with the same styling as input fields */}
-                    <div className="mt-4">
-                    <h5 className="text-lg font-semibold text-white">Added Ingredients</h5>
-                    <div className="space-y-4">
-                        {ingredientsList.map((ingredient, index) => (
-                        <div className="flex items-center space-x-4">
-                            <div
-                                key={index}
-                                className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText"
-                            >
-                                <span>{ingredient.name} ({ingredient.amount} gr)</span>
-                            </div>
-                                <button
-                                    className="w-auto min-w-[200px] py-2 px-8 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition-all duration-300"
-                                    onClick={() => removeIngredient(ingredient.amount, ingredient.name)}
-                                >
-                                Remove Ingredient
-                                </button>
-                            </div>
-                            ))}
-                        </div>
-                    </div>
-                        <div>
-                            <button
-                                className="w-auto min-w-[200px] py-2 px-8 bg-purple-500 text-white text-lg font-semibold rounded-lg hover:bg-purple-700 transition-all duration-300"
-                                onClick={fetchNutrients}
-                            >
-                                Get Nutrients
-                            </button>
-                            {error && (
-                                <p className="text-red-500 text-lg font-semibold">
-                                    {error}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                    
-                ) : (
-                    // Show the list of ingredients if newFood is not null
-                    <div className="mt-8">
-                    <h4 className="text-lg font-semibold text-white tracking-wide mb-4">Ingredients List</h4>
-                    <div className="space-y-4">
-                        {ingredientsList && ingredientsList.length > 0 ? (
-                        ingredientsList.map((ingredient, index) => (
-                            <div key={index} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg shadow-lg w-1/3">
-                            <div className="flex flex-col">
-                                {/* Display quantity, unit, and ingredient name */}
-                                <span className="text-white font-semibold">{ingredient.name}</span>
-                                <span className="text-gray-400">
-                                {ingredient.amount} gr
-                                </span>
-                            </div>
-                            </div>
-                        ))
-                        ) : (
-                        <p className="text-gray-400">No ingredients added yet.</p>
-                        )}
-                    </div>
-                    </div>
-                )}
-
 
                 {/* Nutrient Sections */}
                 <h4 className="text-lg font-semibold text-white tracking-wide mb-4">Nutrients</h4>
@@ -596,9 +557,108 @@ const CreateMealModal = (onClose) => {
                         />
                     </div>
                   </>
+
+                {/* Show Input Fields if newFood is null */}
+                {newFood === null ? (
+                    <div>
+                    <h4 className="text-lg font-semibold text-white tracking-wide">Add Ingredient</h4>
+                    <div className="flex items-center space-x-4">
+                        <input
+                            type="text"
+                            value={ingredientName}
+                            disabled={newFood ? true : false}
+                            onChange={(e) => setIngredientName(e.target.value)}
+                            className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
+                            placeholder="Ingredient name"
+                        />
+                        <input
+                            type="text"
+                            value={ingredientAmount}
+                            disabled={newFood ? true : false}
+                            onChange={(e) => setIngredientAmount(e.target.value)}
+                            className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent"
+                            placeholder="Amount (gr)"
+                        />
+                        <button
+                            className="w-auto min-w-[200px] py-2 px-8 bg-blue-500 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300"
+                            onClick={addIngredient}
+                            disabled={newFood ? true : false}
+                        >
+                        Add Ingredient
+                        </button>
+                    </div>
+                    {/* Displaying added ingredients with the same styling as input fields */}
+                    <div className="mt-4">
+                    <h5 className="text-lg font-semibold text-white">Added Ingredients</h5>
+                    <div className="space-y-4">
+                        {ingredientsList.map((ingredient, index) => (
+                        <div className="flex items-center space-x-4">
+                            <div
+                                key={index}
+                                className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText"
+                            >
+                                <span>{ingredient.name} ({ingredient.amount} gr)</span>
+                            </div>
+                                <button
+                                    className="w-auto min-w-[200px] py-2 px-8 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-700 transition-all duration-300"
+                                    onClick={() => removeIngredient(ingredient.amount, ingredient.name)}
+                                >
+                                Remove Ingredient
+                                </button>
+                            </div>
+                            ))}
+                        </div>
+                    </div>
+                        <div>
+                            <button
+                                className="w-auto min-w-[200px] py-2 px-8 bg-purple-500 text-white text-lg font-semibold rounded-lg hover:bg-purple-700 transition-all duration-300"
+                                onClick={fetchNutrients}
+                            >
+                                Get Nutrients
+                            </button>
+                            {error && (
+                                <p className="text-red-500 text-lg font-semibold">
+                                    {error}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    
+                ) : (
+                    // Show the list of ingredients if newFood is not null
+                    <div className="mt-8">
+                    <h4 className="text-lg font-semibold text-white tracking-wide mb-4">Ingredients List</h4>
+                    <div className="space-y-4">
+                        {ingredientsList && ingredientsList.length > 0 ? (
+                        ingredientsList.map((ingredient, index) => (
+                            <div key={index} className="flex justify-between items-center bg-gray-700 p-4 rounded-lg shadow-lg w-1/3">
+                            <div className="flex flex-col">
+                                {/* Display quantity, unit, and ingredient name */}
+                                <span className="text-white font-semibold">{ingredient.name}</span>
+                                <span className="text-gray-400">
+                                {ingredient.amount} gr
+                                </span>
+                            </div>
+                            </div>
+                        ))
+                        ) : (
+                        <p className="text-gray-400">No ingredients added yet.</p>
+                        )}
+                    </div>
+                    </div>
+                )}
+
                 
                 {/* Buttons in a Row */}
                 <div className="flex justify-between mt-6 space-x-4">
+                    <button 
+                        className="w-full py-3 px-6 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                        onClick={saveFood}
+                        disabled={!ingredientsList}
+                        visible={isSuperMember}
+                    >
+                        Save Food
+                    </button>
                     <button 
                         className="w-full py-3 px-6 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300"
                         onClick={addFoodToMeal}
@@ -621,6 +681,16 @@ const CreateMealModal = (onClose) => {
                         Cancel
                     </button>
                     </div>
+                    {successMessage && (
+                        <div style={{ color: 'green', marginTop: '10px' }}>
+                            {successMessage}
+                        </div>
+                    )}
+                    {error && (
+                        <p className="text-red-500 text-lg font-semibold">
+                            {error}
+                        </p>
+                    )}
               </div>
             </>
           )}
