@@ -36,7 +36,7 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
     <SafeAreaView style={styles.programContainer}>
       <SafeAreaView style={styles.headerContainer}>
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>
-          {currentWorkout.name}
+          {currentWorkout.workout_name}
         </Text>
         <SafeAreaView style={styles.iconRow}>
           <SafeAreaView style={styles.ratingContainer}>
