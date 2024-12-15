@@ -132,7 +132,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                     // Successfully created comment on backend
                     // Add the new comment to the local state
                     const comment_id = response.data.comment_id;
-                    setComments(prevComments => [...prevComments, { id: comment_id, content: newComment }]);
+                    setComments(prevComments => [...prevComments, { id: comment_id, content: newComment, username:localStorage.getItem('username') }]);
                     setNewComment("");
                     setShowCommentBox(false);
                 }
