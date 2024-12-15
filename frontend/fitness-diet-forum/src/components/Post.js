@@ -36,7 +36,12 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
         const fetchPostData = async () => {
             try {
                 if (mealId) {
-                    // TODO: Fetch meal data using mealId if needed
+                    const mealResponse = await axios.get(baseURL + `/get_meal_from_id/?meal_id=${mealId}`, config);
+                    if (mealResponse.status === 200) {
+                        setMeal(mealResponse.data);
+                    } else {
+                        setError('Meal not found');
+                    }
                 }
 
                 if (workoutId) {
@@ -156,7 +161,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     }
 
     return (
-        <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
+        <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center mb-4 justify-between"> 
                 <Link to={`/profile/${user.username}`} className="flex items-center">
@@ -209,12 +214,11 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
 
             {/* Meal */}
             {meal && (
-                <div className="h-96 overflow-y-scroll mb-4">
+                <div className="h-100 overflow-y-scroll mb-4">
                     <Meal
-                        mealName={""}
-                        foods={[]}
+                        mealName={meal.meal_name}
+                        foods={meal.foods}
                         onDelete={() => {}}
-                        key={1}
                         isOwn={false}
                     />
                 </div>
@@ -222,7 +226,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
 
             {/* ExerciseProgram */}
             {workout && (
-                <div className="h-96 overflow-y-scroll mb-4">
+                <div className="h-100 overflow-y-scroll mb-4">
                     <ExerciseProgram
                         programName={workout.workout_name}
                         exercises={workout.exercises}
