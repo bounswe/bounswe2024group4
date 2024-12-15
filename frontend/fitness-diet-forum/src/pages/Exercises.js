@@ -72,19 +72,19 @@ const Exercises = () => {
       {/* Navigation Buttons */}
       <div className="w-full flex justify-center mb-6">
         <button
-          className={`px-4 py-2 mx-2 ${view === "weekly" ? "bg-blue-500" : "bg-gray-600"}`}
+          className={`border rounded px-4 py-2 mx-2 ${view === "weekly" ? "bg-blue-500" : "bg-gray-600"}`}
           onClick={() => setView("weekly")}
         >
           Weekly Program
         </button>
         <button
-          className={`px-4 py-2 mx-2 ${view === "myExercises" ? "bg-blue-500" : "bg-gray-600"}`}
+          className={`border rounded px-4 py-2 mx-2 ${view === "myExercises" ? "bg-blue-500" : "bg-gray-600"}`}
           onClick={() => setView("myExercises")}
         >
-          My Exercises
+          My Exercise Programs
         </button>
         <button
-          className={`px-4 py-2 mx-2 ${view === "bookmarked" ? "bg-blue-500" : "bg-gray-600"}`}
+          className={`border rounded px-4 py-2 mx-2 ${view === "bookmarked" ? "bg-blue-500" : "bg-gray-600"}`}
           onClick={() => setView("bookmarked")}
         >
           Bookmarked Workouts
