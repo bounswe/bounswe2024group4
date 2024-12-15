@@ -414,8 +414,8 @@ def delete_meal_by_id(request, meal_id):
             
             # delete the image from images folder
             for food in meal.foods.all():
-                if food.image_url and os.path.exists(food.image_url) and food.image_url != '':
-                    os.remove(food.image_url)
+                if food.image_url and os.path.exists(food.image_url.url) and food.image_url.url != '':
+                    os.remove(food.image_url.url)
 
             # Delete the workout
             meal.delete()
