@@ -17,13 +17,29 @@ class TestCreateMealFood(APITestCase):
         
         data = {
             'food_name': 'Apple',
-            'ingredients': '100 gr apple,',
+            'ingredients': '100 gr apple',
         }
         response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
         
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()['message'], 'Food for meal created successfully with Edamam Nutrition Analysis API')
         self.assertEqual(response.json()['calories'], "52.0 kcal")
+
+    def test_create_food_all_api_mulitple_ingrdients(self):
+        data = {'username': 'testuser1', 'password': 'password'}
+        response = self.client.post(reverse('log_in'), data)
+        token = response.json()['token']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        
+        data = {
+            'food_name': 'Apple Twist',
+            'ingredients': '100 gr apple\n10 gr sugar\n5 gr cinnamon',
+        }
+        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['message'], 'Food for meal created successfully with Edamam Nutrition Analysis API')
+        self.assertTrue(float(response.json()['calories'].split(' ')[0]) > 52)
 
     def test_create_food_all_fail(self):
         data = {'username': 'testuser1', 'password': 'password'}

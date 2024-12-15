@@ -349,7 +349,7 @@ def get_meal_from_id(request):
         for food in foods:
             food_list.append({
                 'food_name': food.name,
-                'ingredients': [ingredient.split(' ') for ingredient in food.ingredients.split(',')],
+                'ingredients': [ingredient.split('\n') for ingredient in food.ingredients.split(',')],
                 'energ_kcal': food.energ_kcal,
                 'fat': food.fat,
                 'fat_saturated': food.fat_saturated,
@@ -375,7 +375,11 @@ def get_meal_from_id(request):
             'meal_name': meal.meal_name,
             'created_at': meal.created_at,
             'rating': meal.rating,
-
+            'calories': meal.calories,
+            'protein': meal.protein,
+            'fat': meal.fat,
+            'carbs': meal.carbs,
+            'fiber': meal.fiber,
             'foods': food_list
             }, status=200)
     return JsonResponse({'message': 'Invalid request'}, status=400)
@@ -465,6 +469,11 @@ def get_meals(request):
                 'meal_name': meal.meal_name,
                 'created_at': meal.created_at,
                 'rating': meal.rating,
+                'calories': meal.calories,
+                'protein': meal.protein,
+                'fat': meal.fat,
+                'carbs': meal.carbs,
+                'fiber': meal.fiber,
                 'foods': list(meal.foods.values(
                     'name',
                     'ingredients',
@@ -580,7 +589,7 @@ def get_food_by_id(request):
             food = Food.objects.get(food_id=food_id)
             return JsonResponse({
                 'food_name': food.name,
-                'ingredients': [ingredient.split(' ') for ingredient in food.ingredients.split(',')],
+                'ingredients': [ingredient.split('\n') for ingredient in food.ingredients.split(',')],
                 'recipe_url': food.recipe_url,
                 'image_url': food.image_url,
                 'energ_kcal': food.energ_kcal,
