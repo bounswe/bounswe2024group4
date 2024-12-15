@@ -211,6 +211,10 @@ const CreateMealModal = (onClose) => {
     };
     // Function to finalize and add the meal to the list
     const handleCreateMeal = async () => {
+        if(!foodIDs || foodIDs.length < 1){
+            setError("You should add food to meal.");
+            return;
+        }
         const newFoodIDs = [...foodIDs,];
         const newMealData = {
             ...newMeal,
