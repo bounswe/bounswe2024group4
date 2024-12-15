@@ -24,7 +24,7 @@ def create_meal(request):
         data = json.loads(request.body)
         user = request.user
         meal_name = data.get('meal_name')
-        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
+#        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
         foods = data.get('foods', [])
         
         # Create the meal first
