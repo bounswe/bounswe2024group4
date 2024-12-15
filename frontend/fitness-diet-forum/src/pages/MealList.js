@@ -34,7 +34,6 @@ const MealList = () => {
 
       {showForm && (
         <CreateMealModal
-          userMeals={meals}
           onClose={() => setShowForm(false)}
         />
       )}

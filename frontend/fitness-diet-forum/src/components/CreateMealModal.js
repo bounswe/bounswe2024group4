@@ -5,8 +5,7 @@ import Food from './Food';
 import NutrientSection from "./NutrientSection.js";
 
 
-const CreateMealModal = (userMeals, onClose) => {
-    const [meals, setMeals] = useState(userMeals); 
+const CreateMealModal = (onClose) => {
     const [newMeal, setNewMeal] = useState({ mealName: '', foods: [] });
     const [mealCreated, setMealCreated] = useState(false); // Track whether the meal is created
     const [newFood, setNewFood] = useState(null);
@@ -17,6 +16,8 @@ const CreateMealModal = (userMeals, onClose) => {
     const [foods, setFoods] = useState([]);
     const [suggestedFoods, setSuggestedFoods] = useState([]);
     const [ingredientsList, setIngredientsList] = useState([]);
+    const [foodPicture, setFoodPicture] = useState(null);
+    const [preview, setPreview] = useState(""); 
 
     const [error, setError] = useState(null);
     const globalContext = useContext(Context);
@@ -60,14 +61,25 @@ const CreateMealModal = (userMeals, onClose) => {
       }, [baseURL]);
 
     const fetchNutrients = async () => {
-        const body = {
-            'food_name': foodName,
-            'ingredients': ingredientsList
-                    .map(ingredient => `${ingredient.amount} gr ${ingredient.name}`)
-                    .join(",")
-        }
+        const formDataToSend = new FormData();
+        formDataToSend.append('food_name', foodName);
+        formDataToSend.append('ingredients', ingredientsList
+            .map(ingredient => `${ingredient.amount} gr ${ingredient.name}`)
+            .join("\n"));
+        formDataToSend.append('recipe_url', recipeUrl);
+        formDataToSend.append('image_url', foodPicture);
+
         try{
-            const nutrientsResponse = await axios.post(baseURL + "/create_food_all/", body, config);
+            const nutrientsResponse = await axios.post(
+                baseURL + "/create_food_all/", 
+                formDataToSend, 
+                {
+                    headers: {
+                        Authorization: `Token ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
             console.log(nutrientsResponse);
             if(nutrientsResponse.status !== 201){       
                 setNewFood(null);
@@ -78,6 +90,14 @@ const CreateMealModal = (userMeals, onClose) => {
         }catch{
             setError("Food not found");
             setNewFood(null);
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setFoodPicture(file);
+        if (file) {
+            setPreview(URL.createObjectURL(file));
         }
     };
 
@@ -188,7 +208,6 @@ const CreateMealModal = (userMeals, onClose) => {
         const newMealData = {
             ...newMeal,
         };
-        setMeals(prev => [...prev, newMealData]);
         setNewMeal({ mealName: '', foods: [] });
         setMealCreated(false); // Reset the meal creation process
 //        onClose;
@@ -282,24 +301,24 @@ const CreateMealModal = (userMeals, onClose) => {
                       <Food
                         key={index}
                         foodName={food.food_name}
-                        calories={food.energ_kcal}
+                        calories={food.calories}
                         protein={food.protein}
-                        carbs={food.carbs}
+                        carbs={food.carbo}
                         fat={food.fat}
-                        ingredients={food.ingredients}
-                        imageUrl={food.imageUrl}
-                        recipeUrl={food.recipeUrl}
+                        ingredients={ingredientsList}
+                        imageUrl={baseURL + foodPicture}
+                        recipeUrl={recipeUrl}
                         ca={food.ca}
-                        cholesterol={food.recipeUrl}
-                        fiber={food.recipeUrl}
-                        k={food.recipeUrl}
-                        na={food.recipeUrl}
-                        vitARae={food.recipeUrl}
-                        vitB6={food.recipeUrl}
-                        vitB12={food.recipeUrl}
-                        vitC={food.recipeUrl}
-                        vitD={food.recipeUrl}
-                        vitK={food.recipeUrl}
+                        cholesterol={food.cholesterol}
+                        fiber={food.fiber}
+                        k={food.k}
+                        na={food.na}
+                        vitARae={food.vit_a_rae}
+                        vitB6={food.vit_b6}
+                        vitB12={food.vit_b12}
+                        vitC={food.vit_c}
+                        vitD={food.vit_d}
+                        vitK={food.vit_k}
                       />
                     ))}
                   </div>
@@ -449,16 +468,33 @@ const CreateMealModal = (userMeals, onClose) => {
                             visible={true}
                             placeholder="Enter recipe URL"
                         />
-                        <NutrientSection
-                            title="Photo"
-                            nutrients={[
-                                
-                            ]}
-                            handleInputChange={handleInputChange}
-                            disabled={!!newFood}
-                            visible={true}
-                            placeholder="Enter image URL"
-                        />
+                        <p className="text-white font-medium">Food Picture</p>
+                        <div className="w-24 h-24 mb-4 relative">
+                        
+                            <img
+                                className="w-24 h-24 rounded-full border border-gray-300 object-cover"
+                                src={preview || "https://via.placeholder.com/150"}
+                                alt="Food Picture Preview"
+                            />
+                            <label
+                                htmlFor="fileUpload"
+                                className="absolute inset-0 hover:bg-gray-200 opacity-60 rounded-full flex justify-center items-center cursor-pointer transition duration-500"
+                            >
+                                <img
+                                    className="w-6 h-6"
+                                    src="https://www.svgrepo.com/show/33565/upload.svg"
+                                    alt="Upload Icon"
+                                />
+                                <input
+                                    type="file"
+                                    id="fileUpload"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    disabled={!!newFood}
+                                />
+                            </label>
+                        </div>
                         <NutrientSection
                             title="Calories"
                             nutrients={[

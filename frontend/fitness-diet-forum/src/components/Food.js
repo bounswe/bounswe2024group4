@@ -60,7 +60,7 @@ const Food = ({
           />
           <div className="ml-4">
             <h1 className="text-3xl font-semibold">{foodName}</h1>
-            <span className="text-xl font-normal">{calories} cal</span>
+            <span className="text-xl font-normal">{calories}</span>
           </div>
         </div>
 
@@ -79,15 +79,19 @@ const Food = ({
                   <div className="mt-2">
                     <div className="flex justify-between text-lg">
                       <span>Protein</span>
-                      <span className="font-bold">{protein} g</span>
+                      <span className="font-bold">{protein || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Carbs</span>
-                      <span className="font-bold">{carbs} g</span>
+                      <span className="font-bold">{carbs || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Fat</span>
-                      <span className="font-bold">{fat} g</span>
+                      <span className="font-bold">{fat || '-'}</span>
+                    </div>
+                    <div className="flex justify-between text-lg mt-2">
+                      <span>Fiber</span>
+                      <span className="font-bold">{fiber || '-'}</span>
                     </div>
                   </div>
                 )}
@@ -105,23 +109,19 @@ const Food = ({
                   <div className="mt-2">
                     <div className="flex justify-between text-lg">
                       <span>Cholesterol</span>
-                      <span className="font-bold">{cholesterol} mg</span>
-                    </div>
-                    <div className="flex justify-between text-lg mt-2">
-                      <span>Fiber</span>
-                      <span className="font-bold">{fiber} g</span>
+                      <span className="font-bold">{cholesterol || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Potassium</span>
-                      <span className="font-bold">{k} mg</span>
+                      <span className="font-bold">{k || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Sodium</span>
-                      <span className="font-bold">{na} mg</span>
+                      <span className="font-bold">{na || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Calcium</span>
-                      <span className="font-bold">{ca} mg</span>
+                      <span className="font-bold">{ca || '-'}</span>
                     </div>
                   </div>
                 )}
@@ -139,27 +139,27 @@ const Food = ({
                   <div className="mt-2">
                     <div className="flex justify-between text-lg">
                       <span>Vitamin A</span>
-                      <span className="font-bold">{vitARae} µg</span>
+                      <span className="font-bold">{vitARae || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Vitamin B6</span>
-                      <span className="font-bold">{vitB6} mg</span>
+                      <span className="font-bold">{vitB6 || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Vitamin B12</span>
-                      <span className="font-bold">{vitB12} µg</span>
+                      <span className="font-bold">{vitB12 || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Vitamin C</span>
-                      <span className="font-bold">{vitC} mg</span>
+                      <span className="font-bold">{vitC || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Vitamin D</span>
-                      <span className="font-bold">{vitD} IU</span>
+                      <span className="font-bold">{vitD || '-'}</span>
                     </div>
                     <div className="flex justify-between text-lg mt-2">
                       <span>Vitamin K</span>
-                      <span className="font-bold">{vitK} µg</span>
+                      <span className="font-bold">{vitK || '-'}</span>
                     </div>
                   </div>
                 )}
@@ -172,8 +172,8 @@ const Food = ({
               <ul className="mt-4 space-y-2 list-none">
                 {ingredients.map((ingredient, index) => (
                   <li key={index} className="flex justify-between text-lg w-full">
-                    <span className="break-words">{ingredient.slice(2)}</span>
-                    <span className="ml-auto">{ingredient.slice(0, 2).join(" ")}</span>
+                    <span className="break-words">{ingredient.name}</span>
+                    <span className="ml-auto">{ingredient.amount} gr</span>
                   </li>
                 ))}
               </ul>
