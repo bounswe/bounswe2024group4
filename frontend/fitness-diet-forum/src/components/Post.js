@@ -216,10 +216,15 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
             {meal && (
                 <div className="h-100 overflow-y-scroll mb-4">
                     <Meal
-                        mealName={meal.meal_name}
+                        key={meal.meal_id}
+                        mealId={meal.meal_id}
+                        mealName={meal.mealName}
                         foods={meal.foods}
                         onDelete={() => {}}
                         isOwn={false}
+                        currentRating={meal.rating}
+                        ratingCount={meal.rating_count}
+                        showRating={user.username!==localStorage.getItem('username')}
                     />
                 </div>
             )}
