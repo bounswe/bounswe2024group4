@@ -3,12 +3,14 @@ import { Context } from "../globalContext/globalContext.js";
 import axios from "axios";
 import Food from './Food';
 import NutrientSection from "./NutrientSection.js";
+import { faHouseMedicalCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 
 const CreateMealModal = (onClose) => {
-    const [newMeal, setNewMeal] = useState({ mealName: '', foods: [] });
+    const [newMeal, setNewMeal] = useState({ meal_name: '', foods: [] });
     const [mealCreated, setMealCreated] = useState(false); // Track whether the meal is created
     const [newFood, setNewFood] = useState(null);
+    const [foodIDs, setFoodIDs] = useState([]);
     const [ingredientName, setIngredientName] = useState('');
     const [ingredientAmount, setIngredientAmount] = useState(''); 
     const [searchTerm, setSearchTerm] = useState('');
@@ -197,7 +199,8 @@ const CreateMealModal = (onClose) => {
             ...prevMeal,
             foods: [...prevMeal.foods, food],
         }));
-
+        setFoodIDs(prevIDs => [...prevIDs, food.food_id]);
+        
         setNewFood(null);
         setSearchTerm('');
         setFoodFound(true);
@@ -208,13 +211,18 @@ const CreateMealModal = (onClose) => {
     };
     // Function to finalize and add the meal to the list
     const handleCreateMeal = async () => {
+        const newFoodIDs = [...foodIDs,];
         const newMealData = {
             ...newMeal,
         };
+        console.log("sending:", newFoodIDs);
         try{
             const mealResponse = await axios.post(
                 baseURL + "/create_meal/", 
-                newMealData, 
+                {
+                    meal_name: newMealData.meal_name,
+                    foods: newFoodIDs
+                }, 
                 config
             );
             if(mealResponse.status !== 201){       
@@ -225,7 +233,8 @@ const CreateMealModal = (onClose) => {
         }catch{
             setError("Something went wrong.");
         }
-        setNewMeal({ mealName: '', foods: [] });
+        setNewMeal({ meal_name: '', foods: [] });
+        setFoodIDs([]);
         setMealCreated(false); // Reset the meal creation process
 //        onClose;
     };
@@ -248,8 +257,11 @@ const CreateMealModal = (onClose) => {
     const handleSuggestionClick = async (food) => {
         setSearchTerm(food.name); // Set input value to the selected suggestion
         const foodResponse = await axios.get(baseURL + "/get_food_by_id/?food_id="+food.food_id, config);
-        console.log("RESPONSE:", foodResponse);
-        setNewFood(foodResponse.data);
+        
+        const responseData = foodResponse.data;
+        responseData.food_id = food.food_id
+        setNewFood(responseData);
+        console.log("RESPONSE+FOOD ID:", responseData);
         function parseIngredients(ingredients) {
             if (Array.isArray(ingredients)) {
                 ingredients = ingredients.flat().join("\n");
@@ -293,10 +305,8 @@ const CreateMealModal = (onClose) => {
 
     const createMeal = () => {
         setMealCreated(true);
-
-        // Initialize the newMeal with the meal name and an empty foods array
         setNewMeal({
-            mealName: newMeal.mealName,
+            meal_name: newMeal.meal_name,
             foods: [],
         });
     };
@@ -311,8 +321,8 @@ const CreateMealModal = (onClose) => {
                 <label className="block text-lg font-medium text-lightText">Meal Name</label>
                 <input 
                   type="text" 
-                  name="mealName" 
-                  value={newMeal.mealName} 
+                  name="meal_name" 
+                  value={newMeal.meal_name} 
                   onChange={handleMealInputChange} 
                   className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-lightText placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary focus:border-transparent" 
                   placeholder="Enter meal name"
@@ -329,7 +339,7 @@ const CreateMealModal = (onClose) => {
             <>
               {/* Display Progress of Added Foods ABOVE the form */}
               <div className="mt-8">
-                <h3 className="text-xl font-semibold text-white mb-4">Foods Added to {newMeal.mealName || 'Meal'}</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">Foods Added to {newMeal.meal_name || 'Meal'}</h3>
                 {newMeal.foods.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {newMeal.foods.map((food, index) => (
@@ -588,6 +598,7 @@ const CreateMealModal = (onClose) => {
                     <button 
                         className="w-full py-3 px-6 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300"
                         onClick={addFoodToMeal}
+                        disabled={!ingredientsList}
                     >
                         Add Food to Meal
                     </button>
