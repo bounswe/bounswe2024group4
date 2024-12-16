@@ -123,7 +123,7 @@ const ExerciseProgramList = () => {
                 muscle: exercise.muscle,
                 equipment: exercise.equipment,
                 difficulty: exercise.difficulty,
-                instruction: exercise.instruction,
+                instruction: exercise.instructions,
                 repetitions: reps,
                 sets: sets
             };

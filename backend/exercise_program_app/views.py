@@ -489,7 +489,7 @@ def workout_log(request, workout_id):
         data = json.loads(request.body)
         user = request.user
         workout = get_object_or_404(Workout, workout_id=workout_id)
-        
+
         # Handle date
         date_str = data.get('date')
         if date_str:
@@ -506,14 +506,13 @@ def workout_log(request, workout_id):
             user=user,
             date=log_date
         )
-        
+    
         # Update workout completion status
         if 'workout_completed' in data:
             workout_log.is_completed = data['workout_completed']
             workout_log.save()
-            
         # Handle exercise logs
-        if 'exercises' in data:
+        if 'exercises' in data['exercises']:
             exercise_ids = [ex['exercise_id'] for ex in data['exercises']]
             workout_exercises = Exercise.objects.filter(
                 workout=workout, 
