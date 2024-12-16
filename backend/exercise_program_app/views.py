@@ -229,6 +229,7 @@ def rate_workout(request):
             # Update user score
             if user.workout_rating_count + user.meal_rating_count > 0:
                 user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+                user.save()
             user.check_super_member()
             user.save()
 

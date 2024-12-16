@@ -452,6 +452,51 @@ class WorkoutTests(TestCase):
         self.assertEqual(self.user.workout_rating_count, 1)
         self.assertAlmostEqual(self.user.workout_rating, 4.5, places=2)
 
+    def test_rate_workout_with_score(self):
+        """Test rating workout with score"""
+        data = {
+            'workout_id': self.workout.workout_id,
+            'rating': 3
+        }
+        response = self.client.post(
+            reverse('rate_workout'),
+            data=json.dumps(data),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Rating submitted successfully')
+        
+        self.workout.refresh_from_db()
+        self.assertEqual(self.workout.rating_count, 1)
+        self.assertEqual(self.workout.rating, 3)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.workout_rating_count, 1)
+        self.assertEqual(self.user.workout_rating, 3)
+        self.assertEqual(self.user.score, 3)
+
+        data = {
+            'workout_id': self.workout.workout_id,
+            'rating': 5
+        }
+        response = self.client.post(
+            reverse('rate_workout'),
+            data=json.dumps(data),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.workout.refresh_from_db()
+        self.assertEqual(self.workout.rating_count, 2)
+        self.assertEqual(self.workout.rating, 4)
+
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.workout_rating_count, 2)
+        self.assertEqual(self.user.workout_rating, 4)
+        self.assertEqual(self.user.score, 4)
+
+
     def test_get_workout_by_id_not_found(self):
         """Test getting nonexistent workout"""
         response = self.client.get(
