@@ -46,7 +46,6 @@ const SearchResults = () => {
     fetchWorkouts();
   }, [searchResults]);
 
-  // Fetch detailed meal data
   useEffect(() => {
     const fetchMeals = async () => {
       if (searchResults?.meals) {
@@ -56,20 +55,25 @@ const SearchResults = () => {
               params: { meal_id: meal.meal_id },
               ...config,
             });
-            return response.data;
+            // Combine the fetched data with the original created_by field
+            return {
+              ...response.data,
+              created_by: meal.created_by, // Preserve created_by from the original search results
+            };
           } catch (err) {
             console.error(`Failed to fetch meal ${meal.meal_id}:`, err);
             return null;
           }
         });
-
+  
         const detailedMeals = await Promise.all(mealPromises);
         setMeals(detailedMeals.filter((meal) => meal !== null));
       }
     };
-
+  
     fetchMeals();
-  }, [searchResults]);
+  }, [searchResults, config, baseURL]);
+  
 
   if (!searchResults) {
     return (
@@ -162,43 +166,68 @@ const SearchResults = () => {
         <div className="mb-4 min-h-screen">
           <div className="flex flex-col gap-4">
             {meals.map((meal) => (
-              <Meal
-                key={meal.meal_id}
-                mealId={meal.meal_id}
-                mealName={meal.meal_name}
-                foods={meal.foods}
-                onDelete={() => console.log(`Delete meal ${meal.meal_id}`)}
-                isOwn={false}
-                currentRating={meal.rating}
-                ratingCount={meal.rating_count}
-                showRating={false}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Workouts Tab */}
-      {activeTab === "workouts" && workouts.length > 0 && (
-        <div className="mb-4 min-h-screen">
-          <div className="flex flex-col gap-4">
-            {workouts.map((workout) => (
-              <div className="h-96 overflow-y-scroll mb-4" key={workout.workout_id}>
-                <ExerciseProgram
-                  programName={workout.workout_name}
-                  exercises={workout.exercises}
-                  onDelete={() => {}}
+              <div key={meal.meal_id} className="bg-gray-800 p-4 rounded-lg">
+                <Meal
+                  mealId={meal.meal_id}
+                  mealName={meal.meal_name}
+                  foods={meal.foods}
+                  onDelete={() => console.log(`Delete meal ${meal.meal_id}`)}
                   isOwn={false}
-                  programId={workout.id}
-                  currentRating={workout.rating}
-                  ratingCount={workout.rating_count}
-                  showRating={workout.created_by !== localStorage.getItem("username")}
+                  currentRating={meal.rating}
+                  ratingCount={meal.rating_count}
+                  showRating={false}
                 />
+                <div className="flex items-center mb-2">
+                  Meal by: 
+                  {/* Link to User Profile */}
+                  <Link
+                    to={`/profile/${meal.created_by.username}`}
+                    className="text-white-400 hover:underline text-lg font-semibold"
+                  >
+                     @{meal.created_by.username}
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+
+{/* Workouts Tab */}
+{activeTab === "workouts" && workouts.length > 0 && (
+  <div className="mb-4 min-h-screen">
+    <div className="flex flex-col gap-4">
+      {workouts.map((workout) => (
+        <div key={workout.workout_id} className="bg-gray-800 p-4 rounded-lg">
+          
+          <ExerciseProgram
+            programName={workout.workout_name}
+            exercises={workout.exercises}
+            onDelete={() => {}}
+            isOwn={false}
+            programId={workout.id}
+            currentRating={workout.rating}
+            ratingCount={workout.rating_count}
+            showRating={workout.created_by !== localStorage.getItem("username")}
+          />
+          Workout by: 
+          <div className="flex items-center mb-2">
+            {/* Link to User Profile */}
+            
+            <Link
+              to={`/profile/${workout.created_by}`}
+              className="text-white-400 hover:underline text-lg font-semibold"
+            >
+              @{workout.created_by}
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 
       {/* No Results Found for the Active Tab */}
       {activeTab === "users" && (!searchResults.users || searchResults.users.length === 0) && (
