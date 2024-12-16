@@ -12,7 +12,7 @@ const AuthenticatedLayout = ({ children }) => {
         {/* Topbar */}
         <Topbar />
         {/* Main content */}
-        <div className="p-8">{children}</div>
+        <div className="p-8 min-h-screen">{children}</div>
       </div>
     </div>
   );

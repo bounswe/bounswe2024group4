@@ -53,8 +53,8 @@ const SearchResults = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white p-4 rounded">
-      <h3 className="text-lg font-bold mb-4">Search Results</h3>
+    <div className="bg-gray-900 text-white p-4 rounded ">
+      <h3 className="text-lg font-bold mb-4 ">Search Results</h3>
 
       {/* Tab Buttons */}
       <div className="flex justify-center space-x-4 mb-6">
@@ -73,7 +73,7 @@ const SearchResults = () => {
 
       {/* Users Tab */}
       {activeTab === "users" && searchResults.users && searchResults.users.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4 min-h-screen">
           
           <div className="flex flex-col gap-4">
             {searchResults.users.map((user) => (
@@ -117,7 +117,7 @@ const SearchResults = () => {
 
       {/* Posts Tab */}
       {activeTab === "posts" && searchResults.posts && searchResults.posts.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4 min-h-screen">
           
           <div className="flex flex-col gap-4">
             {searchResults.posts.map((post) => (
@@ -139,7 +139,7 @@ const SearchResults = () => {
 
       {/* Meals Tab */}
       {activeTab === "meals" && searchResults.meals && searchResults.meals.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4 min-h-screen">
           
           <ul className="list-disc pl-5">
             {searchResults.meals.map((meal) => (
@@ -153,7 +153,7 @@ const SearchResults = () => {
 
       {/* Workouts Tab */}
       {activeTab === "workouts" && workouts.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4 min-h-screen">
           
           <div className="flex flex-col gap-4">
             {workouts.map((workout) => (
