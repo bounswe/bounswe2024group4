@@ -24,6 +24,8 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     const [showCommentBox, setShowCommentBox] = useState(false);
     const [newComment, setNewComment] = useState("");
     const [comments, setComments] = useState([]);
+    const score = user?.score !== undefined ? user.score.toFixed(1) : "N/A"; // Safely access score
+    //console.log(user.score);
 
     const config = useMemo(() => ({
         headers: {
