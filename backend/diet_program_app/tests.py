@@ -41,7 +41,6 @@ class TestCreateMealFood(APITestCase):
         self.assertEqual(response.json()['message'], 'Food for meal created successfully with Edamam Nutrition Analysis API')
         self.assertTrue(float(response.json()['calories'].split(' ')[0]) > 52)
 
-
     def test_create_food_all_fail(self):
         data = {'username': 'testuser1', 'password': 'password'}
         response = self.client.post(reverse('log_in'), data)
