@@ -196,7 +196,7 @@ const SearchResults = () => {
                   programId={workout.id}
                   currentRating={workout.rating}
                   ratingCount={workout.rating_count}
-                  showRating={workout.created_by.username !== localStorage.getItem("username")}
+                  showRating={workout.created_by !== localStorage.getItem("username")}
                 />
               </div>
             ))}
