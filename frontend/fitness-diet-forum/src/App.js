@@ -15,6 +15,7 @@ import PrivateRoute  from "./components/PrivateRoute";
 import ProfilePage from './pages/ProfilePage';
 import History from './components/History';
 import SearchResults from './pages/SearchResults';
+
 function App() {
   return (
   <Router>
@@ -122,6 +123,7 @@ function App() {
         <PrivateRoute>
           <AuthenticatedLayout>
             <Discover />
+
           </AuthenticatedLayout>
         </PrivateRoute>
       }
