@@ -16,7 +16,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useGlobalSearchParams } from 'expo-router';
 import WorkoutsScreen from '../components/WorkoutsScreen';
-import PostsScreen from './(tabs)/index';
+import FeedScreen from '../components/FeedScreen';
 import MealsScreen from '../components/MealsScreen';
 
 interface Route {
@@ -60,7 +60,20 @@ function ProfileDetailScreen() {
         );
         const data = profileResponse.data;
         setUserData(data);
+        const enrichedPosts = data.posts.map((post: any) => ({
+          ...post,
+          user: {
+            username: data.username,
+            profile_picture: data.profile_picture,
+          },
+        }));
+
+        setUserData({
+          ...data,
+          posts: enrichedPosts,
+        });
         setIsFollowing(data.is_following);
+        console.log(profileResponse.data.posts)
 
         const workoutDetailsPromises = data.workouts.map(async (workout: any) => {
           const response = await axios.get(`${baseURL}/get-workout/${workout.workout_id}/`, config);
@@ -130,7 +143,10 @@ function ProfileDetailScreen() {
     weight_history,
   } = userData;
 
-  const profilePictureUri = profile_picture?.trim() !== '' ? profile_picture : 'https://via.placeholder.com/150';
+  const profilePictureUri =
+    profile_picture && profile_picture.trim() !== ""
+      ? `${baseURL}/${profile_picture}` 
+      : "https://via.placeholder.com/150";
   const recentWeight = weight_history?.length > 0 ? weight_history[weight_history.length - 1] : null;
 
   const labels = weight_history?.length > 0
@@ -140,18 +156,19 @@ function ProfileDetailScreen() {
     ? weight_history.map((item: any) => item.weight)
     : [];
 
-  const renderScene = ({ route }: { route: Route }) => {
-    switch (route.key) {
-      case 'workouts':
-        return <WorkoutsScreen workoutPrograms={programs} isOwnProfile={false} />;
-      case 'posts':
-        return <PostsScreen />;
-      case 'meals':
-        return <MealsScreen />;
-      default:
-        return null;
-    }
-  };
+    const renderScene = ({ route }: { route: Route }) => {
+      switch (route.key) {
+        case 'workouts':
+          return <WorkoutsScreen workoutPrograms={programs} isOwnProfile={false} />;
+          case 'posts':
+            return <FeedScreen posts={posts} />; 
+        case 'meals':
+          return <MealsScreen />;
+        default:
+          return null;
+      }
+    };
+    
 
   return (
     <View style={styles.container}>

@@ -16,7 +16,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import WorkoutsScreen from "../../components/WorkoutsScreen";
-import PostsScreen from "./index";
+import FeedScreen from '../../components/FeedScreen';
 import MealsScreen from "../../components/MealsScreen";
 import BookmarksScreen from "../../components/BookmarksScreen";
 
@@ -37,7 +37,7 @@ function MyProfileScreen() {
   const [userData, setUserData] = useState<any>(null);
   const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [modalVisible, setModalVisible] = useState(false); 
 
   const baseURL = `http://${process.env.EXPO_PUBLIC_API_URL}:8000`;
 
@@ -52,9 +52,22 @@ function MyProfileScreen() {
           `${baseURL}/view_profile/?viewed_username=${username}`,
           config
         );
+        const data = profileResponse.data;
         setUserData(profileResponse.data);
         console.log(profileResponse.data)
-
+                
+                const enrichedPosts = data.posts.map((post: any) => ({
+                  ...post,
+                  user: {
+                    username: data.username,
+                    profile_picture: data.profile_picture,
+                  },
+                }));
+        
+                setUserData({
+                  ...data,
+                  posts: enrichedPosts,
+                });
         const workoutDetailsPromises = profileResponse.data.workouts.map(async (workout: any) => {
           const response = await axios.get(
             `${baseURL}/get-workout/${workout.workout_id}/`,
@@ -127,8 +140,8 @@ function MyProfileScreen() {
     switch (route.key) {
       case "workouts":
         return <WorkoutsScreen workoutPrograms={programs} isOwnProfile={true} />;
-      case "posts":
-        return <PostsScreen />;
+        case 'posts':
+          return <FeedScreen posts={posts} />; 
       case "meals":
         return <MealsScreen />;
       case "bookmarks":
