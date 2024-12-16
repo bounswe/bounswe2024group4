@@ -111,7 +111,7 @@ const ExerciseProgram = ({ programName, exercises, onDelete, isOwn, programId, c
                 icon={isBookmarked ? solidBookmark : regularBookmark}
                 className={isBookmarked ? "text-yellow-400" : "text-gray-400"}
             />
-        </button>
+            </button>
 
             {/* Program Name */}
             <div className="mb-4">

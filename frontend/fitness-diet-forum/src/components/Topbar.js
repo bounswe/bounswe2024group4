@@ -23,15 +23,15 @@ const Topbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState(["all"]);
   const [muscles, setMuscles] = useState([]);
-  const [calories, setCalories] = useState({ min: 0, max: 1000 });
-  const [minProtein, setMinProtein] = useState(0);
-  const [maxProtein, setMaxProtein] = useState(1000);
-  const [minFat, setMinFat] = useState(0);
-  const [maxFat, setMaxFat] = useState(1000);
-  const [minCarbs, setMinCarbs] = useState(0);
-  const [maxCarbs, setMaxCarbs] = useState(1000);
-  const [minFiber, setMinFiber] = useState(0);
-  const [maxFiber, setMaxFiber] = useState(1000);
+  const [calories, setCalories] = useState({ min: null, max: null });
+  const [minProtein, setMinProtein] = useState();
+  const [maxProtein, setMaxProtein] = useState();
+  const [minFat, setMinFat] = useState();
+  const [maxFat, setMaxFat] = useState();
+  const [minCarbs, setMinCarbs] = useState();
+  const [maxCarbs, setMaxCarbs] = useState();
+  const [minFiber, setMinFiber] = useState();
+  const [maxFiber, setMaxFiber] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -57,31 +57,36 @@ const Topbar = () => {
 
   const handleSearch = async () => {
     try {
+      // Build the params object dynamically
+      const params = {
+        search: searchQuery,
+        ...(categories.length > 0 && { categories: categories.join(",") }),
+        ...(muscles.length > 0 && { muscles: muscles.join(",") }),
+        ...(calories.min !== null && { min_calories: calories.min }),
+        ...(calories.max !== null && { max_calories: calories.max }),
+        ...(minProtein !== undefined && { min_protein: minProtein }),
+        ...(maxProtein !== undefined && { max_protein: maxProtein }),
+        ...(minFat !== undefined && { min_fat: minFat }),
+        ...(maxFat !== undefined && { max_fat: maxFat }),
+        ...(minCarbs !== undefined && { min_carbs: minCarbs }),
+        ...(maxCarbs !== undefined && { max_carbs: maxCarbs }),
+        ...(minFiber !== undefined && { min_fiber: minFiber }),
+        ...(maxFiber !== undefined && { max_fiber: maxFiber }),
+      };
+  
       const response = await axios.get(`${baseURL}/search/`, {
-        params: {
-          search: searchQuery,
-          categories: categories.join(","),
-          muscles: muscles.join(","), // Send selected muscles as a comma-separated string
-          min_calories: calories.min,
-          max_calories: calories.max,
-          min_protein: minProtein,
-          max_protein: maxProtein,
-          min_fat: minFat,
-          max_fat: maxFat,
-          min_carbs: minCarbs,
-          max_carbs: maxCarbs,
-          min_fiber: minFiber,
-          max_fiber: maxFiber,
-        },
+        params,
         headers: {
           Authorization: `Token ${token}`,
         },
       });
+  
       navigate("/search-results", { state: { results: response.data } });
     } catch (error) {
       console.error("Search failed:", error.response?.data?.error || "An error occurred.");
     }
   };
+  
 
   const muscleOptions = [
     'abdominals',
