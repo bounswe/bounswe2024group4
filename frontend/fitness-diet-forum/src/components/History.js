@@ -3,6 +3,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import axios from "axios";
 import { Context } from "../globalContext/globalContext.js";
+import { Link } from 'react-router-dom';
 
 const History = () => {
   const [workoutLogs, setWorkoutLogs] = useState([]);
@@ -102,16 +103,32 @@ const History = () => {
                       {log.workout.workout_name}
                     </h4>
                     {details ? (
-                      <div>
-                        <p><strong>Created by:</strong> {details.created_by}</p>
+                      <div className="bg-gray-900 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
                         {log.exercises && log.exercises.map((exercise) => (
-                          <div key={exercise.exercise_id} className="mb-2">
-                            <p><strong>{exercise.name}</strong></p>
-                            <p><strong>Done Sets:</strong> {exercise.actual_sets}</p>
-                            <p><strong>Done Reps:</strong> {exercise.actual_reps}</p>
-                            <p><strong>Weight:</strong> {exercise.weight} kg</p>
+                          <div key={exercise.exercise_id} className="mb-6 p-4 bg-gradient-to-r from-blue-600 to-indigo-500 rounded-lg shadow-md">
+                            <p className="text-lg font-semibold text-white">{exercise.name}</p>
+                            <div className="mt-2">
+                              <p className="text-gray-200">
+                                <strong>Done Sets:</strong> {exercise.actual_sets}
+                              </p>
+                              <p className="text-gray-200">
+                                <strong>Done Reps:</strong> {exercise.actual_reps}
+                              </p>
+                              <p className="text-gray-200">
+                                <strong>Weight:</strong> {exercise.weight} kg
+                              </p>
+                            </div>
                           </div>
                         ))}
+                        <p className="text-m font-semibold text-white mb-4">
+                          <strong>Created by:</strong>{' '}
+                          <Link
+                            to={`/profile/${details.created_by}`}
+                            className="text-blue-400 hover:text-blue-600"
+                          >
+                            {details.created_by}
+                          </Link>
+                        </p>
                       </div>
                     ) : (
                       <p>Loading workout details...</p>
