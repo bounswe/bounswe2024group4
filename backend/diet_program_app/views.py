@@ -459,6 +459,7 @@ def rate_meal(request):
             user = meal.created_by
             
             meal.rating = (meal.rating * meal.rating_count + rating) / (meal.rating_count + 1)
+            meal.rating_count = meal.rating_count + 1
             meal.save()
             
             user.meal_rating = (user.meal_rating * user.meal_rating_count + rating) / (user.meal_rating_count + 1)
