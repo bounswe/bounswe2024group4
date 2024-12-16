@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, View, Animated } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import WorkoutEdit from './WorkoutEdit';
 import images from '../constants/image_map';
@@ -8,11 +8,17 @@ import { Workout } from '../constants/types';
 interface WorkoutProgramProps {
   workout: Workout;
   onUpdate: (updatedWorkout: Workout) => void;
+  isEditable?: boolean;
 }
 
-const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) => {
+const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ 
+  workout, 
+  onUpdate,
+  isEditable = false 
+}) => {
   const [currentWorkout, setCurrentWorkout] = useState<Workout>(workout);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
 
   const handleShare = () => {
     console.log(`Sharing workout: ${currentWorkout.name}`);
@@ -32,67 +38,99 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
     setIsModalVisible(false);
   };
 
+  const toggleExercise = (index: number) => {
+    setExpandedExercise(expandedExercise === index ? null : index);
+  };
+
+  const renderExerciseCard = (exercise: any, index: number) => {
+    const isExpanded = expandedExercise === index;
+    const instructionText = exercise.instruction ?? exercise.instructions;
+
+    return (
+      <TouchableOpacity 
+        key={`${exercise.id}-${index}`}
+        style={styles.exerciseCard}
+        onPress={() => toggleExercise(index)}
+        activeOpacity={0.9}
+      >
+        <View style={styles.exerciseHeader}>
+          <View style={styles.exerciseImageContainer}>
+            {exercise.muscle ? (
+              <Image 
+                source={images[exercise.muscle as keyof typeof images]} 
+                style={styles.exerciseImage} 
+              />
+            ) : (
+              <View style={styles.exerciseImagePlaceholder} />
+            )}
+          </View>
+          
+          <View style={styles.exerciseMainInfo}>
+            <Text style={styles.exerciseName} numberOfLines={2}>
+              {exercise.name}
+            </Text>
+            <View style={styles.exerciseMetrics}>
+              <Text style={styles.metrics}>{exercise.sets} sets • {exercise.reps} reps</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.expandButton} 
+            onPress={() => toggleExercise(index)}
+          >
+            <FontAwesome 
+              name={isExpanded ? "chevron-up" : "chevron-down"} 
+              size={16} 
+              color="#5C90E0" 
+            />
+          </TouchableOpacity>
+        </View>
+
+        {isExpanded && (
+          <View style={styles.exerciseContent}>
+            <Text style={styles.exerciseInstruction}>
+              {instructionText}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.programContainer}>
-      <SafeAreaView style={styles.headerContainer}>
-        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>
-          {currentWorkout.name}
-        </Text>
-        <SafeAreaView style={styles.iconRow}>
-          <SafeAreaView style={styles.ratingContainer}>
-            <FontAwesome name="star" size={24} color="#FFD700" />
+      <View style={styles.header}>
+        <View style={styles.titleRow}>
+          <Text style={styles.programTitle} numberOfLines={2}>
+            {currentWorkout.workout_name}
+          </Text>
+        </View>
+        
+        <View style={styles.ratingAndActions}>
+          <View style={styles.ratingContainer}>
+            <FontAwesome name="star" size={18} color="#FFD700" />
             <Text style={styles.ratingNumber}>{currentWorkout.rating}</Text>
-            <Text style={styles.ratingCount}>({currentWorkout.rating_count} ratings)</Text>
-          </SafeAreaView>
-          <TouchableOpacity onPress={handleShare}>
-            <FontAwesome name="share" size={24} color="#fff" style={styles.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleEdit}>
-            <FontAwesome name="edit" size={24} color="#fff" style={styles.icon} />
-          </TouchableOpacity>
-        </SafeAreaView>
-      </SafeAreaView>
-
-      {currentWorkout.exercises.map((exercise, index) => {
-        const [showFullInstruction, setShowFullInstruction] = useState(false);
-        const instructionText = exercise.instruction ?? exercise.instructions;
-        const truncatedInstruction =
-          instructionText.length > 100
-            ? `${instructionText.substring(0, 100)}...`
-            : instructionText;
-
-        return (
-          <React.Fragment key={`${exercise.id}-${index}`}>
-            <SafeAreaView style={styles.exerciseRow}>
-              {exercise.muscle ? (
-                <Image source={images[exercise.muscle as keyof typeof images]} style={styles.exerciseImage} />
-              ) : (
-                <View style={styles.exerciseImagePlaceholder} />
-              )}
-              <SafeAreaView style={styles.exerciseDetails}>
-                <Text style={styles.exerciseName}>{exercise.name}</Text>
-                <Text style={styles.exerciseInstruction}>
-                  {showFullInstruction ? instructionText : truncatedInstruction}
-                </Text>
-                <TouchableOpacity onPress={() => setShowFullInstruction(!showFullInstruction)}>
-                  <Text style={styles.showMoreButton}>
-                    {showFullInstruction ? 'Show Less' : 'Show More'}
-                  </Text>
-                </TouchableOpacity>
-                <Text style={styles.exerciseSetsReps}>
-                  {exercise.sets} sets x {exercise.reps} reps
-                </Text>
-              </SafeAreaView>
-            </SafeAreaView>
-            {index < currentWorkout.exercises.length - 1 && (
-              <View style={styles.separatorLine} />
+            <Text style={styles.ratingCount}>({currentWorkout.rating_count})</Text>
+          </View>
+          
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={handleShare} style={styles.iconButton}>
+              <FontAwesome name="share-alt" size={20} color="#5C90E0" />
+            </TouchableOpacity>
+            {isEditable && (
+              <TouchableOpacity onPress={handleEdit} style={styles.iconButton}>
+                <FontAwesome name="edit" size={20} color="#5C90E0" />
+              </TouchableOpacity>
             )}
-          </React.Fragment>
-        );
-      })}
+          </View>
+        </View>
+      </View>
 
+      <View style={styles.exerciseList}>
+        {currentWorkout.exercises.map((exercise, index) => renderExerciseCard(exercise, index))}
+      </View>
 
-      {isModalVisible && (
+      {isEditable && isModalVisible && (
         <WorkoutEdit
           workout={currentWorkout}
           isVisible={isModalVisible}
@@ -107,92 +145,126 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ workout, onUpdate }) =>
 const styles = StyleSheet.create({
   programContainer: {
     backgroundColor: '#0B2346',
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 8,
-    borderColor: '#5C90E0',
-    borderWidth: 2,
+    borderRadius: 12,
+    borderColor: '#1a3865',
+    borderWidth: 1,
+    marginTop: 12,
   },
-  headerContainer: {
+  header: {
+    padding: 16,
+    paddingBottom: 12,
+  },
+  titleRow: {
+    marginBottom: 8,
+  },
+  ratingAndActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
   },
   programTitle: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    flexShrink: 1,
-    marginRight: 10,
+    flexWrap: 'wrap',
+    lineHeight: 32,
   },
-  iconRow: {
+  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  icon: {
-    marginLeft: 10,
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(92, 144, 224, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
   },
   ratingContainer: {
-    alignItems: 'center',
-    marginLeft: 10,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   ratingNumber: {
     color: '#FFD700',
-    fontSize: 14,
-    marginLeft: 5,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 6,
   },
   ratingCount: {
-    color: '#bbb',
-    fontSize: 12,
-    marginLeft: 5,
+    color: '#8396B8',
+    fontSize: 14,
+    marginLeft: 4,
   },
-  exerciseRow: {
+  exerciseList: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 12,
+  },
+  exerciseCard: {
+    backgroundColor: 'rgba(92, 144, 224, 0.05)',
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(92, 144, 224, 0.2)',
+  },
+  exerciseHeader: {
     flexDirection: 'row',
+    padding: 12,
     alignItems: 'center',
-    marginBottom: 10,
+  },
+  exerciseImageContainer: {
+    marginRight: 12,
+  },
+  exerciseMainInfo: {
+    flex: 1,
+    marginRight: 8,
+  },
+  exerciseContent: {
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(92, 144, 224, 0.1)',
   },
   exerciseImage: {
-    width: 50,
-    height: 50,
-    marginRight: 20,
-    marginLeft: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 8,
   },
   exerciseImagePlaceholder: {
-    width: 50,
-    height: 50,
-    marginRight: 20,
-    marginLeft: 10,
-    backgroundColor: '#555',
-    borderRadius: 5,
-  },
-  exerciseDetails: {
-    flex: 1,
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: 'rgba(92, 144, 224, 0.2)',
   },
   exerciseName: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+    flexWrap: 'wrap',
+    lineHeight: 22,
+  },
+  exerciseMetrics: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metrics: {
+    color: '#8396B8',
+    fontSize: 14,
   },
   exerciseInstruction: {
-    color: '#bbb',
-    fontSize: 13,
+    color: '#8396B8',
+    fontSize: 14,
+    lineHeight: 20,
   },
-  showMoreButton: {
-    color: '#5C90E0',
-    fontSize: 12,
-    marginTop: 5,
-    textDecorationLine: 'underline',
-  },
-  exerciseSetsReps: {
-    color: '#bbb',
-    fontSize: 16,
-  },
-  separatorLine: {
-    height: 1,
-    backgroundColor: '#5C90E0',
-    marginVertical: 5,
-    borderRadius: 1,
+  expandButton: {
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(92, 144, 224, 0.1)',
+    borderRadius: 14,
   },
 });
 

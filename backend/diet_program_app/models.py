@@ -45,6 +45,11 @@ class Meal(models.Model):
     rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)
     foods = models.ManyToManyField(Food)
+    calories = models.FloatField(default=0)
+    protein = models.FloatField(default=0)
+    fat = models.FloatField(default=0)
+    carbs = models.FloatField(default=0)
+    fiber = models.FloatField(default=0)
 
     def _str_(self):
         return self.meal_name
