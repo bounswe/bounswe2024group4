@@ -23,13 +23,13 @@ const WorkoutEdit: React.FC<WorkoutEditProps> = ({
   const handleInputChange = (
     value: string,
     index: number,
-    field: 'sets' | 'reps' | 'name'
+    field: 'sets' | 'reps' | 'workout_name'
   ) => {
-    if (field === 'name') {
+    if (field === 'workout_name') {
       // Directly update the workout name
       setEditableWorkout((prev) => ({
         ...prev,
-        name: value,
+        workout_name: value,
       }));
     } else {
       // Update sets or reps of a specific exercise
@@ -59,7 +59,7 @@ const WorkoutEdit: React.FC<WorkoutEditProps> = ({
           <TextInput
             style={styles.workoutNameInput}
             value={editableWorkout.name}
-            onChangeText={(text) => handleInputChange(text, 0, 'name')} // Handle name change
+            onChangeText={(text) => handleInputChange(text, 0, 'workout_name')} // Handle name change
             placeholder="Workout Name"
             placeholderTextColor="#bbb"
           />

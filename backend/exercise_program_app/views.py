@@ -206,7 +206,7 @@ def rate_workout(request):
             workout_id = data.get('workout_id')
             rating = float(data.get('rating'))
             workout = Workout.objects.get(workout_id=workout_id)
-            user = request.user  # Get the user who is rating, not the workout creator
+            user = workout.created_by
  
             if not user:
                 return JsonResponse({'error': 'No user found'}, status=400)

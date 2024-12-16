@@ -102,7 +102,7 @@ export default function Index() {
           <WorkoutProgram
             workout={{
               id: item.id,
-              name: item.workout_name,
+              workout_name: item.workout_name,
               created_by: item.created_by,
               rating: item.rating,
               rating_count: item.rating_count,
@@ -117,7 +117,7 @@ export default function Index() {
                   workout.id === updatedWorkout.id
                     ? {
                         ...workout,
-                        workout_name: updatedWorkout.name,
+                        workout_name: updatedWorkout.workout_name,
                         created_by: updatedWorkout.created_by,
                         rating: updatedWorkout.rating,
                         rating_count: updatedWorkout.rating_count,

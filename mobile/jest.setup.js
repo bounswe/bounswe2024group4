@@ -38,3 +38,7 @@ jest.mock('expo-font', () => ({
   jest.mock('@expo/vector-icons', () => ({
     Ionicons: 'Icon',
   }));
+  jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+
