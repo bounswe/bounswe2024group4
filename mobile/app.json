@@ -20,7 +20,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.beratyilmaz.mobile"
     },
     "web": {
       "bundler": "metro",
@@ -34,8 +35,13 @@
       "typedRoutes": true
     },
     "extra": {
-      "expoEnv": "development"
+      "expoEnv": "development",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "b1463976-3a21-4f90-89a4-dcf389e89b40"
+      }
     }
-    
   }
 }
