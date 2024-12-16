@@ -105,9 +105,12 @@ function MyProfileScreen() {
 
   const { bio, profile_picture, score, followers_count, following_count, posts, height, weight_history } =
     userData;
-  const profilePictureUri =
-    profile_picture?.trim() !== "" ? profile_picture : "https://via.placeholder.com/150";
-  const recentWeight =
+    const profilePictureUri =
+    profile_picture && profile_picture.trim() !== ""
+      ? `${baseURL}/${profile_picture}` 
+      : "https://via.placeholder.com/150"; 
+  
+    const recentWeight =
     weight_history?.length > 0 ? weight_history[weight_history.length - 1].weight : null;
 
   const labels = weight_history?.length > 0
