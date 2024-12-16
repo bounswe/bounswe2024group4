@@ -120,11 +120,11 @@ const MealList: React.FC = () => {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => {/*
+        onPress={() => {
           router.push({
             pathname: '../mealProgramCreator',
             params: { viewingUser, viewedUser },
-          });*/
+          });
         }}
       >
         <FontAwesome5 name="plus" size={24} color="#fff" />
