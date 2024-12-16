@@ -32,18 +32,10 @@ const FeedScreen: React.FC<FeedScreenProps> = ({ posts }) => {
   }
 
   const renderPost = ({ item }: { item: PostType }) => {
-    const user = {
-      username: item.user.username,
-      profile_picture:
-        item.user.profile_picture && item.user.profile_picture.trim() !== ''
-          ? `${baseURL}/${item.user.profile_picture}`
-          : 'https://via.placeholder.com/150', 
-    };
-  
     return (
       <Post
         postId={item.post_id}
-        user={user}
+        user={item.user}
         content={item.content}
         mealId={item.meal_id}
         workoutId={item.workout_id}
