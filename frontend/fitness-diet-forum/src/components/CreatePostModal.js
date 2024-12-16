@@ -205,6 +205,9 @@ const CreatePostModal = ({
                     onDelete={handleRemoveMeal}
                     isOwn={true}
                     foods={meal.foods}
+                    currentRating={meal.rating}
+                    ratingCount={meal.rating_count}
+                    showRating={false}
                   />
                 ))}
             </div>
