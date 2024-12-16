@@ -158,14 +158,14 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
     <View style={styles.postContainer}>
       <View style={styles.userInfoContainer}>
         <View style={styles.userDetails}>
-        <Image
-          source={{ 
-            uri: user.profile_picture 
-              ? `${baseURL}/${user.profile_picture}` 
-              : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-          }}
-          style={styles.profileImage}
-        />
+          <Image
+            source={{ 
+              uri: user.profile_picture 
+                ? `${baseURL}/${user.profile_picture}` 
+                : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+            }}
+            style={styles.profileImage}
+          />
           <View style={styles.userTextContainer}>
             <Text style={styles.username}>@{user.username}</Text>
             {user.rating && (
@@ -186,7 +186,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
         </View>
       </View>
 
-      <Text style={styles.postContent}>{content}</Text>
+      {content && <Text style={styles.postContent}>{content}</Text>}
 
       {meal && (
         <View style={styles.contentCard}>
@@ -196,7 +196,10 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
       )}
 
       {workout && (
-        <View style={styles.workoutContainer}>
+        <View style={[
+          styles.workoutContainer,
+          !content && { marginTop: 0 } // Remove top margin if there's no content
+        ]}>
           <WorkoutProgram 
             workout={workout}
             onUpdate={handleWorkoutUpdate}
@@ -304,7 +307,6 @@ const styles = StyleSheet.create({
   postContent: {
     fontSize: 16,
     color: '#fff',
-    marginVertical: 12,
     lineHeight: 24,
   },
   contentCard: {
@@ -320,10 +322,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   workoutContainer: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#0F172A',
     borderRadius: 8,
-    padding: 16,
-    marginVertical: 12,
   },
   actionsContainer: {
     flexDirection: 'row',

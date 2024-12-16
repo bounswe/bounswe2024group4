@@ -8,7 +8,7 @@ import axios from 'axios';
 import { Link } from "react-router-dom";
 import { formatDistanceToNowStrict } from "date-fns";
 
-const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, created_at }) => {
+const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, created_at, isOwn, onDelete }) => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const token = localStorage.getItem("token");
@@ -25,6 +25,9 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     const [newComment, setNewComment] = useState("");
     const [comments, setComments] = useState([]);
 
+    const [showOptions, setShowOptions] = useState(false);
+
+
     const config = useMemo(() => ({
         headers: {
           'Authorization': 'Token ' + token,
@@ -34,10 +37,13 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     useEffect(() => {
         const fetchPostData = async () => {
             try {
-
-
                 if (mealId) {
-                    // TODO: Fetch meal data using mealId if needed
+                    const mealResponse = await axios.get(baseURL + `/get_meal_from_id/?meal_id=${mealId}`, config);
+                    if (mealResponse.status === 200) {
+                        setMeal(mealResponse.data);
+                    } else {
+                        setError('Meal not found');
+                    }
                 }
 
                 if (workoutId) {
@@ -132,7 +138,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                     // Successfully created comment on backend
                     // Add the new comment to the local state
                     const comment_id = response.data.comment_id;
-                    setComments(prevComments => [...prevComments, { id: comment_id, content: newComment }]);
+                    setComments(prevComments => [...prevComments, { id: comment_id, content: newComment, username:localStorage.getItem('username') }]);
                     setNewComment("");
                     setShowCommentBox(false);
                 }
@@ -142,8 +148,22 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
         }
     };
 
+    const deletePost = async () => {
+        try {
+            const response = await axios.delete(`${baseURL}/post/${postId}/delete/`, config);
+            
+            if (response.status !== 200) {
+                throw new Error('Failed to delete the post.');
+            }else{
+                onDelete(postId);
+            }
+        } catch (error) {
+            console.error('Error deleting post:', error);
+        }
+    }
+
     return (
-        <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
+        <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center mb-4 justify-between"> 
                 <Link to={`/profile/${user.username}`} className="flex items-center">
@@ -162,10 +182,33 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                         </div>
                     </div>
                 </Link>
-
-                <p className="text-gray-500 text-sm">
-                    {createdDate}
-                </p>
+                <div>
+                    {/* Dropdown Menu for Actions */}
+                    {isOwn && (
+                        <div className="flex justify-end mt-4 relative">
+                            <div className="group">
+                                <button
+                                    className="text-gray-600 hover:text-gray-800 transition-all duration-300"
+                                    onClick={() => setShowOptions(prev => !prev)}
+                                    style={{ fontSize: "2rem", lineHeight: "1rem" }}
+                                >
+                                    &#x22EF;
+                                </button>
+                                {showOptions && (
+                                    <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                        <button
+                                            className="w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100 rounded-lg transition-all duration-300"
+                                            onClick={deletePost}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    <p className="text-gray-500 text-sm">{createdDate}</p>
+                </div>
             </div>
 
             {/* Post Content */}
@@ -173,12 +216,11 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
 
             {/* Meal */}
             {meal && (
-                <div className="h-96 overflow-y-scroll mb-4">
+                <div className="h-100 overflow-y-scroll mb-4">
                     <Meal
-                        mealName={""}
-                        foods={[]}
+                        mealName={meal.meal_name}
+                        foods={meal.foods}
                         onDelete={() => {}}
-                        key={1}
                         isOwn={false}
                     />
                 </div>
@@ -186,7 +228,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
 
             {/* ExerciseProgram */}
             {workout && (
-                <div className="h-96 overflow-y-scroll mb-4">
+                <div className="h-100 overflow-y-scroll mb-4">
                     <ExerciseProgram
                         programName={workout.workout_name}
                         exercises={workout.exercises}
@@ -245,22 +287,19 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                         {comments.map((comment) => (
                     <li key={comment.id} className="mb-2">
                     <Link
-                    to={`/profile/${comment.username}`}
-                    className="font-semibold text-blue-400 hover:underline mr-2"
+                        to={`/profile/${comment.username}`}
+                        className="font-semibold text-blue-400 hover:underline mr-2"
                     >
-            @{comment.username}
-          </Link>
-          {comment.content}
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
+                        @{comment.username}
+                    </Link>
+                    {comment.content}
+                    </li>
+                ))}
+                </ul>
+            </div>
+            )}
         </div>
     );
 };
 
 export default Post;
-
-

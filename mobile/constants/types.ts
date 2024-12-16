@@ -9,6 +9,7 @@ export interface Exercise {
     instruction: string;
     sets: number;
     reps: number;
+    difficulty: string;
   }
   
   export interface Workout {

@@ -239,7 +239,7 @@ def create_food_all(request):
                 'food_name': food_name,
                 'ingredients': ingredients,
                 'recipe_url': recipe_url,
-                'image_url': food.image_url if food.image_url else '',
+                'image_url': food.image_url.url if food.image_url else '',
                 'calories': energ_kcal,
                 'fat': fat,
                 'fat_saturated': fat_saturated,
@@ -389,8 +389,10 @@ def get_meal_from_id(request):
             })
         return JsonResponse({
             'meal_name': meal.meal_name,
+            'meal_id': meal_id,
             'created_at': meal.created_at,
             'rating': meal.rating,
+            'rating_count': meal.rating_count,
             'calories': meal.calories,
             'protein': meal.protein,
             'fat': meal.fat,
@@ -414,8 +416,8 @@ def delete_meal_by_id(request, meal_id):
             
             # delete the image from images folder
             for food in meal.foods.all():
-                if food.image_url and os.path.exists(food.image_url) and food.image_url != '':
-                    os.remove(food.image_url)
+                if food.image_url and os.path.exists(food.image_url.url) and food.image_url.url != '':
+                    os.remove(food.image_url.url)
 
             # Delete the workout
             meal.delete()
@@ -485,6 +487,7 @@ def get_meals(request):
                 'meal_name': meal.meal_name,
                 'created_at': meal.created_at,
                 'rating': meal.rating,
+                'rating_count': meal.rating_count,
                 'calories': meal.calories,
                 'protein': meal.protein,
                 'fat': meal.fat,
@@ -608,7 +611,7 @@ def get_food_by_id(request):
                 'ingredients': [ingredient.split('\n') for ingredient in food.ingredients.split(',')],
                 'recipe_url': food.recipe_url,
                 'image_url': food.image_url.url,
-                'energ_kcal': food.energ_kcal,
+                'calories': food.energ_kcal,
                 'fat': food.fat,
                 'fat_saturated': food.fat_saturated,
                 'fat_trans': food.fat_trans,

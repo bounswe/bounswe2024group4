@@ -69,9 +69,7 @@ export default function TabLayout() {
           viewingUser: currentUser,
           viewedUser: currentUser
         }}
-      />
-    
-      
+      />  
       <Tabs.Screen
         name="WeeklyProgram"
         options={{
