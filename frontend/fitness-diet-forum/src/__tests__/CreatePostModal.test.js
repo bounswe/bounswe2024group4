@@ -37,6 +37,9 @@ describe('CreatePostModal', () => {
         ];
 
         axios.get.mockResolvedValueOnce({ data: mockWorkouts });
+        axios.get.mockResolvedValueOnce({
+            data: { meals: [{ id: 1, name: 'Meal 1' }] }, // Example response structure
+        });
         renderWithContext(<CreatePostModal isModalOpen={true} closeModal={jest.fn()} />);
         expect(screen.getByText(/Create a Post/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/Write your post here.../i)).toBeInTheDocument();
@@ -54,11 +57,14 @@ describe('CreatePostModal', () => {
           { id: 2, workout_name: 'Workout 2' }
         ];
         axios.get.mockResolvedValueOnce({ data: mockWorkouts });
+        axios.get.mockResolvedValueOnce({
+            data: { meals: [{ id: 1, name: 'Meal 1' }] }, // Example response structure
+        });
       
         renderWithContext(<CreatePostModal isModalOpen={true} closeModal={jest.fn()} />);
       
         // Wait for workouts to be fetched and displayed
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
         await waitFor(() => expect(screen.getByText('Workout 1')).toBeInTheDocument());
         await waitFor(() => expect(screen.getByText('Workout 2')).toBeInTheDocument());
     });
@@ -67,21 +73,24 @@ describe('CreatePostModal', () => {
         const mockWorkouts = [
             { id: 1, workout_name: 'Workout 1', exercises: ['Exercise 1'], rating: 5, rating_count: 10 }
         ];
-
+    
         axios.get.mockResolvedValueOnce({ data: mockWorkouts });
         axios.post.mockResolvedValueOnce({ status: 200 });
-
+        axios.get.mockResolvedValueOnce({
+            data: { meals: [{ id: 1, name: 'Meal 1' }] }, // Example response structure
+        });
+    
         renderWithContext(<CreatePostModal isModalOpen={true} closeModal={jest.fn()} />);
-
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
-
-        // Select workout
-        const selectElement = screen.getByRole('combobox');
-        fireEvent.change(selectElement, { target: { value: '1' } });
-
+    
+        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
+    
+        // Get all comboboxes and select the one for the workout (index 0)
+        const selectElements = screen.getAllByRole('combobox');
+        fireEvent.change(selectElements[0], { target: { value: '1' } });
+    
         // Click Add Workout
         fireEvent.click(screen.getByText('Add Workout'));
-
+    
         expect(screen.getByText('Workout 1')).toBeInTheDocument();
     });
 
@@ -91,9 +100,14 @@ describe('CreatePostModal', () => {
             { id: 1, workout_name: 'Workout 1', exercises: ['Exercise 1'], rating: 5, rating_count: 10 }
         ];
         axios.get.mockResolvedValueOnce({ data: mockWorkouts });
+        axios.get.mockResolvedValueOnce({
+            data: { meals: [{ id: 1, name: 'Meal 1' }] }, // Example response structure
+        });
         axios.post.mockResolvedValueOnce({ status: 200 });
     
-        renderWithContext(<CreatePostModal isModalOpen={true} closeModal={jest.fn()} />);
+        // Mock the user context or props if necessary
+        const mockUser = { username: 'testUser' };
+        renderWithContext(<CreatePostModal isModalOpen={true} closeModal={jest.fn()} user={mockUser} />);
     
         // Wait for the workouts to load and validate the dropdown contains the expected option
         await waitFor(() => {
@@ -102,7 +116,7 @@ describe('CreatePostModal', () => {
         });
     
         // Select a workout
-        fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } });
+        fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: '1' } });
     
         // Add content to the post
         fireEvent.change(screen.getByPlaceholderText(/Write your post here.../i), {
@@ -112,16 +126,19 @@ describe('CreatePostModal', () => {
         // Click 'Submit'
         fireEvent.click(screen.getByText('Submit'));
     
-        // Wait for the POST request and validate its payload
-        await waitFor(() => expect(axios.post).toHaveBeenCalledWith(
-            'http://localhost:3000/post/',
-            expect.objectContaining({
-                content: 'This is my post content.',
-                workoutId: 1, // Validate the workout ID
-                username: 'testUser', // Ensure the username is passed correctly
-            }),
-            expect.any(Object)
-        ));
+        await waitFor(() => {
+            expect(axios.post).toHaveBeenCalledWith(
+                'http://localhost:3000/post/',
+                {
+                    content: 'This is my post content.',
+                    workoutId: 1,
+                    mealId: null, // If mealId is optional and defaults to null
+                },
+                {
+                    headers: { Authorization: 'Token testToken' } // Ensure the Authorization header is sent
+                }
+            );
+        });
     });
     
     
@@ -132,13 +149,16 @@ describe('CreatePostModal', () => {
         const closeModalMock = jest.fn(); // Mock the closeModal function
     
         axios.get.mockResolvedValueOnce({ data: mockWorkouts });
+        axios.get.mockResolvedValueOnce({
+            data: { meals: [{ id: 1, name: 'Meal 1' }] }, // Example response structure
+        });
       
         renderWithContext(<CreatePostModal isModalOpen={true} closeModal={closeModalMock} />);
       
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
       
-        const selectElement = screen.getByRole('combobox');
-        fireEvent.change(selectElement, { target: { value: '1' } });
+        const selectElements = screen.getAllByRole('combobox');
+        fireEvent.change(selectElements[0], { target: { value: '1' } });
       
         fireEvent.click(screen.getByText('Add Workout'));
       
@@ -149,7 +169,6 @@ describe('CreatePostModal', () => {
         expect(closeModalMock).toHaveBeenCalledWith(); 
     });
     
-      
 
     test('disables submit button when post content and workout are empty', () => {
         const mockWorkouts = [
@@ -158,23 +177,30 @@ describe('CreatePostModal', () => {
         const closeModalMock = jest.fn(); // Mock the closeModal function
     
         axios.get.mockResolvedValueOnce({ data: mockWorkouts });
+        axios.get.mockResolvedValueOnce({
+            data: { meals: [{ id: 1, name: 'Meal 1' }] }, // Example response structure
+        });
     
         renderWithContext(<CreatePostModal isModalOpen={true} closeModal={closeModalMock} />);
         expect(screen.getByText('Submit')).toBeDisabled();
     });
+
 
     test('enables submit button when post content and workout are provided', async () => {
         const mockWorkouts = [
           { id: 1, workout_name: 'Workout 1', exercises: ['Exercise 1'], rating: 5, rating_count: 10 }
         ];
         axios.get.mockResolvedValueOnce({ data: mockWorkouts });
+        axios.get.mockResolvedValueOnce({
+            data: { meals: [{ id: 1, name: 'Meal 1' }] }, // Example response structure
+        });
       
         renderWithContext(<CreatePostModal isModalOpen={true} closeModal={jest.fn()} />);
       
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
       
-        const selectElement = screen.getByRole('combobox');
-        fireEvent.change(selectElement, { target: { value: '1' } });
+        const selectElements = screen.getAllByRole('combobox');
+        fireEvent.change(selectElements[0], { target: { value: '1' } });
       
         fireEvent.click(screen.getByText('Add Workout'));
       
