@@ -234,17 +234,20 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({
           </View>
           
           <View style={styles.headerActions}>
+          {!isEditable ? (
+          <>
             <TouchableOpacity onPress={toggleBookmark} style={styles.iconButton}>
               <FontAwesome
                 name={isBookmarked ? "bookmark" : "bookmark-o"}
                 size={20}
-                color={ "#5C90E0"}
+                color="#5C90E0"
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleShare} style={styles.iconButton}>
               <FontAwesome name="share-alt" size={20} color="#5C90E0" />
             </TouchableOpacity>
-            {isEditable && (
+          </>
+            ) : (
               <TouchableOpacity onPress={handleEdit} style={styles.iconButton}>
                 <FontAwesome name="edit" size={20} color="#5C90E0" />
               </TouchableOpacity>
