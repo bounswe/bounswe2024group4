@@ -104,19 +104,8 @@ const History = () => {
                     {details ? (
                       <div>
                         <p><strong>Created by:</strong> {details.created_by}</p>
-                        <p><strong>Rating:</strong> {details.rating} ({details.rating_count} ratings)</p>
-                        <h5 className="font-semibold mt-3 mb-2">Exercises:</h5>
-                        <ul className="ml-4 list-disc">
-                          {details.exercises.map((exercise) => (
-                            <li key={exercise.exercise_id} className="mb-2">
-                              <strong>{exercise.name}</strong> ({exercise.muscle}, {exercise.equipment})<br/>
-                              <span className="text-sm text-gray-300">
-                                Sets: {exercise.sets}, Reps: {exercise.reps}<br/>
-                                Instruction: {exercise.instruction}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
+                        
+                        
                       </div>
                     ) : (
                       <p>Loading workout details...</p>
