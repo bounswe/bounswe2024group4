@@ -60,7 +60,6 @@ function ProfileDetailScreen() {
         );
         const data = profileResponse.data;
         setUserData(data);
-        // Kullanıcı bilgilerini her posta ekle
         const enrichedPosts = data.posts.map((post: any) => ({
           ...post,
           user: {

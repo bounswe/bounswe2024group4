@@ -37,7 +37,7 @@ function MyProfileScreen() {
   const [userData, setUserData] = useState<any>(null);
   const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [modalVisible, setModalVisible] = useState(false); 
 
   const baseURL = `http://${process.env.EXPO_PUBLIC_API_URL}:8000`;
 
@@ -55,7 +55,7 @@ function MyProfileScreen() {
         const data = profileResponse.data;
         setUserData(profileResponse.data);
         console.log(profileResponse.data)
-                // Kullanıcı bilgilerini her posta ekle
+                
                 const enrichedPosts = data.posts.map((post: any) => ({
                   ...post,
                   user: {
