@@ -2,24 +2,26 @@ import React, { useState } from 'react';
 import { SafeAreaView, FlatList, Text, Image, StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import axios from 'axios';
+import images from '../constants/image_map'; 
 
 interface WorkoutProgram {
   id: string;
   workout_name: string;
   rating: number;
-  rating_count: number; // Number of ratings
+  rating_count: number; 
   exercises: {
     id: string;
     name: string;
     sets: number;
     reps: number;
-    image?: string;
+    image?: string; 
+    muscle?: string; 
   }[];
 }
 
 interface WorkoutsScreenProps {
   workoutPrograms: WorkoutProgram[];
-  isOwnProfile: boolean; // Indicates if the current user owns this profile
+  isOwnProfile: boolean; 
 }
 
 const WorkoutsScreen: React.FC<WorkoutsScreenProps> = ({ workoutPrograms, isOwnProfile }) => {
@@ -41,7 +43,6 @@ const WorkoutsScreen: React.FC<WorkoutsScreenProps> = ({ workoutPrograms, isOwnP
 
       if (response.status === 200) {
         Alert.alert('Success', 'Rating submitted successfully!');
-        // Update the local rating count and average rating (manually adjust the state here if needed)
       } else {
         Alert.alert('Error', 'Failed to submit rating. Please try again.');
       }
@@ -52,7 +53,6 @@ const WorkoutsScreen: React.FC<WorkoutsScreenProps> = ({ workoutPrograms, isOwnP
   };
 
   const handleShare = (programName: string) => {
-    console.log(`Sharing workout: ${programName}`);
     Alert.alert('Share', `Shared workout: ${programName}`);
   };
 
@@ -86,7 +86,19 @@ const WorkoutsScreen: React.FC<WorkoutsScreenProps> = ({ workoutPrograms, isOwnP
       {item.exercises.map((exercise, index) => (
         <React.Fragment key={exercise.id || index.toString()}>
           <View style={styles.exerciseRow}>
-            {exercise.image && <Image source={{ uri: exercise.image }} style={styles.exerciseImage} />}
+            {exercise.image ? (
+              // Display image from URL
+              <Image source={{ uri: exercise.image }} style={styles.exerciseImage} />
+            ) : exercise.muscle ? (
+              // Display fallback muscle group image
+              <Image
+                source={images[exercise.muscle as keyof typeof images]}
+                style={styles.exerciseImage}
+              />
+            ) : (
+              // Placeholder for missing images
+              <View style={styles.exerciseImagePlaceholder} />
+            )}
             <View style={styles.exerciseDetails}>
               <Text style={styles.exerciseName}>{exercise.name}</Text>
               <Text style={styles.exerciseSetsReps}>
@@ -195,6 +207,15 @@ const styles = StyleSheet.create({
     height: 50,
     marginRight: 20,
     marginLeft: 10,
+    borderRadius: 8,
+  },
+  exerciseImagePlaceholder: {
+    width: 50,
+    height: 50,
+    marginRight: 20,
+    marginLeft: 10,
+    backgroundColor: '#555',
+    borderRadius: 5,
   },
   exerciseDetails: {
     flex: 1,
@@ -239,13 +260,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  noDataText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-  },
 });
 
 export default WorkoutsScreen;
-
