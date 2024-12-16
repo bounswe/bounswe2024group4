@@ -68,7 +68,11 @@ def search(request):
             'like_count': post.likeCount,
             'user': {
                 'username': post.user.username,
-                'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None
+                'profile_picture': post.user.profile_picture.url if post.user.profile_picture else None,
+                'score': post.user.score,
+                'user_type': post.user.user_type,
+                'workout_rating': post.user.workout_rating,
+                'meal_rating':post.user.meal_rating
             },
             'workout_id': post.workout.workout_id if post.workout else None,
             'meal_id': post.mealId

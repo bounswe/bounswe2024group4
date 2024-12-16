@@ -24,7 +24,9 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     const [showCommentBox, setShowCommentBox] = useState(false);
     const [newComment, setNewComment] = useState("");
     const [comments, setComments] = useState([]);
+
     const [showOptions, setShowOptions] = useState(false);
+
 
     const config = useMemo(() => ({
         headers: {

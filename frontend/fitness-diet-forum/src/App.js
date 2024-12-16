@@ -13,6 +13,7 @@ import AuthenticatedLayout from './layouts/AuthenticatedLayout';
 import PublicLayout from './layouts/PublicLayout';
 import PrivateRoute  from "./components/PrivateRoute";
 import ProfilePage from './pages/ProfilePage';
+import SearchResults from './pages/SearchResults';
 function App() {
   return (
     <Router>
@@ -110,6 +111,16 @@ function App() {
         <PrivateRoute>
           <AuthenticatedLayout>
             <Discover />
+          </AuthenticatedLayout>
+        </PrivateRoute>
+      }
+    />
+    <Route
+      path="/search-results"
+      element={
+        <PrivateRoute>
+          <AuthenticatedLayout>
+            <SearchResults />
           </AuthenticatedLayout>
         </PrivateRoute>
       }
