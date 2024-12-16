@@ -26,6 +26,7 @@ describe("Post Component", () => {
       content: "This is a test post.",
       like_count: 5,
       liked: false,
+      created_at: '2024-12-15T12:00:00Z',
     };
   
     const renderComponent = () =>
