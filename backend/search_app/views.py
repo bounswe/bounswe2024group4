@@ -23,16 +23,16 @@ def search(request):
     search_query = request.GET.get('search', '').strip()  # 'meals' or 'workouts' or 'posts' or 'users' or 'all' or 'super_member'
     categories = request.GET.get('categories', 'all')
     muscles = request.GET.get('muscles', '').split(',')
-    min_calories = request.GET.get('min_calories', 0)
-    max_calories = request.GET.get('max_calories', int(1e9))
-    min_protein = request.GET.get('min_protein', 0)
-    max_protein = request.GET.get('max_protein', int(1e9))
-    min_fat = request.GET.get('min_fat', 0)
-    max_fat = request.GET.get('max_fat', int(1e9))
-    min_carbs = request.GET.get('min_carbs', 0)
-    max_carbs = request.GET.get('max_carbs', int(1e9))
-    min_fiber = request.GET.get('min_fiber', 0)
-    max_fiber = request.GET.get('max_fiber', int(1e9))
+    min_calories = float(request.GET.get('min_calories', 0))
+    max_calories = float(request.GET.get('max_calories', int(1e9)))
+    min_protein = float(request.GET.get('min_protein', 0))
+    max_protein = float(request.GET.get('max_protein', int(1e9)))
+    min_fat = float(request.GET.get('min_fat', 0))
+    max_fat = float(request.GET.get('max_fat', int(1e9)))
+    min_carbs = float(request.GET.get('min_carbs', 0))
+    max_carbs = float(request.GET.get('max_carbs', int(1e9)))
+    min_fiber = float(request.GET.get('min_fiber', 0))
+    max_fiber = float(request.GET.get('max_fiber', int(1e9)))
 
     if not search_query or search_query == '':
         return JsonResponse({'error': 'Search query is required'}, status=400)
@@ -87,19 +87,19 @@ def search(request):
             Q(created_by__username__icontains=search_query)
         ).select_related('created_by').order_by('-created_at')
 
-        if 'meals' in categories:            
-            meal_queryset = meal_queryset.filter(
-                calories__lte=float(max_calories),
-                calories__gte=float(min_calories),
-                protein__gte=float(min_protein),
-                protein__lte=float(max_protein),
-                fat__lte=float(max_fat),
-                fat__gte=float(min_fat),
-                carbs__lte=float(max_carbs),
-                carbs__gte=float(min_carbs),
-                fiber__lte=float(max_fiber),
-                fiber__gte=float(min_fiber)
-            )
+        # if 'meals' in categories:            
+        meal_queryset = meal_queryset.filter(
+            calories__lte=float(max_calories),
+            calories__gte=float(min_calories),
+            protein__gte=float(min_protein),
+            protein__lte=float(max_protein),
+            fat__lte=float(max_fat),
+            fat__gte=float(min_fat),
+            carbs__lte=float(max_carbs),
+            carbs__gte=float(min_carbs),
+            fiber__lte=float(max_fiber),
+            fiber__gte=float(min_fiber)
+        )
 
         response['meals'] = [{
             'meal_id': meal.meal_id,
