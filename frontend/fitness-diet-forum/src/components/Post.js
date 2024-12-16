@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import { FaHeart, FaComment, FaBookmark } from "react-icons/fa";
 import { IoIosStar } from "react-icons/io";
 import ExerciseProgram from "./ExerciseProgram";
@@ -8,7 +8,7 @@ import axios from 'axios';
 import { Link } from "react-router-dom";
 import { formatDistanceToNowStrict } from "date-fns";
 
-const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, created_at }) => {
+const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, created_at, isOwn, onDelete }) => {
     const globalContext = useContext(Context);
     const { baseURL } = globalContext;
     const token = localStorage.getItem("token");
@@ -24,20 +24,30 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
     const [showCommentBox, setShowCommentBox] = useState(false);
     const [newComment, setNewComment] = useState("");
     const [comments, setComments] = useState([]);
-    const config = {
+
+    const [showOptions, setShowOptions] = useState(false);
+
+
+    const config = useMemo(() => ({
         headers: {
-            'Authorization': 'Token ' + token,
+          'Authorization': 'Token ' + token,
         },
-    };
+      }), [token]);
 
     useEffect(() => {
         const fetchPostData = async () => {
             try {
                 if (mealId) {
-                    // TO DO: Fetch meal data using mealId
+                    const mealResponse = await axios.get(baseURL + `/get_meal_from_id/?meal_id=${mealId}`, config);
+                    if (mealResponse.status === 200) {
+                        setMeal(mealResponse.data);
+                    } else {
+                        setError('Meal not found');
+                    }
                 }
+
                 if (workoutId) {
-                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}`, config);
+                    const workoutResponse = await axios.get(baseURL + `/get-workout/${workoutId}/`, config);
                     if (workoutResponse.status === 200) {
                         setWorkout(workoutResponse.data);
                     } else {
@@ -49,43 +59,52 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 const bookmarkResponse = await axios.get(baseURL + "/bookmarked_posts/", config);
                 if (bookmarkResponse.status === 200) {
                     const bookmarkedPostIds = bookmarkResponse.data.bookmarked_posts.map(post => post.post_id);
-                    //console.log(bookmarkedPostIds);
                     setIsBookmarked(bookmarkedPostIds.includes(postId));
                 }
             } catch (error) {
                 setError('Something went wrong');
             }
         };
+        const fetchComments = async () => {
+            if (!postId) return;
+            try {
+              const response = await axios.get(`${baseURL}/get_comments/?postId=${postId}`, config);
+              if (response.status === 200) {
+                setComments(response.data.comments);
+              }
+            } catch (error) {
+              console.error("Error fetching comments:", error);
+            }
+          };
         fetchPostData();
-    }, [mealId, workoutId, hasLiked ]);
+        fetchComments();
+    }, [mealId, workoutId, hasLiked, baseURL, config, postId]);
 
     const handleLikeClick = async () => {
         const updatedHasLiked = !hasLiked;
         const updatedLikeCount = likeCount + (hasLiked ? -1 : 1);
-    
+
         // Optimistically update UI
         setHasLiked(updatedHasLiked);
         setLikeCount(updatedLikeCount);
-    
+
         try {
             const response = await axios.post(
                 `${baseURL}/toggle_like/`, 
                 { postId }, 
                 config
             );
-    
-            if (response.status === 200) {
-                console.log(response.data.message);
-            } else {
+
+            if (response.status !== 200) {
                 throw new Error('Unexpected response status');
             }
         } catch (error) {
             console.error('Error toggling like:', error);
-            setHasLiked(hasLiked); // Restore previous state of hasLiked
-            setLikeCount(likeCount); // Restore previous like count
+            // Revert on error
+            setHasLiked(hasLiked);
+            setLikeCount(likeCount);
         }
     };
-    
 
     const toggleBookmark = async () => {
         try {
@@ -97,7 +116,6 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 { postId },
                 config
             );
-            //console.log(postId);
             if (response.status !== 200) {
                 throw new Error("Unexpected response");
             }
@@ -107,17 +125,45 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
         }
     };
 
-    const handleCommentSubmit = (e) => {
+    const handleCommentSubmit = async (e) => {
         e.preventDefault();
         if (newComment.trim()) {
-            setComments([...comments, newComment]);
-            setNewComment("");
-            setShowCommentBox(false);
+            try {
+                const response = await axios.post(
+                    `${baseURL}/comment/`,
+                    { postId, content: newComment },
+                    config
+                );
+                if (response.status === 201) {
+                    // Successfully created comment on backend
+                    // Add the new comment to the local state
+                    const comment_id = response.data.comment_id;
+                    setComments(prevComments => [...prevComments, { id: comment_id, content: newComment, username:localStorage.getItem('username') }]);
+                    setNewComment("");
+                    setShowCommentBox(false);
+                }
+            } catch (error) {
+                console.error('Error creating comment:', error);
+            }
         }
     };
 
+    const deletePost = async () => {
+        try {
+            const response = await axios.delete(`${baseURL}/post/${postId}/delete/`, config);
+            
+            if (response.status !== 200) {
+                throw new Error('Failed to delete the post.');
+            }else{
+                onDelete(postId);
+            }
+        } catch (error) {
+            console.error('Error deleting post:', error);
+        }
+    }
+
     return (
-        <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
+        <div className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center mb-4 justify-between"> 
                 <Link to={`/profile/${user.username}`} className="flex items-center">
@@ -127,19 +173,42 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                         className="w-12 h-12 rounded-full mr-4"
                     />
                     <div>
-                    <h3 className="text-xl font-semibold">@{user.username}</h3>
-                    <div className="flex items-center text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                        <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
-                        ))}
-                        <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
-                    </div>
+                        <h3 className="text-xl font-semibold">@{user.username}</h3>
+                        <div className="flex items-center text-yellow-400">
+                            {[...Array(5)].map((_, i) => (
+                                <IoIosStar key={i} className={i < user.score ? "text-yellow-400" : "text-gray-500"} />
+                            ))}
+                            <span className="text-gray-300 ml-2">{user.score.toFixed(1)}</span>
+                        </div>
                     </div>
                 </Link>
-
-                <p className="text-gray-500 text-sm">
-                    {createdDate}
-                </p>
+                <div>
+                    {/* Dropdown Menu for Actions */}
+                    {isOwn && (
+                        <div className="flex justify-end mt-4 relative">
+                            <div className="group">
+                                <button
+                                    className="text-gray-600 hover:text-gray-800 transition-all duration-300"
+                                    onClick={() => setShowOptions(prev => !prev)}
+                                    style={{ fontSize: "2rem", lineHeight: "1rem" }}
+                                >
+                                    &#x22EF;
+                                </button>
+                                {showOptions && (
+                                    <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                        <button
+                                            className="w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100 rounded-lg transition-all duration-300"
+                                            onClick={deletePost}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    <p className="text-gray-500 text-sm">{createdDate}</p>
+                </div>
             </div>
 
             {/* Post Content */}
@@ -147,20 +216,24 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
 
             {/* Meal */}
             {meal && (
-                <div className="h-96 overflow-y-scroll mb-4">
+                <div className="h-100 overflow-y-scroll mb-4">
                     <Meal
-                        mealName={""}
-                        foods={[]}
+                        key={meal.meal_id}
+                        mealId={meal.meal_id}
+                        mealName={meal.mealName}
+                        foods={meal.foods}
                         onDelete={() => {}}
-                        key={1}
                         isOwn={false}
+                        currentRating={meal.rating}
+                        ratingCount={meal.rating_count}
+                        showRating={user.username!==localStorage.getItem('username')}
                     />
                 </div>
             )}
 
             {/* ExerciseProgram */}
             {workout && (
-                <div className="h-96 overflow-y-scroll mb-4">
+                <div className="h-100 overflow-y-scroll mb-4">
                     <ExerciseProgram
                         programName={workout.workout_name}
                         exercises={workout.exercises}
@@ -169,7 +242,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                         programId={workout.id}
                         currentRating={workout.rating}
                         ratingCount={workout.rating_count}
-                        showRating={true}
+                        showRating={user.username!==localStorage.getItem('username')}
                     />
                 </div>
             )}
@@ -190,7 +263,6 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 >
                     <FaBookmark className={`mr-2`} /> Bookmark
                 </button>
-                
             </div>
 
             {/* Comment Box */}
@@ -217,17 +289,22 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                 <div className="mt-4">
                     <h4 className="font-semibold mb-2">Comments:</h4>
                     <ul>
-                        {comments.map((comment, index) => (
-                            <li key={index} className="mb-2">
-                                {comment}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                        {comments.map((comment) => (
+                    <li key={comment.id} className="mb-2">
+                    <Link
+                        to={`/profile/${comment.username}`}
+                        className="font-semibold text-blue-400 hover:underline mr-2"
+                    >
+                        @{comment.username}
+                    </Link>
+                    {comment.content}
+                    </li>
+                ))}
+                </ul>
+            </div>
             )}
         </div>
     );
 };
 
 export default Post;
-

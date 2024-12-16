@@ -32,7 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
     user_type = models.CharField(max_length=20, choices=[('guest', 'Guest'), ('member', 'Member'), ('super_member', 'Super Member')], default='guest')
-    score = models.IntegerField(default=0)  # For leaderboard ranking
+    score = models.FloatField(default=0)  # For leaderboard ranking
     height = models.FloatField(default=0)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../css/index.css'; // Adjust this path if necessary
 
-const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
+const Exercise = ({ exerciseName, sets, reps, instruction, equipment, difficulty }) => {
     const [showInstruction, setShowInstruction] = useState(false);
 
     const toggleVisibility = () => {
@@ -12,6 +12,37 @@ const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
         return input
             .replace(/_/g, ' ') // Replace underscores with spaces
             .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize each word
+    };
+
+    const renderInstruction = (text) => {
+        const urlRegex = /https?:\/\/[^\s]+/g; // Regular expression to match URLs
+        const parts = text.split(urlRegex); // Split text by URLs
+        const urls = text.match(urlRegex); // Extract matched URLs
+
+        if (!urls) {
+            return <p className="text-base leading-relaxed">{text}</p>;
+        }
+
+        // Combine text and links
+        return (
+            <p className="text-base leading-relaxed">
+                {parts.map((part, index) => (
+                    <React.Fragment key={index}>
+                        {part}
+                        {urls[index] && (
+                            <a
+                                href={urls[index]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline hover:text-blue-800"
+                            >
+                                {urls[index]}
+                            </a>
+                        )}
+                    </React.Fragment>
+                ))}
+            </p>
+        );
     };
 
     return (
@@ -40,6 +71,16 @@ const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
                 </div>
             )}
 
+            {/* Difficulty Section */}
+            {difficulty && (
+                <div>
+                    <h3 className="text-base font-semibold text-blue-300"> {/* Changed to text-base */}
+                        Difficulty:
+                    </h3>
+                    <p className="text-base">{formatString(difficulty)}</p> {/* Changed to text-base */}
+                </div>
+            )}
+
             {/* Instruction Section */}
             {instruction && (
                 <>
@@ -52,9 +93,7 @@ const Exercise = ({ exerciseName, sets, reps, instruction, equipment }) => {
                     
                     {showInstruction && (
                         <div className="bg-white text-gray-800 rounded-lg p-4 shadow-inner">
-                            <p className="text-base leading-relaxed"> {/* Changed to text-base */}
-                                {instruction}
-                            </p>
+                            {renderInstruction(instruction)}
                             <button
                                 onClick={toggleVisibility}
                                 className="mt-3 px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"

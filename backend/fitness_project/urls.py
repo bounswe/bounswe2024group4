@@ -29,7 +29,6 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
-from activity_streams import views as activity_streams_views
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -60,8 +59,9 @@ urlpatterns = [
     path('get-programs/', exercise_program_views.get_programs, name='get_programs'), # Get weekly programs by username
     path('workouts/toggle-bookmark/', exercise_program_views.toggle_bookmark_workout, name='toggle_bookmark_workout'), # Bookmark a workout
     path('get-bookmarked-workouts/', exercise_program_views.get_bookmarked_workouts, name='get_bookmarked_workouts'), # Get bookmarked workouts by username
-
     path('workout-activities/', exercise_program_views.get_workout_activities, name='get_workout_activities'),
+    path('get-workout-log-activities/', exercise_program_views.get_workout_log_activities, name='get_workout_log_activities'),
+    path('create-exercise/', exercise_program_views.create_exercise_superuser, name='create-exercise'), # Create an exercise
     #User auth related endpoints
     path('sign_up/', auth_views.sign_up, name='sign_up'),
     path('log_in/', auth_views.log_in, name='log_in'),
@@ -84,26 +84,37 @@ urlpatterns = [
     path('following_feed/', social_feed_views.following_feed, name='following_feed'),
     path('follow/', simple_features_views.follow, name='follow'),
     path('unfollow/', simple_features_views.unfollow, name='unfollow'),
+    path('get_comments/',post_views.get_comments_for_post,name='get_comments'),
     # Meal related endpoints
     path('create_meal/', diet_program_views.create_meal, name='create_meal'),
+    path('get_meal_activities/', diet_program_views.get_meal_activities, name='get_meal_activities'),
     path('create_food_all/', diet_program_views.create_food_all, name='create_food_all'),
     path('create_food_superuser/', diet_program_views.create_food_superuser, name='create_food_superuser'),
     path('get_meal_from_id/', diet_program_views.get_meal_from_id, name='get_meal_from_id'),
-    path('meals/delete/<int:workout_id>/', diet_program_views.delete_meal_by_id, name='delete_meal_by_id'),
+    path('meals/delete/<int:meal_id>/', diet_program_views.delete_meal_by_id, name='delete_meal_by_id'),
     path('get_foodname_options/', diet_program_views.get_foodname_options, name='get_foodname_options'),
     path('rate_meal/', diet_program_views.rate_meal, name='rate_meal'),
-    path('get_meals_by_user_id/', diet_program_views.get_meals_by_user_id, name='get_meals_by_user_id'),
+    path('get_meals/', diet_program_views.get_meals, name='get_meals'),
     path('toggle_bookmark_meal/', diet_program_views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
     path('get_bookmarked_meals_by_user_id/', diet_program_views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
+    path('get_food_by_id/', diet_program_views.get_food_by_id, name='get_food_by_id'),
     # Swagger endpoints
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path('my-programs/', profile_views.get_user_programs, name='get_user_programs'),
     # path('my-workout-logs/', profile_views.get_user_workout_logs, name='get_user_workout_logs'),
-    path('get-activities/', activity_streams_views.get_activities, name='get_activity_stream'),
-    path('log-activity/', activity_streams_views.log_activity, name='log_activity'),
-    path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
-    
+  #  path('test-firestore/', activity_streams_views.test_firestore_connection, name='test_firestore'),
+    path('search/', include('search_app.urls')),
+
+    # Posts related endpoints
+    path('post/<int:post_id>/delete/', post_views.delete_post, name='delete_post'),
+    path('comment/<int:comment_id>/delete/', post_views.delete_comment, name='delete_comment'),
+
+    # Include all posts-related URLs
+    path('', include('posts_app.urls')),  # This will include all URLs from posts_app.urls
+
+    # Include all diet program related URLs
+    path('', include('diet_program_app.urls')),
 
 ]
 

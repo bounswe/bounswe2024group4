@@ -70,17 +70,7 @@ export default function TabLayout() {
           viewedUser: currentUser
         }}
       />
-      <Tabs.Screen
-        name="messages"
-        options={{
-          title: 'Messages',
-          tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="message" color={color} />,
-        }}
-        initialParams={{
-          viewingUser: currentUser,
-          viewedUser: currentUser
-        }}
-      />
+    
       <Tabs.Screen
         name="profile"
         options={{
@@ -90,6 +80,17 @@ export default function TabLayout() {
         initialParams={{
           viewingUser: currentUser,
           viewedUser: currentUser
+        }}
+      />
+      <Tabs.Screen
+        name="WeeklyProgram"
+        options={{
+          title: 'Weekly',
+          tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="calendar-week" color={color} />,
+        }}
+        initialParams={{
+          viewingUser: currentUser,
+          viewedUser: currentUser,
         }}
       />
       <Tabs.Screen
@@ -105,5 +106,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    
   );
 }

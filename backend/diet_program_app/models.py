@@ -22,9 +22,7 @@ class Food(models.Model):
     cholesterol = models.TextField(default='N/A')
     na = models.TextField(default='N/A')
     ca = models.TextField(default='N/A')
-    # mg = models.TextField(default='N/A')
     k = models.TextField(default='N/A')
-    # fe = models.TextField(default='N/A')
     vit_k = models.TextField(default='N/A')
     vit_c = models.TextField(default='N/A')
     vit_a_rae = models.TextField(default='N/A')
@@ -32,12 +30,12 @@ class Food(models.Model):
     vit_b12 = models.TextField(default='N/A')
     vit_b6 = models.TextField(default='N/A')
 
-    recipe_url = models.URLField(default='')
-
-    creator_level = models.IntegerField(default=0) # 0: User, 1: Superuser, 2: API
+    recipe_url = models.URLField(default='', blank=True)
+    image_url = models.ImageField(default='', blank=True, upload_to='food_images/')
 
     def _str_(self):
         return self.food_name
+
 
 class Meal(models.Model):
     meal_id = models.AutoField(primary_key=True)
@@ -47,6 +45,11 @@ class Meal(models.Model):
     rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)
     foods = models.ManyToManyField(Food)
+    calories = models.FloatField(default=0)
+    protein = models.FloatField(default=0)
+    fat = models.FloatField(default=0)
+    carbs = models.FloatField(default=0)
+    fiber = models.FloatField(default=0)
 
     def _str_(self):
         return self.meal_name
