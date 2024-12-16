@@ -15,7 +15,7 @@ import { useRouter, useGlobalSearchParams } from 'expo-router';
 interface LeaderboardEntry {
   username: string;
   profile_picture: string | null;
-  rating?: number;
+  score?: number;
   workout_rating?: number;
   meal_rating?: number;
 }
@@ -105,7 +105,7 @@ const Leaderboard: React.FC = () => {
           <Text style={styles.username}>{item.username}</Text>
         </TouchableOpacity>
         <Text style={styles.score}>
-          {activeTab === 'combined' && item.rating?.toFixed(1)}
+          {activeTab === 'combined' && item.score?.toFixed(1)}
           {activeTab === 'workout' && item.workout_rating?.toFixed(1)}
           {activeTab === 'meal' && item.meal_rating?.toFixed(1)}
         </Text>
