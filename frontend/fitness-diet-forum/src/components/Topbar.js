@@ -22,10 +22,24 @@ const Topbar = () => {
   // State variables
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState(["all"]);
-  const [muscles, setMuscles] = useState("");
+  const [muscles, setMuscles] = useState([]);
   const [calories, setCalories] = useState({ min: 0, max: 1000 });
+  const [minProtein, setMinProtein] = useState(0);
+  const [maxProtein, setMaxProtein] = useState(1000);
+  const [minFat, setMinFat] = useState(0);
+  const [maxFat, setMaxFat] = useState(1000);
+  const [minCarbs, setMinCarbs] = useState(0);
+  const [maxCarbs, setMaxCarbs] = useState(1000);
+  const [minFiber, setMinFiber] = useState(0);
+  const [maxFiber, setMaxFiber] = useState(1000);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false); // State for filter modal
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  const formatString = (input) => {
+    return input
+        .replace(/_/g, ' ') // Replace underscores with spaces
+        .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize each word
+  };
 
   const handleLogout = async () => {
     try {
@@ -47,9 +61,17 @@ const Topbar = () => {
         params: {
           search: searchQuery,
           categories: categories.join(","),
-          muscles: muscles,
+          muscles: muscles.join(","), // Send selected muscles as a comma-separated string
           min_calories: calories.min,
           max_calories: calories.max,
+          min_protein: minProtein,
+          max_protein: maxProtein,
+          min_fat: minFat,
+          max_fat: maxFat,
+          min_carbs: minCarbs,
+          max_carbs: maxCarbs,
+          min_fiber: minFiber,
+          max_fiber: maxFiber,
         },
         headers: {
           Authorization: `Token ${token}`,
@@ -60,6 +82,22 @@ const Topbar = () => {
       console.error("Search failed:", error.response?.data?.error || "An error occurred.");
     }
   };
+
+  const muscleOptions = [
+    'abdominals',
+    'biceps',
+    'calves',
+    'chest',
+    'glutes',
+    'hamstrings',
+    'lats',
+    'lower_back',
+    'quadriceps',
+    'traps',
+    'triceps',
+    'shoulders',
+    'cardio'
+  ];
 
   return (
     <div className="bg-black text-white p-4 flex flex-col gap-4">
@@ -110,7 +148,7 @@ const Topbar = () => {
       {/* Filter Modal */}
       {isFilterModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg w-96">
+          <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg w-1/3">
             <h2 className="text-lg font-bold mb-4">Filters</h2>
 
             {/* Categories filter */}
@@ -139,18 +177,31 @@ const Topbar = () => {
             {/* Muscle group filter */}
             <div className="mb-4">
               <label className="block font-medium">Muscles</label>
-              <input
-                type="text"
-                value={muscles}
-                onChange={(e) => setMuscles(e.target.value)}
-                placeholder="Comma-separated muscle groups"
-                className="w-full p-2 border border-gray-300 rounded bg-gray-700 text-white"
-              />
+              <div className="grid grid-cols-2 gap-4">
+                {muscleOptions.map((muscle) => (
+                  <label key={muscle} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      value={muscle}
+                      checked={muscles.includes(muscle)}
+                      onChange={() => {
+                        if (muscles.includes(muscle)) {
+                          setMuscles(muscles.filter((m) => m !== muscle)); // Unselect
+                        } else {
+                          setMuscles([...muscles, muscle]); // Select
+                        }
+                      }}
+                      className="text-white"
+                    />
+                    {formatString(muscle)}
+                  </label>
+                ))}
+              </div>
             </div>
 
             {/* Calorie range filter */}
             <div className="mb-4">
-              <label className="block font-medium">Calories</label>
+              <label className="block font-medium">Calories (kcal)</label>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -163,6 +214,90 @@ const Topbar = () => {
                   type="number"
                   value={calories.max}
                   onChange={(e) => setCalories({ ...calories, max: e.target.value })}
+                  placeholder="Max"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+              </div>
+            </div>
+
+            {/* Protein range filter */}
+            <div className="mb-4">
+              <label className="block font-medium">Protein (g)</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={minProtein}
+                  onChange={(e) => setMinProtein(e.target.value)}
+                  placeholder="Min"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+                <input
+                  type="number"
+                  value={maxProtein}
+                  onChange={(e) => setMaxProtein(e.target.value)}
+                  placeholder="Max"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+              </div>
+            </div>
+
+            {/* Fat range filter */}
+            <div className="mb-4">
+              <label className="block font-medium">Fat (g)</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={minFat}
+                  onChange={(e) => setMinFat(e.target.value)}
+                  placeholder="Min"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+                <input
+                  type="number"
+                  value={maxFat}
+                  onChange={(e) => setMaxFat(e.target.value)}
+                  placeholder="Max"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+              </div>
+            </div>
+
+            {/* Carbs range filter */}
+            <div className="mb-4">
+              <label className="block font-medium">Carbs (g)</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={minCarbs}
+                  onChange={(e) => setMinCarbs(e.target.value)}
+                  placeholder="Min"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+                <input
+                  type="number"
+                  value={maxCarbs}
+                  onChange={(e) => setMaxCarbs(e.target.value)}
+                  placeholder="Max"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+              </div>
+            </div>
+
+            {/* Fiber range filter */}
+            <div className="mb-4">
+              <label className="block font-medium">Fiber (g)</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={minFiber}
+                  onChange={(e) => setMinFiber(e.target.value)}
+                  placeholder="Min"
+                  className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
+                />
+                <input
+                  type="number"
+                  value={maxFiber}
+                  onChange={(e) => setMaxFiber(e.target.value)}
                   placeholder="Max"
                   className="w-1/2 p-2 border border-gray-300 rounded bg-gray-700 text-white"
                 />
@@ -198,7 +333,3 @@ const Topbar = () => {
 };
 
 export default Topbar;
-
-
-
-
