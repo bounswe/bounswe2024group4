@@ -24,6 +24,7 @@ const EditProfileScreen = () => {
     email: string;
     bio: string;
     profilePicture: string | null;
+    preview: string | null;
     weight: string;
     height: string;
     password: string;
@@ -33,6 +34,7 @@ const EditProfileScreen = () => {
     email: "",
     bio: "",
     profilePicture: null,
+    preview: null,
     weight: "",
     height: "",
     password: "",
@@ -92,7 +94,11 @@ const EditProfileScreen = () => {
     });
 
     if (!result.canceled) {
-      setUserInfo((prev) => ({ ...prev, profilePicture: result.assets[0].uri }));
+      setUserInfo((prev) => ({
+        ...prev,
+        profilePicture: result.assets[0].uri,
+        preview: result.assets[0].uri, 
+      }));
     }
   };
 
@@ -115,7 +121,7 @@ const EditProfileScreen = () => {
       const value = userInfo[key as keyof typeof userInfo];
       if (value) {
         if (key === "profilePicture") {
-          formDataToSend.append(key, {
+          formDataToSend.append("profile_picture", {
             uri: value,
             type: "image/jpeg",
             name: "profile_picture.jpg",
@@ -157,10 +163,10 @@ const EditProfileScreen = () => {
           <TouchableOpacity onPress={pickImage}>
             <Image
               style={styles.profilePicture}
-              source={{ uri: userInfo.profilePicture || "https://via.placeholder.com/150" }}
+              source={{ uri: userInfo.preview || userInfo.profilePicture || "https://via.placeholder.com/150" }}
             />
           </TouchableOpacity>
-          <Text style={styles.changePhotoText}>Change Photo</Text>
+          <Text style={styles.changePhotoText}>Change Profile Picture</Text>
         </View>
 
         {/* Username */}
@@ -330,6 +336,5 @@ const styles = StyleSheet.create({
     marginBottom: 5 
   },
 });
-
 
 export default EditProfileScreen;
