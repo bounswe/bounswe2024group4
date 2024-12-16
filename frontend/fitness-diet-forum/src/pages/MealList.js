@@ -45,7 +45,7 @@ const MealList = () => {
         try {
           const response = await axios.get(baseURL + `/get_bookmarked_meals/`, config);
           if (response.status === 200) {
-            const bookmarkedMealIds = response.data.map((meal) => meal.meal_id);
+            const bookmarkedMealIds = response.data.meals.map((meal) => meal.meal_id);
 
             // Fetch detailed meal data for each bookmarked meal
             const mealPromises = bookmarkedMealIds.map(async (id) => {

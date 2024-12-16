@@ -38,7 +38,7 @@ const Meal = ({ mealId, mealName, foods, onDelete, isOwn, currentRating, ratingC
 
           if (response.status === 200) {
             // Check if the current meal is bookmarked
-            const bookmarkedMealIds = response.data.map((meal) => meal.meal_id);
+            const bookmarkedMealIds = response.data.meals.map((meal) => meal.meal_id);
             setIsBookmarked(bookmarkedMealIds.includes(mealId));
           }
         } catch (error) {
