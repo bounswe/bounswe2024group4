@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, Image, StyleSheet, TouchableOpacity, View, Animated } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import WorkoutEdit from './WorkoutEdit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import images from '../constants/image_map';
 import { Workout } from '../constants/types';
+import axios from 'axios';
+
 
 interface WorkoutProgramProps {
   workout: Workout;
   onUpdate: (updatedWorkout: Workout) => void;
   isEditable?: boolean;
+  showRating?: boolean;
 }
+
+const baseURL = 'http://' + process.env.EXPO_PUBLIC_API_URL + ':8000';
 
 const WorkoutProgram: React.FC<WorkoutProgramProps> = ({ 
   workout, 
   onUpdate,
-  isEditable = false 
+  isEditable = false,
+  showRating = false,
 }) => {
   const [currentWorkout, setCurrentWorkout] = useState<Workout>(workout);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
+  const [rating, setRating] = useState(0);
+  const [averageRating, setAverageRating] = useState(currentWorkout.rating);
+  const [ratingCount, setRatingCount] = useState(currentWorkout.rating_count);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const handleShare = () => {
     console.log(`Sharing workout: ${currentWorkout.name}`);
@@ -36,6 +47,115 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({
 
   const handleCancel = () => {
     setIsModalVisible(false);
+  };
+
+  useEffect(() => {
+    const fetchBookmarkStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+
+        const config = {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        };
+
+        const response = await axios.get(
+          `${baseURL}/get-bookmarked-workouts/`,
+          config
+        );
+
+        if (response.status === 200) {
+          const bookmarkedWorkoutIds = response.data.map((workout: any) => workout.id);
+          setIsBookmarked(bookmarkedWorkoutIds.includes(currentWorkout.id));
+        }
+      } catch (error) {
+        console.error("Error fetching bookmark status:", error);
+      }
+    };
+
+    fetchBookmarkStatus();
+  }, [currentWorkout.id]);
+
+  const toggleBookmark = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const config = {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      };
+
+      const response = await axios.post(
+        `${baseURL}/workouts/toggle-bookmark/`,
+        {
+          workout_id: currentWorkout.id,
+        },
+        config
+      );
+
+      if (response.status === 200) {
+        setIsBookmarked(prev => !prev);
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    }
+  };
+
+  const handleRating = async (selectedRating: number) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          'Authorization': `Token ${token}`        
+        }
+      };
+  
+      const response = await axios.post(`${baseURL}/rate-workout/`, {
+        workout_id: currentWorkout.id,
+        rating: selectedRating
+      }, config);
+  
+      if (response.status === 200) {
+        setRating(selectedRating);
+        // Update the average rating and count
+        const newTotalRatings = ratingCount + 1;
+        const newAverageRating = 
+          ((averageRating * ratingCount) + selectedRating) / newTotalRatings;
+        setRatingCount(newTotalRatings);
+        setAverageRating(newAverageRating);
+      }
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+    }
+  };
+
+  const RatingStars = () => {
+    return (
+      <View style={styles.inlineRatingContainer}>
+        <View style={styles.starsContainer}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <TouchableOpacity
+              key={star}
+              onPress={() => handleRating(star)}
+              style={styles.compactStarButton}
+            >
+              <FontAwesome
+                name="star"
+                size={24}
+                color={star <= rating ? "#FFD700" : "rgba(255, 215, 0, 0.3)"}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
   };
 
   const toggleExercise = (index: number) => {
@@ -109,11 +229,18 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({
         <View style={styles.ratingAndActions}>
           <View style={styles.ratingContainer}>
             <FontAwesome name="star" size={18} color="#FFD700" />
-            <Text style={styles.ratingNumber}>{currentWorkout.rating}</Text>
-            <Text style={styles.ratingCount}>({currentWorkout.rating_count})</Text>
+            <Text style={styles.ratingNumber}>{averageRating.toFixed(1)}</Text>
+            <Text style={styles.ratingCount}>({ratingCount})</Text>
           </View>
           
           <View style={styles.headerActions}>
+            <TouchableOpacity onPress={toggleBookmark} style={styles.iconButton}>
+              <FontAwesome
+                name={isBookmarked ? "bookmark" : "bookmark-o"}
+                size={20}
+                color={ "#5C90E0"}
+              />
+            </TouchableOpacity>
             <TouchableOpacity onPress={handleShare} style={styles.iconButton}>
               <FontAwesome name="share-alt" size={20} color="#5C90E0" />
             </TouchableOpacity>
@@ -126,9 +253,16 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({
         </View>
       </View>
 
+
       <View style={styles.exerciseList}>
         {currentWorkout.exercises.map((exercise, index) => renderExerciseCard(exercise, index))}
       </View>
+
+      {showRating && (
+        <View style={styles.ratingSection}>
+          <RatingStars />
+        </View>
+      )}
 
       {isEditable && isModalVisible && (
         <WorkoutEdit
@@ -141,6 +275,7 @@ const WorkoutProgram: React.FC<WorkoutProgramProps> = ({
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   programContainer: {
@@ -265,6 +400,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(92, 144, 224, 0.1)',
     borderRadius: 14,
+  },
+  compactRatingSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    paddingTop: 4,
+  },
+  inlineRatingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(92, 144, 224, 0.05)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(92, 144, 224, 0.2)',
+    paddingVertical: 8,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  compactStarButton: {
+    padding: 4,
   },
 });
 
