@@ -651,6 +651,7 @@ const CreateMealModal = ({onClose}) => {
                 
                 {/* Buttons in a Row */}
                 <div className="flex justify-between mt-6 space-x-4">
+                {isSuperMember && (
                     <button 
                         className="w-full py-3 px-6 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300"
                         onClick={saveFood}
@@ -659,6 +660,7 @@ const CreateMealModal = ({onClose}) => {
                     >
                         Save Food
                     </button>
+                )}
                     <button 
                         className="w-full py-3 px-6 bg-primary text-white text-lg font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300"
                         onClick={addFoodToMeal}
