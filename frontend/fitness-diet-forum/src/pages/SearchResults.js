@@ -203,15 +203,6 @@ const SearchResults = () => {
           </div>
         </div>
       )}
-                  {/* Search results section */}
-                  {searchResults && (
-        <div className="bg-gray-900 text-white p-4 mt-4 rounded">
-          <h3 className="text-lg font-bold">Search Results</h3>
-          <pre className="bg-gray-800 p-4 rounded">
-            {JSON.stringify(searchResults, null, 2)} {/* Display search results in JSON format */}
-          </pre>
-        </div>
-      )}
 
       {/* No Results Found for the Active Tab */}
       {activeTab === "users" && (!searchResults.users || searchResults.users.length === 0) && (
