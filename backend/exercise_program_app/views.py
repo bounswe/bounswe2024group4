@@ -512,7 +512,7 @@ def workout_log(request, workout_id):
             workout_log.is_completed = data['workout_completed']
             workout_log.save()
         # Handle exercise logs
-        if 'exercises' in data['exercises']:
+        if 'exercises' in data:
             exercise_ids = [ex['exercise_id'] for ex in data['exercises']]
             workout_exercises = Exercise.objects.filter(
                 workout=workout, 
