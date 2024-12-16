@@ -18,9 +18,10 @@ import { useRouter } from "expo-router";
 import WorkoutsScreen from "../../components/WorkoutsScreen";
 import PostsScreen from "./index";
 import MealsScreen from "../../components/MealsScreen";
+import BookmarksScreen from "../../components/BookmarksScreen";
 
 interface Route {
-  key: "posts" | "workouts" | "meals";
+  key: "posts" | "workouts" | "meals" | "bookmarks";
   title: string;
 }
 
@@ -31,6 +32,7 @@ function MyProfileScreen() {
     { key: "posts", title: "Posts" },
     { key: "workouts", title: "Workouts" },
     { key: "meals", title: "Meals" },
+    { key: "bookmarks", title:"Bookmarks"},
   ]);
   const [userData, setUserData] = useState<any>(null);
   const [programs, setPrograms] = useState<any[]>([]);
@@ -51,6 +53,7 @@ function MyProfileScreen() {
           config
         );
         setUserData(profileResponse.data);
+        console.log(profileResponse.data)
 
         const workoutDetailsPromises = profileResponse.data.workouts.map(async (workout: any) => {
           const response = await axios.get(
@@ -128,6 +131,8 @@ function MyProfileScreen() {
         return <PostsScreen />;
       case "meals":
         return <MealsScreen />;
+      case "bookmarks":
+        return <BookmarksScreen />;
       default:
         return null;
     }
