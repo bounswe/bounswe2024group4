@@ -86,7 +86,11 @@ const LeaderBoard = () => {
                             className="text-lg font-bold text-blue-400 hover:underline"
                         >
                             <img
-                                src={(baseURL + '/' + user.profile_picture) || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
+                                src={
+                                    user.profile_picture
+                                    ? (baseURL + '/' + user.profile_picture)
+                                    : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                                }
                                 alt={`${user.username}'s profile`}
                                 className="w-16 h-16 rounded-full border-2 border-gray-600"
                             />
