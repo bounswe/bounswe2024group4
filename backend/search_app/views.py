@@ -13,7 +13,9 @@ from drf_yasg import openapi
 import json
 from django.db.models import Sum, FloatField, Case, When, Value
 from django.db.models.functions import Cast
+from swagger_docs.swagger import search_schema
 
+@swagger_auto_schema(method='get', **search_schema)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -137,3 +139,4 @@ def search(request):
 
     return JsonResponse(response)
 
+# Create your views here.

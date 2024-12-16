@@ -6,7 +6,7 @@ from exercise_program_app.models import Workout
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import post_schema, toggle_like_schema, comment_schema, liked_posts_schema, bookmarked_posts_schema
+from swagger_docs.swagger import post_schema, toggle_like_schema, comment_schema, liked_posts_schema, bookmarked_posts_schema, toggle_bookmark_schema, delete_post_schema, delete_comment_schema
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -133,7 +133,7 @@ def comment(request):
         # return render(request, 'comment.html')
 
 
-@swagger_auto_schema(method='post', **toggle_like_schema)
+@swagger_auto_schema(method='post', **toggle_bookmark_schema)
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -210,7 +210,6 @@ def bookmarked_posts(request):
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
 
-
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -246,6 +245,7 @@ def get_comments_for_post(request):
     return JsonResponse({'comments': data}, status=200)
 
   
+@swagger_auto_schema(method='delete', **delete_post_schema)
 @api_view(['DELETE'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -272,7 +272,7 @@ def delete_post(request, post_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-  
+@swagger_auto_schema(method='delete', **delete_comment_schema)
 @api_view(['DELETE'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

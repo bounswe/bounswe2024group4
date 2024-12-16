@@ -137,7 +137,7 @@ const LeaderBoard = () => {
                     <h2 className="text-2xl text-white font-semibold text-center mb-4">
                         Overall Leaderboard
                     </h2>
-                    {renderLeaderboard(users, "rating")}
+                    {renderLeaderboard(users, "score")}
                 </div>
                 <div>
                     <h2 className="text-2xl text-white font-semibold text-center mb-4">

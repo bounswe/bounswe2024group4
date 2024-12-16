@@ -24,7 +24,7 @@ def create_meal(request):
         data = json.loads(request.body)
         user = request.user
         meal_name = data.get('meal_name')
-        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
+#        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
         foods = data.get('foods', [])
         
         # Create the meal first
@@ -324,7 +324,7 @@ def create_food_superuser(request):
                 'food_name': food_name,
                 'ingredients': ingredients,
                 'recipe_url': recipe_url,
-                'image_url': food.image_url if food.image_url else '',
+                'image_url': food.image_url.url if food.image_url else '',
                 'calories': energ_kcal,
                 'fat': fat,
                 'fat_saturated': fat_saturated,
@@ -459,12 +459,14 @@ def rate_meal(request):
             user = meal.created_by
             
             meal.rating = (meal.rating * meal.rating_count + rating) / (meal.rating_count + 1)
+            meal.rating_count = meal.rating_count + 1
             meal.save()
             
             user.meal_rating = (user.meal_rating * user.meal_rating_count + rating) / (user.meal_rating_count + 1)
             user.meal_rating_count = user.meal_rating_count + 1
 
             user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+            user.save()
             user.check_super_member()
             user.save()
 
@@ -482,42 +484,50 @@ def get_meals(request):
         try:
             user = request.user
             meals = Meal.objects.filter(created_by=user)
-            meals_data = [{
-                'meal_id': meal.meal_id,
-                'meal_name': meal.meal_name,
-                'created_at': meal.created_at,
-                'rating': meal.rating,
-                'rating_count': meal.rating_count,
-                'calories': meal.calories,
-                'protein': meal.protein,
-                'fat': meal.fat,
-                'carbs': meal.carbs,
-                'fiber': meal.fiber,
-                'foods': list(meal.foods.values(
-                    'name',
-                    'ingredients',
-                    'recipe_url',
-                    'image_url',
-                    'energ_kcal', 
-                    'fat', 
-                    'fat_saturated', 
-                    'fat_trans', 
-                    'carbo',
-                    'fiber',
-                    'sugar',
-                    'protein',
-                    'cholesterol',
-                    'na',
-                    'ca',
-                    'k',
-                    'vit_k',
-                    'vit_c',
-                    'vit_a_rae',
-                    'vit_d',
-                    'vit_b12',
-                    'vit_b6',
-                )),
-            } for meal in meals]
+            meals_data = []
+            
+            for meal in meals:
+                foods_data = []
+                for food in meal.foods.all():
+                    foods_data.append({
+                        'name': food.name,
+                        'ingredients': food.ingredients,
+                        'recipe_url': food.recipe_url,
+                        'image_url': food.image_url.url if food.image_url else '',
+                        'energ_kcal': food.energ_kcal,
+                        'fat': food.fat,
+                        'fat_saturated': food.fat_saturated,
+                        'fat_trans': food.fat_trans,
+                        'carbo': food.carbo,
+                        'fiber': food.fiber,
+                        'sugar': food.sugar,
+                        'protein': food.protein,
+                        'cholesterol': food.cholesterol,
+                        'na': food.na,
+                        'ca': food.ca,
+                        'k': food.k,
+                        'vit_k': food.vit_k,
+                        'vit_c': food.vit_c,
+                        'vit_a_rae': food.vit_a_rae,
+                        'vit_d': food.vit_d,
+                        'vit_b12': food.vit_b12,
+                        'vit_b6': food.vit_b6,
+                    })
+                
+                meals_data.append({
+                    'meal_id': meal.meal_id,
+                    'meal_name': meal.meal_name,
+                    'created_at': meal.created_at,
+                    'rating': meal.rating,
+                    'rating_count': meal.rating_count,
+                    'calories': meal.calories,
+                    'protein': meal.protein,
+                    'fat': meal.fat,
+                    'carbs': meal.carbs,
+                    'fiber': meal.fiber,
+                    'foods': foods_data,
+                })
+
             return JsonResponse({'message': 'Meals found', 'meals': meals_data}, status=200)
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)

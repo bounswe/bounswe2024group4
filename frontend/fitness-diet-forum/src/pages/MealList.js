@@ -20,21 +20,21 @@ const MealList = () => {
 
   useEffect(() => {
     const fetchUserMeals = async () => {
-        try {
-            const response = await axios.get(baseURL + `/get_meals/`, config);
-            if (response.status === 200) {
-                const data = response.data;
-                setMeals(data.meals);
-            } else {
-                setError('User not found');
-            }
-        } catch (error) {
-            setError('Something went wrong');
+      try {
+        const response = await axios.get(baseURL + `/get_meals/`, config);
+        if (response.status === 200) {
+          const data = response.data;
+          setMeals(data.meals);
+        } else {
+          setError('User not found');
         }
+      } catch (error) {
+        setError('Something went wrong');
+      }
     };
 
     fetchUserMeals();
-  }, [changed]);
+  }, [changed, showForm]);
 
   const deleteMeal = async (mealId) => {
     try {
@@ -44,38 +44,46 @@ const MealList = () => {
         setChanged(!changed);
       }
     } catch (error) {
-        setError('Could not delete meal.');
+      setError('Could not delete meal.');
     }
   };
 
   return (
     <div className="meal-list p-8 bg-darkBackground min-h-screen">
       <h1 className="text-4xl font-bold text-lightText mb-10 tracking-wider">Meals</h1>
-      {error ? (
-        <div className="text-center text-red-500">
-          <p className="text-xl font-medium">{error}</p>
-        </div>
-      ) : meals.length === 0 ? (
-        <div className="text-center text-lightText">
-          <p className="text-xl font-medium">No meals available. Create a new meal to get started!</p>
-        </div>
-      ) : (
-        <div className="grid gap-10">
-          {meals.map((meal) => (
-            <Meal
-              mealId={meal.meal_id}
-              mealName={meal.mealName}
-              foods={meal.foods}
-              onDelete={() => deleteMeal(meal.meal_id)}
-              isOwn={true}
-              currentRating={meal.rating} 
-              ratingCount={meal.rating_count}
-              showRating={false}
-            />
-          ))}
-        </div>
+
+      {/* Show Meals Only If showForm is False */}
+      {!showForm && (
+        <>
+          {error ? (
+            <div className="text-center text-red-500">
+              <p className="text-xl font-medium">{error}</p>
+            </div>
+          ) : meals.length === 0 ? (
+            <div className="text-center text-lightText">
+              <p className="text-xl font-medium">No meals available. Create a new meal to get started!</p>
+            </div>
+          ) : (
+            <div className="grid gap-10">
+              {meals.map((meal) => (
+                <Meal
+                  key={meal.meal_id}
+                  mealId={meal.meal_id}
+                  mealName={meal.mealName}
+                  foods={meal.foods}
+                  onDelete={() => deleteMeal(meal.meal_id)}
+                  isOwn={true}
+                  currentRating={meal.rating}
+                  ratingCount={meal.rating_count}
+                  showRating={false}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
+      {/* Create Meal Button */}
       {!showForm && (
         <button
           className="mt-10 bg-primary text-white text-lg font-semibold py-3 px-6 rounded-lg hover:bg-primary-dark transition-colors duration-300"
@@ -85,6 +93,7 @@ const MealList = () => {
         </button>
       )}
 
+      {/* Show Modal When showForm is True */}
       {showForm && (
         <CreateMealModal
           onClose={() => setShowForm(false)}
