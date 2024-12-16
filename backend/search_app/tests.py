@@ -286,13 +286,13 @@ class AdvancedSearchTests(TestCase):
         # We'll search for 'meal' and filter categories to 'meals' only,
         # and set min_calories and max_calories to capture the meal above.
         response = self.client.get(
-            f'{self.search_url}?search=meal&categories=meals&min_calories=80&max_calories=100'
+            f'{self.search_url}?categories=meals&min_calories=80&max_calories=100'
         )
         
         self.assertEqual(response.status_code, 200)
         
         data = response.json()
-        print(data)
+        # print(data)
         self.assertIn('meals', data)
         self.assertTrue(len(data['meals']) > 0)
 

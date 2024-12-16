@@ -87,19 +87,19 @@ def search(request):
             Q(created_by__username__icontains=search_query)
         ).select_related('created_by').order_by('-created_at')
 
-        if 'meals' in categories:            
-            meal_queryset = meal_queryset.filter(
-                calories__lte=float(max_calories),
-                calories__gte=float(min_calories),
-                protein__gte=float(min_protein),
-                protein__lte=float(max_protein),
-                fat__lte=float(max_fat),
-                fat__gte=float(min_fat),
-                carbs__lte=float(max_carbs),
-                carbs__gte=float(min_carbs),
-                fiber__lte=float(max_fiber),
-                fiber__gte=float(min_fiber)
-            )
+        # if 'meals' in categories:            
+        meal_queryset = meal_queryset.filter(
+            calories__lte=float(max_calories),
+            calories__gte=float(min_calories),
+            protein__gte=float(min_protein),
+            protein__lte=float(max_protein),
+            fat__lte=float(max_fat),
+            fat__gte=float(min_fat),
+            carbs__lte=float(max_carbs),
+            carbs__gte=float(min_carbs),
+            fiber__lte=float(max_fiber),
+            fiber__gte=float(min_fiber)
+        )
 
         response['meals'] = [{
             'meal_id': meal.meal_id,
