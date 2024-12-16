@@ -8,7 +8,7 @@ from user_auth_app.models import User
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view, permission_classes
-from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_by_user_id_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_by_user_id_schema, get_food_by_id_schema
+from swagger_docs.swagger import create_meal_schema, create_food_all_schema, create_food_superuser_schema, get_meal_from_id_schema, delete_meal_by_id_schema, get_foodname_options_schema, rate_meal_schema, get_meals_schema, toggle_bookmark_meal_schema, get_bookmarked_meals_schema, get_food_by_id_schema
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -478,7 +478,7 @@ def rate_meal(request):
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
 
-@swagger_auto_schema(method='get', **get_meals_by_user_id_schema)
+@swagger_auto_schema(method='get', **get_meals_schema)
 @api_view(['GET'])
 def get_meals(request):
     if request.method == 'GET':
@@ -566,13 +566,14 @@ def toggle_bookmark_meal(request):
     return JsonResponse({'message': 'Invalid request'}, status=405)
 
 
-@swagger_auto_schema(method='get', **get_bookmarked_meals_by_user_id_schema)
+@swagger_auto_schema(method='get', **get_bookmarked_meals_schema)
 @api_view(['GET'])
-def get_bookmarked_meals_by_user_id(request):
+def get_bookmarked_meals(request):
     if request.method == 'GET':
         try:
-            user_id = request.GET.get('user_id')
-            user = User.objects.get(user_id=user_id)
+            # username = request.GET.get('username')
+            # user = User.objects.get(username=username)
+            user = request.user
             meals = user.bookmarked_meals.all()
             meals_data = [{
             'meal_id': meal.meal_id,

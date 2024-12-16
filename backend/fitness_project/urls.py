@@ -96,7 +96,7 @@ urlpatterns = [
     path('rate_meal/', diet_program_views.rate_meal, name='rate_meal'),
     path('get_meals/', diet_program_views.get_meals, name='get_meals'),
     path('toggle_bookmark_meal/', diet_program_views.toggle_bookmark_meal, name='toggle_bookmark_meal'),
-    path('get_bookmarked_meals_by_user_id/', diet_program_views.get_bookmarked_meals_by_user_id, name='get_bookmarked_meals_by_user_id'),
+    path('get_bookmarked_meals/', diet_program_views.get_bookmarked_meals, name='get_bookmarked_meals'),
     path('get_food_by_id/', diet_program_views.get_food_by_id, name='get_food_by_id'),
     # Swagger endpoints
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
