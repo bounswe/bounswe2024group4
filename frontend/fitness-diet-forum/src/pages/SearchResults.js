@@ -110,11 +110,7 @@ const SearchResults = () => {
                 <div className="flex items-center mb-4 justify-between">
                   <Link to={`/profile/${user.username}`} className="flex items-center">
                     <img
-                      src={
-                        user.profile_picture
-                          ? `${baseURL}/${user.profile_picture}`
-                          : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                      }
+                      src={(baseURL + '/media/' + user.profile_picture) || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
                       alt="Profile"
                       className="w-12 h-12 rounded-full mr-4"
                     />
