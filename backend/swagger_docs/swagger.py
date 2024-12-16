@@ -235,7 +235,7 @@ get_food_by_id_schema = {
                 }
             )
         ),
-        404: 'Food not found'
+        '404': openapi.Response('Food not found'),
     }
 }
 
@@ -396,13 +396,15 @@ create_food_superuser_schema = {
 get_meal_from_id_schema = {
     'operation_summary': 'Get Meal by ID',
     'operation_description': 'Get a meal by ID',
-    'request_body': openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the meal'),
-        },
-        required=['meal_id'],
-    ),
+    'manual_parameters': [
+        openapi.Parameter(
+            'meal_id',
+            openapi.IN_QUERY,
+            description='ID of the meal',
+            type=openapi.TYPE_INTEGER,
+            required=True
+        )
+    ],
     'responses': {
         200: openapi.Response('Success', openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -462,7 +464,7 @@ delete_meal_by_id_schema = {
     'operation_summary': 'Delete Meal by ID',
     'operation_description': 'Delete a meal by ID',
     'responses': { 
-        '200': openapi.Response('Success', openapi.Schema(
+        200: openapi.Response('Success', openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
                 'message': openapi.Schema(type=openapi.TYPE_STRING),
@@ -2108,14 +2110,120 @@ search_schema = {
             required=True
         ),
         openapi.Parameter(
-            'type',
+            'categories',
             openapi.IN_QUERY,
             description='Type of content to search',
             type=openapi.TYPE_STRING,
             enum=['all', 'users', 'posts', 'meals', 'workouts'],
             default='all'
-        )
+        ),
+        openapi.Parameter(
+            'muscles',
+            openapi.IN_QUERY,
+            description='Muscle groups targeted by workouts',
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(type=openapi.TYPE_STRING),
+            required=False,
+            default=''
+        ),
+        openapi.Parameter(
+            'min_calories',
+            openapi.IN_QUERY,
+            description='Minimum calories per meal',
+            type=openapi.TYPE_INTEGER,
+            required=False,
+            default=0
+        ),
+        openapi.Parameter(
+            'max_calories',
+            openapi.IN_QUERY,
+            description='Maximum calories per meal',
+            type=openapi.TYPE_INTEGER,
+            required=False,
+            default=int(1e9)
+        ),
+        openapi.Parameter(
+            'min_protein',
+            openapi.IN_QUERY,
+            description='Minimum protein content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=0
+        ),
+        openapi.Parameter(
+            'max_protein',
+            openapi.IN_QUERY,
+            description='Maximum protein content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=int(1e9)
+        ),
+        # openapi.Parameter(
+        #     'min_protein',
+        #     openapi.IN_QUERY,
+        #     description='Minimum protein content per meal',
+        #     type=openapi.TYPE_NUMBER,
+        #     required=False,
+        #     default=0
+        # ),
+        # openapi.Parameter(
+        #     'max_protein',
+        #     openapi.IN_QUERY,
+        #     description='Maximum protein content per meal',
+        #     type=openapi.TYPE_NUMBER,
+        #     required=False,
+        #     default=int(1e9)
+        # ),
+        openapi.Parameter(
+            'min_fat',
+            openapi.IN_QUERY,
+            description='Minimum fat content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=0
+        ),
+        openapi.Parameter(
+            'max_fat',
+            openapi.IN_QUERY,
+            description='Maximum fat content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=int(1e9)
+        ),
+        openapi.Parameter(
+            'min_carbs',
+            openapi.IN_QUERY,
+            description='Minimum carbohydrate content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=0
+        ),
+        openapi.Parameter(
+            'max_carbs',
+            openapi.IN_QUERY,
+            description='Maximum carbohydrate content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=int(1e9)
+        ),
+        openapi.Parameter(
+            'min_fiber',
+            openapi.IN_QUERY,
+            description='Minimum fiber content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=0
+        ),
+        openapi.Parameter(
+            'max_fiber',
+            openapi.IN_QUERY,
+            description='Maximum fiber content per meal',
+            type=openapi.TYPE_NUMBER,
+            required=False,
+            default=int(1e9)
+        ),
     ],
+
     'responses': {
         200: openapi.Response(
             description='Search results',
