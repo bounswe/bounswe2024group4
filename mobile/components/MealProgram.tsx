@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Food from './Food';
 
-interface Food {
+interface FoodType {
   id: string;
   image: any;
   name: string;
@@ -10,19 +11,32 @@ interface Food {
   protein: string;
   carbs: string;
   fat: string;
+  ingredients: string[];
+  recipeUrl: string;
+  ca: string;
+  cholesterol: string;
+  fiber: string;
+  k: string;
+  na: string;
+  vitARae: string;
+  vitB6: string;
+  vitB12: string;
+  vitC: string;
+  vitD: string;
+  vitK: string;
 }
 
 interface MealProgramProps {
   meal: {
     id: string;
     name: string;
-    foods: Food[];
+    foods: FoodType[];
     rating?: string;
   };
+  onDelete: () => void;
 }
 
-const MealProgram: React.FC<MealProgramProps> = ({ meal }) => {
-  
+const MealProgram: React.FC<MealProgramProps> = ({ meal, onDelete }) => {
   const handleShare = () => {
     console.log(`Sharing meal: ${meal.name}`);
     // Will be implemented later
@@ -31,100 +45,91 @@ const MealProgram: React.FC<MealProgramProps> = ({ meal }) => {
   return (
     <View style={styles.programContainer}>
       <View style={styles.headerContainer}>
-        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>{meal.name}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.programTitle}>
+          {meal.name}
+        </Text>
         {meal.rating && (
-          <View style={styles.iconRow}>
-            <TouchableOpacity onPress={handleShare}>
-              <FontAwesome name="share" size={24} color="#fff" style={styles.icon} />
-            </TouchableOpacity>
-            <View style={styles.ratingContainer}>
-              <FontAwesome name="star" size={24} color="#FFD700" />
-              <Text style={styles.ratingNumber}>{meal.rating}</Text>
-            </View>
+          <View style={styles.ratingContainer}>
+            <FontAwesome5 name="star" size={18} color="#FFD700" />
+            <Text style={styles.ratingText}>{meal.rating}</Text>
           </View>
         )}
       </View>
+
       {meal.foods.map((food) => (
-        <View key={food.id} style={styles.foodRow}>
-          <Image source={food.image} style={styles.foodImage} />
-          <View style={styles.foodDetails}>
-            <Text style={styles.foodName}>{food.name}</Text>
-            <Text style={styles.foodCalories}>Calories: {food.calories} cal</Text>
-            <Text style={styles.foodNutrients}>
-              Protein: {food.protein} | Carbs: {food.carbs} | Fat: {food.fat}
-            </Text>
-          </View>
-        </View>
+        <Food
+          key={food.id}
+          foodName={food.name}
+          calories={food.calories}
+          protein={food.protein}
+          carbs={food.carbs}
+          fat={food.fat}
+          ingredients={food.ingredients}
+          imageUrl={food.image}
+          recipeUrl={food.recipeUrl}
+          ca={food.ca}
+          cholesterol={food.cholesterol}
+          fiber={food.fiber}
+          k={food.k}
+          na={food.na}
+          vitARae={food.vitARae}
+          vitB6={food.vitB6}
+          vitB12={food.vitB12}
+          vitC={food.vitC}
+          vitD={food.vitD}
+          vitK={food.vitK}
+        />
       ))}
+
+      <View style={styles.deleteButtonContainer}>
+        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+          <FontAwesome5 name="trash-alt" size={18} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   programContainer: {
-    backgroundColor: '#AC1B80',
-    padding: 15,
-    marginBottom: 15,
+    backgroundColor: '#7953A9',
+    padding: 16,
+    marginBottom: 16,
     borderRadius: 8,
-    borderColor: '#E05BAF',
+    borderColor: '#7953A9',
     borderWidth: 2,
   },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   programTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     flexShrink: 1,
     marginRight: 10,
   },
-  iconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    marginLeft: 10,
-  },
   ratingContainer: {
-    alignItems: 'center',
-    marginLeft: 10,
     flexDirection: 'row',
+    alignItems: 'center',
   },
-  ratingNumber: {
+  ratingText: {
     color: '#FFD700',
     fontSize: 14,
-    marginLeft: 5,
+    marginLeft: 4,
   },
-  foodRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+  deleteButtonContainer: {
+    marginTop: 12,
+    alignItems: 'flex-end',
   },
-  foodImage: {
-    width: 50,
-    height: 50,
-    marginRight: 20,
-    marginLeft: 10,
+  deleteButton: {
+    backgroundColor: '#AC1B80',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 5,
-  },
-  foodDetails: {
-    flex: 1,
-  },
-  foodName: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  foodCalories: {
-    color: '#ccc',
-    fontSize: 14,
-  },
-  foodNutrients: {
-    color: '#bbb',
-    fontSize: 14,
   },
 });
 

@@ -62,7 +62,7 @@ export default function TabLayout() {
         name="meals"
         options={{
           title: 'Meals',
-          headerStyle: { backgroundColor: '#C23894' },
+          headerStyle: { backgroundColor: '#7953A9' },
           tabBarIcon: ({ color }) => <FontAwesome6 size={28} name="bowl-food" color={color} />,
         }}
         initialParams={{
