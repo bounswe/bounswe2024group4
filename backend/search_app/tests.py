@@ -245,50 +245,62 @@ class AdvancedSearchTests(TestCase):
     def test_search_meals_with_calorie_filter(self):
         """Test searching meals with specific calorie range filters"""
         # Assume in setUp() we created a meal as:
-        self.meal1 = Meal.objects.create(
-            meal_name='Test meal 1',
-            created_by=self.user,
-            calories=500,
-            protein=30,
-            fat=20,
-            carbs=50,
-            fiber=10
-        )
-        self.meal2 = Meal.objects.create(
-            meal_name='Test meal 2',
-            created_by=self.user,
-            calories=200,
-            protein=30,
-            fat=20,
-            carbs=50,
-            fiber=10
-        )
-        self.meal1 = Meal.objects.create(
-            meal_name='Test meal 3',
-            created_by=self.user,
-            calories=700,
-            protein=30,
-            fat=20,
-            carbs=50,
-            fiber=10
-        )
+        
+        # create foods
+        data = {   # 52 calories
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+        }
+        response = self.client.post('/create_food_all/', data)
+        food_id_1 = response.json()['food_id']
+
+        data = {   # 89 calories
+            'food_name': 'Banana',
+            'ingredients': '100 gr banana',
+        }
+        response = self.client.post('/create_food_all/', data)
+
+        food_id_2 = response.json()['food_id']
+
+        # create meals
+        data = {
+            'meal_name': 'Test meal 1',
+            'foods': [food_id_1]
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id_1 = response.json()['meal_id']
+
+        data = {
+            'meal_name': 'Test meal 2',
+            'foods': [food_id_2]
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id_2 = response.json()['meal_id']
+
+        data = {
+            'meal_name': 'Test meal 3',
+            'foods': [food_id_1, food_id_2]
+        }
+        response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
+        meal_id_3 = response.json()['meal_id']
         # We'll search for 'meal' and filter categories to 'meals' only,
         # and set min_calories and max_calories to capture the meal above.
         response = self.client.get(
-            f'{self.search_url}?search=meal&categories=meals&min_calories=400&max_calories=600'
+            f'{self.search_url}?search=meal&categories=meals&min_calories=80&max_calories=100'
         )
         
         self.assertEqual(response.status_code, 200)
         
         data = response.json()
+        print(data)
         self.assertIn('meals', data)
         self.assertTrue(len(data['meals']) > 0)
 
         # Check that our test meal is included since it falls within the calorie range.
-        self.assertTrue(any(meal['meal_name'] == 'Test meal 1' for meal in data['meals']))
-        self.assertFalse(any(meal['meal_name'] == 'Test meal 2' for meal in data['meals']))
+        self.assertFalse(any(meal['meal_name'] == 'Test meal 1' for meal in data['meals']))
+        self.assertTrue(any(meal['meal_name'] == 'Test meal 2' for meal in data['meals']))
         self.assertFalse(any(meal['meal_name'] == 'Test meal 3' for meal in data['meals']))
-        
+
     def test_search_workouts_with_muscle_filter(self):
         """Test searching workouts filtered by muscle"""
         # Assume we have an Exercise model related to Workout via a foreign key or many-to-many.
