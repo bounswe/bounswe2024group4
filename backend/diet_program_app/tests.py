@@ -347,7 +347,8 @@ class TestMealFoodGettersAndDelete(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
+        
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -369,7 +370,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -398,7 +399,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id1 = response.json()['food_id']
         data = {
             'food_name': 'Banana',
@@ -407,7 +408,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
             'fat': '0.3',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id2 = response.json()['food_id']
         response = self.client.get('/get_foodname_options/')
     
@@ -426,7 +427,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
         food_id1 = response.json()['food_id']
         data = {
             'meal_name': 'Apple Breakfast',
@@ -457,7 +458,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
 
         data = {
             'meal_name': 'Apple Breakfast',
@@ -490,7 +491,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
             'fat': '0.2',
             'fat_saturated': '0.1'
         }
-        response = self.client.post('/create_food_all/', json.dumps(data), content_type='application/json')
+        response = self.client.post('/create_food_all/', data)
 
         data = {
             'meal_name': 'Apple Breakfast',
