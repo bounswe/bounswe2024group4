@@ -495,7 +495,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
         self.assertTrue(meal_id2 in [item['meal_id'] for item in response.json()['meals']])
         self.assertFalse(meal_id1 in [item['meal_id'] for item in response.json()['meals']])
 
-    def test_get_bookmarked_meals_by_user_id(self):
+    def test_get_bookmarked_meals(self):
         response = self.client.post(reverse('log_in'), {'username': 'testuser1', 'password': 'password'})
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
 
@@ -521,14 +521,13 @@ class TestMealFoodGettersAndDelete(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
 
         self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id1}), content_type='application/json')
-        response = self.client.get('/get_bookmarked_meals_by_user_id/', {'user_id': self.user2.user_id})
-        # print(response.json())
+        response = self.client.get('/get_bookmarked_meals/')
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(meal_id1 in [item['meal_id'] for item in response.json()['meals']])
         self.assertEqual(len(response.json()['meals']), 1)
 
-    def test_double_bookmark_test_get_bookmarked_meals_by_user_id(self):
+    def test_double_bookmark_test_get_bookmarked_meals(self):
         response = self.client.post(reverse('log_in'), {'username': 'testuser1', 'password': 'password'})
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {response.json()["token"]}')
 
@@ -555,7 +554,7 @@ class TestMealFoodGettersAndDelete(APITestCase):
 
         self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id1}), content_type='application/json')
         self.client.post('/toggle_bookmark_meal/', json.dumps({'meal_id': meal_id1}), content_type='application/json')
-        response = self.client.get('/get_bookmarked_meals_by_user_id/', {'user_id': self.user2.user_id})
+        response = self.client.get('/get_bookmarked_meals/')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['meals'], [])

@@ -260,6 +260,10 @@ create_meal_schema = {
             type=openapi.TYPE_OBJECT,
             properties={
                 'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'created_by': openapi.Schema(type=openapi.TYPE_STRING),
+                'foods_count': openapi.Schema(type=openapi.TYPE_INTEGER),
             }
         )),
         400: openapi.Response('Bad Request'),
@@ -276,6 +280,7 @@ create_food_all_schema = {
             'food_name': openapi.Schema(type=openapi.TYPE_STRING),
             'ingredients': openapi.Schema(type=openapi.TYPE_NUMBER),
             'recipe_url': openapi.Schema(type=openapi.TYPE_NUMBER),
+            'image_url': openapi.Schema(type=openapi.TYPE_STRING),
         },
         required=['food_name', 'ingredients'],
     ), 
@@ -292,6 +297,28 @@ create_food_all_schema = {
             properties={
                 'message': openapi.Schema(type=openapi.TYPE_STRING),
                 'food_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'ingredients': openapi.Schema(type=openapi.TYPE_STRING),
+                'recipe_url': openapi.Schema(type=openapi.TYPE_STRING),
+                'image_url': openapi.Schema(type=openapi.TYPE_STRING),
+                'calories': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+                'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+                'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+                'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+                'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+                'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                'na': openapi.Schema(type=openapi.TYPE_STRING),
+                'k': openapi.Schema(type=openapi.TYPE_STRING),
+                'ca': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
             }
         )),
         400: openapi.Response('Bad Request'),
@@ -336,6 +363,28 @@ create_food_superuser_schema = {
             properties={
                 'message': openapi.Schema(type=openapi.TYPE_STRING),
                 'food_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'ingredients': openapi.Schema(type=openapi.TYPE_STRING),
+                'recipe_url': openapi.Schema(type=openapi.TYPE_STRING),
+                'image_url': openapi.Schema(type=openapi.TYPE_STRING),
+                'calories': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+                'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+                'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+                'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+                'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+                'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                'na': openapi.Schema(type=openapi.TYPE_STRING),
+                'k': openapi.Schema(type=openapi.TYPE_STRING),
+                'ca': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+                'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
             }
         )),
         400: openapi.Response('Bad Request'),
@@ -347,21 +396,59 @@ create_food_superuser_schema = {
 get_meal_from_id_schema = {
     'operation_summary': 'Get Meal by ID',
     'operation_description': 'Get a meal by ID',
+    'request_body': openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the meal'),
+        },
+        required=['meal_id'],
+    ),
     'responses': {
         200: openapi.Response('Success', openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'meal': openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        'foods': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'food_id': openapi.Schema(type=openapi.TYPE_STRING),
-                            }
-                        )),
-                    }
+                'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'created_at': openapi.Schema(type=openapi.TYPE_STRING),
+                'rating': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'rating_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'calories': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                'carbs': openapi.Schema(type=openapi.TYPE_STRING),
+                'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                'foods': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+                            'ingredients': openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(type=openapi.TYPE_STRING)
+                            ),
+                            'recipe_url': openapi.Schema(type=openapi.TYPE_STRING),
+                            'energ_kcal': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+                            'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+                            'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+                            'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                            'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                            'na': openapi.Schema(type=openapi.TYPE_STRING),
+                            'k': openapi.Schema(type=openapi.TYPE_STRING),
+                            'ca': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
+                            'image_url': openapi.Schema(type=openapi.TYPE_STRING),
+                        }
+                    )
                 )
             }
         )),
@@ -432,7 +519,7 @@ rate_meal_schema = {
     }
 }
 
-get_meals_by_user_id_schema = {
+get_meals_schema = {
     'operation_summary': 'Get Meals by User id',
     'operation_description': 'Get the meals created by user',
     'manual_parameters': [
@@ -445,31 +532,53 @@ get_meals_by_user_id_schema = {
         )
     ],
     'responses': {
-        200: openapi.Response(
-            description="Success",
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'message': openapi.Schema(type=openapi.TYPE_STRING),
-                    'meals': openapi.Schema(
-                        type=openapi.TYPE_ARRAY,
-                        items=openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'foods': openapi.Schema(
-                                    type=openapi.TYPE_ARRAY,
-                                    items=openapi.Schema(
-                                        type=openapi.TYPE_OBJECT,
-                                        properties={
-                                            'food_id': openapi.Schema(type=openapi.TYPE_STRING)
-                                        }
-                                    )
-                                )
-                            }
-                        )
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'created_at': openapi.Schema(type=openapi.TYPE_STRING),
+                'rating': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'rating_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'calories': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                'carbs': openapi.Schema(type=openapi.TYPE_STRING),
+                'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                'foods': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+                            'ingredients': openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(type=openapi.TYPE_STRING)
+                            ),
+                            'recipe_url': openapi.Schema(type=openapi.TYPE_STRING),
+                            'energ_kcal': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+                            'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+                            'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+                            'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                            'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                            'na': openapi.Schema(type=openapi.TYPE_STRING),
+                            'k': openapi.Schema(type=openapi.TYPE_STRING),
+                            'ca': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
+                            'image_url': openapi.Schema(type=openapi.TYPE_STRING),
+                        }
                     )
-                }
+                )
+            }
             )
         ),
         404: 'User not found',
@@ -501,9 +610,9 @@ toggle_bookmark_meal_schema = {
     }
 }
 
-get_bookmarked_meals_by_user_id_schema = {
-    'operation_summary': 'Get Bookmarked Meals by User ID',
-    'operation_description': 'Get the meals bookmarked by user ID',
+get_bookmarked_meals_schema = {
+    'operation_summary': 'Get Bookmarked Meals',
+    'operation_description': 'Get the meals bookmarked of the user',
     'manual_parameters': [
         openapi.Parameter(
             'user_id',
@@ -514,31 +623,53 @@ get_bookmarked_meals_by_user_id_schema = {
         )
     ],
     'responses': {
-        200: openapi.Response(
-            description="Success",
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'message': openapi.Schema(type=openapi.TYPE_STRING),
-                    'meals': openapi.Schema(
-                        type=openapi.TYPE_ARRAY,
-                        items=openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'foods': openapi.Schema(
-                                    type=openapi.TYPE_ARRAY,
-                                    items=openapi.Schema(
-                                        type=openapi.TYPE_OBJECT,
-                                        properties={
-                                            'food_id': openapi.Schema(type=openapi.TYPE_STRING)
-                                        }
-                                    )
-                                )
-                            }
-                        )
+        200: openapi.Response('Success', openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'meal_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'meal_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'created_at': openapi.Schema(type=openapi.TYPE_STRING),
+                'rating': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'rating_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'calories': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                'carbs': openapi.Schema(type=openapi.TYPE_STRING),
+                'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                'foods': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'food_name': openapi.Schema(type=openapi.TYPE_STRING),
+                            'ingredients': openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(type=openapi.TYPE_STRING)
+                            ),
+                            'recipe_url': openapi.Schema(type=openapi.TYPE_STRING),
+                            'energ_kcal': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat_saturated': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fat_trans': openapi.Schema(type=openapi.TYPE_STRING),
+                            'cholesterol': openapi.Schema(type=openapi.TYPE_STRING),
+                            'carbo': openapi.Schema(type=openapi.TYPE_STRING),
+                            'sugar': openapi.Schema(type=openapi.TYPE_STRING),
+                            'fiber': openapi.Schema(type=openapi.TYPE_STRING),
+                            'protein': openapi.Schema(type=openapi.TYPE_STRING),
+                            'na': openapi.Schema(type=openapi.TYPE_STRING),
+                            'k': openapi.Schema(type=openapi.TYPE_STRING),
+                            'ca': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_k': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_a_rae': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_c': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_d': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_b6': openapi.Schema(type=openapi.TYPE_STRING),
+                            'vit_b12': openapi.Schema(type=openapi.TYPE_STRING),
+                            'image_url': openapi.Schema(type=openapi.TYPE_STRING),
+                        }
                     )
-                }
+                )
+            }
             )
         ),
         404: 'User not found',
