@@ -61,10 +61,15 @@ class TestCreateMealFood(APITestCase):
         response = self.client.post(reverse('log_in'), data)
         token = response.json()['token']
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
-        
+        data = {
+            'food_name': 'Apple',
+            'ingredients': '100 gr apple',
+        }
+        response = self.client.post('/create_food_all/', data)
+        food_id = response.json()['food_id']
         data = {
             'meal_name': 'Breakfast',
-            'foods': [1],
+            'foods': [food_id],
         }
         response = self.client.post('/create_meal/', json.dumps(data), content_type='application/json')
         
@@ -72,6 +77,10 @@ class TestCreateMealFood(APITestCase):
         self.assertEqual(response.json()['message'], 'Meal created successfully')
         self.assertEqual(response.json()['meal_name'], 'Breakfast')
         self.assertEqual(response.json()['foods_count'], 1)
+
+        meal_id = response.json()['meal_id']
+        meal = Meal.objects.get(meal_id=meal_id)
+        self.assertEqual(meal.calories, 52.0)
 
     def test_create_food_superuser(self):
         data = {'username': 'testuser1', 'password': 'password'}

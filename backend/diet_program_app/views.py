@@ -24,7 +24,6 @@ def create_meal(request):
         data = json.loads(request.body)
         user = request.user
         meal_name = data.get('meal_name')
-#        meal = Meal.objects.create(meal_name=meal_name, created_by=user)
         foods = data.get('foods', [])
         
         # Create the meal first
@@ -43,7 +42,9 @@ def create_meal(request):
         # Then add foods to it
         for food in foods:
             meal.foods.add(food)
+        
         for food in foods:
+            food = Food.objects.get(food_id=food)
             try:
                 meal.calories += float(food.energ_kcal.split(' ')[0])
             except:

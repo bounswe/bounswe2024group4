@@ -263,12 +263,21 @@ class AdvancedSearchTests(TestCase):
             carbs=50,
             fiber=10
         )
-
+        self.meal1 = Meal.objects.create(
+            meal_name='Test meal 3',
+            created_by=self.user,
+            calories=700,
+            protein=30,
+            fat=20,
+            carbs=50,
+            fiber=10
+        )
         # We'll search for 'meal' and filter categories to 'meals' only,
         # and set min_calories and max_calories to capture the meal above.
         response = self.client.get(
             f'{self.search_url}?search=meal&categories=meals&min_calories=400&max_calories=600'
         )
+        
         self.assertEqual(response.status_code, 200)
         
         data = response.json()
@@ -278,6 +287,7 @@ class AdvancedSearchTests(TestCase):
         # Check that our test meal is included since it falls within the calorie range.
         self.assertTrue(any(meal['meal_name'] == 'Test meal 1' for meal in data['meals']))
         self.assertFalse(any(meal['meal_name'] == 'Test meal 2' for meal in data['meals']))
+        self.assertFalse(any(meal['meal_name'] == 'Test meal 3' for meal in data['meals']))
         
     def test_search_workouts_with_muscle_filter(self):
         """Test searching workouts filtered by muscle"""
