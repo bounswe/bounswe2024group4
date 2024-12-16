@@ -104,8 +104,14 @@ const History = () => {
                     {details ? (
                       <div>
                         <p><strong>Created by:</strong> {details.created_by}</p>
-                        
-                        
+                        {log.exercises && log.exercises.map((exercise) => (
+                          <div key={exercise.exercise_id} className="mb-2">
+                            <p><strong>{exercise.name}</strong></p>
+                            <p><strong>Done Sets:</strong> {exercise.actual_sets}</p>
+                            <p><strong>Done Reps:</strong> {exercise.actual_reps}</p>
+                            <p><strong>Weight:</strong> {exercise.weight} kg</p>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <p>Loading workout details...</p>
@@ -154,6 +160,3 @@ const History = () => {
 };
 
 export default History;
-
-
-

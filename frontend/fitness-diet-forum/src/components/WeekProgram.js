@@ -80,25 +80,30 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
     setCurrentDayPrograms(dayPrograms);
   };
 
-  const handleEndExercise = async (completedExercises) => {
-    console.log(currentDayPrograms[0]);
-
-    const updatedExercises = currentDayPrograms.map(program => ({
-      //...program,
-        exercises: program.exercises.map(exercise => ({
-        ...exercise,
-        is_completed: completedExercises.includes(exercise.name),
-      })),
+  const handleEndExercise = async (completedExercises, exerciseDetails) => {
+    // Prepare updated exercises with completion status and the user-provided details
+    const updatedExercises = currentDayPrograms.map((program) => ({
+      exercises: program.exercises.map((exercise) => {
+        const { sets, reps, weight } = exerciseDetails[exercise.name] || {};
+        return {
+          ...exercise,
+          is_completed: completedExercises.includes(exercise.name),
+          exercise_id: exercise.exercise_id,
+          actual_sets: sets || 0,  // Set to 0 if not provided
+          actual_reps: reps || 0,  // Set to 0 if not provided
+          weight: weight || 0,     // Set to 0 if not provided
+        };
+      }),
     }));
-
+  
     const body = {
       workout_completed: true,
-      exercises: updatedExercises,
-      date : new Date().toISOString().split("T")[0]
+      exercises: updatedExercises.flatMap((program) => program.exercises), // Flatten the array of exercises
+      date: new Date().toISOString().split("T")[0],
     };
-
+  
     try {
-      console.log(currentDayPrograms[0]);
+      console.log(body);  // Log the body to see its structure
       const response = await axios.post(
         `${baseURL}/workout-log/${currentDayPrograms[0].id}/`,
         body,
@@ -108,10 +113,11 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
     } catch (error) {
       console.error("Error saving workout log:", error);
     }
-
+  
     setCurrentDay(null);
     setCurrentDayPrograms([]);
   };
+  
 
   const saveWeeklyProgram = async () => {
     const workoutsData = {};
@@ -195,11 +201,11 @@ const WeekProgram = ({ programs, bookmarkedPrograms }) => {
           Save Weekly Program
         </button>
         <button
-    className="bg-green-500 text-white px-4 py-2 rounded"
-    onClick={() => navigate('/history')} 
-  >
-    View History
-  </button>
+          className="bg-green-500 text-white px-4 py-2 rounded"
+          onClick={() => navigate('/history')} 
+        >
+          View History
+        </button>
       </div>
     </div>
   );
