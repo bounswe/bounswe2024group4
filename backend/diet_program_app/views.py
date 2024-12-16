@@ -465,6 +465,7 @@ def rate_meal(request):
             user.meal_rating_count = user.meal_rating_count + 1
 
             user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+            user.save()
             user.check_super_member()
             user.save()
 
