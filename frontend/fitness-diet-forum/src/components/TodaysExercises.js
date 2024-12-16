@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 const TodaysExercises = ({ day, programs, onEndExercise }) => {
   const [completedExercises, setCompletedExercises] = useState([]);
+  const [exerciseDetails, setExerciseDetails] = useState({});
 
   const handleToggleExercise = (exerciseName) => {
     setCompletedExercises((prevCompleted) =>
@@ -9,6 +10,16 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
         ? prevCompleted.filter((name) => name !== exerciseName)
         : [...prevCompleted, exerciseName]
     );
+  };
+
+  const handleInputChange = (exerciseName, field, value) => {
+    setExerciseDetails((prevDetails) => ({
+      ...prevDetails,
+      [exerciseName]: {
+        ...prevDetails[exerciseName],
+        [field]: value,
+      },
+    }));
   };
 
   if (!day) {
@@ -34,6 +45,44 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
                   <span>
                     {exercise.name} ({exercise.sets} set of {exercise.reps} reps)
                   </span>
+                  <div className="ml-4">
+                    {/* Display the actual sets and reps */}
+                    <div>
+                      <span className="font-semibold">Actual:</span> {exercise.sets} sets, {exercise.reps} reps
+                    </div>
+                    <div className="mt-2">
+                      <span className="font-semibold">Done:</span>
+                      <div>
+                        <input
+                          type="number"
+                          placeholder="Sets"
+                          className="form-input"
+                          value={exerciseDetails[exercise.name]?.sets || ""}
+                          onChange={(e) =>
+                            handleInputChange(exercise.name, "sets", e.target.value)
+                          }
+                        />
+                        <input
+                          type="number"
+                          placeholder="Reps"
+                          className="form-input ml-2"
+                          value={exerciseDetails[exercise.name]?.reps || ""}
+                          onChange={(e) =>
+                            handleInputChange(exercise.name, "reps", e.target.value)
+                          }
+                        />
+                        <input
+                          type="number"
+                          placeholder="Weight"
+                          className="form-input ml-2"
+                          value={exerciseDetails[exercise.name]?.weight || ""}
+                          onChange={(e) =>
+                            handleInputChange(exercise.name, "weight", e.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -44,7 +93,7 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
       )}
       <button
         className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-        onClick={() => onEndExercise(completedExercises)}
+        onClick={() => onEndExercise(completedExercises, exerciseDetails)}
       >
         End Exercise
       </button>

@@ -13,10 +13,12 @@ import AuthenticatedLayout from './layouts/AuthenticatedLayout';
 import PublicLayout from './layouts/PublicLayout';
 import PrivateRoute  from "./components/PrivateRoute";
 import ProfilePage from './pages/ProfilePage';
+import History from './components/History';
 import SearchResults from './pages/SearchResults';
+
 function App() {
   return (
-    <Router>
+  <Router>
   <Routes>
     {/* Public Routes (Login, Signup) */}
     <Route
@@ -106,11 +108,22 @@ function App() {
       }
     />
     <Route
+      path="/history"
+      element={
+        <PrivateRoute>
+          <AuthenticatedLayout>
+            <History />
+          </AuthenticatedLayout>
+        </PrivateRoute>
+      }
+    />
+    <Route
       path="/discover"
       element={
         <PrivateRoute>
           <AuthenticatedLayout>
             <Discover />
+
           </AuthenticatedLayout>
         </PrivateRoute>
       }

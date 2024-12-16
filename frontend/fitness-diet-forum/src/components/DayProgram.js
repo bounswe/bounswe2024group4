@@ -17,6 +17,7 @@ const DayProgram = ({
 
   const handleAddClick = () => {
     setIsModalOpen(true);
+    console.log(programs);
   };
 
   const handleCloseModal = () => {

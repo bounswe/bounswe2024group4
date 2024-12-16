@@ -198,10 +198,11 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, onL
       {workout && (
         <View style={[
           styles.workoutContainer,
-          !content && { marginTop: 0 } // Remove top margin if there's no content
+          !content && { marginTop: 0 }
         ]}>
           <WorkoutProgram 
             workout={workout}
+            showRating={true}
             onUpdate={handleWorkoutUpdate}
           />
         </View>
