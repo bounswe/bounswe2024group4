@@ -3,6 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import Post from "../components/Post";
 import axios from "axios";
 import ExerciseProgram from "../components/ExerciseProgram";
+import Meal from "../components/Meal"; // Import the Meal component
 import { Context } from "../globalContext/globalContext";
 import { IoIosStar } from "react-icons/io";
 
@@ -12,18 +13,19 @@ const SearchResults = () => {
   const location = useLocation();
   const searchResults = location.state?.results; 
   const [workouts, setWorkouts] = useState([]);
+  const [meals, setMeals] = useState([]);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("users"); // Track the active tab
+  const [activeTab, setActiveTab] = useState("users");
   const token = localStorage.getItem("token");
 
   const config = useMemo(() => ({
     headers: {
-      "Authorization": "Token " + token,
+      Authorization: "Token " + token,
     },
   }), [token]);
 
+  // Fetch detailed workout data
   useEffect(() => {
-    // Fetch detailed workout data for each workout_id
     const fetchWorkouts = async () => {
       if (searchResults?.workouts) {
         const workoutPromises = searchResults.workouts.map(async (workout) => {
@@ -32,7 +34,7 @@ const SearchResults = () => {
             return response.data;
           } catch (err) {
             console.error(`Failed to fetch workout ${workout.workout_id}:`, err);
-            return null; // Return null if a workout fetch fails
+            return null;
           }
         });
 
@@ -42,6 +44,31 @@ const SearchResults = () => {
     };
 
     fetchWorkouts();
+  }, [searchResults]);
+
+  // Fetch detailed meal data
+  useEffect(() => {
+    const fetchMeals = async () => {
+      if (searchResults?.meals) {
+        const mealPromises = searchResults.meals.map(async (meal) => {
+          try {
+            const response = await axios.get(`${baseURL}/get_meal_from_id/`, {
+              params: { meal_id: meal.meal_id },
+              ...config,
+            });
+            return response.data;
+          } catch (err) {
+            console.error(`Failed to fetch meal ${meal.meal_id}:`, err);
+            return null;
+          }
+        });
+
+        const detailedMeals = await Promise.all(mealPromises);
+        setMeals(detailedMeals.filter((meal) => meal !== null));
+      }
+    };
+
+    fetchMeals();
   }, [searchResults]);
 
   if (!searchResults) {
@@ -73,15 +100,13 @@ const SearchResults = () => {
 
       {/* Users Tab */}
       {activeTab === "users" && searchResults.users && searchResults.users.length > 0 && (
-        <div className="mb-4">
-          
+        <div className="mb-4 min-h-screen">
           <div className="flex flex-col gap-4">
             {searchResults.users.map((user) => (
               <div
                 key={user.username}
                 className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto"
               >
-                {/* Header */}
                 <div className="flex items-center mb-4 justify-between">
                   <Link to={`/profile/${user.username}`} className="flex items-center">
                     <img
@@ -117,8 +142,7 @@ const SearchResults = () => {
 
       {/* Posts Tab */}
       {activeTab === "posts" && searchResults.posts && searchResults.posts.length > 0 && (
-        <div className="mb-4">
-          
+        <div className="mb-4 min-h-screen">
           <div className="flex flex-col gap-4">
             {searchResults.posts.map((post) => (
               <Post
@@ -138,23 +162,29 @@ const SearchResults = () => {
       )}
 
       {/* Meals Tab */}
-      {activeTab === "meals" && searchResults.meals && searchResults.meals.length > 0 && (
-        <div className="mb-4">
-          
-          <ul className="list-disc pl-5">
-            {searchResults.meals.map((meal) => (
-              <li key={meal.meal_id}>
-                {meal.meal_name} - Calories: {meal.calories}
-              </li>
+      {activeTab === "meals" && meals.length > 0 && (
+        <div className="mb-4 min-h-screen">
+          <div className="flex flex-col gap-4">
+            {meals.map((meal) => (
+              <Meal
+                key={meal.meal_id}
+                mealId={meal.meal_id}
+                mealName={meal.meal_name}
+                foods={meal.foods}
+                onDelete={() => console.log(`Delete meal ${meal.meal_id}`)}
+                isOwn={false}
+                currentRating={meal.rating}
+                ratingCount={meal.rating_count}
+                showRating={false}
+              />
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
       {/* Workouts Tab */}
       {activeTab === "workouts" && workouts.length > 0 && (
-        <div className="mb-4">
-          
+        <div className="mb-4 min-h-screen">
           <div className="flex flex-col gap-4">
             {workouts.map((workout) => (
               <div className="h-96 overflow-y-scroll mb-4" key={workout.workout_id}>
@@ -173,6 +203,15 @@ const SearchResults = () => {
           </div>
         </div>
       )}
+                  {/* Search results section */}
+                  {searchResults && (
+        <div className="bg-gray-900 text-white p-4 mt-4 rounded">
+          <h3 className="text-lg font-bold">Search Results</h3>
+          <pre className="bg-gray-800 p-4 rounded">
+            {JSON.stringify(searchResults, null, 2)} {/* Display search results in JSON format */}
+          </pre>
+        </div>
+      )}
 
       {/* No Results Found for the Active Tab */}
       {activeTab === "users" && (!searchResults.users || searchResults.users.length === 0) && (
@@ -181,13 +220,12 @@ const SearchResults = () => {
       {activeTab === "posts" && (!searchResults.posts || searchResults.posts.length === 0) && (
         <p>No posts found.</p>
       )}
-      {activeTab === "meals" && (!searchResults.meals || searchResults.meals.length === 0) && (
-        <p>No meals found.</p>
-      )}
+      {activeTab === "meals" && meals.length === 0 && <p>No meals found.</p>}
       {activeTab === "workouts" && workouts.length === 0 && <p>No workouts found.</p>}
     </div>
   );
 };
 
 export default SearchResults;
+
 

@@ -69,7 +69,7 @@ const MealList = () => {
                 <Meal
                   key={meal.meal_id}
                   mealId={meal.meal_id}
-                  mealName={meal.mealName}
+                  mealName={meal.meal_name}
                   foods={meal.foods}
                   onDelete={() => deleteMeal(meal.meal_id)}
                   isOwn={true}
