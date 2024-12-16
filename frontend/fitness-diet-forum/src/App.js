@@ -106,7 +106,26 @@ function App() {
         </PrivateRoute>
       }
     />
-    <Route
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<Route
       path="/history"
       element={
         <PrivateRoute>
@@ -116,7 +135,8 @@ function App() {
         </PrivateRoute>
       }
     />
-  </Routes>
+
+</Routes>
 </Router>
   );
 }
