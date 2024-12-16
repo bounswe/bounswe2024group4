@@ -29,6 +29,7 @@ describe('Feed component', () => {
       workout_id: 1,
       like_count: 10,
       liked: false,
+      created_at: '2024-12-15T12:00:00Z',
     },
     {
       id: 2,
@@ -42,6 +43,7 @@ describe('Feed component', () => {
       workout_id: 2,
       like_count: 5,
       liked: true,
+      created_at: '2024-12-15T12:00:00Z',
     },
   ];
 
@@ -72,7 +74,7 @@ describe('Feed component', () => {
 
     await waitFor(() => {
       // Check if posts are rendered
-      expect(screen.getByText('Your Feed')).toBeInTheDocument();
+      expect(screen.getByText('Feed')).toBeInTheDocument();
       expect(screen.getByText('Test post content 1')).toBeInTheDocument();
       expect(screen.getByText('Test post content 2')).toBeInTheDocument();
     });

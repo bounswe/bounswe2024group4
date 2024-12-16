@@ -114,17 +114,26 @@ describe('ProfilePage', () => {
           followers_count: 100,
           following_count: 50,
           score: 4.5,
+          rating: 4.5,
           is_following: false,
-          posts: [{ post_id: 1, content: 'Post 1' }],
+          posts: [
+            {
+              post_id: 1,
+              content: 'Post 1',
+              created_at: '2024-12-15T12:00:00Z', // Add a valid ISO date string
+            },
+          ],
           workouts: [],
           user_type: "member"
         }
       });
-    render(
-        <Context.Provider value={contextValue}>
-            <ProfilePage username="testuser2"/>
-        </Context.Provider>
-    );
+      render(
+        <MemoryRouter>
+          <Context.Provider value={contextValue}>
+            <ProfilePage username="testuser2" />
+          </Context.Provider>
+        </MemoryRouter>
+      );
 
     await waitFor(() => {
         const stars = screen.getAllByText('★');

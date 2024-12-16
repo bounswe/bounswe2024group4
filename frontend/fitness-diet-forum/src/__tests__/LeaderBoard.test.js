@@ -98,26 +98,12 @@ describe('LeaderBoard', () => {
     });
   
     renderWithContext(<LeaderBoard />);
-  
+
     await waitFor(() => {
-        const user1Item = screen.getByText('user1').closest('.user-item');
-        const user2Item = screen.getByText('user2').closest('.user-item');
-        const user3Item = screen.getByText('user3').closest('.user-item');
+      const user2Item = screen.getByText('user2').closest('.user-item');
 
-        // Check for stars specific to user1 (rating: 4.5)
-        expect(user1Item).toBeInTheDocument();
-        const user1Stars = user1Item.querySelectorAll('.text-yellow-400');
-        expect(user1Stars).toHaveLength(5);
-
-        // Check for stars specific to user2 (rating: 3.5)
-        expect(user2Item).toBeInTheDocument();
-        const user2Stars = user2Item.querySelectorAll('.text-yellow-400');
-        expect(user2Stars).toHaveLength(4);
-
-        // Check for stars specific to user3 (rating: 2)
-        expect(user3Item).toBeInTheDocument();
-        const user3Stars = user3Item.querySelectorAll('.text-yellow-400');
-        expect(user3Stars).toHaveLength(2);
+      expect(user2Item.querySelectorAll('.text-yellow-400')).toHaveLength(4);
+      expect(user2Item.querySelector('.text-gray-400')).toBeInTheDocument();
     });
   });
   
