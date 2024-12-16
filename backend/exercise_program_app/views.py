@@ -8,14 +8,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from datetime import datetime  # Add this import
 from drf_yasg.utils import swagger_auto_schema
-from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema, rate_workout_schema, get_workout_by_id_schema
+from swagger_docs.swagger import create_program_schema, log_workout_schema, get_exercises_schema, workout_program_schema, rate_workout_schema, get_workout_by_id_schema, create_exercise_superuser_schema, get_workouts_schema, toggle_bookmark_workout_schema, get_bookmarked_workouts_schema
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from user_auth_app.models import User
 from datetime import datetime
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
-from activity_streams.views import log_activity
 from datetime import datetime
 from fitness_project.firebase import db
 from firebase_admin import firestore
@@ -25,18 +24,23 @@ from firebase_admin import firestore
 @swagger_auto_schema(method='get', **get_exercises_schema)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_exercises(request):
     if request.method == 'GET':
         try:
             muscle = request.GET.get('muscle')
             url = f'https://api.api-ninjas.com/v1/exercises?muscle={muscle}'
             response = requests.get(url, headers={'X-Api-Key': os.getenv('EXERCISES_API_KEY')})
-            if response.status_code == 200:
-                data = response.json()
-                return JsonResponse(data, safe=False, status=200)
-            else:
-                return JsonResponse({'error': 'Could not retrieve exercises'}, status=response.status_code)
+            # if response.status_code == 200:
+            exercises = response.json()      # response is a list of exercises
+
+            database_exercises = ExerciseInstance.objects.all()
+
+            exercises = exercises + list(database_exercises.values())
+            return JsonResponse(exercises, safe=False, status=response.status_code)
+
+            # else:
+                # return JsonResponse({'error': 'Could not retrieve exercises'}, status=response.status_code)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=response.status_code)
 
@@ -73,6 +77,7 @@ def workout_program(request):
                     name=exercise_data['name'],
                     muscle=exercise_data['muscle'],
                     equipment=exercise_data['equipment'],
+                    difficulty=exercise_data['difficulty'],
                     instruction=exercise_data['instruction'],
                     sets=int(exercise_data['sets']),
                     reps=int(exercise_data['reps']),
@@ -178,17 +183,6 @@ def delete_workout_by_id(request, workout_id):
             workout_name = workout.workout_name  # Store name for activity log before deletion
             workout.delete()
 
-            # Log the delete activity
-            log_activity(
-                actor=user,
-                activity_type="Delete",
-                obj={
-                    "type": "Workout",
-                    "id": f"http://example.org/workouts/{workout_id}",
-                    "name": workout_name
-                },
-                summary=f"{user.username} deleted the workout '{workout_name}'"
-            )
 
             return JsonResponse({'message': 'Workout deleted successfully'}, status=200)
 
@@ -199,7 +193,6 @@ def delete_workout_by_id(request, workout_id):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-    
 
 @swagger_auto_schema(method='post', **rate_workout_schema)
 @api_view(['POST'])
@@ -221,15 +214,24 @@ def rate_workout(request):
             if rating < 0 or rating > 5:
                 return JsonResponse({'error': 'Rating must be between 0 and 5'}, status=400)
 
+            # Update workout rating
             workout.rating = (workout.rating * workout.rating_count + rating) / (workout.rating_count + 1)
             workout.rating_count += 1
             workout.save()
 
-            user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
+            # Update user rating
+            if user.workout_rating_count == 0:
+                user.workout_rating = rating
+            else:
+                user.workout_rating = (user.workout_rating * user.workout_rating_count + rating) / (user.workout_rating_count + 1)
             user.workout_rating_count += 1
 
-            user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+            # Update user score
+            if user.workout_rating_count + user.meal_rating_count > 0:
+                user.score = (user.meal_rating * user.meal_rating_count + user.workout_rating * user.workout_rating_count) / (user.meal_rating_count + user.workout_rating_count)
+                user.save()
             user.check_super_member()
+            user.save()
 
             return JsonResponse({'message': 'Rating submitted successfully'}, status=200)
         except Exception as e:
@@ -244,25 +246,26 @@ def rate_workout(request):
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def get_workout_by_id(request, workout_id):
-    if request.method == 'GET':
-        try:
-            workout = Workout.objects.get(workout_id=workout_id)
-            workout_data = {
-                'id': workout.workout_id,
-                'workout_name': workout.workout_name,
-                'created_by': workout.created_by.username,
-                'rating': workout.rating,
-                'rating_count': workout.rating_count,
-                'exercises': list(workout.exercise_set.values('type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps', 'exercise_id'))
-            }
-            return JsonResponse(workout_data, status=200)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+    try:
+        workout = Workout.objects.get(workout_id=workout_id)
+        return JsonResponse({
+            'id': workout.workout_id,
+            'workout_name': workout.workout_name,
+            'created_by': workout.created_by.username,
+            'rating': workout.rating,
+            'rating_count': workout.rating_count,
+            'exercises': list(workout.exercise_set.values(
+                'type', 'name', 'muscle', 'equipment', 
+                'instruction', 'sets', 'reps'
+            ))
+        }, status=200)
+    except Workout.DoesNotExist:
+        return JsonResponse({'error': 'Workout not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
-@swagger_auto_schema(method='get', **get_workout_by_id_schema)
+@swagger_auto_schema(method='get', **get_workouts_schema)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -285,7 +288,7 @@ def get_workouts(request):
                     'rating': workout.rating,
                     'rating_count': workout.rating_count,
                     'exercises': list(workout.exercise_set.values(
-                        'type', 'name', 'muscle', 'equipment', 'instruction', 'sets', 'reps'
+                        'type', 'name', 'muscle', 'equipment', 'difficulty', 'instruction', 'sets', 'reps'
                     ))
                 }
                 for workout in workouts
@@ -298,6 +301,7 @@ def get_workouts(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@swagger_auto_schema(method='post', **toggle_bookmark_workout_schema)
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -333,7 +337,7 @@ def toggle_bookmark_workout(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-
+@swagger_auto_schema(method='get', **get_bookmarked_workouts_schema)
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -418,6 +422,7 @@ def create_program(request):
         workouts = Workout.objects.all()
         return render(request, 'create_program.html', {'workouts': workouts})
 
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -455,6 +460,7 @@ def get_programs(request):
                                 'type': exercise.type,
                                 'muscle': exercise.muscle,
                                 'equipment': exercise.equipment,
+                                'difficulty': exercise.difficulty,
                                 'instruction': exercise.instruction,
                                 'sets': exercise.sets,
                                 'reps': exercise.reps
@@ -534,10 +540,8 @@ def workout_log(request, workout_id):
                 exercise_log.weight = exercise_data.get('weight', 0.0)
                 exercise_log.save()
 
-        else:
-            print("no exercise")
-                
-        return JsonResponse({
+        # Prepare response data
+        response_data = {
             'message': 'Workout log updated successfully',
             'workout_id': workout.workout_id,
             'workout_name': workout.workout_name,
@@ -550,13 +554,94 @@ def workout_log(request, workout_id):
                 'actual_sets': log.actual_sets,
                 'actual_reps': log.actual_reps,
                 'weight': log.weight,
-                'target_sets': log.exercise.sets,  # Original target from workout
-                'target_reps': log.exercise.reps   # Original target from workout
+                'target_sets': log.exercise.sets,
+                'target_reps': log.exercise.reps
             } for log in workout_log.exercise_logs.all()]
-        })
+        }
+
+        # Log the activity to Firebase
+        try:
+            activity_data = {
+                "actor": {
+                    "isSuperUser": user.is_superuser,
+                    "id": user.user_id,
+                    "name": user.username
+                },
+                "type": "Log",
+                "object": {
+                    "type": "WorkoutLog",
+                    "id": workout_log.log_id,
+                    "workout": {
+                        "id": workout.workout_id,
+                        "name": workout.workout_name
+                    },
+                    "date": log_date.strftime('%Y-%m-%d'),
+                    "is_completed": workout_log.is_completed,
+                    "exercises": [{
+                        "id": log.exercise.exercise_id,
+                        "name": log.exercise.name,
+                        "type": log.exercise.type,
+                        "muscle": log.exercise.muscle,
+                        "is_completed": log.is_completed,
+                        "performance": {
+                            "actual_sets": log.actual_sets,
+                            "actual_reps": log.actual_reps,
+                            "weight": log.weight,
+                            "target_sets": log.exercise.sets,
+                            "target_reps": log.exercise.reps
+                        }
+                    } for log in workout_log.exercise_logs.all()]
+                },
+                "summary": f"{user.username} logged their '{workout.workout_name}' workout"
+            }
+
+            # Add to Firestore
+            db.collection("workoutLogActivities").add({
+                **activity_data,
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "published": datetime.utcnow().isoformat()
+            })
+
+        except Exception as e:
+            # Log the error but don't fail the request
+            print(f"Firebase logging failed: {str(e)}")
+
+        return JsonResponse(response_data)
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def get_workout_log_activities(request):
+    try:
+        # Start with base query
+        activities_ref = db.collection('workoutLogActivities')
+        query = activities_ref
+            
+        # Order by published date descending (newest first)
+        query = query.order_by('published', direction=firestore.Query.DESCENDING)
+        
+        # Execute query
+        activities = []
+        for doc in query.stream():
+            activity_data = doc.to_dict()
+            # Add document ID to the response
+            activity_data['id'] = doc.id
+            activities.append(activity_data)
+        
+        return JsonResponse({
+            'count': len(activities),
+            'activities': activities
+        }, safe=False, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=400)
 
 
 @api_view(['GET'])
@@ -592,6 +677,7 @@ def get_workout_logs(request):
                         'type': ex_log.exercise.type,
                         'muscle': ex_log.exercise.muscle,
                         'equipment': ex_log.exercise.equipment,
+                        'difficulty': ex_log.exercise.difficulty,
                         'instruction': ex_log.exercise.instruction,
                         # Target values from original workout
                         'target_sets': ex_log.exercise.sets,
@@ -613,6 +699,68 @@ def get_workout_logs(request):
             
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+@swagger_auto_schema(method='post', **create_exercise_superuser_schema)
+@api_view(['POST'])
+# @authentication_classes([TokenAuthentication])
+# @permission_classes([IsAuthenticated])
+def create_exercise_superuser(request):
+    if request.method == 'POST':
+        user = request.user
+        data = json.loads(request.body)
+        type = data['type']
+        name = data['name']
+        muscle = data['muscle']
+        equipment = data['equipment']
+        difficulty = data['difficulty']
+        instruction = data['instruction']
+        
+        muscle_options = [
+            'abdominals',
+            # 'abductors',
+            # 'adductors',
+            'biceps',
+            'calves',
+            'chest',
+            # 'forearms',
+            'glutes',
+            'hamstrings',
+            'lats',
+            'lower_back',
+            # 'middle_back',
+            # 'neck',
+            'quadriceps',
+            'traps',
+            'triceps',
+            'shoulders',
+            'cardio'
+        ]
+
+        difficulty_options = ['beginner', 'intermediate', 'expert']
+
+        type_options = ['cardio', 'olympic_weightlifting', 'plyometrics', 'powerlifting', 'strength', 'stretching', 'strongman']
+        
+        if not user.is_superuser:
+            return JsonResponse({'error': 'You are not authorized to create exercises'}, status=403)
+        elif muscle.lower() not in muscle_options:
+            return JsonResponse({'error': 'Invalid muscle type'}, status=400)
+        elif difficulty.lower() not in difficulty_options:
+            return JsonResponse({'error': 'Invalid difficulty level'}, status=400)
+        elif type.lower() not in type_options:
+            return JsonResponse({'error': 'Invalid exercise type'}, status=400)
+        else:
+            exercise = ExerciseInstance(
+                type=type,
+                name=name,
+                muscle=muscle,
+                equipment=equipment,
+                difficulty=difficulty,
+                instruction=instruction,
+            )
+            exercise.save()
+            return JsonResponse({'message': 'Exercise created successfully'}, status=201)            
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 #Other functions

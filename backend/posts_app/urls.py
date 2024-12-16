@@ -3,7 +3,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-#    path('create/', views.create_post, name='create_post'),
- #   path('delete/<int:id>/', views.delete_post, name='delete_post'),
-    # Add more post-related URLs
+    path('post/', views.post, name='post'),
+    path('toggle_like/', views.toggle_like, name='toggle_like'),
+    path('comment/', views.comment, name='comment'),
+    path('toggle_bookmark/', views.toggle_bookmark, name='toggle_bookmark'),
+    path('liked_posts/', views.liked_posts, name='liked_posts'),
+    path('bookmarked_posts/', views.bookmarked_posts, name='bookmarked_posts'),
+    path('post/<int:post_id>/delete/', views.delete_post, name='delete_post'),
+    path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
 ]

@@ -98,34 +98,3 @@ def csrf_token(request):
     if request.method == "GET":
         csrf_token = get_token(request)
         return JsonResponse({'csrf_token': csrf_token}, status=200)
-
-@csrf_exempt
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def toggle_like(request):
-    try:
-        post_id = request.data.get('postId')
-        user = request.user  # This will now be properly populated from the token
-        
-        if not post_id:
-            return JsonResponse({"error": "Post ID is required"}, status=400)
-            
-        post = Post.objects.get(id=post_id)
-        
-        if post.likes.filter(id=user.id).exists():
-            post.likes.remove(user)
-            liked = False
-        else:
-            post.likes.add(user)
-            liked = True
-            
-        return JsonResponse({
-            "liked": liked,
-            "likes_count": post.likes.count()
-        }, status=200)
-        
-    except Post.DoesNotExist:
-        return JsonResponse({"error": "Post not found"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)

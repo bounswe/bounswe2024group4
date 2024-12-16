@@ -2,8 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './css/index.css';
 import Feed from "./pages/Feed";
-import Sidebar from './components/Sidebar';
-import Topbar from './components/Topbar'; 
+import Discover from "./pages/Discover";
 import MealList from './pages/MealList';
 import Exercises from './pages/Exercises';
 import ExerciseProgramList from './pages/ExerciseProgramList';
@@ -12,12 +11,13 @@ import LeaderBoard from './pages/LeaderBoard';
 import Signup from './pages/Signup';
 import AuthenticatedLayout from './layouts/AuthenticatedLayout';
 import PublicLayout from './layouts/PublicLayout';
-import  PrivateRoute  from "./components/PrivateRoute";
+import PrivateRoute  from "./components/PrivateRoute";
 import ProfilePage from './pages/ProfilePage';
 import History from './components/History';
+import SearchResults from './pages/SearchResults';
 function App() {
   return (
-    <Router>
+  <Router>
   <Routes>
     {/* Public Routes (Login, Signup) */}
     <Route
@@ -112,6 +112,26 @@ function App() {
         <PrivateRoute>
           <AuthenticatedLayout>
             <History />
+          </AuthenticatedLayout>
+        </PrivateRoute>
+      }
+    />
+    <Route
+      path="/discover"
+      element={
+        <PrivateRoute>
+          <AuthenticatedLayout>
+            <Discover />
+          </AuthenticatedLayout>
+        </PrivateRoute>
+      }
+    />
+    <Route
+      path="/search-results"
+      element={
+        <PrivateRoute>
+          <AuthenticatedLayout>
+            <SearchResults />
           </AuthenticatedLayout>
         </PrivateRoute>
       }

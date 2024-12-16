@@ -14,8 +14,17 @@ from rest_framework.authentication import TokenAuthentication
 @permission_classes([IsAuthenticated])
 def get_leaderboard(request):
     if request.method == 'GET':
-        ordered_user_list = User.objects.order_by('-score').values('username', 'profile_picture', 'score')
-        return JsonResponse({'leaderboard': list(ordered_user_list)})
+        users = User.objects.order_by('-score')  # Get the full queryset of Users
+        leaderboard = []
+        for user in users:
+            profile_picture_url = user.profile_picture.url if user.profile_picture else ''
+            leaderboard.append({
+                'username': user.username,
+                'profile_picture': profile_picture_url,
+                'score': user.score,
+            })
+        return JsonResponse({'leaderboard': leaderboard})
+
         
 
 @swagger_auto_schema(method='get', **get_workout_leaderboard_schema)
@@ -24,8 +33,18 @@ def get_leaderboard(request):
 @permission_classes([IsAuthenticated])
 def get_workout_leaderboard(request):
     if request.method == 'GET':
-        ordered_user_list = User.objects.order_by('-workout_rating').values('username', 'profile_picture', 'workout_rating')
-        return JsonResponse({'workout_leaderboard': list(ordered_user_list)})
+        users = User.objects.order_by('-workout_rating')
+        workout_leaderboard = []
+        
+        for user in users:
+            profile_picture_url = user.profile_picture.url if user.profile_picture else ''
+            workout_leaderboard.append({
+                'username': user.username,
+                'profile_picture': profile_picture_url,
+                'workout_rating': user.workout_rating,
+            })
+        
+        return JsonResponse({'workout_leaderboard': workout_leaderboard})
 
 
 @swagger_auto_schema(method='get', **get_meal_leaderboard_schema)
@@ -34,8 +53,17 @@ def get_workout_leaderboard(request):
 @permission_classes([IsAuthenticated])
 def get_meal_leaderboard(request):
     if request.method == 'GET':
-        ordered_user_list = User.objects.order_by('-meal_rating').values('username', 'profile_picture', 'meal_rating')
-        return JsonResponse({'meal_leaderboard': list(ordered_user_list)})
+        users = User.objects.order_by('-meal_rating')
+        meal_leaderboard = []
+        for user in users:
+            profile_picture_url = user.profile_picture.url if user.profile_picture else ''
+            meal_leaderboard.append({
+                'username': user.username,
+                'profile_picture': profile_picture_url,
+                'meal_rating': user.meal_rating,
+            })
+        return JsonResponse({'meal_leaderboard': meal_leaderboard})
+
 
 
 @swagger_auto_schema(method='post', **follow_schema)
