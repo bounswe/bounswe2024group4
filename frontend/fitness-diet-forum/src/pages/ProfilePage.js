@@ -382,7 +382,7 @@ const ProfilePage = () => {
                                     <div key={index} className="bg-gray-900 text-white p-8 rounded-lg shadow-lg mb-6 max-w-3xl mx-auto">
                                         <h3 className="text-lg font-bold mb-2">{meal.name}</h3>
                                         <Meal 
-                                            mealName={meal.name} 
+                                            mealName={meal.meal_name} 
                                             foods={meal.foods} 
                                             onDelete={() => handleDeleteMeal(meal.meal_id)}
                                             isOwn={ownProfile} 
