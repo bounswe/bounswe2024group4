@@ -220,7 +220,7 @@ const Post = ({ postId, user, content, mealId, workoutId, like_count, liked, cre
                     <Meal
                         key={meal.meal_id}
                         mealId={meal.meal_id}
-                        mealName={meal.mealName}
+                        mealName={meal.meal_name}
                         foods={meal.foods}
                         onDelete={() => {}}
                         isOwn={false}

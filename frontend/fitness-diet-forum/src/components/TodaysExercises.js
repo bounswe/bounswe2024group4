@@ -56,7 +56,7 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
                         <input
                           type="number"
                           placeholder="Sets"
-                          className="form-input"
+                          className="form-input text-black"
                           value={exerciseDetails[exercise.name]?.sets || ""}
                           onChange={(e) =>
                             handleInputChange(exercise.name, "sets", e.target.value)
@@ -65,7 +65,7 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
                         <input
                           type="number"
                           placeholder="Reps"
-                          className="form-input ml-2"
+                          className="form-input ml-2 text-black"
                           value={exerciseDetails[exercise.name]?.reps || ""}
                           onChange={(e) =>
                             handleInputChange(exercise.name, "reps", e.target.value)
@@ -74,7 +74,7 @@ const TodaysExercises = ({ day, programs, onEndExercise }) => {
                         <input
                           type="number"
                           placeholder="Weight"
-                          className="form-input ml-2"
+                          className="form-input ml-2 text-black"
                           value={exerciseDetails[exercise.name]?.weight || ""}
                           onChange={(e) =>
                             handleInputChange(exercise.name, "weight", e.target.value)
