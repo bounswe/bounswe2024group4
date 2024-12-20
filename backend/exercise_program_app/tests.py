@@ -382,6 +382,7 @@ class CreateExerciseSuperUserTestCase(APITestCase):
 
 
 class WorkoutTests(TestCase):
+    
     def setUp(self):
         self.client = APIClient()
         
@@ -591,3 +592,153 @@ class WorkoutTests(TestCase):
             self.client.get(reverse('get_bookmarked_workouts')).status_code,
             401
         )
+
+
+class GetWorkoutActivitiesTestCase(TestCase):
+
+
+    def setUp(self):
+        """Set up test environment for workout activities"""
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass123')
+        self.token = Token.objects.create(user=self.user)
+        self.headers = {'HTTP_AUTHORIZATION': f'Token {self.token.key}'}
+
+    @patch('exercise_program_app.views.db')
+    def test_get_workout_activities_success(self, mock_db):
+        """Test successful retrieval of workout activities"""
+        # Mock Firestore return
+        mock_collection = MagicMock()
+        mock_db.collection.return_value = mock_collection
+        mock_doc = MagicMock()
+        mock_doc.id = 'doc123'
+        mock_doc.to_dict.return_value = {
+            '@context': 'https://www.w3.org/ns/activitystreams',
+            'type': 'Create',
+            'actor': {'name': 'testuser'},
+            'published': '2024-12-16T12:50:58.782680'
+        }
+        mock_collection.order_by.return_value.stream.return_value = [mock_doc]
+
+        response = self.client.get(reverse('get_workout_activities'), **self.headers)
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 1)
+        activity = response_data['activities'][0]
+        self.assertEqual(activity['id'], 'doc123')
+        self.assertEqual(activity['actor']['name'], 'testuser')
+        self.assertEqual(activity['type'], 'Create')
+        
+        mock_db.collection.assert_called_once_with('workoutActivities')
+        mock_collection.order_by.assert_called_with('published', direction=firestore.Query.DESCENDING)
+
+    @patch('exercise_program_app.views.db')
+    def test_get_workout_activities_no_data(self, mock_db):
+        """Test workout activities retrieval with no data"""
+        mock_collection = MagicMock()
+        mock_db.collection.return_value = mock_collection
+        mock_collection.order_by.return_value.stream.return_value = []
+
+        response = self.client.get(reverse('get_workout_activities'), **self.headers)
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 0)
+        self.assertEqual(len(response_data['activities']), 0)
+
+    @patch('exercise_program_app.views.db')
+    def test_get_workout_activities_failure(self, mock_db):
+        """Test workout activities retrieval with Firestore error"""
+        mock_db.collection.side_effect = Exception("Firestore error")
+
+        response = self.client.get(reverse('get_workout_activities'), **self.headers)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'Firestore error')
+
+
+
+
+class GetWorkoutLogActivitiesTestCase(TestCase):
+    def setUp(self):
+        """Set up test environment for workout log activities"""
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass123')
+        self.token = Token.objects.create(user=self.user)
+        self.headers = {'HTTP_AUTHORIZATION': f'Token {self.token.key}'}
+
+    @patch('exercise_program_app.views.db')
+    def test_get_workout_log_activities_success(self, mock_db):
+        """Test successful retrieval of workout log activities"""
+        # Mock Firestore return
+        mock_collection = MagicMock()
+        mock_db.collection.return_value = mock_collection
+        mock_doc = MagicMock()
+        mock_doc.id = 'log123'
+        mock_doc.to_dict.return_value = {
+            '@context': 'https://www.w3.org/ns/activitystreams',
+            'type': 'Log',
+            'actor': {
+                'name': 'testuser',
+                'isSuperUser': False,
+                'id': self.user.user_id
+            },
+            'object': {
+                'type': 'WorkoutLog',
+                'workout': {
+                    'id': 1,
+                    'name': 'Test Workout'
+                },
+                'date': '2024-03-21',
+                'is_completed': True,
+                'exercises': [{
+                    'name': 'Push-ups',
+                    'is_completed': True,
+                    'performance': {
+                        'actual_sets': 3,
+                        'actual_reps': 10
+                    }
+                }]
+            },
+            'published': '2024-03-21T12:00:00Z'
+        }
+        mock_collection.order_by.return_value.stream.return_value = [mock_doc]
+
+        response = self.client.get(reverse('get_workout_log_activities'), **self.headers)
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 1)
+        activity = response_data['activities'][0]
+        self.assertEqual(activity['id'], 'log123')
+        self.assertEqual(activity['type'], 'Log')
+        self.assertEqual(activity['actor']['name'], 'testuser')
+        self.assertEqual(activity['object']['type'], 'WorkoutLog')
+        
+        mock_db.collection.assert_called_once_with('workoutLogActivities')
+        mock_collection.order_by.assert_called_with('published', direction=firestore.Query.DESCENDING)
+
+    @patch('exercise_program_app.views.db')
+    def test_get_workout_log_activities_no_data(self, mock_db):
+        """Test workout log activities retrieval with no data"""
+        mock_collection = MagicMock()
+        mock_db.collection.return_value = mock_collection
+        mock_collection.order_by.return_value.stream.return_value = []
+
+        response = self.client.get(reverse('get_workout_log_activities'), **self.headers)
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 0)
+        self.assertEqual(len(response_data['activities']), 0)
+
+    @patch('exercise_program_app.views.db')
+    def test_get_workout_log_activities_failure(self, mock_db):
+        """Test workout log activities retrieval with Firestore error"""
+        mock_db.collection.side_effect = Exception("Firestore error")
+
+        response = self.client.get(reverse('get_workout_log_activities'), **self.headers)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'Firestore error')
