@@ -1534,7 +1534,7 @@ EXPO_PUBLIC_API_URL=DEPLOY_URL
 3) Create an Android device in Android Studio. 
 4) Run `npx expo start` and press `a` to run Android emulation on Android Studio.
 
-#### Other Artifacts
+## Other Artifacts
 - [Software Requirements Specification (SRS)](https://github.com/bounswe/bounswe2024group4/wiki/Requirements-Fitness-and-Diet-Forum)
 - Software design documents
 	- [Sequence Diagrams](https://github.com/bounswe/bounswe2024group4/wiki/Sequence-Diagrams:-Fitness-and-Diet-Forum)
@@ -1550,4 +1550,4 @@ EXPO_PUBLIC_API_URL=DEPLOY_URL
 - Unit tests
 	- [frontend](https://github.com/bounswe/bounswe2024group4/tree/main/frontend/fitness-diet-forum/src/__tests__)
  	- [mobile](https://github.com/bounswe/bounswe2024group4/tree/main/mobile/__tests__)
- 	- backend: all the files with the name `test.py` under the path `backend/*_app`
+ 	- backend: all the files with the name `test.py` under the path `backend/*_app` [backend folder](https://github.com/bounswe/bounswe2024group4/tree/main/backend)
