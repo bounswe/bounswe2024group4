@@ -1540,14 +1540,14 @@ EXPO_PUBLIC_API_URL=DEPLOY_URL
 	- [Sequence Diagrams](https://github.com/bounswe/bounswe2024group4/wiki/Sequence-Diagrams:-Fitness-and-Diet-Forum)
 	- [Class Diagram](https://github.com/bounswe/bounswe2024group4/wiki/Fitness-App-Class-Diagram)
 	- [Use Case Diagrams](https://github.com/bounswe/bounswe2024group4/wiki/Use-Case-Diagrams:-Fitness-and-Diet-Forum)
-- [User scenarios and mockups]
+- User scenarios and mockups
 	- [Scenario 1](https://github.com/bounswe/bounswe2024group4/wiki/Scenario-1)
  	- [Scenario 2](https://github.com/bounswe/bounswe2024group4/wiki/Scenario-2)
   	- [Scenario 3](https://github.com/bounswe/bounswe2024group4/wiki/Scenario-3:-Posting-a-Diet-Program)
   	- [Scenario 4](https://github.com/bounswe/bounswe2024group4/wiki/Scenario-4:-Rating-Another-User's-Programs)
   	- [Scenario 5](https://github.com/bounswe/bounswe2024group4/wiki/Scenario-5:-Chatting-with-Another-User)
 - [Project plan](https://github.com/orgs/bounswe/projects/76/views/4)
-- [Unit tests]
+- Unit tests
 	- [frontend](https://github.com/bounswe/bounswe2024group4/tree/main/frontend/fitness-diet-forum/src/__tests__)
  	- [mobile](https://github.com/bounswe/bounswe2024group4/tree/main/mobile/__tests__)
  	- backend: all the files with the name `test.py` under the path `backend/*_app`
