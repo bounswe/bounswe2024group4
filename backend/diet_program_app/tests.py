@@ -3,6 +3,13 @@ from user_auth_app.models import User
 from diet_program_app.models import Meal, Food
 from django.urls import reverse
 import json
+from django.test import TestCase
+from rest_framework.test import APITestCase, APIClient
+from unittest.mock import patch, MagicMock
+from rest_framework.authtoken.models import Token
+from firebase_admin import firestore
+
+
 
 class TestCreateMealFood(APITestCase):
     def setUp(self):
@@ -560,3 +567,78 @@ class TestMealFoodGettersAndDelete(APITestCase):
         self.assertEqual(response.json()['meals'], [])
 
 
+class GetMealActivitiesTestCase(TestCase):
+    def setUp(self):
+        """Set up test environment for meal activities"""
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass123')
+        self.token = Token.objects.create(user=self.user)
+        self.headers = {'HTTP_AUTHORIZATION': f'Token {self.token.key}'}
+
+    @patch('diet_program_app.views.db')
+    def test_get_meal_activities_success(self, mock_db):
+        """Test successful retrieval of meal activities"""
+        # Mock Firestore return
+        mock_collection = MagicMock()
+        mock_db.collection.return_value = mock_collection
+        mock_doc = MagicMock()
+        mock_doc.id = 'meal123'
+        mock_doc.to_dict.return_value = {
+            '@context': 'https://www.w3.org/ns/activitystreams',
+            'type': 'Create',
+            'actor': {
+                'name': 'testuser',
+                'isSuperUser': False,
+                'id': self.user.user_id
+            },
+            'object': {
+                'type': 'Meal',
+                'id': 1,
+                'name': 'Healthy Breakfast',
+                'foods': [{
+                    'name': 'Apple',
+                    'calories': '52.0 kcal',
+                    'ingredients': '100 gr apple'
+                }]
+            },
+            'published': '2024-03-21T12:00:00Z'
+        }
+        mock_collection.order_by.return_value.stream.return_value = [mock_doc]
+
+        response = self.client.get(reverse('get_meal_activities'))
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 1)
+        activity = response_data['activities'][0]
+        self.assertEqual(activity['id'], 'meal123')
+        self.assertEqual(activity['type'], 'Create')
+        self.assertEqual(activity['actor']['name'], 'testuser')
+        self.assertEqual(activity['object']['type'], 'Meal')
+        
+        mock_db.collection.assert_called_once_with('mealActivities')
+        mock_collection.order_by.assert_called_with('published', direction=firestore.Query.DESCENDING)
+
+    @patch('diet_program_app.views.db')
+    def test_get_meal_activities_no_data(self, mock_db):
+        """Test meal activities retrieval with no data"""
+        mock_collection = MagicMock()
+        mock_db.collection.return_value = mock_collection
+        mock_collection.order_by.return_value.stream.return_value = []
+
+        response = self.client.get(reverse('get_meal_activities'))
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 0)
+        self.assertEqual(len(response_data['activities']), 0)
+
+    @patch('diet_program_app.views.db')
+    def test_get_meal_activities_failure(self, mock_db):
+        """Test meal activities retrieval with Firestore error"""
+        mock_db.collection.side_effect = Exception("Firestore error")
+
+        response = self.client.get(reverse('get_meal_activities'))
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'Firestore error')
